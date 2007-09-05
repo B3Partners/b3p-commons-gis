@@ -74,8 +74,8 @@ public class WMSCapabilitiesReader implements KBConstants {
      * @param serviceProvider ServiceProvider object in which all information has to be saved.
      */
     // <editor-fold defaultstate="" desc="WMSCapabilitiesReader(ServiceProvider serviceProvider) constructor.">
-    public WMSCapabilitiesReader(ServiceProvider serviceProvider) {
-        this.serviceProvider = serviceProvider;
+    public WMSCapabilitiesReader() {
+        this.serviceProvider = new ServiceProvider();
         this.setElementHandlers();
     }
     // </editor-fold>
