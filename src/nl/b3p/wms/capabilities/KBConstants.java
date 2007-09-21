@@ -88,6 +88,10 @@ public interface KBConstants {
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";    
     public static final String CHARSET = "UTF-8";
     public static final String MD_ALGORITHM= "MD5";
+    
+    public static final String GETMAP_EXCEPTION = "msWMSLoadGetMapParams(): WMS server error. Invalid layer(s) given in the LAYERS parameter.";
+    public static final String FEATUREINFO_EXCEPTION = "msWMSFeatureInfo(): WMS server error. Requested layer(s) are not queryable.";
+    public static final String LEGENDGRAPHIC_EXCEPTION = "msWMSGetLegendgraphic(): Invalid layer given in the LAYERS parameter.";
     // </editor-fold>
     
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">

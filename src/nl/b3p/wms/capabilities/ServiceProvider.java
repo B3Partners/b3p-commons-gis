@@ -406,11 +406,13 @@ public class ServiceProvider implements XMLElement, KBConstants {
             sdr = (ServiceDomainResource)it.next();
             sdrhash.put(sdr.getDomain(),sdr);
         }
-        sdr = (ServiceDomainResource) sdrhash.get("GetCapabilities");
-        requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("GetMap");
-        requestElement = sdr.toElement(doc, requestElement);
         
+        sdr = (ServiceDomainResource) sdrhash.get("GetCapabilities");
+        if (sdr!=null)
+            requestElement = sdr.toElement(doc, requestElement);
+        sdr = (ServiceDomainResource) sdrhash.get("GetMap");
+        if (sdr!=null)
+            requestElement = sdr.toElement(doc, requestElement);
         sdr = (ServiceDomainResource) sdrhash.get("GetFeatureInfo");
         if (sdr!=null)
             requestElement = sdr.toElement(doc, requestElement);
