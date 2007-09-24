@@ -129,21 +129,30 @@ public class StyleDomainResource implements XMLElement {
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
     // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    protected void overwriteURL(String newUrl) {
-        //First cut off only the part which is in front of the question mark.
+    protected void overwriteURL(String newUrl, Layer layer) {
+        //This whole url has to be rebuilded, with the layername as stored in the database.        
         String temporaryURL;
-        temporaryURL = this.getUrl();
-        if (null != temporaryURL && !temporaryURL.equals("")) {
-            int firstOccur = temporaryURL.indexOf("?");
-            if(firstOccur != -1) {
-                temporaryURL = temporaryURL.substring(firstOccur);
-                //then add the newly given url in front of the cutted part
-                temporaryURL = newUrl + temporaryURL;
-                //save this new URL as the one to be used
-                //temporaryURL = temporaryURL.replace("&", "&amp;");
-                this.setUrl(temporaryURL);
+        temporaryURL = this.getUrl();        
+        
+        String url = temporaryURL.substring(0, temporaryURL.indexOf("?"));
+        String [] parameters = temporaryURL.substring(temporaryURL.indexOf("?") + 1, temporaryURL.length()).split("&");
+        StringBuffer newParams = new StringBuffer();
+        for (int i = 0; i < parameters.length; i++) { 
+            String [] values = parameters[i].split("=");
+            if (!values[0].equalsIgnoreCase("map")) {
+                newParams.append(values[0]);
+                newParams.append("=");
+                if (values[0].equalsIgnoreCase("layer")) {    
+                    newParams.append(layer.getId());
+                    newParams.append("_");
+                    newParams.append(layer.getName());
+                } else {
+                    newParams.append(values[1]);
+                }
+                newParams.append('&');
             }
         }
+        this.setUrl(newUrl + "?" + newParams.toString() + "style=");
     }
     // </editor-fold>
     

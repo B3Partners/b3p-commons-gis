@@ -100,7 +100,7 @@ public class Style implements XMLElement {
             it = this.getDomainResource().iterator();
             while (it.hasNext()) {
                 StyleDomainResource sdr = (StyleDomainResource)it.next();
-                sdr.overwriteURL(newUrl);
+                sdr.overwriteURL(newUrl, layer);
             }
         }
     }
