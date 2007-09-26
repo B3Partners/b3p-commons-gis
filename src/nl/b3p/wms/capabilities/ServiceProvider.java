@@ -38,6 +38,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
     private Set serviceProviderKeywordList;
     private Set exceptions;
     private Set layers;
+    private Set allRoles;
     
     /** default ServiceProvider() constructor.
      */
@@ -206,12 +207,19 @@ public class ServiceProvider implements XMLElement, KBConstants {
         return getAllLayers(getLayers(), new HashSet());
     }
     
+    public void setAllRoles(Set allRoles) {
+        this.allRoles = allRoles;
+    }
+    
     public Set getAllRoles() {
-        Set roles = new HashSet();
-        // TODO echt ophalen
-        roles.add("gebruiker");
-//        roles.add("themabeheerder");
-        return roles;
+        return allRoles;
+    }
+    
+    public void addRole(Roles role) {
+        if(allRoles == null) {
+            allRoles = new HashSet();
+        }
+        allRoles.add(role);
     }
     
     /** Defines a Set with layers in which only leafs are added. These have no childs.
@@ -469,6 +477,29 @@ public class ServiceProvider implements XMLElement, KBConstants {
             exceptionElement.appendChild(formatElement);
         }
         capabilityElement.appendChild(exceptionElement);
+        
+        
+        
+        //Vendor specifieke elementen
+        Element vendorSpecificElement = doc.createElement("VendorSpecificCapabilities");
+        if(this.getAllRoles() != null && !this.getAllRoles().isEmpty()) {
+            it = this.getAllRoles().iterator();
+            while (it.hasNext()) {
+                Roles role = (Roles) it.next();
+                Element roleElement = doc.createElement("Role");
+                roleElement.setAttribute("id", role.getRole());
+                vendorSpecificElement.appendChild(roleElement);
+            }
+        } else {
+            Element roleElement = doc.createElement("Role");
+            roleElement.setAttribute("id", "Gebruiker");
+            vendorSpecificElement.appendChild(roleElement);
+        }
+        capabilityElement.appendChild(vendorSpecificElement);
+        
+        
+        
+        
         
         //De beschikbare layers.
         it = layers.iterator();

@@ -41,6 +41,7 @@ package nl.b3p.wms.capabilities;
 
 
 import java.io.ByteArrayOutputStream;
+import nl.b3p.wms.capabilities.Roles;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import java.util.Stack;
@@ -229,7 +230,8 @@ public class WMSCapabilitiesReader implements KBConstants {
         s.setElementHandler("LegendURL", new LegendURLHandler());
         
         //These two Handlers are not being used
-        //s.setElementHandler("VendorSpecificCapabilities", new VendorSpecificCapabilitiesHandler());
+        s.setElementHandler("VendorSpecificCapabilities", new VendorSpecificCapabilitiesHandler());
+        s.setElementHandler("Role", new RoleHandler());
         //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
     }
     // </editor-fold>
@@ -1300,6 +1302,20 @@ public class WMSCapabilitiesReader implements KBConstants {
     private class VendorSpecificCapabilitiesHandler extends ElementHandler {
         public void startElement(String uri, String localName, String qName, Attributes attributes) {}
         public void endElement(String uri, String localName, String qName) {}
+    }
+    
+    private class RoleHandler extends ElementHandler {
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            Roles roles = new Roles();
+            roles.setRole(atts.getValue("role"));
+            stack.push(roles);
+        }
+        
+        public void endElement(String uri, String localName, String qName) {
+            Roles roles = (Roles) stack.pop();
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            serviceProvider.addRole(roles);
+        }
     }
     
     private class UserDefinedSymbolizationHandler extends ElementHandler {
