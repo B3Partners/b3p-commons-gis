@@ -40,6 +40,7 @@ filter out the different kind of errors:
 package nl.b3p.wms.capabilities;
 
 
+import java.io.ByteArrayOutputStream;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import java.util.Stack;
@@ -53,6 +54,12 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
@@ -63,6 +70,10 @@ public class WMSCapabilitiesReader implements KBConstants {
     private static final String SCHEMA_FEATURE = "http://apache.org/xml/features/validation/schema";
     private static final String SCHEMA_FACTORY = "http://www.w3.org/2001/XMLSchema";
     private static final String SCHEMA_FILE    = "wms.xsd";
+    
+    private static final String host = AuthScope.ANY_HOST; // "localhost";
+    private static final int port = AuthScope.ANY_PORT;
+    private static final int RTIMEOUT = 10000;
     
     private XMLReader parser;
     private Stack stack = new Stack();
@@ -91,16 +102,42 @@ public class WMSCapabilitiesReader implements KBConstants {
      */
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
     public ServiceProvider getProvider(String location) throws IOException, SAXException {
-        //call a validator for the file
-        //this.validate(location);
-        //if no error on validation, start parsing process
-        XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-        reader.setFeature(VALIDATION_FEATURE, true);
-        reader.setFeature(SCHEMA_FEATURE,true);
-        reader.setContentHandler(s);
-        InputSource is = new InputSource(location);
-        is.setEncoding(CHARSET);
-        reader.parse(is);
+        return getProvider(location, null, null);
+    }
+    
+    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException {
+        HttpClient client = new HttpClient();
+        client.getHttpConnectionManager().
+                getParams().setConnectionTimeout(RTIMEOUT);
+        
+        if (username!=null && password!=null) {
+            client.getParams().setAuthenticationPreemptive(true);
+            Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
+            AuthScope authScope = new AuthScope(host, port);
+            client.getState().setCredentials(authScope, defaultcreds);
+        }
+        
+        // Create a method instance.
+        GetMethod method = new GetMethod(location);
+        
+        try {
+            // Execute the method.
+            int statusCode =client.executeMethod(method);
+           
+            if (statusCode == HttpStatus.SC_OK) {
+                XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+                reader.setFeature(VALIDATION_FEATURE, true);
+                reader.setFeature(SCHEMA_FEATURE,true);
+                reader.setContentHandler(s);
+                InputSource is = new InputSource(method.getResponseBodyAsStream());
+                is.setEncoding(CHARSET);
+                reader.parse(is);
+            }
+        } finally {
+            // Release the connection.
+            method.releaseConnection();
+        }
+        
         return serviceProvider;
     }
     // </editor-fold>
@@ -951,7 +988,7 @@ public class WMSCapabilitiesReader implements KBConstants {
             String xlink = attributes.getValue("xmlns:xlink"); //not being used
             String type = attributes.getValue("xlink:type"); //not being used
             String href = attributes.getValue("xlink:href");
-
+            
             //Stappenplan
             // eerst controleren of bovenste in stack een String met POST of GET is
             // zo ja dan weten we dat de laag eronder een ServiceDomainResource is

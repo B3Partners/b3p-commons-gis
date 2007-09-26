@@ -201,6 +201,38 @@ public class ServiceProvider implements XMLElement, KBConstants {
         }
         return null;
     }
+    
+    public Set getAllLayers() {
+        return getAllLayers(getLayers(), new HashSet());
+    }
+    
+    public Set getAllRoles() {
+        Set roles = new HashSet();
+        // TODO echt ophalen
+        roles.add("gebruiker");
+//        roles.add("themabeheerder");
+        return roles;
+    }
+    
+    /** Defines a Set with layers in which only leafs are added. These have no childs.
+     *
+     * @param originalLayers
+     * 
+     * @return Set with only leaf layers
+     */
+    // <editor-fold defaultstate="" desc="getLeafLayers(Set orgLayers) method.">
+    private Set getAllLayers(Set layers, Set newLayerSet) {
+        if (layers != null && newLayerSet!=null) {
+            Iterator it = layers.iterator();
+            while (it.hasNext()) {
+                Layer layer = (Layer) it.next();
+                newLayerSet.add(layer);
+                getAllLayers(layer.getLayers(), newLayerSet);            
+            }
+        }
+        return newLayerSet;
+    }
+    
     public Set getServiceProviderKeywordList() {
         return serviceProviderKeywordList;
     }
