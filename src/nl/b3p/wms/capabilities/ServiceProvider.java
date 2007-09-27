@@ -478,8 +478,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
         }
         capabilityElement.appendChild(exceptionElement);
         
-        
-        
         //Vendor specifieke elementen
         Element vendorSpecificElement = doc.createElement("VendorSpecificCapabilities");
         if(this.getAllRoles() != null && !this.getAllRoles().isEmpty()) {
