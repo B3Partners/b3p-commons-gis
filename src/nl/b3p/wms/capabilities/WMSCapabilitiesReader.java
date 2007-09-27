@@ -81,6 +81,11 @@ public class WMSCapabilitiesReader implements KBConstants {
     private Switcher s;
     private ServiceProvider serviceProvider;
     
+    public static void main(String [] args) throws IOException, SAXException {
+        WMSCapabilitiesReader wms = new WMSCapabilitiesReader();
+        wms.getProvider("http://localhost:8084/kaartenbalie_mnp/GetCapabilities.xml");
+    }
+    
     /** Constructor of the WMSCapabilitiesReader.
      *
      * @param serviceProvider ServiceProvider object in which all information has to be saved.
@@ -1307,7 +1312,7 @@ public class WMSCapabilitiesReader implements KBConstants {
     private class RoleHandler extends ElementHandler {
         public void startElement(String uri, String localName, String qName, Attributes atts) {
             Roles roles = new Roles();
-            roles.setRole(atts.getValue("role"));
+            roles.setRole(atts.getValue("id"));
             stack.push(roles);
         }
         
