@@ -9,20 +9,6 @@
  */
 
 
-/*
-------------------------------------------------------------------------------------------
- 
-NOTE !!!!!!
-All works fine except for the DTD.... if in a recieved document and link is found in doctype
-the program will try to connect to this link for some reason, this should not happen and has
-to be programmed still... all other components work fine and have been tested.
- 
-I think this problem will be solved when a DTDHandler is activated of maybe an extra
-private handler is written in which this part will be left blank as a default standard.
- 
-------------------------------------------------------------------------------------------
- 
- */
 
 /*
 Since some documents give errors, below are some documents defined with special settings to
@@ -74,7 +60,7 @@ public class WMSCapabilitiesReader implements KBConstants {
     
     private static final String host = AuthScope.ANY_HOST; // "localhost";
     private static final int port = AuthScope.ANY_PORT;
-    private static final int RTIMEOUT = 10000;
+    private static final int RTIMEOUT = 20000;
     
     private XMLReader parser;
     private Stack stack = new Stack();
