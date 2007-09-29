@@ -143,9 +143,7 @@ public class StyleDomainResource implements XMLElement {
                 newParams.append(values[0]);
                 newParams.append("=");
                 if (values[0].equalsIgnoreCase("layer")) {    
-                    newParams.append(layer.getId());
-                    newParams.append("_");
-                    newParams.append(layer.getName());
+                    newParams.append(layer.getUniqueName());
                 } else {
                     newParams.append(values[1]);
                 }

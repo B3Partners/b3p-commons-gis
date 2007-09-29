@@ -302,13 +302,24 @@ public class Layer implements XMLElement {
     }
     
     public String getUniqueName(){
-        return ""+this.getId()+"_"+this.getName();
+        // Indien naam leeg is, dan mag de layer nooit getoond worden via GetMap
+        // dus wij mogen naam nooit vullen als hij oorspronkelijk leeg was!
+        if (this.getName()==null)
+            return null;
+        Integer uid = null;
+        //TODO uniek per serviceprovider
+//        if (serviceProvider!=null)
+//            uid = serviceProvider.getId();
+        uid = this.getId();
+        if (uid==null)
+           uid = new Integer("0");
+        return uid.toString() + "_" + this.getName();
     }
     
     public String getMetaData() {
         return metaData;
     }
-
+    
     public void setMetaData(String metaData) {
         this.metaData = metaData;
     }
@@ -512,27 +523,14 @@ public class Layer implements XMLElement {
         
         if(null != this.getName()) {
             Element nameElement = doc.createElement("Name");
-            String nname="";
-            if (this.getId()!=null){
-                nname+=this.getId();
-            }if (this.getName()!=null){
-                if (nname.length()>0){
-                    nname+="_";
-                }
-                nname+=this.getName();
-            }
-            Text text = doc.createTextNode(nname);
+            Text text = doc.createTextNode(this.getUniqueName());
             nameElement.appendChild(text);
             layerElement.appendChild(nameElement);
         }
         
         if(null != this.getTitle()) {
             Element titleElement = doc.createElement("Title");
-            Integer id = this.getId();
-            if (id == null) {
-                id = new Integer(0);
-            }
-            Text text = doc.createTextNode(id + "_" + this.getTitle());
+            Text text = doc.createTextNode(this.getTitle());
             titleElement.appendChild(text);
             layerElement.appendChild(titleElement);
         }
@@ -574,7 +572,7 @@ public class Layer implements XMLElement {
                 srshash.put(srsbb.getType(), hlist);
             }
         }
-                
+        
         hlist = (ArrayList) srshash.get("SRS");
         if (hlist!=null && !hlist.isEmpty()) {
             Iterator it = hlist.iterator();

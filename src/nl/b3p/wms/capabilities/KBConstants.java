@@ -15,12 +15,12 @@ public interface KBConstants {
     // <editor-fold defaultstate="" desc="Predefined Strings for CapabilityRequest">
     public static final String SERVICE_NAME = "OGC:WMS";
     public static final String SERVICE_TITLE = "Kaartenbalie Map Portal";
-    public static final String SERVICE_ABSTRACT = "WMS-based access to different maps. Try B3Partners Portal System at http://www.b3p.nl/";
+    public static final String SERVICE_ABSTRACT = "Controlled access to OGC WMS maps. See B3P GIS at http://www.b3partners.nl/";
     public static final String SERVICE_FEES = "None";
     public static final String SERVICE_CONSTRAINTS = "None";
     
     public static final String CONTACT_PERSON = "Chris van Lith";
-    public static final String CONTACT_POSITION = "Software Developer";
+    public static final String CONTACT_POSITION = "Partner";
     public static final String CONTACT_ORGANIZATION = "B3Partners";
     public static final String CONTACT_ADDRESS = "Zonnebaan 12C";
     public static final String CONTACT_ADDRESS_TYPE = "Postal";
@@ -28,13 +28,13 @@ public interface KBConstants {
     public static final String CONTACT_CITY = "Utrecht";
     public static final String CONTACT_STATE_OR_PROVINCE = "Utrecht";
     public static final String CONTACT_COUNTRY = "The Netherlands";
-    public static final String CONTACT_VOICETELEPHONE = "0 (031) 30 214 20 81";
+    public static final String CONTACT_VOICETELEPHONE = "+31 30 214 20 81";
     public static final String CONTACT_FASCIMILEPHONE = "";
-    public static final String CONTACT_EMAIL = "info@b3p.nl";
+    public static final String CONTACT_EMAIL = "info@b3partners.nl";
     
     public static final String SERVICEPROVIDER_NAME = "OGC:WMS";
-    public static final String SERVICEPROVIDER_TITLE = "Kaartenbalie Map Portal";
-    public static final String SERVICEPROVIDER_ABSTRACT = "WMS-based access to different maps. Try B3Partners Portal System at http://www.b3p.nl/";
+    public static final String SERVICEPROVIDER_TITLE = "Kaartenbalie WMS Portal";
+    public static final String SERVICEPROVIDER_ABSTRACT = "Controlled access to OGC WMS maps. See B3P GIS at http://www.b3partners.nl/";
     public static final String SERVICEPROVIDER_FEES = "none";
     public static final String SERVICEPROVIDER_ACCESSCONSTRAINTS = "none";
     
