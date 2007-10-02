@@ -44,6 +44,7 @@ public interface KBConstants {
     // <editor-fold defaultstate="" desc="Predefined static final strings ">
     public static final String KB_USER = "user" ;
     public static final String KB_PERSONAL_URL = "personalURL" ;
+    public static final String KB_DEFAULT_ROLE = "gebruiker";
     
     public static final String WMS_SERVICE = "SERVICE" ;
     public static final String WMS_SERVICE_WMS = "WMS" ;

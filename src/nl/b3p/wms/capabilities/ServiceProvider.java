@@ -490,7 +490,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
             }
         } else {
             Element roleElement = doc.createElement("Role");
-            roleElement.setAttribute("id", "Gebruiker");
+            roleElement.setAttribute("id", KB_DEFAULT_ROLE);
             vendorSpecificElement.appendChild(roleElement);
         }
         capabilityElement.appendChild(vendorSpecificElement);

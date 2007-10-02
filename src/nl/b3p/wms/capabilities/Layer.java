@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -312,7 +313,7 @@ public class Layer implements XMLElement {
 //            uid = serviceProvider.getId();
         uid = this.getId();
         if (uid==null)
-           uid = new Integer("0");
+            uid = new Integer("0");
         return uid.toString() + "_" + this.getName();
     }
     
@@ -324,6 +325,35 @@ public class Layer implements XMLElement {
         this.metaData = metaData;
     }
     // </editor-fold>
+    
+    public Set getAuthSubLayersClone(Set authLayerIds) {
+        if (authLayerIds==null || authLayerIds.isEmpty())
+            return null;
+        Set subLayers = this.getLayers();
+        if (subLayers==null || subLayers.isEmpty())
+            return null;
+        
+        Set authSubLayers = null;
+        Iterator it = subLayers.iterator();
+        while(it.hasNext()) {
+            Layer subLayer = (Layer)it.next();
+            Layer subLayerCloned = (Layer)subLayer.clone();
+            Set authSubSubLayers = subLayerCloned.getAuthSubLayersClone(authLayerIds);
+            // niet toevoegen indien deze layer en alle sublayers niet toegankelijk
+            boolean layerAuthorized = authLayerIds.contains(subLayer.getId());
+            if (!layerAuthorized && (authSubSubLayers==null || authSubSubLayers.isEmpty()))
+                continue;
+            subLayerCloned.setLayers(authSubSubLayers);
+            // layer alleen als placeholder indien niet toegankelijk maar wel toegankelijke sublayers heeft
+            if (!layerAuthorized)
+                subLayerCloned.setName(null);
+            if (authSubLayers==null)
+                authSubLayers = new HashSet();
+            authSubLayers.add(subLayerCloned);
+        }
+        return authSubLayers;
+    }
+    
     
     /** Method that will perfom a shallow clone of the given object into this object.
      *
