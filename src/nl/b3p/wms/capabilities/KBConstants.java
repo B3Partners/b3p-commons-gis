@@ -86,6 +86,13 @@ public interface KBConstants {
     public static final String WMS_PARAM_TRANSPARENT_TRUE = "TRUE";
     public static final String WMS_PARAM_WMS_XML = "application/vnd.ogc.wms_xml";
     public static final String WMS_PARAM_EXCEPTION_XML = "application/vnd.ogc.se_xml";
+    public static final String WMS_PARAM_BGCOLOR = "BGCOLOR";
+    public static final String WMS_PARAM_EXCEPTIONS = "EXCEPTIONS";
+    public static final String WMS_PARAM_TIME = "TIME";
+    public static final String WMS_PARAM_ELEVATION = "ELEVATION";
+    public static final String WMS_PARAM_WFS = "WFS";
+    
+    
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";    
     public static final String CHARSET = "UTF-8";
     public static final String MD_ALGORITHM= "MD5";
@@ -93,6 +100,9 @@ public interface KBConstants {
     public static final String GETMAP_EXCEPTION = "msWMSLoadGetMapParams(): WMS server error. Invalid layer(s) given in the LAYERS parameter.";
     public static final String FEATUREINFO_EXCEPTION = "msWMSFeatureInfo(): WMS server error. Requested layer(s) are not queryable.";
     public static final String LEGENDGRAPHIC_EXCEPTION = "msWMSGetLegendgraphic(): Invalid layer given in the LAYERS parameter.";
+    
+    public static final String PERSONAL_URL = "personalURL";
+    public static final String USER = "user";
     // </editor-fold>
     
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
@@ -114,6 +124,19 @@ public interface KBConstants {
         WMS_PARAM_WIDTH,
         WMS_PARAM_HEIGHT,
         WMS_PARAM_FORMAT
+    });
+    
+    public static final List NON_REQUIRED_PARAMS_GetMap = Arrays.asList(new String[] {
+        WMS_SERVICE,
+        WMS_PARAM_TRANSPARENT,
+        WMS_PARAM_BGCOLOR,
+        WMS_PARAM_EXCEPTIONS,
+        WMS_PARAM_TIME,
+        WMS_PARAM_ELEVATION,
+        WMS_PARAM_SLD,
+        WMS_PARAM_WFS,
+        PERSONAL_URL,
+        USER
     });
     
     public static final List PARAMS_GetFeatureInfo = Arrays.asList(new String[] {
