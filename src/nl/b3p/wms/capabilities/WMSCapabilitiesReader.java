@@ -460,7 +460,7 @@ public class WMSCapabilitiesReader implements KBConstants {
                 layerAtStack.addLayer(layer);
             } else if (obj instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) obj;
-                serviceProvider.addLayer(layer);
+                serviceProvider.setTopLayer(layer);
             }
         }
     }

@@ -38,7 +38,9 @@ public class ServiceProvider implements XMLElement, KBConstants {
     private Set serviceProviderKeywordList;
     private Set exceptions;
     private Set layers;
+    private Layer topLayer;
     private Set allRoles;
+    private boolean isSynchronized = false;
     
     /** default ServiceProvider() constructor.
      */
@@ -174,39 +176,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
         dr.setServiceProvider(this);
     }
     
-    public Set getLayers() {
-        return layers;
-    }
-    
-    public void setLayers(Set layers) {
-        this.layers = layers;
-    }
-    
-    public void addLayer(Layer layer) {
-        if(null == layers) {
-            layers = new HashSet();
-        }
-        layers.add(layer);
-        layer.setServiceProvider(this);
-    }
-    public Layer getTopLayer(){
-        Set set= getLayers();
-        if (set!=null){
-            Iterator it=set.iterator();
-            while (it.hasNext()){
-                Layer layer=(Layer)it.next();
-                if (layer.getParent()==null){
-                    return layer;
-                }
-            }
-        }
-        return null;
-    }
-    
-    public Set getAllLayers() {
-        return getAllLayers(getLayers(), new HashSet());
-    }
-    
     public void setAllRoles(Set allRoles) {
         this.allRoles = allRoles;
     }
@@ -222,23 +191,76 @@ public class ServiceProvider implements XMLElement, KBConstants {
         allRoles.add(role);
     }
     
-    /** Defines a Set with layers in which only leafs are added. These have no childs.
-     *
-     * @param originalLayers
-     * 
-     * @return Set with only leaf layers
-     */
-    // <editor-fold defaultstate="" desc="getLeafLayers(Set orgLayers) method.">
-    private Set getAllLayers(Set layers, Set newLayerSet) {
-        if (layers != null && newLayerSet!=null) {
-            Iterator it = layers.iterator();
-            while (it.hasNext()) {
-                Layer layer = (Layer) it.next();
-                newLayerSet.add(layer);
-                getAllLayers(layer.getLayers(), newLayerSet);            
+    private void synchronizeServiceProvider() {
+        if (topLayer != null) {
+            layers = getSetStructure(topLayer, new HashSet());
+            topLayer.setServiceProvider(this);
+            layers.add(topLayer);
+            isSynchronized = true;
+        } else {
+            topLayer = getTreeStructure(defineTopLayer(layers), layers);
+            isSynchronized = true;
+        }
+    }
+    
+    private Layer defineTopLayer(Set layers) {
+        Iterator it = layers.iterator();
+        while (it.hasNext()) {
+            Layer layer = (Layer)it.next();
+            if(layer.getParent() == null) {
+                return layer;
             }
         }
-        return newLayerSet;
+        return null;
+    }
+    
+    private Layer getTreeStructure(Layer parent, Set setlayers) {
+        Iterator it = setlayers.iterator();
+        while (it.hasNext()) {
+            Layer possiblechild = (Layer)it.next();
+            if(possiblechild.getParent() != null && possiblechild.getParent().getId().equals(parent.getId())) {
+                possiblechild = getTreeStructure(possiblechild, setlayers);
+                parent.addLayer(possiblechild);
+            }
+        }
+        return parent;
+    }    
+    
+    private Set getSetStructure(Layer layer, Set layerset) {
+        if (layer != null && layerset != null) {
+            Set layers = layer.getLayers();
+            if (layers != null) {
+                Iterator it = layers.iterator();
+                while (it.hasNext()) {
+                    Layer childLayer = (Layer)it.next();
+                    if(!layerset.contains(childLayer)) {
+                        childLayer.setServiceProvider(this);
+                        layerset.add(childLayer);
+                    }
+                    getSetStructure(childLayer, layerset);
+                }
+            }
+        }
+        return layerset;
+    }
+    
+    //Er zijn drie opties
+    //-er is een set aanwezig --> nog geen boomstructuur
+    //-er is een boom aanwezig --> nog geen setstructuur
+    //-er is een boom aanwezig --> oude setstructuur
+    //bij deze laatste geldt eigenlijk dat de set aangepast wordt aan de nieuwe boomstructuur.....
+    
+    public Layer getTopLayer() {
+        if(!isSynchronized) {
+            synchronizeServiceProvider();
+        }
+        return topLayer;
+    }
+    
+    public void setTopLayer(Layer topLayer) {
+        isSynchronized = false;
+        this.topLayer = topLayer;
+        synchronizeServiceProvider();
     }
     
     public Set getServiceProviderKeywordList() {
@@ -285,80 +307,10 @@ public class ServiceProvider implements XMLElement, KBConstants {
         }
         
         //Layers:
-        it = layers.iterator();
-        while (it.hasNext()) {
-            Layer layer = (Layer)it.next();
-            layer.overwriteURL(newUrl);
-        }
+        getTopLayer().overwriteURL(newUrl);
     }
     // </editor-fold>
     
-    /** Method that will create a deep copy of this object.
-     *
-     * @return an object of type Object
-     */
-    // <editor-fold defaultstate="" desc="clone() method">
-    public Object clone() {
-        ServiceProvider cloneSP = new ServiceProvider();
-        
-        if (null != this.id) {
-            cloneSP.id                          = new Integer(this.id.intValue());
-        }
-        if (null != this.name) {
-            cloneSP.name                        = new String(this.name);
-        }
-        if (null != this.title) {
-            cloneSP.title                       = new String(this.title);
-        }
-        if (null != this.abstracts) {
-            cloneSP.abstracts                   = new String(this.abstracts);
-        }
-        if (null != this.fees) {
-            cloneSP.fees                        = new String(this.fees);
-        }
-        if (null != this.accessConstraints) {
-            cloneSP.accessConstraints           = new String(this.accessConstraints);
-        }
-        if (null != this.givenName) {
-            cloneSP.givenName                   = new String(this.givenName);
-        }
-        if (null != this.url) {
-            cloneSP.url                         = new String(this.url);
-        }
-        if (null != this.updatedDate) {
-            cloneSP.updatedDate                 = (Date)this.updatedDate.clone();
-        }
-        if (null != this.contactInformation) {
-            cloneSP.contactInformation          = (ContactInformation)this.contactInformation.clone();
-        }
-        if (null != this.domainResource) {
-            cloneSP.domainResource              = new HashSet();
-            Iterator it = this.domainResource.iterator();
-            while (it.hasNext()) {
-                ServiceDomainResource sdr       = (ServiceDomainResource)((ServiceDomainResource)it.next()).clone();
-                sdr.setServiceProvider(cloneSP);
-                cloneSP.domainResource.add(sdr);
-            }
-        }
-        if (null != this.serviceProviderKeywordList) {
-            cloneSP.serviceProviderKeywordList  = new HashSet(this.serviceProviderKeywordList);
-        }
-        if (null != this.exceptions) {
-            cloneSP.exceptions                  = new HashSet(this.exceptions);
-        }
-        if (null != this.layers) {
-            cloneSP.layers = new HashSet();
-            Iterator itlayer = this.layers.iterator();
-            while (itlayer.hasNext()) {
-                Layer layer = (Layer)((Layer)itlayer.next()).clone();
-                layer.setServiceProvider(cloneSP);
-                cloneSP.layers.add(layer);
-            }
-        }
-        cloneSP.reviewed = this.reviewed;
-        return cloneSP;
-    }
-    // </editor-fold>
     
     /** Method that will create piece of the XML tree to create a proper XML docuement.
      *
@@ -391,7 +343,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
             abstractElement.appendChild(text);
             serviceElement.appendChild(abstractElement);
         }
-
+        
         if(null != this.getServiceProviderKeywordList() && this.getServiceProviderKeywordList().size() != 0) {
             Element keywordListElement = doc.createElement("KeywordList");
             
@@ -495,16 +447,9 @@ public class ServiceProvider implements XMLElement, KBConstants {
         }
         capabilityElement.appendChild(vendorSpecificElement);
         
-        
-        
-        
-        
         //De beschikbare layers.
-        it = layers.iterator();
-        while (it.hasNext()) {
-            Layer layer = (Layer)it.next();
-            capabilityElement = layer.toElement(doc, capabilityElement);
-        }
+        capabilityElement = topLayer.toElement(doc, capabilityElement);
+        
         //End of Capability
         
         rootElement.appendChild(serviceElement);
@@ -512,12 +457,20 @@ public class ServiceProvider implements XMLElement, KBConstants {
         return rootElement;
     }
     // </editor-fold>
-
+    
     public String getWmsVersion() {
         return wmsVersion;
     }
-
+    
     public void setWmsVersion(String wmsVersion) {
         this.wmsVersion = wmsVersion;
+    }
+    
+    private Set getLayers() {
+        return layers;
+    }
+    
+    private void setLayers(Set layers) {
+        this.layers = layers;
     }
 }
