@@ -10,7 +10,8 @@ package nl.b3p.wms.capabilities;
 
 import java.util.Arrays;
 import java.util.List;
-
+/*TODO: KB Constants moet nog een keer worden opgesplitst in KBconstants en OGCconstants.
+ */
 public interface KBConstants {
     // <editor-fold defaultstate="" desc="Predefined Strings for CapabilityRequest">
     public static final String SERVICE_NAME = "OGC:WMS";
@@ -91,7 +92,35 @@ public interface KBConstants {
     public static final String WMS_PARAM_TIME = "TIME";
     public static final String WMS_PARAM_ELEVATION = "ELEVATION";
     public static final String WMS_PARAM_WFS = "WFS";
+    /*TODO: alle mogelijke formats er nog inzetten!
+     */
+    public static final String FORMAT_PNG = "image/png";
+    public static final String FORMAT_INIMAGE = "INIMAGE";
     
+    /*TODO: dit moet nog een keer aangepast worden!!
+     *Hier moeten alle WFS parameters inkomen.Niet alleen de WFS parameters die WMS niet heeft (zoals nu)
+     */
+    public static final String WFS_PARAM_OUTPUTFORMAT= "OUTPUTFORMAT";
+    public static final String WFS_PARAM_TYPENAME= "TYPENAME";
+    public static final String WFS_PARAM_RESULTTYPE="RESULTTYPE";
+    public static final String WFS_PARAM_PROPERTYNAME="PROPERTYNAME";
+    public static final String WFS_PARAM_FEATUREVERSION="FEATUREVERSION";
+    public static final String WFS_PARAM_MAXFEATURES="MAXFEATURES";
+    public static final String WFS_PARAM_EXPIRY="EXPIRY";
+    public static final String WFS_PARAM_SRSNAME="SRSNAME";
+    public static final String WFS_PARAM_FEATUREID="FEATUREID";
+    public static final String WFS_PARAM_FILTER="FILTER";
+    public static final String WFS_PARAM_TRAVERSEXLINKDEPTH="TRAVERSEXLINKDEPTH";
+    public static final String WFS_PARAM_TRAVERSEXLINKEXPIRY="TRAVERSEXLINKEXPIRY";
+    public static final String WFS_PARAM_SORTBY="SORTBY";
+    public static final String WFS_PARAM_PROPTRAVXLINKEXPIRY="PROPTRAVXLINKEXPIRY";
+    public static final String WFS_PARAM_PROPTRAVXLINKDEPTH="PROPTRAVXLINKDEPTH";
+    public static final String WFS_PARAM_GMLOBJECTID="GMLOBJECTID";
+    
+    public static final String WFS_REQUEST_GetFeature="GetFeature";
+    public static final String WFS_REQUEST_DiscribeFeatureType="DiscribeFeatureType";
+    
+    public static final String WFS_SERVICE_WFS="WFS";
     
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";    
     public static final String CHARSET = "UTF-8";
