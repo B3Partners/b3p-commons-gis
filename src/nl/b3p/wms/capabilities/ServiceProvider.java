@@ -212,13 +212,17 @@ public class ServiceProvider implements XMLElement, KBConstants {
     
     private Layer defineTopLayer(Set layers) {
         Iterator it = layers.iterator();
+        Layer parent = null;
         while (it.hasNext()) {
             Layer layer = (Layer)it.next();
             if(layer.getParent() == null) {
-                return layer;
+                if(parent != null) {
+                    throw new Error("inconsistente database, meerdere top layers! service provider id " + getId());
+                }
+                parent = layer;
             }
         }
-        return null;
+        return parent;
     }
     
     private Layer getTreeStructure(Layer parent, Set setlayers) {
