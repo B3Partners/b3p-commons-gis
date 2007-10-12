@@ -191,15 +191,22 @@ public class ServiceProvider implements XMLElement, KBConstants {
         allRoles.add(role);
     }
     
+    public Set getAllLayers() {
+        if (!isIsSynchronized()) {
+            synchronizeServiceProvider();
+        }
+        return layers;
+    }
+    
     private void synchronizeServiceProvider() {
         if (topLayer != null) {
             layers = getSetStructure(topLayer, new HashSet());
             topLayer.setServiceProvider(this);
             layers.add(topLayer);
-            isSynchronized = true;
+            setIsSynchronized(true);
         } else {
             topLayer = getTreeStructure(defineTopLayer(layers), layers);
-            isSynchronized = true;
+            setIsSynchronized(true);
         }
     }
     
@@ -251,14 +258,14 @@ public class ServiceProvider implements XMLElement, KBConstants {
     //bij deze laatste geldt eigenlijk dat de set aangepast wordt aan de nieuwe boomstructuur.....
     
     public Layer getTopLayer() {
-        if(!isSynchronized) {
+        if(!isIsSynchronized()) {
             synchronizeServiceProvider();
         }
         return topLayer;
     }
     
     public void setTopLayer(Layer topLayer) {
-        isSynchronized = false;
+        setIsSynchronized(false);
         this.topLayer = topLayer;
         synchronizeServiceProvider();
     }
@@ -472,5 +479,13 @@ public class ServiceProvider implements XMLElement, KBConstants {
     
     private void setLayers(Set layers) {
         this.layers = layers;
+    }
+
+    public boolean isIsSynchronized() {
+        return isSynchronized;
+    }
+
+    public void setIsSynchronized(boolean isSynchronized) {
+        this.isSynchronized = isSynchronized;
     }
 }
