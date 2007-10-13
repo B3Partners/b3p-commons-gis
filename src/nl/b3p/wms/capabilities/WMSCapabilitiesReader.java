@@ -62,15 +62,10 @@ public class WMSCapabilitiesReader implements KBConstants {
     private static final int port = AuthScope.ANY_PORT;
     private static final int RTIMEOUT = 20000;
     
-    private XMLReader parser;
+    private XMLReader parser = null;
     private Stack stack = new Stack();
-    private Switcher s;
-    private ServiceProvider serviceProvider;
-    
-    public static void main(String [] args) throws IOException, SAXException {
-        WMSCapabilitiesReader wms = new WMSCapabilitiesReader();
-        wms.getProvider("http://localhost:8084/kaartenbalie_mnp/GetCapabilities.xml");
-    }
+    private Switcher s = null;
+    private ServiceProvider serviceProvider = null;
     
     /** Constructor of the WMSCapabilitiesReader.
      *
@@ -78,10 +73,23 @@ public class WMSCapabilitiesReader implements KBConstants {
      */
     // <editor-fold defaultstate="" desc="WMSCapabilitiesReader(ServiceProvider serviceProvider) constructor.">
     public WMSCapabilitiesReader() {
-        this.serviceProvider = new ServiceProvider();
         this.setElementHandlers();
     }
     // </editor-fold>
+    
+    private void checkObject(Object obj) throws SAXException {
+        if (obj!=null)
+            return;
+        
+        StringBuffer message = new StringBuffer();
+        message.append("No service provider created, possible cause: invalid GetCapabilities xml. ");
+        if (obj instanceof ServiceProvider)
+            message.append("Service provider is null. ");
+        else if (obj instanceof Layer)
+            message.append("Layer is null. ");
+        //TODO andere objecten
+        throw new SAXException(message.toString());
+    }
     
     /** Private method which validates a XML document at a given location.
      *
@@ -93,11 +101,11 @@ public class WMSCapabilitiesReader implements KBConstants {
      * @throws SAXException
      */
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
-    public ServiceProvider getProvider(String location) throws IOException, SAXException {
+    public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
         return getProvider(location, null, null);
     }
     
-    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException {
+    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
         HttpClient client = new HttpClient();
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
@@ -113,23 +121,31 @@ public class WMSCapabilitiesReader implements KBConstants {
         GetMethod method = new GetMethod(location);
         
         try {
-            // Execute the method.
             int statusCode =client.executeMethod(method);
-           
-            if (statusCode == HttpStatus.SC_OK) {
-                XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-                reader.setFeature(VALIDATION_FEATURE, true);
-                reader.setFeature(SCHEMA_FEATURE,true);
-                reader.setContentHandler(s);
-                InputSource is = new InputSource(method.getResponseBodyAsStream());
-                is.setEncoding(CHARSET);
-                reader.parse(is);
+            if (statusCode != HttpStatus.SC_OK) {
+                throw new Exception(method.getStatusLine().getReasonPhrase());
             }
+            String mimeType = method.getResponseHeader("Content-Type").getValue();
+            if (mimeType==null || mimeType.indexOf("xml")==-1) {
+                throw new Exception("Mime type should be xml, found: " + mimeType);
+            }
+            
+            //Nu kan het service provider object gemaakt en gevuld worden
+            serviceProvider = new ServiceProvider();
+            XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+            reader.setFeature(VALIDATION_FEATURE, true);
+            reader.setFeature(SCHEMA_FEATURE,true);
+            reader.setContentHandler(s);
+            InputSource is = new InputSource(method.getResponseBodyAsStream());
+            is.setEncoding(CHARSET);
+            reader.parse(is);
         } finally {
             // Release the connection.
             method.releaseConnection();
         }
         
+        if (serviceProvider==null)
+            throw new Exception("No service provider object could be created, unkown reason!");
         return serviceProvider;
     }
     // </editor-fold>
@@ -234,22 +250,19 @@ public class WMSCapabilitiesReader implements KBConstants {
      */
     // <editor-fold defaultstate="" desc="Defined Handlers.">
     private class WMTHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             //<WMT_MS_Capabilities version="1.1.1">
+            checkObject(serviceProvider);
             String version = attributes.getValue("version");
             serviceProvider.setWmsVersion(version);
             stack.push(serviceProvider);
         }
-        public void endElement(String uri, String localName, String qName) {
-            serviceProvider = (ServiceProvider) stack.pop();
-        }
+        public void endElement(String uri, String localName, String qName) {}
     }
     
     private class ServiceHandler extends ElementHandler {
         public void startElement(String uri, String localName, String qName, Attributes atts) {}
-        public void endElement(String uri, String localName, String qName) {
-            
-        }
+        public void endElement(String uri, String localName, String qName) {}
     }
     
     private class CapabilityHandler extends ElementHandler {
@@ -275,11 +288,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -292,11 +306,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -309,11 +324,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -326,11 +342,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -343,11 +360,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -360,11 +378,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -377,11 +396,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ServiceDomainResource domainResource = (ServiceDomainResource) stack.pop();
             //remove the domainname
             stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addDomainResource(domainResource);
         }
     }
@@ -452,14 +472,16 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(layer);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Layer layer = (Layer) stack.pop();
             Object obj = stack.peek();
             if (obj instanceof Layer) {
                 Layer layerAtStack = (Layer) obj;
+                checkObject(layerAtStack);
                 layerAtStack.addLayer(layer);
             } else if (obj instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) obj;
+                checkObject(serviceProvider);
                 serviceProvider.setTopLayer(layer);
             }
         }
@@ -471,10 +493,10 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(style);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Style style = (Style) stack.pop();
-            Object obj = stack.peek();
             Layer layer = (Layer) stack.peek();
+            checkObject(layer);
             layer.addStyle(style);
         }
     }
@@ -489,22 +511,27 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof LayerDomainResource) {
                 LayerDomainResource domainResource = (LayerDomainResource) object;
+                checkObject(domainResource);
                 domainResource.addFormat(sb.toString());
             } else if (object instanceof ServiceDomainResource) {
                 ServiceDomainResource domainResource = (ServiceDomainResource) object;
+                checkObject(domainResource);
                 domainResource.addFormat(sb.toString());
             } else if (object instanceof StyleDomainResource) {
                 StyleDomainResource domainResource = (StyleDomainResource) object;
+                checkObject(domainResource);
                 domainResource.addFormat(sb.toString());
             } else if (object instanceof Attribution) {
                 Attribution attribution = (Attribution) object;
+                checkObject(attribution);
                 attribution.setLogoFormat(sb.toString());
             } else if (object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.addException(sb.toString());
             }
         }
@@ -520,10 +547,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName)  throws SAXException {
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 String srssen = sb.toString();
                 if (srssen.contains(" ")){
                     String[] tokens= srssen.split(" ");
@@ -569,10 +597,11 @@ public class WMSCapabilitiesReader implements KBConstants {
     
     private class LatLonBoundingBoxHandler extends ElementHandler {
         //instance of Layer
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes)  throws SAXException {
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 SrsBoundingBox srsbb = new SrsBoundingBox();
                 //srsbb.setSrs("EPSG:4326");
                 srsbb.setMinx(attributes.getValue("minx"));
@@ -599,21 +628,23 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(dimension);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName)  throws SAXException {
             Dimensions dimension = (Dimensions) stack.pop();
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.addDimension(dimension);
             }
         }
     }
     
     private class ExtentHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes)  throws SAXException {
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.getDimensions();
                 //Still need to do something here
                 //Get the Identifiers and look through them to find the one with the same
@@ -646,21 +677,23 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(identifier);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName)  throws SAXException {
             Identifier identifier = (Identifier) stack.pop();
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.addIdentifier(identifier);
             }
         }
     }
     
     private class IdentifierHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes)  throws SAXException {
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.getIdentifiers();
                 //Still need to do something here
                 //Get the Identifiers and look through them to find the one with the same
@@ -681,11 +714,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             LayerDomainResource domainResource = (LayerDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Layer layer = (Layer) stack.peek();
+            checkObject(layer);
             layer.addDomainResource(domainResource);
         }
     }
@@ -698,11 +732,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             LayerDomainResource domainResource = (LayerDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Layer layer = (Layer) stack.peek();
+            checkObject(layer);
             layer.addDomainResource(domainResource);
         }
     }
@@ -716,23 +751,25 @@ public class WMSCapabilitiesReader implements KBConstants {
             
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             LayerDomainResource domainResource = (LayerDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Layer layer = (Layer) stack.peek();
+            checkObject(layer);
             layer.addDomainResource(domainResource);
         }
     }
     
     private class ScaleHintHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             String min = attributes.getValue("min");
             String max = attributes.getValue("max");
             
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.setScaleHintMin(min);
                 layer.setScaleHintMax(max);
             }
@@ -749,11 +786,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(attribution);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Attribution attribution = (Attribution) stack.pop();
             Object object = stack.peek();
             if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 if(attribution == null){
                     log.debug("Attribution is null, but still getting here.... explain to me");
                 }
@@ -763,12 +801,13 @@ public class WMSCapabilitiesReader implements KBConstants {
     }
     
     private class LogoURLHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             String width = attributes.getValue("width");
             String height = attributes.getValue("height");
             Object object = stack.peek();
             if(object instanceof Attribution) {
                 Attribution attribution = (Attribution) object;
+                checkObject(attribution);
                 attribution.setLogoWidth(width);
                 attribution.setLogoHeight(height);
             }
@@ -787,11 +826,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             StyleDomainResource domainResource = (StyleDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Style style = (Style) stack.peek();
+            checkObject(style);
             style.addDomainResource(domainResource);
         }
     }
@@ -804,11 +844,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             StyleDomainResource domainResource = (StyleDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Style style = (Style) stack.peek();
+            checkObject(style);
             style.addDomainResource(domainResource);
         }
     }
@@ -823,11 +864,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(domainResource);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             StyleDomainResource domainResource = (StyleDomainResource) stack.pop();
             //remove domainname
             stack.pop();
             Style style = (Style) stack.peek();
+            checkObject(style);
             style.addDomainResource(domainResource);
         }
     }
@@ -843,16 +885,19 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setName(sb.toString());
             } else if (object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.setName(sb.toString());
             } else if (object instanceof Style) {
                 Style style = (Style) object;
+                checkObject(style);
                 style.setName(sb.toString());
             }
         }
@@ -868,19 +913,23 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setTitle(sb.toString());
             } else if (object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.setTitle(sb.toString());
             } else if (object instanceof Attribution) {
                 Attribution attribution = (Attribution) object;
+                checkObject(attribution);
                 attribution.setTitle(sb.toString());
             } else if (object instanceof Style) {
                 Style style = (Style) object;
+                checkObject(style);
                 style.setTitle(sb.toString());
             }
         }
@@ -896,16 +945,19 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setAbstracts(sb.toString());
             } else if (object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.setAbstracts(sb.toString());
             } else if (object instanceof Style) {
                 Style style = (Style) object;
+                checkObject(style);
                 style.setAbstracts(sb.toString());
             }
         }
@@ -921,10 +973,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setFees(sb.toString());
             }
         }
@@ -940,10 +993,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setAccessConstraints(sb.toString());
             }
         }
@@ -964,20 +1018,22 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.addKeyword(sb.toString());
             } else if(object instanceof Layer) {
                 Layer layer = (Layer) object;
+                checkObject(layer);
                 layer.addKeyword(sb.toString());
             }
         }
     }
     
     private class OnlineResourceHandler extends ElementHandler {
-        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             String xlink = attributes.getValue("xmlns:xlink"); //not being used
             String type = attributes.getValue("xlink:type"); //not being used
             String href = attributes.getValue("xlink:href");
@@ -989,6 +1045,7 @@ public class WMSCapabilitiesReader implements KBConstants {
             Object object = stack.peek();
             if (object instanceof String) {
                 String method = (String) object;
+                checkObject(method);
                 if (method.equals("GET") || method.equals("POST")) {
                     stack.pop();
                     Object object2 = stack.peek();
@@ -1009,24 +1066,29 @@ public class WMSCapabilitiesReader implements KBConstants {
                 }
             } else if(object instanceof LayerDomainResource){
                 LayerDomainResource domainResource = (LayerDomainResource)stack.pop();
+                checkObject(domainResource);
                 String domain = (String) stack.peek();
                 domainResource.setUrl(href);
                 domainResource.setDomain(domain);
                 stack.push(domainResource);
             } else if (object instanceof StyleDomainResource){
                 StyleDomainResource domainResource = (StyleDomainResource)stack.pop();
+                checkObject(domainResource);
                 String domain = (String) stack.peek();
                 domainResource.setUrl(href);
                 domainResource.setDomain(domain);
                 stack.push(domainResource);
             } else if(object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setUrl(href);
             } else if (object instanceof Attribution) {
                 Attribution attribution = (Attribution) object;
+                checkObject(attribution);
                 attribution.setAttributionURL(href);
             } else if (object instanceof Identifier) {
                 Identifier identifier = (Identifier) object;
+                checkObject(identifier);
                 identifier.setAuthorityURL(href);
             }
         }
@@ -1041,11 +1103,12 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(contactInformation);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             ContactInformation contactInformation = (ContactInformation) stack.pop();
             Object object = stack.peek();
             if (object instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
+                checkObject(serviceProvider);
                 serviceProvider.setContactInformation(contactInformation);
             }
         }
@@ -1066,10 +1129,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setContactPerson(sb.toString());
             }
         }
@@ -1085,10 +1149,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setContactOrganization(sb.toString());
             }
         }
@@ -1104,10 +1169,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setContactPosition(sb.toString());
             }
         }
@@ -1128,10 +1194,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setAddressType(sb.toString());
             }
         }
@@ -1147,10 +1214,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setAddress(sb.toString());
             }
         }
@@ -1166,10 +1234,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setCity(sb.toString());
             }
         }
@@ -1185,10 +1254,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setStateOrProvince(sb.toString());
             }
         }
@@ -1204,10 +1274,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setPostcode(sb.toString());
             }
         }
@@ -1223,10 +1294,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setCountry(sb.toString());
             }
         }
@@ -1242,10 +1314,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setVoiceTelephone(sb.toString());
             }
         }
@@ -1261,10 +1334,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setFascimileTelephone(sb.toString());
             }
         }
@@ -1280,10 +1354,11 @@ public class WMSCapabilitiesReader implements KBConstants {
             sb.append(chars, start, len);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Object object = stack.peek();
             if(object instanceof ContactInformation) {
                 ContactInformation contactInformation = (ContactInformation) object;
+                checkObject(contactInformation);
                 contactInformation.setEmailAddress(sb.toString());
             }
         }
@@ -1302,9 +1377,10 @@ public class WMSCapabilitiesReader implements KBConstants {
             stack.push(roles);
         }
         
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
             Roles roles = (Roles) stack.pop();
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
             serviceProvider.addRole(roles);
         }
     }
