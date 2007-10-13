@@ -25,20 +25,20 @@ public class ServiceDomainResource implements XMLElement {
     private String postUrl;
     private String domain;
     private ServiceProvider serviceProvider;
-
+    
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
         return id;
     }
-
+    
     private void setId(Integer id) {
         this.id = id;
     }
-
+    
     public Set getFormats() {
         return formats;
     }
-
+    
     public void setFormats(Set formats) {
         this.formats = formats;
     }
@@ -49,11 +49,11 @@ public class ServiceDomainResource implements XMLElement {
         }
         formats.add(f);
     }
-
+    
     public String getGetUrl() {
         return getUrl;
     }
-
+    
     public void setGetUrl(String getUrl) {
         this.getUrl = getUrl;
     }
@@ -61,23 +61,23 @@ public class ServiceDomainResource implements XMLElement {
     public String getPostUrl() {
         return postUrl;
     }
-
+    
     public void setPostUrl(String postUrl) {
         this.postUrl = postUrl;
     }
-
+    
     public String getDomain() {
         return domain;
     }
-
+    
     public void setDomain(String domain) {
         this.domain = domain;
     }
-
+    
     public ServiceProvider getServiceProvider() {
         return serviceProvider;
     }
-
+    
     public void setServiceProvider(ServiceProvider serviceProvider) {
         this.serviceProvider = serviceProvider;
     }
@@ -118,46 +118,11 @@ public class ServiceDomainResource implements XMLElement {
      */
     // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
     protected void overwriteURL(String newUrl) {
-        //First cut off only the part which is in front of the question mark.
-        /*
-        String temporaryURL;
-        temporaryURL = this.getGetUrl();
-        if (null != temporaryURL && !temporaryURL.equals("")) {
-            int firstOccur = temporaryURL.indexOf("?");
-            if(firstOccur != -1) {
-                temporaryURL = temporaryURL.substring(firstOccur);
-                //then add the newly given url in front of the cutted part
-                temporaryURL = newUrl + temporaryURL;
-                //save this new URL as the one to be used
-                temporaryURL = temporaryURL.replace("&", "");
-                this.setGetUrl(temporaryURL);
-            } else {*/
-                this.setGetUrl(newUrl);
-//            }
-//        }
-        
-        //With a post URL no question mark will be found because the data will appear in the message body and
-        //not in the URL itself.
-        /*
-        temporaryURL = this.getPostUrl();
-        if (null != temporaryURL && !temporaryURL.equals("")) {
-            int firstOccur = temporaryURL.indexOf("?");
-            if(firstOccur != -1) {
-                temporaryURL = temporaryURL.substring(firstOccur);
-                //then add the newly given url in front of the cutted part
-                temporaryURL = newUrl + temporaryURL;
-                //save this new URL as the one to be used
-                temporaryURL = temporaryURL.replace("&", "");
-                this.setGetUrl(temporaryURL);
-            } else {*/
-                this.setPostUrl(newUrl);
-//            }
-//        }
-        
-        
+        this.setGetUrl(newUrl);
+        this.setPostUrl(newUrl);
     }
     // </editor-fold>
-          
+    
     /** Method that will create piece of the XML tree to create a proper XML docuement.
      *
      * @param doc Document object which is being used to create new Elements
@@ -186,26 +151,26 @@ public class ServiceDomainResource implements XMLElement {
                 Element onlineElement = doc.createElement("OnlineResource");
                 onlineElement.setAttribute("xlink:href", this.getGetUrl());
                 onlineElement.setAttribute("xlink:type", "simple");
-                onlineElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink"); 
+                onlineElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
                 getElement.appendChild(onlineElement);
                 httpElement.appendChild(getElement);
                 dcptElement.appendChild(httpElement);
                 domainElement.appendChild(dcptElement);
             }
-
+            
             if (null != this.getPostUrl()) {
                 Element postElement = doc.createElement("Post");
                 Element onlineElement = doc.createElement("OnlineResource");
                 onlineElement.setAttribute("xlink:href", this.getPostUrl());
                 onlineElement.setAttribute("xlink:type", "simple");
-                onlineElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");            
+                onlineElement.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
                 postElement.appendChild(onlineElement);
                 httpElement.appendChild(postElement);
                 dcptElement.appendChild(httpElement);
                 domainElement.appendChild(dcptElement);
             }
-        }            
-            
+        }
+        
         rootElement.appendChild(domainElement);
         return rootElement;
     }

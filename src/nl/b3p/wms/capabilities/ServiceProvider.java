@@ -200,17 +200,19 @@ public class ServiceProvider implements XMLElement, KBConstants {
     
     private void synchronizeServiceProvider() {
         if (topLayer != null) {
-            layers = getSetStructure(topLayer, new HashSet());
-            topLayer.setServiceProvider(this);
-            layers.add(topLayer);
+            setLayers(topLayer.buildLayerSet(null, this));
             setIsSynchronized(true);
         } else {
-            topLayer = getTreeStructure(defineTopLayer(layers), layers);
+            topLayer = defineTopLayer();
+            if (topLayer!=null)
+                topLayer.buildLayerTree(layers);
             setIsSynchronized(true);
         }
     }
     
-    private Layer defineTopLayer(Set layers) {
+    private Layer defineTopLayer() {
+        if (layers==null)
+            return null;
         Iterator it = layers.iterator();
         Layer parent = null;
         while (it.hasNext()) {
@@ -223,36 +225,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
             }
         }
         return parent;
-    }
-    
-    private Layer getTreeStructure(Layer parent, Set setlayers) {
-        Iterator it = setlayers.iterator();
-        while (it.hasNext()) {
-            Layer possiblechild = (Layer)it.next();
-            if(possiblechild.getParent() != null && possiblechild.getParent().getId().equals(parent.getId())) {
-                possiblechild = getTreeStructure(possiblechild, setlayers);
-                parent.addLayer(possiblechild);
-            }
-        }
-        return parent;
-    }    
-    
-    private Set getSetStructure(Layer layer, Set layerset) {
-        if (layer != null && layerset != null) {
-            Set layers = layer.getLayers();
-            if (layers != null) {
-                Iterator it = layers.iterator();
-                while (it.hasNext()) {
-                    Layer childLayer = (Layer)it.next();
-                    if(!layerset.contains(childLayer)) {
-                        childLayer.setServiceProvider(this);
-                        layerset.add(childLayer);
-                    }
-                    getSetStructure(childLayer, layerset);
-                }
-            }
-        }
-        return layerset;
     }
     
     //Er zijn drie opties
@@ -299,26 +271,18 @@ public class ServiceProvider implements XMLElement, KBConstants {
      */
     // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
     public void overwriteURL(String newUrl) {
-        //String temporaryURL = newUrl;
-        //int firstOccur = temporaryURL.indexOf("servlet");
-        //if(firstOccur != -1) {
-        //    temporaryURL = temporaryURL.substring(0, firstOccur);
-        //save this new URL as the one to be used
-        //    this.url = temporaryURL.replace("&", "&amp;");
         this.url = newUrl;
-        //}
         
-        //Now call the same method in the underlying objects which are stored in this object
-        Iterator it;
-        //ServiceDomainResource:
-        it = domainResource.iterator();
-        while (it.hasNext()) {
-            ServiceDomainResource sdr = (ServiceDomainResource)it.next();
-            sdr.overwriteURL(newUrl);
+        if (domainResource!=null) {
+            Iterator it = domainResource.iterator();
+            while (it.hasNext()) {
+                ServiceDomainResource sdr = (ServiceDomainResource)it.next();
+                sdr.overwriteURL(newUrl);
+            }
         }
-        
-        //Layers:
-        getTopLayer().overwriteURL(newUrl);
+        Layer tl = getTopLayer();
+        if (tl!=null)
+            tl.overwriteURL(newUrl);
     }
     // </editor-fold>
     
@@ -402,49 +366,53 @@ public class ServiceProvider implements XMLElement, KBConstants {
         //De verschillende request mogelijkheden....
         Element requestElement = doc.createElement("Request");
         
-        Hashtable sdrhash = new Hashtable();
-        ServiceDomainResource sdr = null;
-        Iterator it = domainResource.iterator();
-        while (it.hasNext()) {
-            sdr = (ServiceDomainResource)it.next();
-            sdrhash.put(sdr.getDomain(),sdr);
+        if (domainResource!=null) {
+            Hashtable sdrhash = new Hashtable();
+            ServiceDomainResource sdr = null;
+            Iterator it = domainResource.iterator();
+            while (it.hasNext()) {
+                sdr = (ServiceDomainResource)it.next();
+                sdrhash.put(sdr.getDomain(),sdr);
+            }
+            
+            sdr = (ServiceDomainResource) sdrhash.get("GetCapabilities");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            sdr = (ServiceDomainResource) sdrhash.get("GetMap");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            sdr = (ServiceDomainResource) sdrhash.get("GetFeatureInfo");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            sdr = (ServiceDomainResource) sdrhash.get("DescribeLayer");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            sdr = (ServiceDomainResource) sdrhash.get("GetLegendGraphic");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            sdr = (ServiceDomainResource) sdrhash.get("GetStyles");
+            if (sdr!=null)
+                requestElement = sdr.toElement(doc, requestElement);
+            capabilityElement.appendChild(requestElement);
         }
         
-        sdr = (ServiceDomainResource) sdrhash.get("GetCapabilities");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("GetMap");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("GetFeatureInfo");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("DescribeLayer");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("GetLegendGraphic");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        sdr = (ServiceDomainResource) sdrhash.get("GetStyles");
-        if (sdr!=null)
-            requestElement = sdr.toElement(doc, requestElement);
-        capabilityElement.appendChild(requestElement);
-        
-        //De exception formaten
         Element exceptionElement = doc.createElement("Exception");
-        it = exceptions.iterator();
-        while (it.hasNext()) {
-            Element formatElement = doc.createElement("Format");
-            Text text = doc.createTextNode((String)it.next());
-            formatElement.appendChild(text);
-            exceptionElement.appendChild(formatElement);
+        if (exceptions!=null) {
+            //De exception formaten
+            Iterator it = exceptions.iterator();
+            while (it.hasNext()) {
+                Element formatElement = doc.createElement("Format");
+                Text text = doc.createTextNode((String)it.next());
+                formatElement.appendChild(text);
+                exceptionElement.appendChild(formatElement);
+            }
         }
         capabilityElement.appendChild(exceptionElement);
         
         //Vendor specifieke elementen
         Element vendorSpecificElement = doc.createElement("VendorSpecificCapabilities");
-        if(this.getAllRoles() != null && !this.getAllRoles().isEmpty()) {
-            it = this.getAllRoles().iterator();
+        if(getAllRoles() != null && !getAllRoles().isEmpty()) {
+            Iterator it = getAllRoles().iterator();
             while (it.hasNext()) {
                 Roles role = (Roles) it.next();
                 Element roleElement = doc.createElement("Role");
@@ -459,7 +427,8 @@ public class ServiceProvider implements XMLElement, KBConstants {
         capabilityElement.appendChild(vendorSpecificElement);
         
         //De beschikbare layers.
-        capabilityElement = topLayer.toElement(doc, capabilityElement);
+        if (topLayer!=null)
+            capabilityElement = topLayer.toElement(doc, capabilityElement);
         
         //End of Capability
         
@@ -484,11 +453,11 @@ public class ServiceProvider implements XMLElement, KBConstants {
     private void setLayers(Set layers) {
         this.layers = layers;
     }
-
+    
     public boolean isIsSynchronized() {
         return isSynchronized;
     }
-
+    
     public void setIsSynchronized(boolean isSynchronized) {
         this.isSynchronized = isSynchronized;
     }

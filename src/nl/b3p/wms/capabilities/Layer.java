@@ -162,14 +162,26 @@ public class Layer implements XMLElement {
     
     public void setServiceProvider(ServiceProvider serviceProvider) {
         this.serviceProvider = serviceProvider;
-        if(null != layers) {
-            for (Iterator it = getLayers().iterator(); it.hasNext();) {
-                Layer subLayer = (Layer) it.next();
-                subLayer.setServiceProvider(serviceProvider);
-            }
-        }
     }
     
+    public Set buildLayerSet(Set layerset, ServiceProvider serviceProvider) {
+        if (layerset==null)
+            layerset = new HashSet();
+        this.serviceProvider = serviceProvider;
+        layerset.add(this);
+        
+        Set layers = getLayers();
+        if (layers==null || layers.isEmpty())
+            return layerset;
+        
+        Iterator it = layers.iterator();
+        while (it.hasNext()) {
+            Layer subLayer = (Layer) it.next();
+            layerset = subLayer.buildLayerSet(layerset, serviceProvider);
+        }
+        return layerset;
+    }
+        
     public Set getDimensions() {
         return dimensions;
     }
@@ -282,15 +294,37 @@ public class Layer implements XMLElement {
     }
     
     public void addLayer(Layer layer) {
-        if (null == layers) {
+        if (layers == null) {
             layers = new HashSet();
         }
         layers.add(layer);
         layer.setParent(this);
-        //layer.setServiceProvider(serviceProvider);
-        //layer.setStyles(styles);
     }
     
+    public Layer buildLayerTree(Set layerset) {
+        if (layerset==null)
+            return this;
+        Integer cId = getId();
+        if (cId==null)
+            return this;
+        Iterator it = layerset.iterator();
+        while (it.hasNext()) {
+            Layer layer = (Layer)it.next();
+            Layer parent = layer.getParent(); 
+            if( parent == null) 
+                continue;
+            Integer pId = parent.getId();
+            if (pId==null)
+                continue;
+            if (cId.intValue()==pId.intValue()) {
+                addLayer(layer);
+                layer.buildLayerTree(layerset);
+            }
+            
+        }
+        return this;
+    }
+     
     public Attribution getAttribution() {
         return attribution;
     }

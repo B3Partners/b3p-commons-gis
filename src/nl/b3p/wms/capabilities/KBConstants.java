@@ -32,6 +32,7 @@ public interface KBConstants {
     public static final String CONTACT_VOICETELEPHONE = "+31 30 214 20 81";
     public static final String CONTACT_FASCIMILEPHONE = "";
     public static final String CONTACT_EMAIL = "info@b3partners.nl";
+    public static final String CONTACT_WEBSITE = "http://www.b3partners.nl/";
     
     public static final String SERVICEPROVIDER_NAME = "OGC:WMS";
     public static final String SERVICEPROVIDER_TITLE = "Kaartenbalie WMS Portal";
