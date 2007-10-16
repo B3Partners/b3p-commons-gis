@@ -9,6 +9,7 @@
 
 package nl.b3p.ogc.utils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -21,6 +22,8 @@ import nl.b3p.wms.capabilities.KBConstants;
 public class OGCUrl implements KBConstants{
     private String httpHost;
     private HashMap parameters;
+    private HashMap nameSpaces;
+    private HashMap schemaLocations;
     /*Default constr.*/
     public OGCUrl() {
     }
@@ -84,6 +87,108 @@ public class OGCUrl implements KBConstants{
             return null;
         }
     }
+    /**
+     *Only WFS DiscribeFeaturetype and GetFeature are supported
+     */
+    public String getXMLBody() throws Exception{
+        //check if request is either DiscribeFeaturetype or GetFeature
+        if (getParameter(WMS_REQUEST)!=null && (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)||getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature))){
+            //set all needed namespaces and locations
+            addOpengisNamespaces();
+            addOpengisSchemaLocations();
+            //build common part         
+            StringBuffer s = new StringBuffer();
+            s.append("<?xml version=\"1.0\"?>");
+            s.append("<wfs:").append(this.getParameter(OGCUrl.WMS_REQUEST));
+            if (this.getParameter(OGCUrl.WMS_VERSION)!=null)
+                s.append(" version=\"").append(this.getParameter(OGCUrl.WMS_VERSION)).append("\"");
+            if (this.getParameter(OGCUrl.WMS_SERVICE)!=null)
+                s.append(" service=\"").append(this.getParameter(OGCUrl.WMS_SERVICE)).append("\"");
+            if (this.getParameter(OGCUrl.WFS_PARAM_OUTPUTFORMAT)!=null)
+                s.append(" outputFormat=\"").append(this.getParameter(OGCUrl.WFS_PARAM_OUTPUTFORMAT)).append("\"");
+            if (this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)!=null){
+                s.append(" maxFeatures=\"").append(this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)).append("\"");
+            }
+            String[] _nameSpaces=getNameSpaces();
+            if (_nameSpaces!=null){
+                for(int i=0; i < _nameSpaces.length; i++){
+                    s.append(" ");
+                    s.append(_nameSpaces[i]);
+                }
+            }
+            String[] _schemaLocations=getSchemaLocations();
+            if (_schemaLocations!=null){
+                for(int i=0; i < _schemaLocations.length; i++){
+                    s.append(" ").append(_schemaLocations[i]);
+                }
+            }
+            s.append(">");
+            //create request specific part
+            if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)){
+                if (getParameter(WFS_PARAM_TYPENAME)!=null){
+                    String[] types = getParameter(WFS_PARAM_TYPENAME).split(",");
+                    for (int i=0; i < types.length; i++){
+                        s.append("<wfs:").append(WFS_PARAM_TYPENAME).append(">");
+                        s.append(types[i]);
+                        s.append("</wfs:").append(WFS_PARAM_TYPENAME).append(">");
+                    }
+                }else{
+                    throw new Exception("Typname required for "+getParameter(WMS_REQUEST));
+                }
+            }
+            else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature)){
+                if (getParameter(WFS_PARAM_TYPENAME)!=null){
+                    s.append("<wfs:Query typeName=\"");
+                    String[] typenames=getParameter(WFS_PARAM_TYPENAME).split(",");
+                    for (int i=0; i < typenames.length; i++){
+                        if (i!=0)
+                            s.append(",");
+                        s.append(typenames[i]);
+                    }
+                    s.append("\"");
+                    if (getParameter(WMS_PARAM_SRS)!=null){
+                        s.append(" srsName=\"");
+                        s.append(getParameter(WMS_PARAM_SRS));
+                        s.append("\"");
+                    }
+                    s.append(">");
+                    if (getParameter(WFS_PARAM_FILTER)!=null || getParameter(WMS_PARAM_BBOX)!=null){
+                        s.append("<ogc:Filter>");
+                        if (getParameter(WFS_PARAM_FILTER)!=null)
+                            s.append(getParameter(WFS_PARAM_FILTER));
+                        if (getParameter(WMS_PARAM_BBOX)!=null){
+                            String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
+                            s.append("<BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");                            
+                            s.append(tokens[0]+","+tokens[1]+" "+tokens[2]+","+tokens[3]);
+                            s.append("</coordinates></Box></BBOX>");
+                            
+                            /*s.append("<ogc:Not><ogc:Disjoint><ogc:PropertyName>msGeometry</ogc:PropertyName><gml:Envelope><gml:lowerCorner>");
+                            s.append(tokens[0]+" "+tokens[1]);
+                            s.append("</gml:lowerCorner><gml:upperCorner>");
+                            s.append(tokens[2]+" "+tokens[3]);
+                            s.append("</gml:upperCorner></gml:Envelope></ogc:Disjoint></ogc:Not>");*/
+                            
+                            //s.append("<ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>msGeometry</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not>");
+                        }
+                        s.append("</ogc:Filter>");
+                    }
+                    s.append("</wfs:Query>");
+                }else{
+                    throw new Exception("Typname required for "+getParameter(WMS_REQUEST));
+                }
+            }
+            else{
+                throw new Exception("Request not supported");
+            }
+            s.append("</wfs:");
+            s.append(getParameter(WMS_REQUEST));
+            s.append(">");
+            return s.toString();
+        }else{
+            return null;
+        }
+    }
+    
     public String getUrlWithNonOGCparams(){
         OGCUrl ogcu=new OGCUrl(getUrl());
         ogcu.removeAllWMSParameters();
@@ -182,5 +287,71 @@ public class OGCUrl implements KBConstants{
     
     public String toString(){
         return this.getUrl();
+    }
+
+    private String[] getNameSpaces() {
+        if (nameSpaces==null)
+            return null;
+        String[] returnvalue= new String[nameSpaces.size()];
+        Set keys=nameSpaces.keySet();
+        Iterator it=keys.iterator();
+        for(int i=0; it.hasNext();i++){
+            String prefix=(String)it.next();
+            String location=(String)nameSpaces.get(prefix);
+            returnvalue[i]="xmlns:"+prefix+"=\""+location+"\"";
+        }
+        return returnvalue;
+    }
+    
+    public void addOrReplaceNameSpace(String prefix, String nsUrl){
+        if (prefix!=null && nsUrl!=null){            
+            if (nameSpaces==null)
+                nameSpaces=new HashMap();
+            nameSpaces.put(prefix,nsUrl);
+        }
+    }
+    private String[] getSchemaLocations() {
+        if (schemaLocations==null)
+            return null;
+        String[] returnvalue= new String[schemaLocations.size()];
+        Set keys=schemaLocations.keySet();
+        Iterator it=keys.iterator();
+        for(int i=0; it.hasNext();i++){
+            String prefix=(String)it.next();
+            String location=(String)nameSpaces.get(prefix);
+            returnvalue[i]=prefix+":schemaLocation=\""+location+"\"";
+        }
+        return returnvalue;
+    }
+    public void addOrReplaceSchemaLocation(String prefix, String location){
+        if (prefix!=null && location!=null){
+            if (schemaLocations==null)
+                schemaLocations=new HashMap();
+            schemaLocations.put(prefix,location);
+        }
+    }
+    /**
+     *Adds all namespaces needed for OpenGis
+     */
+    private void addOpengisNamespaces(){
+        if (nameSpaces==null)
+            nameSpaces=new HashMap();
+        if (!nameSpaces.containsKey("wfs"))
+            addOrReplaceNameSpace("wfs","http://www.opengis.net/wfs");        
+        if (!nameSpaces.containsKey("xsi"))
+            addOrReplaceNameSpace("xsi","http://www.w3.org/2001/XMLSchema-instance");
+        if (!nameSpaces.containsKey("gml"))
+            addOrReplaceNameSpace("gml","http://www.opengis.net/gml");
+        if (!nameSpaces.containsKey("ogc"))
+            addOrReplaceNameSpace("ogc","http://www.opengis.net/ogc");
+    }
+    /**
+     *Adds all Schemalocations needed for OpenGis
+     */
+    private void addOpengisSchemaLocations(){
+        if (schemaLocations==null)
+            schemaLocations=new HashMap();
+        if (!schemaLocations.containsKey("xsi"))
+            addOrReplaceSchemaLocation("xsi","http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
     }
 }
