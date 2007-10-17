@@ -484,6 +484,37 @@ public class ServiceProvider implements XMLElement, KBConstants {
             this.getContactInformation().copyElements(sp.getContactInformation());
     }
     
+    /**
+     * This function walks over all the layers of this serviceprovider and checks if in 
+     * any of those object something has changed. If so, then and only then the object 
+     * will be replaced by a new object holding the new information for this service 
+     * provider.
+     *
+     * Here there is only a difficult situation while a layer can have children and each
+     * layer holds a reference to it's parent. We need to check for the different situations
+     * and really delete or update ALL references which a layers holds.
+     *
+     * For example:
+     * - Toplayer
+     *      - Child 1 - level 1
+     *      - Child 2 - level 1
+     *          - Child 1 - level 2
+     *          - Child 2 - level 2
+     *      - Child 3 - level 1
+     *
+     * If Child 2 is removed this means that all childs from level 2 also have to be removed from
+     * the layerlist of the serviceprovider and also that we do not need to forget to delete the 
+     * reference of this Child 2 layer in the set of the toplayer.
+     *
+     * On the other hand, because we are working with sets which have still parts of the tree structure
+     * inside them, we need to be alert when inserting a new layer. The set which we are working with
+     * has the layers in random order (we also cannot sort them) so it is possible that when we loop
+     * over this set we find a child of a newly to insert parent sooner as the parent itself. We don't
+     * have to do anything with this child because it will automatically be added when adding this parent.
+     * Therefore we only need to add those layers of which the parent layer equals the still available
+     * parentlayer in this serviceprovider and where the layer itself does not exist in the set of this
+     * serviceprovider.
+     */
     private Set compareLayerSets(Set oldset, Set newset, EntityManager em) {
         Set tempRemoveSet = new HashSet();
         Iterator it = oldset.iterator();
@@ -506,36 +537,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
             em.remove(removableLayer);
         }
 
-        Iterator newit = newset.iterator();
-        //eerst een boomstructuur maken waarbij de 
-        //hoogste layers uiteindelijk in de set worden teruggegeven
-        //deze vervolgens in een nieuwe set teruggeven
-        //deze set vervolgens overheen lopen en toevoegen aan de parent
-        //waar deze layer bij hoort...
-        //Of misschien is het mogelijk om een aparte lijst met layers te creeren
-        //die echt nieuw zijn, van deze layers vervolgens 
-        
-        //Er moet iets van een methode bedacht worden waarmee de sturtuuc opnieuw in
-        //de set aangebracht wordt. De nieuwe set heeft natuurlijk wel een boomstructuur
-        //maar de hoogste parent uit een nieuwe set met layers is nog steeds gekoppeld aan
-        //een parent van de nieuwe serviceprovider, terwijl daar dus de relatie gelegd moet
-        //worden met de oude parent layer.....
-        //oftewel, de parents staan niet goed afgestemd op elkaar....
-        //hetzelfde geldt waarschijnlijk voor de andere kant, bij het toevoegen aan de set
-        //van de oude parent layer
-        
-        //Er hoeft dus alleen een methode geschreven te worden die van iedere parent in de huidige
-        //layer bekijkt of deze parent gelijk is aan de parent in het oude sp object. Zoniet, dan
-        //moet deze alsnog opgezocht worden en deze layer aan die parent toegevoegd worden.
-        //Dus neem een layer:
-        //-controleer of de parent verwijst naar een layer in de nieuwe set (dan child van een
-        // layer die zelf ook nieuw is) -> verwijzingen staan dan goed
-        //-anders zoek de parent uit de oude set die overeenkomt met de parent uit de nieuwe
-        // en voeg deze layer aan die set toe
-        //waarschijnlijk kan bovenstaande eenvoudiger door alleen te controleren of de parent van
-        //de layer gelijk is aan een layer in de oldset, zoniet dan bestaat de parent van deze layer
-        //niet in de oldset en is die parent zelf ook een nieuwe layer...
-        
+        Iterator newit = newset.iterator();        
         while (newit.hasNext()) {
             Layer layer = (Layer) newit.next();
             layer.setServiceProvider(this);
@@ -546,7 +548,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
                     Layer parent = layer.getParent();
                     if(parent != null) {
                         if (setlayer.equals(layer.getParent())) {
-                            //parent layer bestaat in oldset
                             setlayer.addLayer(layer);
                         }
                     }
@@ -557,6 +558,9 @@ public class ServiceProvider implements XMLElement, KBConstants {
         return oldset;
     }
     
+    /**
+     * Method which will recursivly delete all childs of a given layer in a set of layers.
+     */
     private void removeChildren(Layer layerInQuestion, Set oldSet) {
         Set childLayers = layerInQuestion.getLayers();
         Iterator it = childLayers.iterator();
@@ -569,8 +573,14 @@ public class ServiceProvider implements XMLElement, KBConstants {
                 }
             }                
         }        
-    }    
+    }  
     
+    /**
+     * This function walks over all the service domain resources of this serviceprovider
+     * and checks if in any of those object something has changed. If so, then and only then
+     * the object will be replaced by a new object holding the new information for this
+     * service provider.
+     */
     private Set compareDomainSets(Set oldset, Set newset, EntityManager em) {
         Set tempRemoveSet = new HashSet();
         Iterator it = oldset.iterator();
@@ -585,17 +595,12 @@ public class ServiceProvider implements XMLElement, KBConstants {
         while (removeIt.hasNext()) {
             ServiceDomainResource removableSdr = (ServiceDomainResource) removeIt.next();
             oldset.remove(removableSdr);
-            //em.remove(removableSdr);
         }
 
         Iterator newit = newset.iterator();
         while (newit.hasNext()) {
             ServiceDomainResource sdr = (ServiceDomainResource) newit.next();
             if(!sdr.inList(oldset)) {
-                //if (sdr.getId() == null) {
-                    //sdr.setServiceProvider(this);
-                    //em.persist(sdr);
-                //}
                 oldset.add(sdr);
             }
         }

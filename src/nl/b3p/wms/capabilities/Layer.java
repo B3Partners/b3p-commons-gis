@@ -770,6 +770,9 @@ public class Layer implements XMLElement {
         }
     }
     
+    /**
+     * Public method to check wether the given layer as parameter equals this layer.
+     */
     public boolean equals(Layer layer) {
         if (this.getName() == null && layer.getName() == null && this.getTitle().equalsIgnoreCase(layer.getTitle()))
                 return true;
@@ -779,6 +782,9 @@ public class Layer implements XMLElement {
             return false;
     }
     
+    /**
+     * Public method which checks if this layer is in a list with layers given as a parameter.
+     */
     public boolean inList(Set layers) {
         Iterator it = layers.iterator();
         while (it.hasNext()) {

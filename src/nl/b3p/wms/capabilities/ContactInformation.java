@@ -346,6 +346,10 @@ public class ContactInformation implements XMLElement, KBConstants {
     }
     // </editor-fold>
     
+    /**
+     * Method which set all variables from the given contact information.
+     * It's like a copy function.
+     */
     public void copyElements(ContactInformation ci) {
         this.setAddress(ci.getAddress());
         this.setAddressType(ci.getAddressType());
