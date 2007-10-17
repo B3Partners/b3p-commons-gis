@@ -39,6 +39,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.w3c.dom.Document;
@@ -67,29 +68,45 @@ public class B3pGMLReader extends GMLReader{
      *  at least the attributes 'version' and 'typename' needs to be filled for creating a DescribeFeatureType request.
      *
      */
-    public HashMap readWFSUrl(String wfsGetFeatureUrl) throws Exception {
-        HashMap templates=createGMLInputTemplateFromWFS(wfsGetFeatureUrl);
+    public HashMap readWFSUrl(String wfsGetFeatureUrl) throws TransformerException, Exception{
         OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
+        HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
+        if (templates==null){
+            return null;
+        }
         Set typenames=templates.keySet();
         Iterator it= typenames.iterator();
         HashMap features= new HashMap();
+        PostMethod method = null;
         while (it.hasNext()){
-            String typeName=(String)it.next();
-            GMLInputTemplate git = (GMLInputTemplate)templates.get(typeName);
-            wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,typeName);
-            HttpClient client = new HttpClient();        
-            PostMethod method = new PostMethod(wfsgf.getUrlWithNonOGCparams()); 
-            String body=wfsgf.getXMLBody();
-            method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-            int status=client.executeMethod(method);
-            if (status== HttpStatus.SC_OK){
-                /*String s=method.getResponseBodyAsString();
-                s+="1";*/
-                InputStreamReader isr=new InputStreamReader(method.getResponseBodyAsStream());
-                GMLReader gr= new GMLReader();
-                gr.setInputTemplate(git);                
-                FeatureCollection fc=gr.read(isr);
-                features.put(typeName,fc);      
+            try{
+                String typeName=(String)it.next();
+                GMLInputTemplate git = (GMLInputTemplate)templates.get(typeName);
+                wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,typeName);
+                HttpClient client = new HttpClient();        
+                method = new PostMethod(wfsgf.getUrlWithNonOGCparams()); 
+                String body=wfsgf.getXMLBody();
+                method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+                int status=client.executeMethod(method);
+                if (status== HttpStatus.SC_OK){
+                    /*String s=method.getResponseBodyAsString();
+                    s+="1";*/
+                    log.debug("Response ok, trying to create FeatureCollection....");
+                    InputStreamReader isr=new InputStreamReader(method.getResponseBodyAsStream());
+                    GMLReader gr= new GMLReader();
+                    gr.setInputTemplate(git);                
+                    FeatureCollection fc=gr.read(isr);
+                    features.put(typeName,fc);   
+                }else{
+                    log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
+                }
+            }catch(IOException ioe){
+                log.error("",ioe);
+            }catch (Exception e){
+                log.error("",e);
+            }
+            finally{
+                method.releaseConnection();
             }
         }
         if (features.size()==0){
@@ -98,19 +115,6 @@ public class B3pGMLReader extends GMLReader{
             return features;
         }
      }
-        
-       /* URL url = new URL(wfsGetFeatureUrl);
-        URLConnection conn=url.openConnection();
-        InputStreamReader isr=new InputStreamReader(conn.getInputStream());                
-        
-        //GMLInputTemplate git = createGMLInputTemplateFromWFS("");
-        GMLInputTemplate git = new GMLInputTemplate();
-        git.load(new StringReader(template));
-        setInputTemplate(git);
-        FeatureCollection fcAll=read(isr);
-        isr.close();
-        return fcAll;
-        */
    
     /**//*String template="<?xml version='1.0' encoding='UTF-8'?><JCSGMLInputTemplate>"+
                 "<CollectionElement>wfs:FeatureCollection</CollectionElement>" +
@@ -128,23 +132,39 @@ public class B3pGMLReader extends GMLReader{
      *@param wfsGetFeatureUrl The getFeature url
      *@return a hashmap with al inputtemplates as values en the TypeNames as keys
      */
-    public HashMap createGMLInputTemplateFromWFS(String wfsGetFeatureUrl) throws TransformerException, Exception{
-        OGCUrl wfsGetFeature = new OGCUrl(wfsGetFeatureUrl);
+    public HashMap createGMLInputTemplateFromWFS(OGCUrl ogcrequest) throws TransformerException, Exception{
         HashMap templates=new HashMap();
         //validate the url
-        if (wfsGetFeature.getParameter(OGCUrl.WMS_VERSION)==null || wfsGetFeature.getParameter(OGCUrl.WFS_PARAM_TYPENAME)==null){
+        if (ogcrequest.getParameter(OGCUrl.WMS_VERSION)==null || ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME)==null){
             return null;
         }
-        OGCUrl wfsDFT= new OGCUrl(wfsGetFeatureUrl);
+        OGCUrl wfsDFT= new OGCUrl(ogcrequest.getUrl());
         wfsDFT.removeAllWFSParameters();
-        wfsDFT.addOrReplaceParameter(OGCUrl.WMS_VERSION,wfsGetFeature.getParameter(OGCUrl.WMS_VERSION));
-        wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,wfsGetFeature.getParameter(OGCUrl.WFS_PARAM_TYPENAME));
+        wfsDFT.addOrReplaceParameter(OGCUrl.WMS_VERSION,ogcrequest.getParameter(OGCUrl.WMS_VERSION));
+        wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME));
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_SERVICE,OGCUrl.WFS_SERVICE_WFS);
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_REQUEST,OGCUrl.WFS_REQUEST_DiscribeFeatureType);
-                           
-        Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),wfsDFT.getXMLBody());
+        String body=wfsDFT.getXMLBody();
+        log.debug("Body created for DiscribeFeaterType: "+body);
+        Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);
+                
         if (doc!=null){                            
             NodeList docChilds=doc.getDocumentElement().getChildNodes();
+            Element schema=doc.getDocumentElement();
+            String target=schema.getAttribute("targetNamespace");
+            String defaultPrefix = null;
+            NamedNodeMap attributes=schema.getAttributes();
+            //get the target namespace and add the namespaces to the ogcrequest
+            for (int i=0; i < attributes.getLength(); i++){
+                Node n=attributes.item(i);
+                //if its a namespace:
+                if (n.getNodeName().contains("xmlns")){
+                    ogcrequest.addOrReplaceNameSpace(n.getLocalName(),n.getNodeValue());
+                    if (target.equalsIgnoreCase(n.getNodeValue())){
+                        defaultPrefix=n.getLocalName();
+                    }
+                }
+            }
             //First create a map with names and types.
             HashMap elementsMap=new HashMap();
             for (int dc= 0; dc< docChilds.getLength(); dc++){
@@ -160,8 +180,8 @@ public class B3pGMLReader extends GMLReader{
             for (int dc= 0; dc < docChilds.getLength(); dc++){                   
                 ArrayList elements=new ArrayList();
                 //als de tagname complextype is 
+                Node n = docChilds.item(dc);                
                 if (docChilds.item(dc).getNodeName().equalsIgnoreCase(COMPLEXTYPE)){
-                    Node n = docChilds.item(dc);
                     String type=((Element)n).getAttribute("name");
                     String name="";
                     if (elementsMap.get(type)!=null){
@@ -173,10 +193,14 @@ public class B3pGMLReader extends GMLReader{
                     StringBuffer geom= new StringBuffer();
 
                     for (int i =0; i < elements.size(); i++){
-                        Element e = (Element)elements.get(i);                                          
+                        Element e = (Element)elements.get(i);
+                        String names=e.getNamespaceURI();
+                        String prefix=e.getPrefix();
                         if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
                             geom.append("<GeometryElement>");
-                            geom.append("ms:"+e.getAttribute("name"));
+                            if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
+                                geom.append(defaultPrefix+":");
+                            geom.append(e.getAttribute("name"));
                             geom.append("</GeometryElement>");                                
                         }                                            
                         if (e.getAttribute("type")!=null && allowedType(e.getAttribute("type")) && e.getAttribute("name")!=null){                        
@@ -190,7 +214,6 @@ public class B3pGMLReader extends GMLReader{
                             cols.append("\"/><valuelocation position=\"body\"/></column>");
                         }
                     }
-
                     if (geom.length()>0){          
                         StringBuffer sb = new StringBuffer();
                         sb.append("<?xml version='1.0' encoding='UTF-8'?>");
@@ -209,8 +232,9 @@ public class B3pGMLReader extends GMLReader{
                         try {
                             git.load(new StringReader(sb.toString()));
                             templates.put(name,git);
+                            log.debug("Template: "+sb.toString());
                         } catch (ParseException ex) {
-                            log.error(ex);
+                            log.error("",ex);
                         }
                     }                      
                 }
@@ -220,10 +244,6 @@ public class B3pGMLReader extends GMLReader{
             }
             return null;
         }
-        
-        /*HttpClient client = new HttpClient();
-        GetMethod method = new GetMethod();
-        client.getHttpConnectionManager().getParams().setConnectionTimeout((int)maxResponseTime);      */ 
         return null;
     }
      public static void main(String [] args) throws IOException, ParseException, Exception{
@@ -276,18 +296,18 @@ public class B3pGMLReader extends GMLReader{
                 DOMSource  ds = new DOMSource (doc);
                 trans.transform(ds,sr);
                 String xmlResult=sw.toString();
-                xmlResult=xmlResult;
+                log.debug("Returned document: "+xmlResult);
             }else{
                 log.error("Can't get document. Cause error code: "+status);                     
             }                
         }catch (SAXException se){
-             log.error(se);
+             log.error("",se);
         }catch(TransformerConfigurationException tce){
-            log.error(tce);
+            log.error("",tce);
         }catch(TransformerException te){
-            log.error(te);
+            log.error("",te);
         }catch (IOException ex) {
-             log.error(ex);
+             log.error("",ex);
         }finally {
             // Release the connection.
             method.releaseConnection();

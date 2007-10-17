@@ -9,17 +9,19 @@
 
 package nl.b3p.ogc.utils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import nl.b3p.wms.capabilities.KBConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  *
  * @author Roy
  */
 public class OGCUrl implements KBConstants{
+    private static final Log log = LogFactory.getLog(OGCUrl.class);
     private String httpHost;
     private HashMap parameters;
     private HashMap nameSpaces;
@@ -182,9 +184,9 @@ public class OGCUrl implements KBConstants{
             }
             s.append("</wfs:");
             s.append(getParameter(WMS_REQUEST));
-            s.append(">");
+            s.append(">");            
             return s.toString();
-        }else{
+        }else{            
             return null;
         }
     }
@@ -354,4 +356,6 @@ public class OGCUrl implements KBConstants{
         if (!schemaLocations.containsKey("xsi"))
             addOrReplaceSchemaLocation("xsi","http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
     }
+    
+    
 }
