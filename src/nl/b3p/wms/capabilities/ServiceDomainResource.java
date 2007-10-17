@@ -175,4 +175,24 @@ public class ServiceDomainResource implements XMLElement {
         return rootElement;
     }
     // </editor-fold>
+    
+    public boolean inList(Set sdrs) {
+        Iterator it = sdrs.iterator();
+        while (it.hasNext()) {
+            ServiceDomainResource sdr = (ServiceDomainResource) it.next();
+            if(this.equals(sdr)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private boolean equals(ServiceDomainResource sdr) {
+        if (this.getDomain().equals(sdr.getDomain()) &&
+                this.getGetUrl().equals(sdr.getGetUrl()) &&
+                this.getPostUrl().equals(sdr.getPostUrl())) {
+            return true;
+        }
+        return false;
+    }
 }

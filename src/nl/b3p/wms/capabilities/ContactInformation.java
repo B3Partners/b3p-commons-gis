@@ -345,4 +345,19 @@ public class ContactInformation implements XMLElement, KBConstants {
         return rootElement;
     }
     // </editor-fold>
+    
+    public void copyElements(ContactInformation ci) {
+        this.setAddress(ci.getAddress());
+        this.setAddressType(ci.getAddressType());
+        this.setCity(ci.getCity());
+        this.setContactOrganization(ci.getContactOrganization());
+        this.setContactPerson(ci.getContactPerson());
+        this.setContactPosition(ci.getContactPosition());
+        this.setCountry(ci.getCountry());
+        this.setEmailAddress(ci.getEmailAddress());
+        this.setFascimileTelephone(ci.getFascimileTelephone());
+        this.setPostcode(ci.getPostcode());
+        this.setStateOrProvince(ci.getStateOrProvince());
+        this.setVoiceTelephone(ci.getVoiceTelephone());
+    }
 }

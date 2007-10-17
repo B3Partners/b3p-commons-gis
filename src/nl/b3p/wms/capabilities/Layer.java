@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -324,7 +323,7 @@ public class Layer implements XMLElement {
         }
         return this;
     }
-     
+    
     public Attribution getAttribution() {
         return attribution;
     }
@@ -769,5 +768,25 @@ public class Layer implements XMLElement {
         } else {
             return this;
         }
+    }
+    
+    public boolean equals(Layer layer) {
+        if (this.getName() == null && layer.getName() == null && this.getTitle().equalsIgnoreCase(layer.getTitle()))
+                return true;
+        else if (this.getName() != null && layer.getName() != null && this.getName().equalsIgnoreCase(layer.getName()))
+            return true;
+        else
+            return false;
+    }
+    
+    public boolean inList(Set layers) {
+        Iterator it = layers.iterator();
+        while (it.hasNext()) {
+            Layer layer = (Layer) it.next();
+            if(this.equals(layer)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

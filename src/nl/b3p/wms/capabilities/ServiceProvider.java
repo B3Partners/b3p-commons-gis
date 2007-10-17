@@ -15,10 +15,10 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import nl.b3p.wms.capabilities.KBConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
+import javax.persistence.EntityManager;
 
 public class ServiceProvider implements XMLElement, KBConstants {
     
@@ -450,8 +450,9 @@ public class ServiceProvider implements XMLElement, KBConstants {
         return layers;
     }
     
-    private void setLayers(Set layers) {
+    public void setLayers(Set layers) {
         this.layers = layers;
+        setIsSynchronized(false);
     }
     
     public boolean isIsSynchronized() {
@@ -460,5 +461,144 @@ public class ServiceProvider implements XMLElement, KBConstants {
     
     public void setIsSynchronized(boolean isSynchronized) {
         this.isSynchronized = isSynchronized;
+    }
+    
+    public void copyElements(ServiceProvider sp, EntityManager em) {
+        Set oldlayers = this.getAllLayers();
+        Set newlayers = sp.getAllLayers();
+        this.setLayers(compareLayerSets(oldlayers, newlayers, em));
+        
+        Set oldDomain = this.getDomainResource();
+        Set newDomain = sp.getDomainResource();
+        this.setDomainResource(compareDomainSets(oldDomain, newDomain, em));
+        
+        this.setName(sp.getName());
+        this.setTitle(sp.getTitle());
+        this.setAbstracts(sp.getAbstracts());
+        this.setFees(sp.getFees());
+        this.setAccessConstraints(sp.getAccessConstraints());
+        this.setGivenName(sp.getGivenName());
+        this.setUrl(sp.getUrl());
+        this.setWmsVersion(sp.getWmsVersion());
+        if(this.getContactInformation() != null && sp.getContactInformation() != null)
+            this.getContactInformation().copyElements(sp.getContactInformation());
+    }
+    
+    private Set compareLayerSets(Set oldset, Set newset, EntityManager em) {
+        Set tempRemoveSet = new HashSet();
+        Iterator it = oldset.iterator();
+        while (it.hasNext()) {
+            Layer layer = (Layer) it.next();
+            if(!layer.inList(newset)) {
+                tempRemoveSet.add(layer);
+            }
+        }
+
+        Iterator removeIt = tempRemoveSet.iterator();
+        while (removeIt.hasNext()) {
+            Layer removableLayer = (Layer) removeIt.next();
+            oldset.remove(removableLayer);
+            Layer parent = removableLayer.getParent();
+            removeChildren(removableLayer, oldset);
+            if (parent != null) {
+                parent.getLayers().remove(removableLayer);
+            }
+            em.remove(removableLayer);
+        }
+
+        Iterator newit = newset.iterator();
+        //eerst een boomstructuur maken waarbij de 
+        //hoogste layers uiteindelijk in de set worden teruggegeven
+        //deze vervolgens in een nieuwe set teruggeven
+        //deze set vervolgens overheen lopen en toevoegen aan de parent
+        //waar deze layer bij hoort...
+        //Of misschien is het mogelijk om een aparte lijst met layers te creeren
+        //die echt nieuw zijn, van deze layers vervolgens 
+        
+        //Er moet iets van een methode bedacht worden waarmee de sturtuuc opnieuw in
+        //de set aangebracht wordt. De nieuwe set heeft natuurlijk wel een boomstructuur
+        //maar de hoogste parent uit een nieuwe set met layers is nog steeds gekoppeld aan
+        //een parent van de nieuwe serviceprovider, terwijl daar dus de relatie gelegd moet
+        //worden met de oude parent layer.....
+        //oftewel, de parents staan niet goed afgestemd op elkaar....
+        //hetzelfde geldt waarschijnlijk voor de andere kant, bij het toevoegen aan de set
+        //van de oude parent layer
+        
+        //Er hoeft dus alleen een methode geschreven te worden die van iedere parent in de huidige
+        //layer bekijkt of deze parent gelijk is aan de parent in het oude sp object. Zoniet, dan
+        //moet deze alsnog opgezocht worden en deze layer aan die parent toegevoegd worden.
+        //Dus neem een layer:
+        //-controleer of de parent verwijst naar een layer in de nieuwe set (dan child van een
+        // layer die zelf ook nieuw is) -> verwijzingen staan dan goed
+        //-anders zoek de parent uit de oude set die overeenkomt met de parent uit de nieuwe
+        // en voeg deze layer aan die set toe
+        //waarschijnlijk kan bovenstaande eenvoudiger door alleen te controleren of de parent van
+        //de layer gelijk is aan een layer in de oldset, zoniet dan bestaat de parent van deze layer
+        //niet in de oldset en is die parent zelf ook een nieuwe layer...
+        
+        while (newit.hasNext()) {
+            Layer layer = (Layer) newit.next();
+            layer.setServiceProvider(this);
+            if(!layer.inList(oldset)) {
+                Iterator oldsetit = oldset.iterator();
+                while (oldsetit.hasNext()) {
+                    Layer setlayer = (Layer)oldsetit.next();
+                    Layer parent = layer.getParent();
+                    if(parent != null) {
+                        if (setlayer.equals(layer.getParent())) {
+                            //parent layer bestaat in oldset
+                            setlayer.addLayer(layer);
+                        }
+                    }
+                }
+                oldset.add(layer);
+            }
+        }
+        return oldset;
+    }
+    
+    private void removeChildren(Layer layerInQuestion, Set oldSet) {
+        Set childLayers = layerInQuestion.getLayers();
+        Iterator it = childLayers.iterator();
+        while (it.hasNext()) {
+            Layer childLayer = (Layer) it.next();
+            if(!childLayer.getLayers().isEmpty()) {
+                removeChildren(childLayer, oldSet);
+                if(oldSet.contains(childLayer)) {
+                    oldSet.remove(childLayer);
+                }
+            }                
+        }        
+    }    
+    
+    private Set compareDomainSets(Set oldset, Set newset, EntityManager em) {
+        Set tempRemoveSet = new HashSet();
+        Iterator it = oldset.iterator();
+        while (it.hasNext()) {
+            ServiceDomainResource sdr = (ServiceDomainResource) it.next();
+            if(!sdr.inList(newset)) {
+                tempRemoveSet.add(sdr);
+            }
+        }
+
+        Iterator removeIt = tempRemoveSet.iterator();
+        while (removeIt.hasNext()) {
+            ServiceDomainResource removableSdr = (ServiceDomainResource) removeIt.next();
+            oldset.remove(removableSdr);
+            //em.remove(removableSdr);
+        }
+
+        Iterator newit = newset.iterator();
+        while (newit.hasNext()) {
+            ServiceDomainResource sdr = (ServiceDomainResource) newit.next();
+            if(!sdr.inList(oldset)) {
+                //if (sdr.getId() == null) {
+                    //sdr.setServiceProvider(this);
+                    //em.persist(sdr);
+                //}
+                oldset.add(sdr);
+            }
+        }
+        return oldset;
     }
 }
