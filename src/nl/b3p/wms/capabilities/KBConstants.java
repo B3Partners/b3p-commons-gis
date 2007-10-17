@@ -131,9 +131,14 @@ public interface KBConstants {
     public static final String CHARSET = "UTF-8";
     public static final String MD_ALGORITHM= "MD5";
     
-    public static final String GETMAP_EXCEPTION = "msWMSLoadGetMapParams(): WMS server error. Invalid layer(s) given in the LAYERS parameter.";
-    public static final String FEATUREINFO_EXCEPTION = "msWMSFeatureInfo(): WMS server error. Requested layer(s) are not queryable.";
-    public static final String LEGENDGRAPHIC_EXCEPTION = "msWMSGetLegendgraphic(): Invalid layer given in the LAYERS parameter.";
+    public static final String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
+    public static final String GETMAP_QUERYABLE_EXCEPTION = "Kaartenbalie GetMap fout: Gevraagde kaartlaag is niet queryable.";
+    public static final String FEATUREINFO_EXCEPTION = "Kaartenbalie GetFeatureInfo fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
+    public static final String FEATUREINFO_QUERYABLE_EXCEPTION = "Kaartenbalie GetFeatureInfo fout: Gevraagde kaartlaag is niet queryable.";
+    public static final String LEGENDGRAPHIC_EXCEPTION = "Kaartenbalie GetLegendGraphic fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
+    public static final String IMAGE_SIZE_EXCEPTION = "Kaartenbalie GetMap fout: afbeelding WIDTH and HEIGHT moet tussen 1 en 2048 pixels zijn.";
+    public static final String BBOX_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige BBOX waarden.";
+    public static final String SRS_EXCEPTION = "Kaartenbalie GetMap fout: SRS moet geldig zijn voor alle kaartlagen.";
     
     public static final String PERSONAL_URL = "personalURL";
     public static final String USER = "user";
