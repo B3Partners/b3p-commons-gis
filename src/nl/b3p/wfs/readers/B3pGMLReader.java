@@ -12,6 +12,7 @@ import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureDataset;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -68,8 +69,8 @@ public class B3pGMLReader extends GMLReader{
      *  at least the attributes 'version' and 'typename' needs to be filled for creating a DescribeFeatureType request.
      *
      */
-    public HashMap readWFSUrl(String wfsGetFeatureUrl) throws TransformerException, Exception{
-        OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
+    public HashMap readWFSUrl(OGCUrl wfsgf) throws TransformerException, Exception{
+        //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
         HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
         if (templates==null){
             return null;
@@ -89,13 +90,18 @@ public class B3pGMLReader extends GMLReader{
                 method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
                 int status=client.executeMethod(method);
                 if (status== HttpStatus.SC_OK){
-                    /*String s=method.getResponseBodyAsString();
-                    s+="1";*/
                     log.debug("Response ok, trying to create FeatureCollection....");
-                    InputStreamReader isr=new InputStreamReader(method.getResponseBodyAsStream());
+                    Reader r = null;
+                    if(log.isDebugEnabled()){
+                        String s=method.getResponseBodyAsString();
+                        log.debug("Response: "+s);
+                        r=new StringReader(s);
+                    }else{
+                        r=new InputStreamReader(method.getResponseBodyAsStream());
+                    }
                     GMLReader gr= new GMLReader();
                     gr.setInputTemplate(git);                
-                    FeatureCollection fc=gr.read(isr);
+                    FeatureCollection fc=gr.read(r);
                     features.put(typeName,fc);   
                 }else{
                     log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
@@ -138,7 +144,7 @@ public class B3pGMLReader extends GMLReader{
         if (ogcrequest.getParameter(OGCUrl.WMS_VERSION)==null || ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME)==null){
             return null;
         }
-        OGCUrl wfsDFT= new OGCUrl(ogcrequest.getUrl());
+        OGCUrl wfsDFT= (OGCUrl)ogcrequest.clone();
         wfsDFT.removeAllWFSParameters();
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_VERSION,ogcrequest.getParameter(OGCUrl.WMS_VERSION));
         wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME));
@@ -168,8 +174,9 @@ public class B3pGMLReader extends GMLReader{
             //First create a map with names and types.
             HashMap elementsMap=new HashMap();
             for (int dc= 0; dc< docChilds.getLength(); dc++){
-                if (docChilds.item(dc).getNodeName().equalsIgnoreCase("element")){
-                    Element e= (Element) docChilds.item(dc);
+                Node n = docChilds.item(dc);         
+                if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase("element")){ 
+                    Element e= (Element) n;
                     String type=e.getAttribute("type");
                     if (type.contains(":"))
                         type=type.split(":")[1];
@@ -181,7 +188,7 @@ public class B3pGMLReader extends GMLReader{
                 ArrayList elements=new ArrayList();
                 //als de tagname complextype is 
                 Node n = docChilds.item(dc);                
-                if (docChilds.item(dc).getNodeName().equalsIgnoreCase(COMPLEXTYPE)){
+                if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase(COMPLEXTYPE)){
                     String type=((Element)n).getAttribute("name");
                     String name="";
                     if (elementsMap.get(type)!=null){
@@ -250,12 +257,12 @@ public class B3pGMLReader extends GMLReader{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
          String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
          B3pGMLReader reader = new B3pGMLReader();
-         reader.readWFSUrl(royurl);
+         reader.readWFSUrl(new OGCUrl(royurl));
      }
 
     private ArrayList getElementsWithTagname(Node node, String tagname) {
         ArrayList al = new ArrayList();
-        if (node.getNodeName().equalsIgnoreCase(tagname)){
+        if (node.getLocalName()!=null && node.getLocalName().equalsIgnoreCase(tagname)){
             al.add(node);
         }
         if (node.hasChildNodes()){

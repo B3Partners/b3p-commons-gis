@@ -37,6 +37,18 @@ public class OGCUrl implements KBConstants{
     public OGCUrl(String url){
         setUrl(url);
     }
+    
+    public Object clone(){
+        OGCUrl returnv = new OGCUrl();
+        returnv.setHttpHost(new String(this.getHttpHost()));
+        if (this.getParameters()!=null)
+            returnv.setParameters((HashMap)this.getParameters().clone());
+        if (this.getNameSpaces()!=null)
+            returnv.setNameSpaces((HashMap)this.getNameSpaces().clone());
+        if (this.getSchemaLocations()!=null)
+            returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
+        return returnv;
+    }
      /** Main methode to fill the OGUrl object
      *
      * @param url The url that fills the OGCUrl object
@@ -111,14 +123,15 @@ public class OGCUrl implements KBConstants{
             if (this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)!=null){
                 s.append(" maxFeatures=\"").append(this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)).append("\"");
             }
-            String[] _nameSpaces=getNameSpaces();
+            
+            String[] _nameSpaces=getNameSpacesArray();
             if (_nameSpaces!=null){
                 for(int i=0; i < _nameSpaces.length; i++){
                     s.append(" ");
                     s.append(_nameSpaces[i]);
                 }
             }
-            String[] _schemaLocations=getSchemaLocations();
+            String[] _schemaLocations=getSchemaLocationsArray();
             if (_schemaLocations!=null){
                 for(int i=0; i < _schemaLocations.length; i++){
                     s.append(" ").append(_schemaLocations[i]);
@@ -130,9 +143,9 @@ public class OGCUrl implements KBConstants{
                 if (getParameter(WFS_PARAM_TYPENAME)!=null){
                     String[] types = getParameter(WFS_PARAM_TYPENAME).split(",");
                     for (int i=0; i < types.length; i++){
-                        s.append("<wfs:").append(WFS_PARAM_TYPENAME).append(">");
+                        s.append("<wfs:TypeName>");
                         s.append(types[i]);
-                        s.append("</wfs:").append(WFS_PARAM_TYPENAME).append(">");
+                        s.append("</wfs:TypeName>");
                     }
                 }else{
                     throw new Exception("Typname required for "+getParameter(WMS_REQUEST));
@@ -192,7 +205,7 @@ public class OGCUrl implements KBConstants{
     }
     
     public String getUrlWithNonOGCparams(){
-        OGCUrl ogcu=new OGCUrl(getUrl());
+        OGCUrl ogcu=(OGCUrl)this.clone();
         ogcu.removeAllWMSParameters();
         ogcu.removeAllWFSParameters();
         return ogcu.getUrl();
@@ -291,7 +304,7 @@ public class OGCUrl implements KBConstants{
         return this.getUrl();
     }
 
-    private String[] getNameSpaces() {
+    private String[] getNameSpacesArray() {
         if (nameSpaces==null)
             return null;
         String[] returnvalue= new String[nameSpaces.size()];
@@ -312,7 +325,7 @@ public class OGCUrl implements KBConstants{
             nameSpaces.put(prefix,nsUrl);
         }
     }
-    private String[] getSchemaLocations() {
+    private String[] getSchemaLocationsArray() {
         if (schemaLocations==null)
             return null;
         String[] returnvalue= new String[schemaLocations.size()];
@@ -355,6 +368,42 @@ public class OGCUrl implements KBConstants{
             schemaLocations=new HashMap();
         if (!schemaLocations.containsKey("xsi"))
             addOrReplaceSchemaLocation("xsi","http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
+    }
+
+    protected static Log getLog() {
+        return log;
+    }
+
+    protected String getHttpHost() {
+        return httpHost;
+    }
+
+    protected void setHttpHost(String httpHost) {
+        this.httpHost = httpHost;
+    }
+
+    protected HashMap getParameters() {
+        return parameters;
+    }
+
+    protected void setParameters(HashMap parameters) {
+        this.parameters = parameters;
+    }
+
+    protected void setNameSpaces(HashMap nameSpaces) {
+        this.nameSpaces = nameSpaces;
+    }
+
+    protected void setSchemaLocations(HashMap schemaLocations) {
+        this.schemaLocations = schemaLocations;
+    }
+
+    public HashMap getNameSpaces() {
+        return nameSpaces;
+    }
+
+    public HashMap getSchemaLocations() {
+        return schemaLocations;
     }
     
     
