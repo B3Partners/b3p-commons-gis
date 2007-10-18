@@ -17,9 +17,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- *
- * @author Roy
+ * @author Roy Braam
  */
+
+/*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
+ en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg 
+ zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
 public class OGCUrl implements KBConstants{
     private static final Log log = LogFactory.getLog(OGCUrl.class);
     private String httpHost;
@@ -36,19 +39,8 @@ public class OGCUrl implements KBConstants{
      */
     public OGCUrl(String url){
         setUrl(url);
-    }
+    }    
     
-    public Object clone(){
-        OGCUrl returnv = new OGCUrl();
-        returnv.setHttpHost(new String(this.getHttpHost()));
-        if (this.getParameters()!=null)
-            returnv.setParameters((HashMap)this.getParameters().clone());
-        if (this.getNameSpaces()!=null)
-            returnv.setNameSpaces((HashMap)this.getNameSpaces().clone());
-        if (this.getSchemaLocations()!=null)
-            returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
-        return returnv;
-    }
      /** Main methode to fill the OGUrl object
      *
      * @param url The url that fills the OGCUrl object
@@ -67,9 +59,9 @@ public class OGCUrl implements KBConstants{
             if (tokens[i].contains("=")){
                 String keyValuePair[]=tokens[i].split("=");
                 if (keyValuePair.length==2)
-                    parameters.put(keyValuePair[0],keyValuePair[1]);
+                    addOrReplaceParameter(keyValuePair[0],keyValuePair[1]);
                 else
-                    parameters.put(keyValuePair[0],null);
+                    addOrReplaceParameter(keyValuePair[0],null);
             }            
         }
     }
@@ -171,7 +163,7 @@ public class OGCUrl implements KBConstants{
                         s.append("<ogc:Filter>");
                         if (getParameter(WFS_PARAM_FILTER)!=null)
                             s.append(getParameter(WFS_PARAM_FILTER));
-                        if (getParameter(WMS_PARAM_BBOX)!=null){
+                        else if (getParameter(WMS_PARAM_BBOX)!=null){
                             String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
                             s.append("<BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");                            
                             s.append(tokens[0]+","+tokens[1]+" "+tokens[2]+","+tokens[3]);
@@ -197,7 +189,8 @@ public class OGCUrl implements KBConstants{
             }
             s.append("</wfs:");
             s.append(getParameter(WMS_REQUEST));
-            s.append(">");            
+            s.append(">");
+            log.debug("Body created: "+s.toString());
             return s.toString();
         }else{            
             return null;
@@ -217,6 +210,7 @@ public class OGCUrl implements KBConstants{
      * @return the param value that is removed or null if the parameter key not is found
      */
     public String removeParameter(String param) {
+        param=param.toUpperCase();
         Object o=parameters.remove(param);
         if (o==null){
             return null;
@@ -229,6 +223,7 @@ public class OGCUrl implements KBConstants{
      * @return the value of the given param or null if the param isn't found.
      */
     public String getParameter(String param) {
+        param=param.toUpperCase();
         Object o=parameters.get(param);
         if (o==null)
             return null;
@@ -242,6 +237,7 @@ public class OGCUrl implements KBConstants{
      * @return previous value associated with specified param, or null  if there was no mapping for param
      */
     public String addOrReplaceParameter(String param, String value){
+        param=param.toUpperCase();
         Object o=parameters.get(param);
         parameters.put(param,value.trim());
         if (o==null)
@@ -369,7 +365,17 @@ public class OGCUrl implements KBConstants{
         if (!schemaLocations.containsKey("xsi"))
             addOrReplaceSchemaLocation("xsi","http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
     }
-
+    public Object clone(){
+        OGCUrl returnv = new OGCUrl();
+        returnv.setHttpHost(new String(this.getHttpHost()));
+        if (this.getParameters()!=null)
+            returnv.setParameters((HashMap)this.getParameters().clone());
+        if (this.getNameSpaces()!=null)
+            returnv.setNameSpaces((HashMap)this.getNameSpaces().clone());
+        if (this.getSchemaLocations()!=null)
+            returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
+        return returnv;
+    }
     protected static Log getLog() {
         return log;
     }

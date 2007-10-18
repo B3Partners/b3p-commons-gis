@@ -74,16 +74,27 @@ public class B3pGMLReader extends GMLReader{
         HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
         if (templates==null){
             return null;
-        }
-        Set typenames=templates.keySet();
-        Iterator it= typenames.iterator();
+        }                
         HashMap features= new HashMap();
         PostMethod method = null;
-        while (it.hasNext()){
+        String[] featureTypes=null;
+        if (wfsgf.getParameter(OGCUrl.WFS_PARAM_TYPENAME)!=null)
+            featureTypes= wfsgf.getParameter(OGCUrl.WFS_PARAM_TYPENAME).split(",");
+        for (int i=0; i < featureTypes.length; i++){
             try{
-                String typeName=(String)it.next();
-                GMLInputTemplate git = (GMLInputTemplate)templates.get(typeName);
-                wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,typeName);
+                Object o=null;
+                o=templates.get(featureTypes[i]);
+                if(o==null){
+                    String[] tokens=featureTypes[i].split(":");
+                    if (tokens.length>1)
+                        o=templates.get(tokens[1]);
+                    
+                } 
+                if (o==null){
+                    log.error("Kan template niet vinden voor "+featureTypes[i]);
+                }
+                GMLInputTemplate git = (GMLInputTemplate)o;
+                wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,featureTypes[i]);
                 HttpClient client = new HttpClient();        
                 method = new PostMethod(wfsgf.getUrlWithNonOGCparams()); 
                 String body=wfsgf.getXMLBody();
@@ -92,17 +103,17 @@ public class B3pGMLReader extends GMLReader{
                 if (status== HttpStatus.SC_OK){
                     log.debug("Response ok, trying to create FeatureCollection....");
                     Reader r = null;
-                    if(log.isDebugEnabled()){
+                    /*if(log.isDebugEnabled()){
                         String s=method.getResponseBodyAsString();
                         log.debug("Response: "+s);
                         r=new StringReader(s);
-                    }else{
+                    }else{*/
                         r=new InputStreamReader(method.getResponseBodyAsStream());
-                    }
+                    //}
                     GMLReader gr= new GMLReader();
                     gr.setInputTemplate(git);                
                     FeatureCollection fc=gr.read(r);
-                    features.put(typeName,fc);   
+                    features.put(featureTypes[i],fc);   
                 }else{
                     log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
                 }
@@ -150,8 +161,7 @@ public class B3pGMLReader extends GMLReader{
         wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME));
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_SERVICE,OGCUrl.WFS_SERVICE_WFS);
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_REQUEST,OGCUrl.WFS_REQUEST_DiscribeFeatureType);
-        String body=wfsDFT.getXMLBody();
-        log.debug("Body created for DiscribeFeaterType: "+body);
+        String body=wfsDFT.getXMLBody();        
         Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);
                 
         if (doc!=null){                            
@@ -214,9 +224,18 @@ public class B3pGMLReader extends GMLReader{
                             cols.append("<column><name>");
                             cols.append(e.getAttribute("name"));
                             cols.append("</name><type>");
-                            cols.append(e.getAttribute("type"));
+                            //if (defaultPrefix!=null)
+                            //    cols.append(defaultPrefix+":");
+                            String t=e.getAttribute("type").toUpperCase();
+                            if (t.contains(":")){
+                                if (t.split(":").length>1)
+                                    t=t.split(":")[1];
+                            }
+                            cols.append(t);
                             cols.append("</type><valueelement elementname=\"");
                             //sb.append(doc.getDocumentElement().getPrefix());
+                            if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
+                                cols.append(defaultPrefix+":");
                             cols.append(e.getAttribute("name"));
                             cols.append("\"/><valuelocation position=\"body\"/></column>");
                         }
@@ -274,6 +293,11 @@ public class B3pGMLReader extends GMLReader{
     }
     
     private boolean allowedType(String type){
+        if (type.contains(":")){
+            String tokens[]=type.split(":");
+            if (tokens.length>1)
+                type=tokens[1];
+        }
         if (type.equalsIgnoreCase("STRING") || type.equalsIgnoreCase("INTEGER") || type.equalsIgnoreCase("DOUBLE"))
             return true;
         else

@@ -69,21 +69,21 @@ public class B3pShapeWriter {
         ArrayList files= new ArrayList();
         if (allPoint.size()>0){
             if (allPoly.size()==0 && allLine.size()==0)
-                files.add(writeShape(allPoint,filename));
+                files.addAll(writeShape(allPoint,filename));
             else
-                files.add(writeShape(allPoint,filename+"_p.shp"));
+                files.addAll(writeShape(allPoint,filename+"_p.shp"));
         }
         if (allPoly.size()>0){
             if (allPoint.size()==0 && allLine.size()==0)
-                files.add(writeShape(allPoly,filename));
+                files.addAll(writeShape(allPoly,filename));
             else
-                files.add(writeShape(allPoly,filename+"_a.shp"));
+                files.addAll(writeShape(allPoly,filename+"_a.shp"));
         }
         if(allLine.size()>0){
             if (allPoint.size()==0 && allPoly.size()==0)
-                files.add(writeShape(allLine,filename));
+                files.addAll(writeShape(allLine,filename));
             else
-                files.add(writeShape(allLine,filename+"_l.shp"));
+                files.addAll(writeShape(allLine,filename+"_l.shp"));
         }
         return files;
     }
@@ -91,16 +91,27 @@ public class B3pShapeWriter {
      * Writes a FeatureCollection to shape using the folder and the given name
      *@fc The feature collection (CAN'T have different types) 
      */
-    public File writeShape(FeatureCollection fc,String name) throws IllegalParametersException, Exception{
-        if (!name.endsWith(".shp")){
-            name+=".shp";
+    public List writeShape(FeatureCollection fc,String shpName) throws IllegalParametersException, Exception{
+        ArrayList files= new ArrayList();
+        if (!shpName.endsWith(".shp")){
+            shpName+=".shp";
         }
-        DriverProperties dpo = new DriverProperties(getFolder()+name);
+        String name=shpName.replace(".shp","");
+        String dbfName=name+".dbf";
+        String shxName=name+".shx";
+        DriverProperties dpo = new DriverProperties(getFolder()+shpName);
         ShapefileWriter sw = new ShapefileWriter();
         sw.write(fc,dpo);
-        File file = new File(getFolder()+name);
-        boolean a=file.canRead();
-        return file;
+        File shpFile = new File(getFolder()+shpName);
+        File dbfFile = new File(getFolder()+dbfName);
+        File shxFile = new File(getFolder()+shxName);
+        if(shpFile.canRead())
+            files.add(shpFile);
+        if(dbfFile.canRead())
+            files.add(dbfFile);
+        if(shxFile.canRead())
+            files.add(shxFile);
+        return files;
     }
 
     public String getFolder() {
