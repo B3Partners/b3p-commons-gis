@@ -18,11 +18,11 @@ import java.util.Iterator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
-import javax.persistence.EntityManager;
 
 public class ServiceProvider implements XMLElement, KBConstants {
     
     private Integer id;
+    private String abbr;
     private String name;
     private String title;
     private String abstracts;
@@ -463,147 +463,13 @@ public class ServiceProvider implements XMLElement, KBConstants {
         this.isSynchronized = isSynchronized;
     }
     
-    public void copyElements(ServiceProvider sp, EntityManager em) {
-        Set oldlayers = this.getAllLayers();
-        Set newlayers = sp.getAllLayers();
-        this.setLayers(compareLayerSets(oldlayers, newlayers, em));
-        
-        Set oldDomain = this.getDomainResource();
-        Set newDomain = sp.getDomainResource();
-        this.setDomainResource(compareDomainSets(oldDomain, newDomain, em));
-        
-        this.setName(sp.getName());
-        this.setTitle(sp.getTitle());
-        this.setAbstracts(sp.getAbstracts());
-        this.setFees(sp.getFees());
-        this.setAccessConstraints(sp.getAccessConstraints());
-        this.setGivenName(sp.getGivenName());
-        this.setUrl(sp.getUrl());
-        this.setWmsVersion(sp.getWmsVersion());
-        if(this.getContactInformation() != null && sp.getContactInformation() != null)
-            this.getContactInformation().copyElements(sp.getContactInformation());
+    public String getAbbr() {
+        if (abbr==null && id!=null)
+            return id.toString();
+        return abbr;
     }
-    
-    /**
-     * This function walks over all the layers of this serviceprovider and checks if in 
-     * any of those object something has changed. If so, then and only then the object 
-     * will be replaced by a new object holding the new information for this service 
-     * provider.
-     *
-     * Here there is only a difficult situation while a layer can have children and each
-     * layer holds a reference to it's parent. We need to check for the different situations
-     * and really delete or update ALL references which a layers holds.
-     *
-     * For example:
-     * - Toplayer
-     *      - Child 1 - level 1
-     *      - Child 2 - level 1
-     *          - Child 1 - level 2
-     *          - Child 2 - level 2
-     *      - Child 3 - level 1
-     *
-     * If Child 2 is removed this means that all childs from level 2 also have to be removed from
-     * the layerlist of the serviceprovider and also that we do not need to forget to delete the 
-     * reference of this Child 2 layer in the set of the toplayer.
-     *
-     * On the other hand, because we are working with sets which have still parts of the tree structure
-     * inside them, we need to be alert when inserting a new layer. The set which we are working with
-     * has the layers in random order (we also cannot sort them) so it is possible that when we loop
-     * over this set we find a child of a newly to insert parent sooner as the parent itself. We don't
-     * have to do anything with this child because it will automatically be added when adding this parent.
-     * Therefore we only need to add those layers of which the parent layer equals the still available
-     * parentlayer in this serviceprovider and where the layer itself does not exist in the set of this
-     * serviceprovider.
-     */
-    private Set compareLayerSets(Set oldset, Set newset, EntityManager em) {
-        Set tempRemoveSet = new HashSet();
-        Iterator it = oldset.iterator();
-        while (it.hasNext()) {
-            Layer layer = (Layer) it.next();
-            if(!layer.inList(newset)) {
-                tempRemoveSet.add(layer);
-            }
-        }
 
-        Iterator removeIt = tempRemoveSet.iterator();
-        while (removeIt.hasNext()) {
-            Layer removableLayer = (Layer) removeIt.next();
-            oldset.remove(removableLayer);
-            Layer parent = removableLayer.getParent();
-            removeChildren(removableLayer, oldset);
-            if (parent != null) {
-                parent.getLayers().remove(removableLayer);
-            }
-            em.remove(removableLayer);
-        }
-
-        Iterator newit = newset.iterator();        
-        while (newit.hasNext()) {
-            Layer layer = (Layer) newit.next();
-            layer.setServiceProvider(this);
-            if(!layer.inList(oldset)) {
-                Iterator oldsetit = oldset.iterator();
-                while (oldsetit.hasNext()) {
-                    Layer setlayer = (Layer)oldsetit.next();
-                    Layer parent = layer.getParent();
-                    if(parent != null) {
-                        if (setlayer.equals(layer.getParent())) {
-                            setlayer.addLayer(layer);
-                        }
-                    }
-                }
-                oldset.add(layer);
-            }
-        }
-        return oldset;
-    }
-    
-    /**
-     * Method which will recursivly delete all childs of a given layer in a set of layers.
-     */
-    private void removeChildren(Layer layerInQuestion, Set oldSet) {
-        Set childLayers = layerInQuestion.getLayers();
-        Iterator it = childLayers.iterator();
-        while (it.hasNext()) {
-            Layer childLayer = (Layer) it.next();
-            if(!childLayer.getLayers().isEmpty()) {
-                removeChildren(childLayer, oldSet);
-                if(oldSet.contains(childLayer)) {
-                    oldSet.remove(childLayer);
-                }
-            }                
-        }        
-    }  
-    
-    /**
-     * This function walks over all the service domain resources of this serviceprovider
-     * and checks if in any of those object something has changed. If so, then and only then
-     * the object will be replaced by a new object holding the new information for this
-     * service provider.
-     */
-    private Set compareDomainSets(Set oldset, Set newset, EntityManager em) {
-        Set tempRemoveSet = new HashSet();
-        Iterator it = oldset.iterator();
-        while (it.hasNext()) {
-            ServiceDomainResource sdr = (ServiceDomainResource) it.next();
-            if(!sdr.inList(newset)) {
-                tempRemoveSet.add(sdr);
-            }
-        }
-
-        Iterator removeIt = tempRemoveSet.iterator();
-        while (removeIt.hasNext()) {
-            ServiceDomainResource removableSdr = (ServiceDomainResource) removeIt.next();
-            oldset.remove(removableSdr);
-        }
-
-        Iterator newit = newset.iterator();
-        while (newit.hasNext()) {
-            ServiceDomainResource sdr = (ServiceDomainResource) newit.next();
-            if(!sdr.inList(oldset)) {
-                oldset.add(sdr);
-            }
-        }
-        return oldset;
+    public void setAbbr(String abbr) {
+        this.abbr = abbr;
     }
 }

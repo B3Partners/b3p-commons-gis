@@ -335,19 +335,21 @@ public class Layer implements XMLElement {
         }
     }
     
+    public String getSpAbbr() {
+        if (serviceProvider==null)
+            return "0";
+        String abbr = serviceProvider.getAbbr();
+        if (abbr==null)
+            return "0";
+        return abbr;
+    }
+    
     public String getUniqueName(){
         // Indien naam leeg is, dan mag de layer nooit getoond worden via GetMap
         // dus wij mogen naam nooit vullen als hij oorspronkelijk leeg was!
         if (this.getName()==null)
             return null;
-        Integer uid = null;
-        //TODO uniek per serviceprovider
-//        if (serviceProvider!=null)
-//            uid = serviceProvider.getId();
-        uid = this.getId();
-        if (uid==null)
-            uid = new Integer("0");
-        return uid.toString() + "_" + this.getName();
+        return getSpAbbr() + "_" + this.getName();
     }
     
     public String getMetaData() {
@@ -799,4 +801,5 @@ public class Layer implements XMLElement {
         }
         return false;
     }
+    
 }
