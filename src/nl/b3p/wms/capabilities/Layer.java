@@ -180,7 +180,7 @@ public class Layer implements XMLElement {
         }
         return layerset;
     }
-        
+    
     public Set getDimensions() {
         return dimensions;
     }
@@ -309,8 +309,8 @@ public class Layer implements XMLElement {
         Iterator it = layerset.iterator();
         while (it.hasNext()) {
             Layer layer = (Layer)it.next();
-            Layer parent = layer.getParent(); 
-            if( parent == null) 
+            Layer parent = layer.getParent();
+            if( parent == null)
                 continue;
             Integer pId = parent.getId();
             if (pId==null)
@@ -774,8 +774,10 @@ public class Layer implements XMLElement {
      * Public method to check wether the given layer as parameter equals this layer.
      */
     public boolean equals(Layer layer) {
+        if (layer==null)
+            return false;
         if (this.getName() == null && layer.getName() == null && this.getTitle().equalsIgnoreCase(layer.getTitle()))
-                return true;
+            return true;
         else if (this.getName() != null && layer.getName() != null && this.getName().equalsIgnoreCase(layer.getName()))
             return true;
         else
@@ -786,6 +788,8 @@ public class Layer implements XMLElement {
      * Public method which checks if this layer is in a list with layers given as a parameter.
      */
     public boolean inList(Set layers) {
+        if (layers==null)
+            return false;
         Iterator it = layers.iterator();
         while (it.hasNext()) {
             Layer layer = (Layer) it.next();

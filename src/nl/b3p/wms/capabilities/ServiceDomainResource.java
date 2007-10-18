@@ -180,6 +180,8 @@ public class ServiceDomainResource implements XMLElement {
      * Public method which checks if this service domain resource is in a list with service domain rsources given as a parameter.
      */
     public boolean inList(Set sdrs) {
+        if (sdrs==null)
+            return false;
         Iterator it = sdrs.iterator();
         while (it.hasNext()) {
             ServiceDomainResource sdr = (ServiceDomainResource) it.next();
@@ -194,6 +196,8 @@ public class ServiceDomainResource implements XMLElement {
      * Public method to check wether the given service domain resource as parameter equals this service domain resource.
      */
     private boolean equals(ServiceDomainResource sdr) {
+        if (sdr==null)
+            return false;
         if (this.getDomain().equals(sdr.getDomain()) &&
                 this.getGetUrl().equals(sdr.getGetUrl()) &&
                 this.getPostUrl().equals(sdr.getPostUrl())) {

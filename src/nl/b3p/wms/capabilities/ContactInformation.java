@@ -351,6 +351,8 @@ public class ContactInformation implements XMLElement, KBConstants {
      * It's like a copy function.
      */
     public void copyElements(ContactInformation ci) {
+        if (ci==null)
+            return;
         this.setAddress(ci.getAddress());
         this.setAddressType(ci.getAddressType());
         this.setCity(ci.getCity());
