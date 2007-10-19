@@ -225,6 +225,14 @@ public class OGCUrl implements KBConstants{
             return null;
         return (String)o;        
     }
+    /*Returns all nonOGC params
+     */
+    public HashMap getNonOGCParameters(){
+        OGCUrl o = (OGCUrl) this.clone();
+        o.removeAllWFSParameters();
+        o.removeAllWMSParameters();
+        return o.getParameters();
+    }
      /** Adds or replaces a param with a value
      *
      * @param param The definition of the param that needs to be added or replaced.     
@@ -243,7 +251,29 @@ public class OGCUrl implements KBConstants{
         if (o==null)
             return null;
         return (String)o;        
-    }   
+    }
+    /** Adds or replaces a string with params
+     *
+     * @param params A String with parameters seperated by a '&'
+     * 
+      *
+     * @return the number of added params
+     */
+    public int addOrReplaceParameters(String params){
+        if (params==null)
+            return 0;
+        String tokens[]=params.split("&");
+        for (int i=0; i < tokens.length; i++){           
+            if (tokens[i].contains("=")){
+                String keyValuePair[]=tokens[i].split("=");
+                if (keyValuePair.length==2)
+                    addOrReplaceParameter(keyValuePair[0],keyValuePair[1]);
+                else
+                    addOrReplaceParameter(keyValuePair[0],null);
+            }            
+        }
+        return tokens.length;
+    }
      /** Removes all WMS parameters (version 1.1.1)
      *    
      */
@@ -299,8 +329,20 @@ public class OGCUrl implements KBConstants{
     public String toString(){
         return this.getUrl();
     }
-
-    private String[] getNameSpacesArray() {
+    public String[] getParametersArray(){
+        if (parameters==null)
+            return null;
+        String [] returnvalue= new String[parameters.size()];
+        Set keys=parameters.keySet();
+        Iterator it =keys.iterator();
+        for (int i=0; it.hasNext(); i++){
+            String key=(String)it.next();
+            String value=(String)parameters.get(key);
+            returnvalue[i]=key+"="+value;
+        }
+        return returnvalue;
+    } 
+    public String[] getNameSpacesArray() {
         if (nameSpaces==null)
             return null;
         String[] returnvalue= new String[nameSpaces.size()];
