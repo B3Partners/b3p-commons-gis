@@ -167,15 +167,7 @@ public class OGCUrl implements KBConstants{
                             String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
                             s.append("<BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");                            
                             s.append(tokens[0]+","+tokens[1]+" "+tokens[2]+","+tokens[3]);
-                            s.append("</coordinates></Box></BBOX>");
-                            
-                            /*s.append("<ogc:Not><ogc:Disjoint><ogc:PropertyName>msGeometry</ogc:PropertyName><gml:Envelope><gml:lowerCorner>");
-                            s.append(tokens[0]+" "+tokens[1]);
-                            s.append("</gml:lowerCorner><gml:upperCorner>");
-                            s.append(tokens[2]+" "+tokens[3]);
-                            s.append("</gml:upperCorner></gml:Envelope></ogc:Disjoint></ogc:Not>");*/
-                            
-                            //s.append("<ogc:Not><ogc:PropertyIsNull><ogc:PropertyName>msGeometry</ogc:PropertyName></ogc:PropertyIsNull></ogc:Not>");
+                            s.append("</coordinates></Box></BBOX>");                                                        
                         }
                         s.append("</ogc:Filter>");
                     }
@@ -210,6 +202,8 @@ public class OGCUrl implements KBConstants{
      * @return the param value that is removed or null if the parameter key not is found
      */
     public String removeParameter(String param) {
+        if (param==null)
+            return null;
         param=param.toUpperCase();
         Object o=parameters.remove(param);
         if (o==null){
@@ -223,6 +217,8 @@ public class OGCUrl implements KBConstants{
      * @return the value of the given param or null if the param isn't found.
      */
     public String getParameter(String param) {
+        if (param==null)
+            return null;
         param=param.toUpperCase();
         Object o=parameters.get(param);
         if (o==null)
@@ -237,12 +233,16 @@ public class OGCUrl implements KBConstants{
      * @return previous value associated with specified param, or null  if there was no mapping for param
      */
     public String addOrReplaceParameter(String param, String value){
+        if (param==null)
+            return null;
         param=param.toUpperCase();
         Object o=parameters.get(param);
-        parameters.put(param,value.trim());
+        if (value!=null)
+            value=value.trim();
+        parameters.put(param,value);
         if (o==null)
             return null;
-        return (String)o;
+        return (String)o;        
     }   
      /** Removes all WMS parameters (version 1.1.1)
      *    

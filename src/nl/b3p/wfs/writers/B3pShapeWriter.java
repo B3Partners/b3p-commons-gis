@@ -105,11 +105,11 @@ public class B3pShapeWriter {
         File shpFile = new File(getFolder()+shpName);
         File dbfFile = new File(getFolder()+dbfName);
         File shxFile = new File(getFolder()+shxName);
-        if(shpFile.canRead())
+        if(shpFile.exists())
             files.add(shpFile);
-        if(dbfFile.canRead())
+        if(dbfFile.exists())
             files.add(dbfFile);
-        if(shxFile.canRead())
+        if(shxFile.exists())
             files.add(shxFile);
         return files;
     }

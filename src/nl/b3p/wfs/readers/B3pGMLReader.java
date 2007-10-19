@@ -73,6 +73,7 @@ public class B3pGMLReader extends GMLReader{
         //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
         HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
         if (templates==null){
+            log.error("No Templates founed/created.");
             return null;
         }                
         HashMap features= new HashMap();
@@ -96,23 +97,28 @@ public class B3pGMLReader extends GMLReader{
                 GMLInputTemplate git = (GMLInputTemplate)o;
                 wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,featureTypes[i]);
                 HttpClient client = new HttpClient();        
-                method = new PostMethod(wfsgf.getUrlWithNonOGCparams()); 
+                String host=wfsgf.getUrlWithNonOGCparams();
+                method = new PostMethod(host); 
                 String body=wfsgf.getXMLBody();
                 method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
                 int status=client.executeMethod(method);
                 if (status== HttpStatus.SC_OK){
                     log.debug("Response ok, trying to create FeatureCollection....");
                     Reader r = null;
-                    /*if(log.isDebugEnabled()){
-                        String s=method.getResponseBodyAsString();
-                        log.debug("Response: "+s);
-                        r=new StringReader(s);
-                    }else{*/
-                        r=new InputStreamReader(method.getResponseBodyAsStream());
-                    //}
+                    r=new InputStreamReader(method.getResponseBodyAsStream());                    
                     GMLReader gr= new GMLReader();
                     gr.setInputTemplate(git);                
                     FeatureCollection fc=gr.read(r);
+                    if (fc.size()==0){
+                        //There are no Features loaded. So redo the post method and show the response to user.
+                        PostMethod method2= new PostMethod(host);
+                        method2.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+                        client.executeMethod(method2);
+                        String cause=method2.getResponseBodyAsString(1000);
+                        if(log.isDebugEnabled()){                            
+                            log.debug("No features returned cause(first 1000 characters): "+cause);
+                        }                        
+                    }
                     features.put(featureTypes[i],fc);   
                 }else{
                     log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
@@ -126,22 +132,13 @@ public class B3pGMLReader extends GMLReader{
                 method.releaseConnection();
             }
         }
-        if (features.size()==0){
+        if (features.size()==0){            
             return null;
         }else{
             return features;
         }
-     }
+     }   
    
-    /**//*String template="<?xml version='1.0' encoding='UTF-8'?><JCSGMLInputTemplate>"+
-                "<CollectionElement>wfs:FeatureCollection</CollectionElement>" +
-                "<FeatureElement>gml:featureMember</FeatureElement>" +
-                "<GeometryElement>ms:msGeometry</GeometryElement>" +
-                "" +
-                "<column><name>ts</name><type>STRING</type><valueelement elementname=\"ms:ts\"/><valuelocation position=\"body\"/></column>" +
-                "<column><name>ts_naam</name><type>STRING</type><valueelement elementname=\"ms:ts_naam\"/><valuelocation position=\"body\"/></column>" +
-                "</ColumnDefinitions>" +
-                "</JCSGMLInputTemplate>";*/
     /**
      *Creates GMLInputTemplates for every Featuretype/TypeName in the given url. It puts all GMLInputTemplates in a 
      *HashMap with the TypeName as key.
@@ -158,118 +155,123 @@ public class B3pGMLReader extends GMLReader{
         OGCUrl wfsDFT= (OGCUrl)ogcrequest.clone();
         wfsDFT.removeAllWFSParameters();
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_VERSION,ogcrequest.getParameter(OGCUrl.WMS_VERSION));
-        wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME));
+        
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_SERVICE,OGCUrl.WFS_SERVICE_WFS);
         wfsDFT.addOrReplaceParameter(OGCUrl.WMS_REQUEST,OGCUrl.WFS_REQUEST_DiscribeFeatureType);
-        String body=wfsDFT.getXMLBody();        
-        Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);
-                
-        if (doc!=null){                            
-            NodeList docChilds=doc.getDocumentElement().getChildNodes();
-            Element schema=doc.getDocumentElement();
-            String target=schema.getAttribute("targetNamespace");
-            String defaultPrefix = null;
-            NamedNodeMap attributes=schema.getAttributes();
-            //get the target namespace and add the namespaces to the ogcrequest
-            for (int i=0; i < attributes.getLength(); i++){
-                Node n=attributes.item(i);
-                //if its a namespace:
-                if (n.getNodeName().contains("xmlns")){
-                    ogcrequest.addOrReplaceNameSpace(n.getLocalName(),n.getNodeValue());
-                    if (target.equalsIgnoreCase(n.getNodeValue())){
-                        defaultPrefix=n.getLocalName();
+        
+        //TODO: Helaas is het bij degree niet mogelijk om meerdere typenames tegelijk op te vragen in een DescribeFeatureType
+        //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.
+        String[] types =ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME).split(",");
+        for (int b=0; b < types.length; b++){
+            wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,types[b]);
+            String body=wfsDFT.getXMLBody();        
+            Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
+            if (doc!=null){                            
+                NodeList docChilds=doc.getDocumentElement().getChildNodes();
+                Element schema=doc.getDocumentElement();
+                String target=schema.getAttribute("targetNamespace");
+                String defaultPrefix = null;
+                NamedNodeMap attributes=schema.getAttributes();
+                //get the target namespace and add the namespaces to the ogcrequest
+                for (int i=0; i < attributes.getLength(); i++){
+                    Node n=attributes.item(i);
+                    //if its a namespace:
+                    if (n.getNodeName().contains("xmlns")){
+                        ogcrequest.addOrReplaceNameSpace(n.getLocalName(),n.getNodeValue());
+                        if (target.equalsIgnoreCase(n.getNodeValue())){
+                            defaultPrefix=n.getLocalName();
+                        }
                     }
                 }
-            }
-            //First create a map with names and types.
-            HashMap elementsMap=new HashMap();
-            for (int dc= 0; dc< docChilds.getLength(); dc++){
-                Node n = docChilds.item(dc);         
-                if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase("element")){ 
-                    Element e= (Element) n;
-                    String type=e.getAttribute("type");
-                    if (type.contains(":"))
-                        type=type.split(":")[1];
-                    String name=e.getAttribute("name");
-                    elementsMap.put(type,name);
-                }
-            }
-            for (int dc= 0; dc < docChilds.getLength(); dc++){                   
-                ArrayList elements=new ArrayList();
-                //als de tagname complextype is 
-                Node n = docChilds.item(dc);                
-                if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase(COMPLEXTYPE)){
-                    String type=((Element)n).getAttribute("name");
-                    String name="";
-                    if (elementsMap.get(type)!=null){
-                        name=(String)elementsMap.get(type);
+                //First create a map with names and types.
+                HashMap elementsMap=new HashMap();
+                for (int dc= 0; dc< docChilds.getLength(); dc++){
+                    Node n = docChilds.item(dc);         
+                    if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase("element")){ 
+                        Element e= (Element) n;
+                        String type=e.getAttribute("type");
+                        if (type.contains(":"))
+                            type=type.split(":")[1];
+                        String name=e.getAttribute("name");
+                        elementsMap.put(type,name);
                     }
-                    elements=getElementsWithTagname(n,"element");
+                }
+                for (int dc= 0; dc < docChilds.getLength(); dc++){                   
+                    ArrayList elements=new ArrayList();
+                    //als de tagname complextype is 
+                    Node n = docChilds.item(dc);                
+                    if (n.getLocalName()!=null && n.getLocalName().equalsIgnoreCase(COMPLEXTYPE)){
+                        String type=((Element)n).getAttribute("name");
+                        String name="";
+                        if (elementsMap.get(type)!=null){
+                            name=(String)elementsMap.get(type);
+                        }
+                        elements=getElementsWithTagname(n,"element");
 
-                    StringBuffer cols= new StringBuffer();
-                    StringBuffer geom= new StringBuffer();
+                        StringBuffer cols= new StringBuffer();
+                        StringBuffer geom= new StringBuffer();
 
-                    for (int i =0; i < elements.size(); i++){
-                        Element e = (Element)elements.get(i);
-                        String names=e.getNamespaceURI();
-                        String prefix=e.getPrefix();
-                        if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
-                            geom.append("<GeometryElement>");
-                            if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
-                                geom.append(defaultPrefix+":");
-                            geom.append(e.getAttribute("name"));
-                            geom.append("</GeometryElement>");                                
-                        }                                            
-                        if (e.getAttribute("type")!=null && allowedType(e.getAttribute("type")) && e.getAttribute("name")!=null){                        
-                            cols.append("<column><name>");
-                            cols.append(e.getAttribute("name"));
-                            cols.append("</name><type>");
-                            //if (defaultPrefix!=null)
-                            //    cols.append(defaultPrefix+":");
-                            String t=e.getAttribute("type").toUpperCase();
-                            if (t.contains(":")){
-                                if (t.split(":").length>1)
-                                    t=t.split(":")[1];
+                        for (int i =0; i < elements.size(); i++){
+                            Element e = (Element)elements.get(i);
+                            String names=e.getNamespaceURI();
+                            String prefix=e.getPrefix();
+                            if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
+                                geom.append("<GeometryElement>");
+                                if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
+                                    geom.append(defaultPrefix+":");
+                                geom.append(e.getAttribute("name"));
+                                geom.append("</GeometryElement>");                                
+                            }                                            
+                            if (e.getAttribute("type")!=null && allowedType(e.getAttribute("type")) && e.getAttribute("name")!=null){                        
+                                cols.append("<column><name>");
+                                cols.append(e.getAttribute("name"));
+                                cols.append("</name><type>");
+                                //if (defaultPrefix!=null)
+                                //    cols.append(defaultPrefix+":");
+                                String t=e.getAttribute("type").toUpperCase();
+                                if (t.contains(":")){
+                                    if (t.split(":").length>1)
+                                        t=t.split(":")[1];
+                                }
+                                cols.append(t);
+                                cols.append("</type><valueelement elementname=\"");
+                                //sb.append(doc.getDocumentElement().getPrefix());
+                                if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
+                                    cols.append(defaultPrefix+":");
+                                cols.append(e.getAttribute("name"));
+                                cols.append("\"/><valuelocation position=\"body\"/></column>");
                             }
-                            cols.append(t);
-                            cols.append("</type><valueelement elementname=\"");
-                            //sb.append(doc.getDocumentElement().getPrefix());
-                            if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
-                                cols.append(defaultPrefix+":");
-                            cols.append(e.getAttribute("name"));
-                            cols.append("\"/><valuelocation position=\"body\"/></column>");
                         }
-                    }
-                    if (geom.length()>0){          
-                        StringBuffer sb = new StringBuffer();
-                        sb.append("<?xml version='1.0' encoding='UTF-8'?>");
-                        sb.append("<JCSGMLInputTemplate>");
-                        sb.append("<CollectionElement>wfs:FeatureCollection</CollectionElement>");
-                        sb.append("<FeatureElement>gml:featureMember</FeatureElement>");
-                        sb.append(geom.toString());
-                        if (cols.length()>0){
-                            sb.append("<ColumnDefinitions>");
-                            sb.append(cols.toString());
-                            sb.append("</ColumnDefinitions>");
-                        }
-                        sb.append("</JCSGMLInputTemplate>");
-                        GMLInputTemplate git = new GMLInputTemplate();
-                        String template=sb.toString();
-                        try {
-                            git.load(new StringReader(sb.toString()));
-                            templates.put(name,git);
-                            log.debug("Template: "+sb.toString());
-                        } catch (ParseException ex) {
-                            log.error("",ex);
-                        }
-                    }                      
-                }
+                        if (geom.length()>0){          
+                            StringBuffer sb = new StringBuffer();
+                            sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+                            sb.append("<JCSGMLInputTemplate>");
+                            sb.append("<CollectionElement>wfs:FeatureCollection</CollectionElement>");
+                            sb.append("<FeatureElement>gml:featureMember</FeatureElement>");
+                            sb.append(geom.toString());
+                            if (cols.length()>0){
+                                sb.append("<ColumnDefinitions>");
+                                sb.append(cols.toString());
+                                sb.append("</ColumnDefinitions>");
+                            }
+                            sb.append("</JCSGMLInputTemplate>");
+                            GMLInputTemplate git = new GMLInputTemplate();
+                            String template=sb.toString();
+                            try {
+                                git.load(new StringReader(sb.toString()));
+                                templates.put(name,git);
+                                log.debug("Template: "+sb.toString());
+                            } catch (ParseException ex) {
+                                log.error("",ex);
+                            }
+                        }                      
+                    }                
+                }            
             }
-            if (templates.size()>0){
-                return templates;
-            }
-            return null;
         }
+        if (templates.size()>0){
+            return templates;
+        }        
         return null;
     }
      public static void main(String [] args) throws IOException, ParseException, Exception{
