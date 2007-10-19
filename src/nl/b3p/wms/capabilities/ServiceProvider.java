@@ -32,7 +32,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
     private String url;
     private String wmsVersion;
     private Date updatedDate;
-    private boolean reviewed;
     private ContactInformation contactInformation;
     private Set domainResource;
     private Set serviceProviderKeywordList;
@@ -127,14 +126,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
         this.updatedDate = updatedDate;
     }
     
-    public boolean isReviewed() {
-        return reviewed;
-    }
-    
-    public void setReviewed(boolean reviewed) {
-        this.reviewed = reviewed;
-    }
-    
     public ContactInformation getContactInformation() {
         return contactInformation;
     }
@@ -192,22 +183,11 @@ public class ServiceProvider implements XMLElement, KBConstants {
     }
     
     public Set getAllLayers() {
-        if (!isIsSynchronized()) {
-            synchronizeServiceProvider();
+        if (!isIsSynchronized() && topLayer != null) {
+            layers = topLayer.buildLayerSet(null, this);
+            setIsSynchronized(true);
         }
         return layers;
-    }
-    
-    private void synchronizeServiceProvider() {
-        if (topLayer != null) {
-            setLayers(topLayer.buildLayerSet(null, this));
-            setIsSynchronized(true);
-        } else {
-            topLayer = defineTopLayer();
-            if (topLayer!=null)
-                topLayer.buildLayerTree(layers);
-            setIsSynchronized(true);
-        }
     }
     
     private Layer defineTopLayer() {
@@ -234,8 +214,11 @@ public class ServiceProvider implements XMLElement, KBConstants {
     //bij deze laatste geldt eigenlijk dat de set aangepast wordt aan de nieuwe boomstructuur.....
     
     public Layer getTopLayer() {
-        if(!isIsSynchronized()) {
-            synchronizeServiceProvider();
+        if(!isIsSynchronized() && topLayer==null) {
+            topLayer = defineTopLayer();
+            if (topLayer!=null)
+                topLayer.buildLayerTree(layers);
+            setIsSynchronized(true);
         }
         return topLayer;
     }
@@ -243,7 +226,6 @@ public class ServiceProvider implements XMLElement, KBConstants {
     public void setTopLayer(Layer topLayer) {
         setIsSynchronized(false);
         this.topLayer = topLayer;
-        synchronizeServiceProvider();
     }
     
     public Set getServiceProviderKeywordList() {
@@ -468,8 +450,28 @@ public class ServiceProvider implements XMLElement, KBConstants {
             return id.toString();
         return abbr;
     }
-
+    
     public void setAbbr(String abbr) {
         this.abbr = abbr;
+    }
+    
+    public ServiceProvider shallowClone() {
+        ServiceProvider sc = new ServiceProvider();
+        sc.setAbbr(this.getAbbr());
+        sc.setAbstracts(this.getAbstracts());
+        sc.setAccessConstraints(this.getAccessConstraints());
+        sc.setFees(this.getFees());
+        sc.setGivenName(this.getGivenName());
+        sc.setIsSynchronized(false);
+        sc.setName(this.getName());
+        sc.setTitle(this.getTitle());
+        sc.setUrl(this.getUrl());
+        sc.setWmsVersion(this.getWmsVersion());
+        return sc;
+    }
+    
+    //TODO nog verwijderen
+    public void setReviewed(boolean r) {
+        return;
     }
 }

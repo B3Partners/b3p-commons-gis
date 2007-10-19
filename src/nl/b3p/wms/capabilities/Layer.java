@@ -378,10 +378,14 @@ public class Layer implements XMLElement {
             boolean layerAuthorized = authLayerIds.contains(subLayer.getId());
             if (!layerAuthorized && (authSubSubLayers==null || authSubSubLayers.isEmpty()))
                 continue;
+            
             subLayerCloned.setLayers(authSubSubLayers);
             // layer alleen als placeholder indien niet toegankelijk maar wel toegankelijke sublayers heeft
-            if (!layerAuthorized)
+            if (!layerAuthorized) {
                 subLayerCloned.setName(null);
+            } else {
+                log.debug("layer authorized, name: " +subLayerCloned.getUniqueName());
+            }
             if (authSubLayers==null)
                 authSubLayers = new HashSet();
             authSubLayers.add(subLayerCloned);
@@ -389,17 +393,6 @@ public class Layer implements XMLElement {
         return authSubLayers;
     }
     
-    
-    /** Method that will perfom a shallow clone of the given object into this object.
-     *
-     * @param l Layer objectfrom which the information has to be cloned.
-     */
-    // <editor-fold defaultstate="" desc="shallowClone(Layer l) method">
-    public void shallowClone(Layer l) {
-        this.id = l.id;
-        this.title = l.title;
-    }
-    // </editor-fold>
     
     /** Method that will overwrite the URL's stored in the database with the URL specified for Kaartenbalie.
      * This new URL indicate the link to the kaartenbalie, while the old link is used to indicate the URL
@@ -447,6 +440,15 @@ public class Layer implements XMLElement {
     // <editor-fold defaultstate="" desc="clone() method">
     public Object clone() {
         Layer cloneLayer                    = new Layer();
+        
+        // voeg een lichte copy van de serviceprovider toe om
+        // later een unieke naam te kunnen maken.
+        ServiceProvider sp = this.getServiceProvider();
+        if (sp!=null) {
+            ServiceProvider cloneSp = sp.shallowClone();
+            cloneLayer.setServiceProvider(cloneSp);
+        }
+        
         if (null != this.id) {
             cloneLayer.id                   = new Integer(this.id.intValue());
         }
