@@ -116,7 +116,7 @@ public class B3pGMLReader extends GMLReader{
                         client.executeMethod(method2);
                         String cause=method2.getResponseBodyAsString(1000);
                         if(log.isDebugEnabled()){                            
-                            log.debug("No features returned cause(first 1000 characters): "+cause);
+                            log.error("No features returned cause(first 1000 characters): "+cause);
                         }                        
                     }
                     features.put(featureTypes[i],fc);   
