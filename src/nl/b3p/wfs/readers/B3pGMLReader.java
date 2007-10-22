@@ -164,7 +164,7 @@ public class B3pGMLReader extends GMLReader{
         String[] types =ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME).split(",");
         for (int b=0; b < types.length; b++){
             wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,types[b]);
-            String body=wfsDFT.getXMLBody();        
+            String body=wfsDFT.getXMLBody();
             Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
             if (doc!=null){                            
                 NodeList docChilds=doc.getDocumentElement().getChildNodes();
