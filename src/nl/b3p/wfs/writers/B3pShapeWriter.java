@@ -52,7 +52,7 @@ public class B3pShapeWriter {
     public List writeToShape(FeatureCollection fcAll,String filename) throws IllegalParametersException, Exception{
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allPoly = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());        
         Iterator it = fcAll.iterator();
         while(it.hasNext()){
             Feature f = (Feature)it.next();
@@ -77,7 +77,7 @@ public class B3pShapeWriter {
             if (allPoint.size()==0 && allLine.size()==0)
                 files.addAll(writeShape(allPoly,filename));
             else
-                files.addAll(writeShape(allPoly,filename+"_a.shp"));
+                files.addAll(writeShape(allPoly,filename+"_v.shp"));
         }
         if(allLine.size()>0){
             if (allPoint.size()==0 && allPoly.size()==0)

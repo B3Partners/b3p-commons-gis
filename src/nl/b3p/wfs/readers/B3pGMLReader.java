@@ -32,7 +32,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import nl.b3p.ogc.utils.OGCUrl;
+import nl.b3p.ogc.utils.OGCRequest;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -69,7 +69,7 @@ public class B3pGMLReader extends GMLReader{
      *  at least the attributes 'version' and 'typename' needs to be filled for creating a DescribeFeatureType request.
      *
      */
-    public HashMap readWFSUrl(OGCUrl wfsgf) throws TransformerException, Exception{
+    public HashMap readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception{
         //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
         HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
         if (templates==null){
@@ -79,8 +79,8 @@ public class B3pGMLReader extends GMLReader{
         HashMap features= new HashMap();
         PostMethod method = null;
         String[] featureTypes=null;
-        if (wfsgf.getParameter(OGCUrl.WFS_PARAM_TYPENAME)!=null)
-            featureTypes= wfsgf.getParameter(OGCUrl.WFS_PARAM_TYPENAME).split(",");
+        if (wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME)!=null)
+            featureTypes= wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
         for (int i=0; i < featureTypes.length; i++){
             try{
                 Object o=null;
@@ -95,7 +95,7 @@ public class B3pGMLReader extends GMLReader{
                     log.error("Kan template niet vinden voor "+featureTypes[i]);
                 }
                 GMLInputTemplate git = (GMLInputTemplate)o;
-                wfsgf.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,featureTypes[i]);
+                wfsgf.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,featureTypes[i]);
                 HttpClient client = new HttpClient();        
                 String host=wfsgf.getUrlWithNonOGCparams();
                 method = new PostMethod(host); 
@@ -146,24 +146,24 @@ public class B3pGMLReader extends GMLReader{
      *@param wfsGetFeatureUrl The getFeature url
      *@return a hashmap with al inputtemplates as values en the TypeNames as keys
      */
-    public HashMap createGMLInputTemplateFromWFS(OGCUrl ogcrequest) throws TransformerException, Exception{
+    public HashMap createGMLInputTemplateFromWFS(OGCRequest ogcrequest) throws TransformerException, Exception{
         HashMap templates=new HashMap();
         //validate the url
-        if (ogcrequest.getParameter(OGCUrl.WMS_VERSION)==null || ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME)==null){
+        if (ogcrequest.getParameter(OGCRequest.WMS_VERSION)==null || ogcrequest.getParameter(OGCRequest.WFS_PARAM_TYPENAME)==null){
             return null;
         }
-        OGCUrl wfsDFT= (OGCUrl)ogcrequest.clone();
+        OGCRequest wfsDFT= (OGCRequest)ogcrequest.clone();
         wfsDFT.removeAllWFSParameters();
-        wfsDFT.addOrReplaceParameter(OGCUrl.WMS_VERSION,ogcrequest.getParameter(OGCUrl.WMS_VERSION));
+        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_VERSION,ogcrequest.getParameter(OGCRequest.WMS_VERSION));
         
-        wfsDFT.addOrReplaceParameter(OGCUrl.WMS_SERVICE,OGCUrl.WFS_SERVICE_WFS);
-        wfsDFT.addOrReplaceParameter(OGCUrl.WMS_REQUEST,OGCUrl.WFS_REQUEST_DiscribeFeatureType);
+        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_SERVICE,OGCRequest.WFS_SERVICE_WFS);
+        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_REQUEST,OGCRequest.WFS_REQUEST_DiscribeFeatureType);
         
         //TODO: Helaas is het bij degree niet mogelijk om meerdere typenames tegelijk op te vragen in een DescribeFeatureType
         //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.
-        String[] types =ogcrequest.getParameter(OGCUrl.WFS_PARAM_TYPENAME).split(",");
+        String[] types =ogcrequest.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
         for (int b=0; b < types.length; b++){
-            wfsDFT.addOrReplaceParameter(OGCUrl.WFS_PARAM_TYPENAME,types[b]);
+            wfsDFT.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,types[b]);
             String body=wfsDFT.getXMLBody();
             Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
             if (doc!=null){                            
@@ -278,7 +278,7 @@ public class B3pGMLReader extends GMLReader{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
          String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
          B3pGMLReader reader = new B3pGMLReader();
-         reader.readWFSUrl(new OGCUrl(royurl));
+         reader.readWFSUrl(new OGCRequest(royurl));
      }
 
     private ArrayList getElementsWithTagname(Node node, String tagname) {

@@ -23,21 +23,21 @@ import org.apache.commons.logging.LogFactory;
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
  en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg 
  zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
-public class OGCUrl implements KBConstants{
-    private static final Log log = LogFactory.getLog(OGCUrl.class);
+public class OGCRequest implements KBConstants{
+    private static final Log log = LogFactory.getLog(OGCRequest.class);
     private String httpHost;
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     /*Default constr.*/
-    public OGCUrl() {
+    public OGCRequest() {
     }
     /** Main constructor
      *
      * @param url The url that fills the OGCUrl object
      * 
      */
-    public OGCUrl(String url){
+    public OGCRequest(String url){
         setUrl(url);
     }    
     
@@ -105,15 +105,15 @@ public class OGCUrl implements KBConstants{
             //build common part         
             StringBuffer s = new StringBuffer();
             s.append("<?xml version=\"1.0\"?>");
-            s.append("<wfs:").append(this.getParameter(OGCUrl.WMS_REQUEST));
-            if (this.getParameter(OGCUrl.WMS_VERSION)!=null)
-                s.append(" version=\"").append(this.getParameter(OGCUrl.WMS_VERSION)).append("\"");
-            if (this.getParameter(OGCUrl.WMS_SERVICE)!=null)
-                s.append(" service=\"").append(this.getParameter(OGCUrl.WMS_SERVICE)).append("\"");
-            if (this.getParameter(OGCUrl.WFS_PARAM_OUTPUTFORMAT)!=null)
-                s.append(" outputFormat=\"").append(this.getParameter(OGCUrl.WFS_PARAM_OUTPUTFORMAT)).append("\"");
-            if (this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)!=null){
-                s.append(" maxFeatures=\"").append(this.getParameter(OGCUrl.WFS_PARAM_MAXFEATURES)).append("\"");
+            s.append("<wfs:").append(this.getParameter(OGCRequest.WMS_REQUEST));
+            if (this.getParameter(OGCRequest.WMS_VERSION)!=null)
+                s.append(" version=\"").append(this.getParameter(OGCRequest.WMS_VERSION)).append("\"");
+            if (this.getParameter(OGCRequest.WMS_SERVICE)!=null)
+                s.append(" service=\"").append(this.getParameter(OGCRequest.WMS_SERVICE)).append("\"");
+            if (this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT)!=null)
+                s.append(" outputFormat=\"").append(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT)).append("\"");
+            if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES)!=null){
+                s.append(" maxFeatures=\"").append(this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES)).append("\"");
             }
             
             String[] _nameSpaces=getNameSpacesArray();
@@ -190,7 +190,7 @@ public class OGCUrl implements KBConstants{
     }
     
     public String getUrlWithNonOGCparams(){
-        OGCUrl ogcu=(OGCUrl)this.clone();
+        OGCRequest ogcu=(OGCRequest)this.clone();
         ogcu.removeAllWMSParameters();
         ogcu.removeAllWFSParameters();
         return ogcu.getUrl();
@@ -228,7 +228,7 @@ public class OGCUrl implements KBConstants{
     /*Returns all nonOGC params
      */
     public HashMap getNonOGCParameters(){
-        OGCUrl o = (OGCUrl) this.clone();
+        OGCRequest o = (OGCRequest) this.clone();
         o.removeAllWFSParameters();
         o.removeAllWMSParameters();
         return o.getParameters();
@@ -408,7 +408,7 @@ public class OGCUrl implements KBConstants{
             addOrReplaceSchemaLocation("xsi","http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
     }
     public Object clone(){
-        OGCUrl returnv = new OGCUrl();
+        OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
         if (this.getParameters()!=null)
             returnv.setParameters((HashMap)this.getParameters().clone());
@@ -417,9 +417,6 @@ public class OGCUrl implements KBConstants{
         if (this.getSchemaLocations()!=null)
             returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
         return returnv;
-    }
-    protected static Log getLog() {
-        return log;
     }
 
     protected String getHttpHost() {
