@@ -194,9 +194,10 @@ public interface KBConstants {
     });
     
     public static final List PARAMS_GetLegendGraphic = Arrays.asList(new String[] {
-        WMS_SERVICE,
         WMS_VERSION,
-        WMS_PARAM_STYLE
+        WMS_REQUEST,
+        WMS_PARAM_LAYER,
+        WMS_PARAM_FORMAT        
     });
     
     public static final List PARAMS_GetStyles = Arrays.asList(new String[] {
