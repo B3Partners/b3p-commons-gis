@@ -127,7 +127,7 @@ public class WMSCapabilitiesReader implements KBConstants {
             }
             String mimeType = method.getResponseHeader("Content-Type").getValue();
             if (mimeType==null || mimeType.indexOf("xml")==-1) {
-                throw new Exception("Mime type should be xml, found: " + mimeType);
+                throw new Exception("Cannot get a GetCapabilities document from server");
             }
             
             //Nu kan het service provider object gemaakt en gevuld worden
