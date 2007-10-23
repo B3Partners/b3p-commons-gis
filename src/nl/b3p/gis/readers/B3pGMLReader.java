@@ -6,7 +6,7 @@
  * Autor: Roy
  */
 
-package nl.b3p.wfs.readers;
+package nl.b3p.gis.readers;
 
 import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureDataset;

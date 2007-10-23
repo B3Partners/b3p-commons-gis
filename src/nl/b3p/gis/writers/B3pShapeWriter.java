@@ -6,7 +6,7 @@
  * Autor: Roy
  */
 
-package nl.b3p.wfs.writers;
+package nl.b3p.gis.writers;
 
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
