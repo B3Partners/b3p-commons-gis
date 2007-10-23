@@ -37,9 +37,9 @@ public class Layer implements XMLElement {
     private String fixedHeight;
     private String scaleHintMin;
     private String scaleHintMax;
-    private Attribution attribution;// = new Attribution();
+    private Attribution attribution;
     private Layer parent;
-    private ServiceProvider serviceProvider;// = new ServiceProvider();
+    private ServiceProvider serviceProvider;
     private Set dimensions;
     private Set layerKeywordList;
     private Set styles;

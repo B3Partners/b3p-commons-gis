@@ -470,8 +470,4 @@ public class ServiceProvider implements XMLElement, KBConstants {
         return sc;
     }
     
-    //TODO nog verwijderen
-    public void setReviewed(boolean r) {
-        return;
-    }
 }
