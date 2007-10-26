@@ -68,6 +68,7 @@ public class B3pGMLReader extends GMLReader{
      * @param wfsGetFeatureUrl The wfs getFeature url. The request needs to be valid, at the moment no check is done.
      *  at least the attributes 'version' and 'typename' needs to be filled for creating a DescribeFeatureType request.
      *
+     * @return a hashmap with key's the featuretypes and as values the featurecollections
      */
     public HashMap readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception{
         //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
