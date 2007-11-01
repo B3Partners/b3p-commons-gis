@@ -464,16 +464,31 @@ public class OGCRequest implements KBConstants{
         return schemaLocations;
     }
     
-    public boolean isValidRequestURL() throws Exception {
-        //HashMap parameters = this.getParameters();
-        
+    public boolean isValidRequestURL(String reason) throws Exception {        
         if (parameters == null)
             return false;
         
+        if (reason == null)
+            reason = new String();
+        
         if (containsParameter(REQUEST)) {
             String request = (String) parameters.get(REQUEST);
+            if(request == null || request.equals("")) {
+                throw new UnsupportedOperationException("No request parameter found in url!");
+            }
+            
+            //na dit punt kunnen we er zeker van zijn dat we een request hebben....
+            //nu kunnen we aan de hand van de service bekijken welke verplichte parameters er
+            //nodig zijn voor dit request....
             if (containsParameter(SERVICE)) {
                 String service = (String) parameters.get(SERVICE);
+                if(service == null || service.equals("")) {
+                    throw new UnsupportedOperationException("No service parameter for request found in url!");
+                }
+                
+                //nu weten we ook wat voor service het om gaat en kunnen we de verplichte parameters
+                //uit de Constants ophalen, om hiermee alle andere parameters te controleren.
+                //methode moet nog wel verder uitgebreid worden.
                 if(service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
                     //het is een WMS request, want service = wms
                     //nu eerst controleren of the request type ondersteunt wordt.
@@ -489,7 +504,7 @@ public class OGCRequest implements KBConstants{
                             requiredParams = PARAMS_GetLegendGraphic;
                         }
                         
-                        if (isValidRequestURL(requiredParams, request)) {
+                        if (isValidRequestURL(requiredParams, request, reason)) {
                             return true;
                         }                        
                     } else {
@@ -504,13 +519,12 @@ public class OGCRequest implements KBConstants{
                 }
             }
         } else {
-            //er komt geen request parameter in de url voor
             throw new UnsupportedOperationException("No request parameter found in url!");
         }
         return false;
     }
     
-    private boolean isValidRequestURL(List requiredParams, String request) throws Exception {
+    private boolean isValidRequestURL(List requiredParams, String request, String reason) throws Exception {
         if (parameters == null || requiredParams == null || (parameters.isEmpty() && !requiredParams.isEmpty()))
             return false;
         
@@ -518,8 +532,7 @@ public class OGCRequest implements KBConstants{
         while (it.hasNext()) {
             String parameter = (String) it.next();
             if(!parameters.containsKey(parameter))
-                throw new IllegalArgumentException("Not all parameters for request '" + 
-                        request + "' are available, missing parameter: " + parameter +".");
+                reason = "Not all parameters for request '" + request + "' are available, missing parameter: " + parameter + ".";
         }
         
         //Alle parameter keys zijn wel aanwezig, test nu op waarden
@@ -527,18 +540,21 @@ public class OGCRequest implements KBConstants{
         while (it.hasNext()) {
             String parameter = (String) it.next();
             if(!parameter.equalsIgnoreCase(WMS_PARAM_STYLES))
-                if(this.getParameter(parameter) == null)
+                if(this.getParameter(parameter) == null) {
                     //TODO:
                     //Deze throw clausule straks nog uitbreiden met eventuele hints als
                     //deze voor handen zijn, door in de constanten voor de verschillende
                     //params een lijst te generenen met waarden die daar voor verplicht zijn
                     //en wat de maximum waarden dan zijn....
-                    throw new IllegalArgumentException("Value for parameter " + parameter + " is missing.");
+                    reason = "Value for parameter " + parameter + " is missing.";
+                    return false;
+            
                     //Hier moet dus niet alleen een controle uitgevoerd worden of een value
                     //bestaat, maar ook of deze value voor de betreffende parameter kolpt
                     //indien ja, dan kan gewoon true gereturned worden, anders moet er OF
                     //een foutmelding gegeven worden dat de value niet bestaat OF
                     //een foutmelding gegeven worden dat de value niet klopt!
+                }
         }
         
         return true;
