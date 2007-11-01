@@ -348,6 +348,9 @@ public class OGCRequest implements KBConstants{
         for (int i=0; it.hasNext(); i++){
             String key=(String)it.next();
             String value=(String)parameters.get(key);
+            if(value == null) {
+                value = "";
+            }
             returnvalue[i]=key+"="+value;
         }
         return returnvalue;
@@ -540,6 +543,35 @@ public class OGCRequest implements KBConstants{
         
         return true;
     }
+    /*
+    private void validateParams() throws Exception {
+        int width  = Integer.parseInt(getParameter(WMS_PARAM_WIDTH));
+        int height = Integer.parseInt(getParameter(WMS_PARAM_HEIGHT));
+        if(width < 1 || height < 1 || width > 2048 || height > 2048) {
+            log.error("Image wrong size: width, height: " + width + ", " + height);
+            throw new Exception(IMAGE_SIZE_EXCEPTION);
+        }
+        
+        String [] boxx = (getParameter(WMS_PARAM_BBOX)).split(",");
+        if(boxx.length < 4) {
+            log.error("BBOX wrong size: " + boxx.length);
+            throw new Exception(BBOX_EXCEPTION);
+        }
+        
+        double minx=0.0, miny=0.0, maxx=-1.0, maxy=-1.0;
+        try {
+            minx = Double.parseDouble(boxx[0]);
+            miny = Double.parseDouble(boxx[1]);
+            maxx = Double.parseDouble(boxx[2]);
+            maxy = Double.parseDouble(boxx[3]);
+            if (minx > maxx || miny > maxy) {
+                throw new Exception("");
+            }
+        } catch (Exception e) {
+            log.error("BBOX error minx, miny, maxx, maxy: " + minx+ ", "+ miny+ ", "+maxx+ ", "+maxy);
+            throw new Exception(BBOX_EXCEPTION);
+        }
+    }
     
     
     public static void main(String [] args) {
@@ -564,4 +596,5 @@ public class OGCRequest implements KBConstants{
         "http://www.kb.nl/wms?REQUEST=GetMap&SERVICE=wms&VERSION=1.1.1&LAYERS=&STYLES=&SRS=&BBOX=&WIDTH=&HEIGHT=&FORMAT=",
         "http://www.kb.nl/wms?REQUEST=GetCapabilities"
     });
+    */
 }

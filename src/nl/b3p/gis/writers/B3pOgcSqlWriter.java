@@ -346,7 +346,7 @@ public class B3pOgcSqlWriter {
         }
         return false;        
     }
-    
+    /*
      public static void main(String [] args) throws IOException, ParseException, Exception{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
          String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
@@ -368,4 +368,5 @@ public class B3pOgcSqlWriter {
          }
          
      }
+     */
 }
