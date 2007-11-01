@@ -15,6 +15,7 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import nl.b3p.ogc.utils.KBConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;

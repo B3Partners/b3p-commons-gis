@@ -9,10 +9,11 @@
 
 package nl.b3p.ogc.utils;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
-import nl.b3p.wms.capabilities.KBConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -223,8 +224,17 @@ public class OGCRequest implements KBConstants{
         Object o=parameters.get(param);
         if (o==null)
             return null;
-        return (String)o;        
+        return (String)o;
     }
+    
+    public boolean containsParameter(String param) {
+        if (param == null)
+            return false;
+        
+        param = param.toUpperCase();
+        return parameters.containsKey(param);
+    }
+    
     /*Returns all nonOGC params
      */
     public HashMap getNonOGCParameters(){
@@ -451,5 +461,107 @@ public class OGCRequest implements KBConstants{
         return schemaLocations;
     }
     
+    public boolean isValidRequestURL() throws Exception {
+        //HashMap parameters = this.getParameters();
+        
+        if (parameters == null)
+            return false;
+        
+        if (containsParameter(REQUEST)) {
+            String request = (String) parameters.get(REQUEST);
+            if (containsParameter(SERVICE)) {
+                String service = (String) parameters.get(SERVICE);
+                if(service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
+                    //het is een WMS request, want service = wms
+                    //nu eerst controleren of the request type ondersteunt wordt.
+                    List requiredParams = null;
+                    if (SUPPORTED_REQUESTS.contains(request)) {
+                        if(request.equals(WMS_REQUEST_GetCapabilities)) {
+                            requiredParams = REQUIRED_PARAMS_GetCapabilities;
+                        } else if (request.equals(WMS_REQUEST_GetMap)) {
+                            requiredParams = PARAMS_GetMap;
+                        } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+                            requiredParams = PARAMS_GetFeatureInfo;
+                        } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+                            requiredParams = PARAMS_GetLegendGraphic;
+                        }
+                        
+                        if (isValidRequestURL(requiredParams, request)) {
+                            return true;
+                        }                        
+                    } else {
+                        throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
+                            "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
+                            "VERSION=1.1.1&SERVICE=WMS");
+                    }
+                } else if (service.equalsIgnoreCase(WFS_SERVICE_WFS)) {
+                    //het is een WFS request
+                } else {
+                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                }
+            }
+        } else {
+            //er komt geen request parameter in de url voor
+            throw new UnsupportedOperationException("No request parameter found in url!");
+        }
+        return false;
+    }
     
+    private boolean isValidRequestURL(List requiredParams, String request) throws Exception {
+        if (parameters == null || requiredParams == null || (parameters.isEmpty() && !requiredParams.isEmpty()))
+            return false;
+        
+        Iterator it = requiredParams.iterator();
+        while (it.hasNext()) {
+            String parameter = (String) it.next();
+            if(!parameters.containsKey(parameter))
+                throw new IllegalArgumentException("Not all parameters for request '" + 
+                        request + "' are available, missing parameter: " + parameter +".");
+        }
+        
+        //Alle parameter keys zijn wel aanwezig, test nu op waarden
+        it = requiredParams.iterator();
+        while (it.hasNext()) {
+            String parameter = (String) it.next();
+            if(!parameter.equalsIgnoreCase(WMS_PARAM_STYLES))
+                if(this.getParameter(parameter) == null)
+                    //TODO:
+                    //Deze throw clausule straks nog uitbreiden met eventuele hints als
+                    //deze voor handen zijn, door in de constanten voor de verschillende
+                    //params een lijst te generenen met waarden die daar voor verplicht zijn
+                    //en wat de maximum waarden dan zijn....
+                    throw new IllegalArgumentException("Value for parameter " + parameter + " is missing.");
+                    //Hier moet dus niet alleen een controle uitgevoerd worden of een value
+                    //bestaat, maar ook of deze value voor de betreffende parameter kolpt
+                    //indien ja, dan kan gewoon true gereturned worden, anders moet er OF
+                    //een foutmelding gegeven worden dat de value niet bestaat OF
+                    //een foutmelding gegeven worden dat de value niet klopt!
+        }
+        
+        return true;
+    }
+    
+    
+    public static void main(String [] args) {
+        OGCRequest ogc = new OGCRequest();
+        Iterator it = TEST_URLS.iterator();
+        while (it.hasNext()) {
+            String url = (String) it.next();
+            ogc.setUrl(url);
+            
+            try {
+                boolean isvalid = ogc.isValidRequestURL();
+                System.out.println(isvalid);
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+    
+    public static final List TEST_URLS = Arrays.asList(new String[] {
+        "http://www.kb.nl/wms?REQUEST=GetCapabilities&SERVICE=wms&VERSION=1.1.1",
+        //"http://www.kb.nl/wms?REQUEST=GetCapabilities&SERVICE=wms",
+        "http://www.kb.nl/wms?REQUEST=GetMap&SERVICE=wms&VERSION=1.1.1&LAYERS=&STYLES=&SRS=&BBOX=&WIDTH=&HEIGHT=&FORMAT=",
+        "http://www.kb.nl/wms?REQUEST=GetCapabilities"
+    });
 }

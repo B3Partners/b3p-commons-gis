@@ -10,7 +10,7 @@
 
 package nl.b3p.wms.capabilities;
 
-import nl.b3p.wms.capabilities.KBConstants;
+import nl.b3p.ogc.utils.KBConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;

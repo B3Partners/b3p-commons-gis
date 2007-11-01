@@ -27,6 +27,7 @@ package nl.b3p.wms.capabilities;
 
 
 import java.io.ByteArrayOutputStream;
+import nl.b3p.ogc.utils.KBConstants;
 import nl.b3p.wms.capabilities.Roles;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
