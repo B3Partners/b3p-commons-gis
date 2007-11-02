@@ -477,46 +477,39 @@ public class OGCRequest implements KBConstants{
                 throw new UnsupportedOperationException("No request parameter found in url!");
             }
             
-            //na dit punt kunnen we er zeker van zijn dat we een request hebben....
-            //nu kunnen we aan de hand van de service bekijken welke verplichte parameters er
-            //nodig zijn voor dit request....
-            if (containsParameter(SERVICE)) {
-                String service = (String) parameters.get(SERVICE);
-                if(service == null || service.equals("")) {
-                    throw new UnsupportedOperationException("No service parameter for request found in url!");
-                }
-                
-                //nu weten we ook wat voor service het om gaat en kunnen we de verplichte parameters
-                //uit de Constants ophalen, om hiermee alle andere parameters te controleren.
-                //methode moet nog wel verder uitgebreid worden.
-                if(service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
-                    //het is een WMS request, want service = wms
-                    //nu eerst controleren of the request type ondersteunt wordt.
-                    List requiredParams = null;
-                    if (SUPPORTED_REQUESTS.contains(request)) {
-                        if(request.equals(WMS_REQUEST_GetCapabilities)) {
+            List requiredParams = null;
+            if (SUPPORTED_REQUESTS.contains(request)) {
+                if(request.equals(WMS_REQUEST_GetCapabilities)) {
+                    if (containsParameter(SERVICE)) {
+                        String service = (String) parameters.get(SERVICE);
+                        if(service == null || service.equals("")) {
+                            throw new UnsupportedOperationException("No service parameter for request found in url!");
+                        }
+                        if(service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
                             requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                        } else if (request.equals(WMS_REQUEST_GetMap)) {
-                            requiredParams = PARAMS_GetMap;
-                        } else if (request.equals(WMS_REQUEST_GetFeatureInfo)){
-                            requiredParams = PARAMS_GetFeatureInfo;
-                        } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
-                            requiredParams = PARAMS_GetLegendGraphic;
-                        }                        
-                        if (isValidRequestURL(requiredParams, request, reason)) {
-                            return true;
-                        }                        
+                        } else if (service.equalsIgnoreCase(WFS_SERVICE_WFS)) {
+                            //het is een WFS request
+                        } else {
+                            throw new UnsupportedOperationException("Service '" + service + "' not supported!");
+                        }
                     } else {
-                        throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
-                            "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
-                            "VERSION=1.1.1&SERVICE=WMS");
+                        throw new UnsupportedOperationException("No service parameter for request found in url!");
                     }
-                } else if (service.equalsIgnoreCase(WFS_SERVICE_WFS)) {
-                    //het is een WFS request
-                } else {
-                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                }
-            }
+                } else if (request.equals(WMS_REQUEST_GetMap)) {
+                    requiredParams = PARAMS_GetMap;
+                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)){
+                    requiredParams = PARAMS_GetFeatureInfo;
+                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+                    requiredParams = PARAMS_GetLegendGraphic;
+                }                        
+                if (isValidRequestURL(requiredParams, request, reason)) {
+                    return true;
+                }                        
+            } else {
+                throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
+                    "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
+                    "VERSION=1.1.1&SERVICE=WMS");
+            }            
         } else {
             throw new UnsupportedOperationException("No request parameter found in url!");
         }
