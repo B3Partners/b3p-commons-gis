@@ -78,7 +78,7 @@ public interface OGCConstants {
     public static final String WMS_REQUEST_GetCapabilities = "GetCapabilities";
     public static final String WMS_REQUEST_GetMap = "GetMap";
     public static final String WMS_REQUEST_GetFeatureInfo = "GetFeatureInfo";
-    public static final String WMS_REQUEST_GetLegendGraphic = "GetLegendgraphic";
+    public static final String WMS_REQUEST_GetLegendGraphic = "GetLegendGraphic";
     public static final String WMS_REQUEST_GetStyles = "GetStyles";
     public static final String WMS_REQUEST_PutStyles = "PutStyles";
     public static final String WMS_REQUEST_DescribeLayer = "DescribeLayer";
@@ -197,10 +197,6 @@ public interface OGCConstants {
         REQUEST,
         VERSION,
         WMS_PARAM_FORMAT,
-        WMS_PARAM_SLD,
-        WMS_PARAM_WIDTH,
-        WMS_PARAM_HEIGHT,
-        WMS_PARAM_EXCEPTIONS,
         WMS_PARAM_LAYER       
     });
     
@@ -209,6 +205,10 @@ public interface OGCConstants {
         WMS_PARAM_FEATURETYPE,
         WMS_PARAM_RULE,
         WMS_PARAM_SCALE,
+        WMS_PARAM_SLD,        
+        WMS_PARAM_WIDTH,
+        WMS_PARAM_HEIGHT,        
+        WMS_PARAM_EXCEPTIONS,
         WMS_PARAM_SLD_BODY
     });
     

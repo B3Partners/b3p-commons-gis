@@ -275,22 +275,45 @@ public class B3pOgcSqlWriter {
                 for (int i=0; i < fs.getAttributeCount(); i++){
                     Object o=f.getAttribute(fs.getAttributeName(i));
                     if (i!=0)
-                        q.append(", ");
-                    if (o==null){
-                        q.append("\'\'");
-                    }else{
-                        if (fs.getAttributeType(i)== AttributeType.GEOMETRY){
-                            q.append("GeomFromText(\'");
-                            q.append(f.getGeometry().toText());
-                            //Todo: Srid opzoeken
-                            q.append("\', 28992");                
-                            q.append(")");
-                        }else{                            
+                        q.append(", ");                    
+                    if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
+                        q.append("GeomFromText(\'");
+                        q.append(f.getGeometry().toText());
+                        //Todo: Srid opzoeken
+                        q.append("\', 28992");                
+                        q.append(")");
+                    }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){                            
+                        q.append(o);                            
+                    }else if (fs.getAttributeType(i).equals(AttributeType.INTEGER)){
+                        q.append(o); 
+                    }else if (fs.getAttributeType(i).equals(AttributeType.STRING)){
+                        if (o==null)
+                            q.append(o);
+                        else{
+                            String s=(String)o;
+                            s=s.replaceAll("'","\'\'");
+                            q.append("\'");
+                            q.append(s);
+                            q.append("\'");
+                        }
+                    }else if (fs.getAttributeType(i).equals(AttributeType.DATE)){
+                         if (o==null)
+                            q.append(o);
+                        else{
                             q.append("\'");
                             q.append(o);
-                            q.append("\'");                        
+                            q.append("\'");
+                        }
+                    }else if (fs.getAttributeType(i).equals(AttributeType.OBJECT)){
+                         if (o==null)
+                            q.append(o);
+                        else{
+                            q.append("\'");
+                            q.append(o);
+                            q.append("\'");
                         }
                     }
+                    
                 }
                 q.append(");");                
             }
@@ -350,23 +373,32 @@ public class B3pOgcSqlWriter {
      public static void main(String [] args) throws IOException, ParseException, Exception{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
          String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
+         String degree="http://portal.prvlimburg.nl/risicokaart_prof/ogcwebservices?SRSNAME=EPSG:28992&TYPENAME=app:V_RB10_PUNT_PROF,app:V_KWO_PUNT_PROF,app:V_RB10_LIJN_PROF,app:RGS_IRG_KRN_PROF,app:V_RB9_LIJN_PROF,app:V_RB8_POLY_PROF,app:RGS_ISDFE_ZONE_PROF,app:Incident,app:V_RB9_POLY_PROF,app:gg,app:euregio_hulpverlening,app:V_RB10_POLY_PROF,app:RGS_ISG_AFST_PROF,app:RGS_ISB_EADPUNT_PROF,app:V_RB11_POLY_PROF,app:V_RB6_POLY_PROF,app:RGS_ISB_EAD_PROF,app:V_RB4_LIJN_PROF,app:V_RB5_POLY_PROF,app:V_RB8_LIJN_PROF,app:V_RB8_PUNT_PROF,app:RGS_IRG_LOK_PROF,app:RGS_IRG_EAD_PROF,app:V_RB6_LIJN_PROF,app:RGS_IRG_POS_PROF,app:seveso_1,app:V_RB6_PUNT_PROF,app:V_RB7_LIJN_PROF,app:V_RB5_POS_PROF,app:RGS_IRG_CTR_PROF,app:RGS_ISB_CTR_PROF,app:data_brussel,app:RGS_ISB_LOK_PROF,app:RGS_IRG_EADPUNT_PROF&VERSION=1.1.0&SERVICE=WFS&REQUEST=GetFeature";
          String url="jdbc:postgresql://localhost:5432/pnb_wis";
          String user="postgres";
          String password="***REMOVED***";
          B3pGMLReader reader = new B3pGMLReader();
-         HashMap features=reader.readWFSUrl(new OGCRequest(royurl));
-         Set featureTypes=features.keySet();
-         Iterator it=featureTypes.iterator();
-         DriverManager.registerDriver(new org.postgresql.Driver());
-         Connection conn= DriverManager.getConnection(url,user,password);
-         
-         while(it.hasNext()){
-             String featureType= (String)it.next();
-             FeatureCollection fc= (FeatureCollection) features.get(featureType);
-             B3pOgcSqlWriter bosw = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
-             bosw.write(fc,featureType,"the_geom","28992",2,true,true);
+         OGCRequest wfslink=new OGCRequest(degree);
+         wfslink.addOrReplaceNameSpace("app","http://www.deegree.org/app");
+         HashMap features=reader.readWFSUrl(wfslink);
+         if (features!=null){
+             Set featureTypes=features.keySet();
+             Iterator it=featureTypes.iterator();
+             DriverManager.registerDriver(new org.postgresql.Driver());
+             Connection conn= DriverManager.getConnection(url,user,password);
+
+             while(it.hasNext()){
+                 String featureType= (String)it.next();
+                 String tableName=new String(featureType);
+                 if (tableName.contains(":")){
+                     tableName=featureType.split(":")[1];
+                 }
+                 FeatureCollection fc= (FeatureCollection) features.get(featureType);                 
+                 B3pOgcSqlWriter bosw = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
+                 if (fc!=null)
+                     bosw.write(fc,tableName.toLowerCase(),"the_geom","28992",2,true,true);
+             }
          }
-         
      }
      */
 }

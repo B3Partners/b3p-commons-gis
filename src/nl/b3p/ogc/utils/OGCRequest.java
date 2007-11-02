@@ -464,12 +464,12 @@ public class OGCRequest implements KBConstants{
         return schemaLocations;
     }
     
-    public boolean isValidRequestURL(String reason) throws Exception {        
+    public boolean isValidRequestURL(StringBuffer reason) throws Exception {        
         if (parameters == null)
             return false;
         
         if (reason == null)
-            reason = new String();
+            reason = new StringBuffer();
         
         if (containsParameter(REQUEST)) {
             String request = (String) parameters.get(REQUEST);
@@ -498,12 +498,11 @@ public class OGCRequest implements KBConstants{
                             requiredParams = REQUIRED_PARAMS_GetCapabilities;
                         } else if (request.equals(WMS_REQUEST_GetMap)) {
                             requiredParams = PARAMS_GetMap;
-                        } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+                        } else if (request.equals(WMS_REQUEST_GetFeatureInfo)){
                             requiredParams = PARAMS_GetFeatureInfo;
                         } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                             requiredParams = PARAMS_GetLegendGraphic;
-                        }
-                        
+                        }                        
                         if (isValidRequestURL(requiredParams, request, reason)) {
                             return true;
                         }                        
@@ -524,15 +523,22 @@ public class OGCRequest implements KBConstants{
         return false;
     }
     
-    private boolean isValidRequestURL(List requiredParams, String request, String reason) throws Exception {
+    private boolean isValidRequestURL(List requiredParams, String request, StringBuffer reason) throws Exception {
         if (parameters == null || requiredParams == null || (parameters.isEmpty() && !requiredParams.isEmpty()))
             return false;
         
         Iterator it = requiredParams.iterator();
         while (it.hasNext()) {
             String parameter = (String) it.next();
-            if(!parameters.containsKey(parameter))
-                reason = "Not all parameters for request '" + request + "' are available, missing parameter: " + parameter + ".";
+            if(!parameters.containsKey(parameter)){
+                reason.append("Not all parameters for request '");
+                reason.append(request);
+                reason.append("' are available, missing parameter: ");
+                reason.append(parameter);
+                reason.append(".");
+                return false;
+            }
+                
         }
         
         //Alle parameter keys zijn wel aanwezig, test nu op waarden
@@ -546,7 +552,9 @@ public class OGCRequest implements KBConstants{
                     //deze voor handen zijn, door in de constanten voor de verschillende
                     //params een lijst te generenen met waarden die daar voor verplicht zijn
                     //en wat de maximum waarden dan zijn....
-                    reason = "Value for parameter " + parameter + " is missing.";
+                    reason.append("Value for parameter ");
+                    reason.append(parameter);
+                    reason.append(" is missing.");
                     return false;
             
                     //Hier moet dus niet alleen een controle uitgevoerd worden of een value
