@@ -97,6 +97,7 @@ public interface OGCConstants {
     //Exception formats:
     public static final String WMS_PARAM_EXCEPTION_XML = "application/vnd.ogc.se_xml";
     public static final String WMS_PARAM_EXCEPTION_INIMAGE = "application/vnd.ogc.se_inimage";
+    public static final String WMS_PARAM_SHORT_EXCEPTION_INIMAGE = "inimage";
     public static final String WMS_PARAM_EXCEPTION_BLANK = "application/vnd.ogc.se_blank";
     
     //Output formats GetMap:
