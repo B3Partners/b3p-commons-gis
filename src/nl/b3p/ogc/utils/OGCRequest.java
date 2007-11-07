@@ -88,7 +88,6 @@ public class OGCRequest implements KBConstants{
             }
         }
         if (sb.length()>0){
-            sb.deleteCharAt(sb.length()-1);
             return sb.toString();
         }else{
             return null;

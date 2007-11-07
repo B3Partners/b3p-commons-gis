@@ -61,6 +61,10 @@ public interface KBConstants extends OGCConstants {
     public static final String IMAGE_SIZE_EXCEPTION = "Kaartenbalie GetMap fout: afbeelding WIDTH and HEIGHT moet tussen 1 en 2048 pixels zijn.";
     public static final String BBOX_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige BBOX waarden.";
     public static final String SRS_EXCEPTION = "Kaartenbalie GetMap fout: SRS moet geldig zijn voor alle kaartlagen.";
+    
+    public static final String UNSUPPORTED_VERSION = "Opgegeven VERSION wordt niet ondersteund door Kaartenbalie";
+    public static final String UNSUPPORTED_SERVICE = "Opgegeven SERVICE wordt niet ondersteund door Kaartenbalie";
+    public static final String UNSUPPORTED_REQUEST = "Opgegeven REQUEST is niet geldig voor het ophalen van een GetCapability";
     // </editor-fold>
     
     public static final String CHARSET = "UTF-8";
