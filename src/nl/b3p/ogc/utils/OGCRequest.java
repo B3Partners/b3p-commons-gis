@@ -9,13 +9,32 @@
 
 package nl.b3p.ogc.utils;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import nl.b3p.ogc.wfs.v110.BaseRequestType;
+import nl.b3p.ogc.wfs.v110.DescribeFeatureType;
+import nl.b3p.ogc.wfs.v110.GetFeature;
+import nl.b3p.ogc.wfs.v110.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.exolab.castor.types.AnyNode;
+import org.exolab.castor.xml.MarshalException;
+import org.exolab.castor.xml.Marshaller;
+import org.exolab.castor.xml.Unmarshaller;
+import org.exolab.castor.xml.ValidationException;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 /**
  * @author Roy Braam
@@ -59,10 +78,27 @@ public class OGCRequest implements KBConstants{
                 httpHost=tokens[i];
             if (tokens[i].contains("=")){
                 String keyValuePair[]=tokens[i].split("=");
-                if (keyValuePair.length==2)
-                    addOrReplaceParameter(keyValuePair[0],keyValuePair[1]);
-                else
-                    addOrReplaceParameter(keyValuePair[0],null);
+                //if it's a namespace
+                if (keyValuePair[0].equalsIgnoreCase("NAMESPACE")){
+                    if (tokens[i].contains("(") && tokens[i].contains(")")){
+                        String namespacestring=tokens[i].substring(tokens[i].indexOf("(")+1,tokens[i].indexOf(")"));
+                        String[] namespaces= namespacestring.split(",");
+                        for (int b=0; b < namespaces.length; b++){
+                            if (namespaces[b].contains("=")){
+                                String prefixUriPair[]=namespaces[b].split("=");
+                                if (prefixUriPair.length==2)
+                                    addOrReplaceNameSpace(prefixUriPair[0],prefixUriPair[1]);
+                                else 
+                                    addOrReplaceNameSpace(prefixUriPair[0],null);
+                            }
+                        }
+                    }
+                }else{
+                    if (keyValuePair.length==2)
+                        addOrReplaceParameter(keyValuePair[0],keyValuePair[1]);
+                    else
+                        addOrReplaceParameter(keyValuePair[0],null);
+                }
             }            
         }
     }
@@ -87,106 +123,102 @@ public class OGCRequest implements KBConstants{
                 sb.append("&");
             }
         }
+        if (getNameSpaces()!=null && getNameSpaces().size()>0){
+            sb.append("namespace=xmlns(");
+            Set mapEntries = getNameSpaces().entrySet();
+            it=mapEntries.iterator();
+            while(it.hasNext()){
+                Map.Entry me= (Entry) it.next();
+                sb.append(me.getKey());
+                sb.append("=");
+                sb.append(me.getValue());
+            }
+            sb.append(")&");            
+        }
         if (sb.length()>0){
             return sb.toString();
         }else{
             return null;
         }
     }
+    
     /**
-     *Only WFS DiscribeFeaturetype and GetFeature are supported
+     * Get XMLBody creates the body string for a post message. For now only supports getFeature en DiscribeFeatureType
      */
-    public String getXMLBody() throws Exception{
-        //check if request is either DiscribeFeaturetype or GetFeature
-        if (getParameter(WMS_REQUEST)!=null && (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)||getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature))){
-            //set all needed namespaces and locations
-            addOpengisNamespaces();
-            addOpengisSchemaLocations();
-            //build common part         
-            StringBuffer s = new StringBuffer();
-            s.append("<?xml version=\"1.0\"?>");
-            s.append("<wfs:").append(this.getParameter(OGCRequest.WMS_REQUEST));
-            if (this.getParameter(OGCRequest.WMS_VERSION)!=null)
-                s.append(" version=\"").append(this.getParameter(OGCRequest.WMS_VERSION)).append("\"");
-            if (this.getParameter(OGCRequest.WMS_SERVICE)!=null)
-                s.append(" service=\"").append(this.getParameter(OGCRequest.WMS_SERVICE)).append("\"");
+    public String getXMLBody() throws MarshalException, ValidationException, IOException, ParserConfigurationException, SAXException{
+        BaseRequestType brt=null;
+        String body=null;
+        if (getParameter(WMS_REQUEST)==null || getParameter(WMS_REQUEST).length()<=0){
+            return body;
+        } 
+        if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)){
+            DescribeFeatureType dft= new DescribeFeatureType();
+            setBasicRequest(dft);
             if (this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT)!=null)
-                s.append(" outputFormat=\"").append(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT)).append("\"");
-            if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES)!=null){
-                s.append(" maxFeatures=\"").append(this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES)).append("\"");
-            }
-            
-            String[] _nameSpaces=getNameSpacesArray();
-            if (_nameSpaces!=null){
-                for(int i=0; i < _nameSpaces.length; i++){
-                    s.append(" ");
-                    s.append(_nameSpaces[i]);
-                }
-            }
-            String[] _schemaLocations=getSchemaLocationsArray();
-            if (_schemaLocations!=null){
-                for(int i=0; i < _schemaLocations.length; i++){
-                    s.append(" ").append(_schemaLocations[i]);
-                }
-            }
-            s.append(">");
-            //create request specific part
-            if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)){
-                if (getParameter(WFS_PARAM_TYPENAME)!=null){
-                    String[] types = getParameter(WFS_PARAM_TYPENAME).split(",");
-                    for (int i=0; i < types.length; i++){
-                        s.append("<wfs:TypeName>");
-                        s.append(types[i]);
-                        s.append("</wfs:TypeName>");
-                    }
-                }else{
-                    throw new Exception("Typname required for "+getParameter(WMS_REQUEST));
-                }
-            }
-            else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature)){
-                if (getParameter(WFS_PARAM_TYPENAME)!=null){
-                    s.append("<wfs:Query typeName=\"");
-                    String[] typenames=getParameter(WFS_PARAM_TYPENAME).split(",");
-                    for (int i=0; i < typenames.length; i++){
-                        if (i!=0)
-                            s.append(",");
-                        s.append(typenames[i]);
-                    }
-                    s.append("\"");
-                    if (getParameter(WMS_PARAM_SRS)!=null){
-                        s.append(" srsName=\"");
-                        s.append(getParameter(WMS_PARAM_SRS));
-                        s.append("\"");
-                    }
-                    s.append(">");
-                    if (getParameter(WFS_PARAM_FILTER)!=null || getParameter(WMS_PARAM_BBOX)!=null){
-                        s.append("<ogc:Filter>");
-                        if (getParameter(WFS_PARAM_FILTER)!=null)
-                            s.append(getParameter(WFS_PARAM_FILTER));
-                        else if (getParameter(WMS_PARAM_BBOX)!=null){
-                            String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
-                            s.append("<BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");                            
-                            s.append(tokens[0]+","+tokens[1]+" "+tokens[2]+","+tokens[3]);
-                            s.append("</coordinates></Box></BBOX>");                                                        
-                        }
-                        s.append("</ogc:Filter>");
-                    }
-                    s.append("</wfs:Query>");
-                }else{
-                    throw new Exception("Typname required for "+getParameter(WMS_REQUEST));
-                }
-            }
+                dft.setOutputFormat(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT));
             else{
-                throw new Exception("Request not supported");
+                //temp oplossing. Default value wordt niet ondersteund....
+                dft.setOutputFormat(null);
             }
-            s.append("</wfs:");
-            s.append(getParameter(WMS_REQUEST));
-            s.append(">");
-            log.debug("Body created: "+s.toString());
-            return s.toString();
-        }else{            
-            return null;
+            if (this.getParameter(WFS_PARAM_TYPENAME)!=null){
+                String[] types = getParameter(WFS_PARAM_TYPENAME).split(",");
+                    for (int i=0; i < types.length; i++){
+                        dft.addTypeName(types[i]);
+                    }                
+            }
+            brt=dft;            
+        }else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature)){
+            GetFeature gf = new GetFeature();
+            setBasicRequest(gf);
+            if (this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT)!=null){
+                gf.setOutputFormat(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT));                
+            }
+            Query q = new Query();
+            if (getParameter(WFS_PARAM_TYPENAME)!=null){
+                StringBuffer s = new StringBuffer();
+                String[] typenames=getParameter(WFS_PARAM_TYPENAME).split(",");
+                for (int i=0; i < typenames.length; i++){
+                    if (i!=0)
+                        s.append(",");
+                    s.append(typenames[i]);
+                }
+                q.setTypeName(s.toString());
+            }
+            if (getParameter(WMS_PARAM_SRS)!=null){
+                q.setSrsName(getParameter(WMS_PARAM_SRS));
+            }
+            if (getParameter(WFS_PARAM_FILTER)!=null){
+                AnyNode a = xmlStringToAnyNode(getParameter(WFS_PARAM_FILTER));
+                q.setFilter(a);
+            }else if (getParameter(WMS_PARAM_BBOX)!=null){
+                StringBuffer s = new StringBuffer();
+                String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");                
+                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");                            
+                s.append(tokens[0]+","+tokens[1]+" "+tokens[2]+","+tokens[3]);
+                s.append("</coordinates></Box></BBOX></Filter>");                
+                AnyNode a=xmlStringToAnyNode(s.toString());
+                q.setFilter(a);
+            }
+            gf.addQuery(q);
+            brt=gf;                     
+        }else{
+            throw new UnsupportedOperationException("Request: "+getParameter(WMS_REQUEST)+" wordt (nog) niet ondersteund");
         }
+        StringWriter sw= new StringWriter();
+        Marshaller m = new Marshaller(sw);
+        if (getNameSpaces()!=null){
+            Set mapEntries = getNameSpaces().entrySet();
+            Iterator it=mapEntries.iterator();
+            while(it.hasNext()){
+                Map.Entry me= (Entry) it.next();
+                m.setNamespaceMapping((String)me.getKey(), (String)me.getValue());
+            }
+        }
+        if (brt!=null){
+            m.marshal(brt);            
+            body=sw.toString();
+        }
+        return body;        
     }
     
     public String getUrlWithNonOGCparams(){
@@ -558,59 +590,33 @@ public class OGCRequest implements KBConstants{
         }
         
         return true;
-    }
-    /*
-    private void validateParams() throws Exception {
-        int width  = Integer.parseInt(getParameter(WMS_PARAM_WIDTH));
-        int height = Integer.parseInt(getParameter(WMS_PARAM_HEIGHT));
-        if(width < 1 || height < 1 || width > 2048 || height > 2048) {
-            log.error("Image wrong size: width, height: " + width + ", " + height);
-            throw new Exception(IMAGE_SIZE_EXCEPTION);
+    }    
+
+    private void setBasicRequest(BaseRequestType brt) {
+        if (this.getParameter(OGCRequest.WMS_VERSION)!=null)
+            brt.setVersion(this.getParameter(OGCRequest.WMS_VERSION));
+        if (this.getParameter(OGCRequest.WMS_SERVICE)!=null)
+            brt.setService(this.getParameter(OGCRequest.WMS_SERVICE));        
+        if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES)!=null){
+            log.debug("nog niet geimplementeerd: "+WFS_PARAM_MAXFEATURES);
         }
+    }
+    public AnyNode xmlStringToAnyNode(String xml) throws ParserConfigurationException, SAXException, IOException {        
+        AnyNode anyNode = null;       
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser saxParser = factory.newSAXParser();
+        XMLReader reader = saxParser.getXMLReader();
+
+        org.exolab.castor.xml.util.SAX2ANY handler = new org.exolab.castor.xml.util.SAX2ANY();
+
+        reader.setContentHandler(handler);
+        reader.setErrorHandler(handler);
+        InputSource source = new InputSource(new StringReader(xml));
+        reader.parse(source);
+
+        anyNode = handler.getStartingNode();
         
-        String [] boxx = (getParameter(WMS_PARAM_BBOX)).split(",");
-        if(boxx.length < 4) {
-            log.error("BBOX wrong size: " + boxx.length);
-            throw new Exception(BBOX_EXCEPTION);
-        }
-        
-        double minx=0.0, miny=0.0, maxx=-1.0, maxy=-1.0;
-        try {
-            minx = Double.parseDouble(boxx[0]);
-            miny = Double.parseDouble(boxx[1]);
-            maxx = Double.parseDouble(boxx[2]);
-            maxy = Double.parseDouble(boxx[3]);
-            if (minx > maxx || miny > maxy) {
-                throw new Exception("");
-            }
-        } catch (Exception e) {
-            log.error("BBOX error minx, miny, maxx, maxy: " + minx+ ", "+ miny+ ", "+maxx+ ", "+maxy);
-            throw new Exception(BBOX_EXCEPTION);
-        }
+        return anyNode;
     }
     
-    
-    public static void main(String [] args) {
-        OGCRequest ogc = new OGCRequest();
-        Iterator it = TEST_URLS.iterator();
-        while (it.hasNext()) {
-            String url = (String) it.next();
-            ogc.setUrl(url);
-            
-            try {
-                boolean isvalid = ogc.isValidRequestURL();
-                System.out.println(isvalid);
-            } catch (Exception e) {
-                System.out.println(e.toString());
-            }
-        }
-    }
-    
-    public static final List TEST_URLS = Arrays.asList(new String[] {
-        "http://www.kb.nl/wms?REQUEST=GetCapabilities&SERVICE=wms&VERSION=1.1.1",
-        //"http://www.kb.nl/wms?REQUEST=GetCapabilities&SERVICE=wms",
-        "http://www.kb.nl/wms?REQUEST=GetMap&SERVICE=wms&VERSION=1.1.1&LAYERS=&STYLES=&SRS=&BBOX=&WIDTH=&HEIGHT=&FORMAT=",
-        "http://www.kb.nl/wms?REQUEST=GetCapabilities"
-    });
-    */
 }

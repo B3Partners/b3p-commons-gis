@@ -13,6 +13,7 @@ import com.vividsolutions.jump.feature.FeatureDataset;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -82,56 +83,47 @@ public class B3pGMLReader extends GMLReader{
         String[] featureTypes=null;
         if (wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME)!=null)
             featureTypes= wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
-        for (int i=0; i < featureTypes.length; i++){
-            try{
-                Object o=null;
-                o=templates.get(featureTypes[i]);
-                if(o==null){
-                    String[] tokens=featureTypes[i].split(":");
-                    if (tokens.length>1)
-                        o=templates.get(tokens[1]);
-                    
-                } 
-                if (o==null){
-                    log.error("Kan template niet vinden voor "+featureTypes[i]);
-                }
-                GMLInputTemplate git = (GMLInputTemplate)o;
-                wfsgf.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,featureTypes[i]);
-                HttpClient client = new HttpClient();        
-                String host=wfsgf.getUrlWithNonOGCparams();
-                method = new PostMethod(host); 
-                String body=wfsgf.getXMLBody();
-                method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-                int status=client.executeMethod(method);
-                if (status== HttpStatus.SC_OK){
-                    log.debug("Response ok, trying to create FeatureCollection....");
-                    Reader r = null;
-                    r=new InputStreamReader(method.getResponseBodyAsStream());                    
-                    GMLReader gr= new GMLReader();
-                    gr.setInputTemplate(git);                
-                    FeatureCollection fc=gr.read(r);
-                    if (fc.size()==0){
-                        //There are no Features loaded. So redo the post method and show the response to user.
-                        PostMethod method2= new PostMethod(host);
-                        method2.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-                        client.executeMethod(method2);
-                        String cause=method2.getResponseBodyAsString(1000);
-                        if(log.isDebugEnabled()){                            
-                            log.error("No features returned cause(first 1000 characters): "+cause);
-                        }                        
-                    }
-                    features.put(featureTypes[i],fc);   
-                }else{
-                    log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
-                }
-            }catch(IOException ioe){
-                log.error("",ioe);
-            }catch (Exception e){
-                log.error("",e);
+        for (int i=0; i < featureTypes.length; i++){            
+            Object o=null;
+            o=templates.get(featureTypes[i]);
+            if(o==null){
+                String[] tokens=featureTypes[i].split(":");
+                if (tokens.length>1)
+                    o=templates.get(tokens[1]);
+
+            } 
+            if (o==null){
+                log.error("Kan template niet vinden voor "+featureTypes[i]);
             }
-            finally{
-                method.releaseConnection();
-            }
+            GMLInputTemplate git = (GMLInputTemplate)o;
+            wfsgf.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,featureTypes[i]);
+            HttpClient client = new HttpClient();        
+            String host=wfsgf.getUrlWithNonOGCparams();
+            method = new PostMethod(host); 
+            String body=wfsgf.getXMLBody();
+            method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+            int status=client.executeMethod(method);
+            if (status== HttpStatus.SC_OK){
+                log.debug("Response ok, trying to create FeatureCollection....");
+                Reader r = null;
+                r=new InputStreamReader(method.getResponseBodyAsStream());                    
+                GMLReader gr= new GMLReader();
+                gr.setInputTemplate(git);                
+                FeatureCollection fc=gr.read(r);
+                if (fc.size()==0){
+                    //There are no Features loaded. So redo the post method and show the response to user.
+                    PostMethod method2= new PostMethod(host);
+                    method2.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+                    client.executeMethod(method2);
+                    String cause=method2.getResponseBodyAsString(1000);
+                    if(log.isDebugEnabled()){                            
+                        log.error("No features returned cause(first 1000 characters): "+cause);
+                    }                        
+                }
+                features.put(featureTypes[i],fc);   
+            }else{
+                log.error("Failed to connect with "+wfsgf.getUrlWithNonOGCparams()+" Using body: "+body);
+            }            
         }
         if (features.size()==0){            
             return null;
@@ -258,13 +250,10 @@ public class B3pGMLReader extends GMLReader{
                             sb.append("</JCSGMLInputTemplate>");
                             GMLInputTemplate git = new GMLInputTemplate();
                             String template=sb.toString();
-                            try {
-                                git.load(new StringReader(sb.toString()));
-                                templates.put(name,git);
-                                log.debug("Template: "+sb.toString());
-                            } catch (ParseException ex) {
-                                log.error("",ex);
-                            }
+                            git.load(new StringReader(sb.toString()));
+                            templates.put(name,git);
+                            log.debug("Template: "+sb.toString());
+
                         }                      
                     }                
                 }            
@@ -277,9 +266,13 @@ public class B3pGMLReader extends GMLReader{
     }
      public static void main(String [] args) throws IOException, ParseException, Exception{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
-         String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
+         String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";
+         String degreeurl="http://portal.prvlimburg.nl/risicokaart_prof/ogcwebservices?SRSNAME=EPSG:28992&TYPENAME=app:Incident&VERSION=1.1.0&SERVICE=WFS&REQUEST=GetFeature&namespace=xmlns(app=http://www.deegree.org/app)";
          B3pGMLReader reader = new B3pGMLReader();
-         reader.readWFSUrl(new OGCRequest(royurl));
+         OGCRequest ogcr =new OGCRequest(royurl);
+         ogcr.getUrl();
+         reader.readWFSUrl(ogcr);
+         
      }
 
     private ArrayList getElementsWithTagname(Node node, String tagname) {
@@ -306,46 +299,34 @@ public class B3pGMLReader extends GMLReader{
         else
             return false;
     }    
-    private Document getDocumentByHTTPPost(String host, String body){
+    private Document getDocumentByHTTPPost(String host, String body) throws UnsupportedEncodingException, SAXException, IOException, TransformerConfigurationException, TransformerException{
         Document doc=null;
-        PostMethod method = null;        
-        try{
-            HttpClient client = new HttpClient();        
-            method = new PostMethod(host);        
-            method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-            int status=client.executeMethod(method);
-            if (status== HttpStatus.SC_OK){
-                DOMParser dp = new DOMParser();
-                //String s = method.getResponseBodyAsString();
-                //s+="s";
-                dp.parse(new InputSource(method.getResponseBodyAsStream()));
-                doc=dp.getDocument();
-                //for testing
-                TransformerFactory transfac = TransformerFactory.newInstance();  
-                Transformer trans = transfac.newTransformer(); 
-                trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");  
-                trans.setOutputProperty(OutputKeys.INDENT, "yes");
-                StringWriter sw = new StringWriter();
-                StreamResult sr = new StreamResult(sw);
-                DOMSource  ds = new DOMSource (doc);
-                trans.transform(ds,sr);
-                String xmlResult=sw.toString();
-                log.debug("Returned document: "+xmlResult);
-            }else{
-                log.error("Can't get document. Cause error code: "+status);                     
-            }                
-        }catch (SAXException se){
-             log.error("",se);
-        }catch(TransformerConfigurationException tce){
-            log.error("",tce);
-        }catch(TransformerException te){
-            log.error("",te);
-        }catch (IOException ex) {
-             log.error("",ex);
-        }finally {
-            // Release the connection.
-            method.releaseConnection();
-        } 
+        PostMethod method = null;                
+        HttpClient client = new HttpClient();        
+        method = new PostMethod(host);        
+        method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+        int status=client.executeMethod(method);
+        if (status== HttpStatus.SC_OK){
+            DOMParser dp = new DOMParser();
+            //String s = method.getResponseBodyAsString();
+            //s+="s";
+            dp.parse(new InputSource(method.getResponseBodyAsStream()));
+            doc=dp.getDocument();
+            //for testing
+            TransformerFactory transfac = TransformerFactory.newInstance();  
+            Transformer trans = transfac.newTransformer(); 
+            trans.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");  
+            trans.setOutputProperty(OutputKeys.INDENT, "yes");
+            StringWriter sw = new StringWriter();
+            StreamResult sr = new StreamResult(sw);
+            DOMSource  ds = new DOMSource (doc);
+            trans.transform(ds,sr);
+            String xmlResult=sw.toString();
+            log.debug("Returned document: "+xmlResult);
+        }else{
+            log.error("Can't get document. Cause error code: "+status);                     
+        }                
+        
         return doc;
     }
 }

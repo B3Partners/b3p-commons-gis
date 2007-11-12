@@ -223,20 +223,15 @@ public class B3pOgcSqlWriter {
                         }
                         //execute the create table script.
                         PreparedStatement statement = null;
-                        try{
-                            if (sbg.toString()!=null){
-                                sb.append(";");
-                                sb.append(sbg.toString());
-                            }
-                            statement=connection.prepareStatement(sb.toString());
-                            statement.execute();                        
-                        }catch(SQLException se){
-                            log.error("Query: "+sb.toString(),se);
-                            throw se;
-                        }finally{
-                            if (statement!=null)
-                                statement.close();
+                        
+                        if (sbg.toString()!=null){
+                            sb.append(";");
+                            sb.append(sbg.toString());
                         }
+                        statement=connection.prepareStatement(sb.toString());
+                        statement.execute();                        
+                        statement.close();
+                        
                     }else{
                         throw new Exception("CREATE TABLE not supported for "+dbmd.getDatabaseProductName());
                     }
@@ -320,19 +315,10 @@ public class B3pOgcSqlWriter {
             //excecute the insert script if there is data to add.
             if (q!=null){
                 PreparedStatement statement=null;
-                try{                
-                    statement=connection.prepareStatement(q.toString());
-                    statement.execute();
-
-                }catch(SQLException se){
-                    log.error("Can't execute query: "+q.toString(), se);
-                    throw se;
-                }finally {
-                    if (statement!=null)
-                        statement.close();
-                }
+                statement=connection.prepareStatement(q.toString());
+                statement.execute();
+                statement.close();
             }
-            
         }
     }    
     public Connection getConnection() {
