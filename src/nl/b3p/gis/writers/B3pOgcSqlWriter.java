@@ -13,22 +13,16 @@ import com.vividsolutions.jump.feature.AttributeType;
 import com.vividsolutions.jump.feature.Feature;
 import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureSchema;
-import com.vividsolutions.jump.io.ParseException;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import nl.b3p.gis.readers.B3pGMLReader;
-import nl.b3p.ogc.utils.OGCRequest;
-import nl.b3p.ogc.utils.OgcSqlUtils;
+import nl.b3p.ogc.utils.SqlMetaDataUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -41,19 +35,18 @@ public class B3pOgcSqlWriter {
     
     private Connection connection;    
     
-    public static final String DEFAULT_GEOM_COLUMN="the_geom";
-    public static final String PRODUCT_POSTGRES="PostgreSQL";
+    public static final String DEFAULT_GEOM_COLUMN="the_geom";    
     public static final String POSTGRES_GLOBALGEOMETRY="GEOMETRY";
-    public static final Set SUPPORTED_DIALECTS=new HashSet();   
+    public static final List SUPPORTED_DIALECTS= Arrays.asList(new String[] {
+        SqlMetaDataUtils.PRODUCT_POSTGRES
+    });    
     
     /** Creates a new instance of B3pOgcSqlWriter */
     public B3pOgcSqlWriter(Connection conn){
-        SUPPORTED_DIALECTS.add(PRODUCT_POSTGRES);
         setConnection(conn);  
     }
     /* Creates a connection and a B3pOgcSqlWriter*/
     public B3pOgcSqlWriter(String url,String user,String password, java.sql.Driver driver) throws SQLException{
-        SUPPORTED_DIALECTS.add(PRODUCT_POSTGRES);
         DriverManager.registerDriver(driver);
         setConnection(DriverManager.getConnection(url,user,password));
     }
@@ -86,7 +79,7 @@ public class B3pOgcSqlWriter {
         /*if(!sameGeomType)
             throw new Exception("Not all features got the same Geometry Type");*/
         DatabaseMetaData dbmd = connection.getMetaData();
-        List tableNames=OgcSqlUtils.getTableAndViewNames(connection);        
+        List tableNames=SqlMetaDataUtils.getTableAndViewNames(connection);        
         FeatureSchema fs= fc.getFeatureSchema();         
         boolean wrongTable=false;
         if (tableNames!=null){
@@ -176,7 +169,7 @@ public class B3pOgcSqlWriter {
                         //if there is a geomColum needed create the create script.
                         if(geomColumnFound){
                             //if it is a postgres/postgis db
-                            if (dbmd.getDatabaseProductName().equalsIgnoreCase(PRODUCT_POSTGRES)){
+                            if (dbmd.getDatabaseProductName().equalsIgnoreCase(SqlMetaDataUtils.PRODUCT_POSTGRES)){
                                 // get the database name.
                                 String s=dbmd.getURL();
                                 String url=dbmd.getURL();
