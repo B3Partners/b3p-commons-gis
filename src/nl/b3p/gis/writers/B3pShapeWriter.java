@@ -9,6 +9,9 @@
 package nl.b3p.gis.writers;
 
 import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jump.feature.Feature;
@@ -56,14 +59,16 @@ public class B3pShapeWriter {
         Iterator it = fcAll.iterator();
         while(it.hasNext()){
             Feature f = (Feature)it.next();
-            if (f.getGeometry() instanceof Point){
+            if (f.getGeometry() instanceof Point || f.getGeometry() instanceof MultiPoint){
                 allPoint.add(f);                        
             }
-            if (f.getGeometry() instanceof Polygon){
+            else if (f.getGeometry() instanceof Polygon || f.getGeometry() instanceof MultiPolygon){
                 allPoly.add(f);
             }
-            if (f.getGeometry() instanceof LineString){
+            else if (f.getGeometry() instanceof LineString || f.getGeometry() instanceof MultiLineString){
                 allLine.add(f);
+            }else{
+                log.error("Geometry type not found"+f.getGeometry().getClass().toString());
             }
         }
         ArrayList files= new ArrayList();
