@@ -106,6 +106,7 @@ public class B3pGMLReader extends GMLReader{
             if (status== HttpStatus.SC_OK){
                 log.debug("Response ok, trying to create FeatureCollection....");
                 Reader r = null;
+                
                 r=new InputStreamReader(method.getResponseBodyAsStream());                    
                 GMLReader gr= new GMLReader();
                 gr.setInputTemplate(git);                

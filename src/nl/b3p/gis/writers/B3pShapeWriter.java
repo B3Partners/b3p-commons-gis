@@ -55,40 +55,52 @@ public class B3pShapeWriter {
     public List writeToShape(FeatureCollection fcAll,String filename) throws IllegalParametersException, Exception{
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allPoly = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());        
+        FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMPoint = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMPoly = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());
         Iterator it = fcAll.iterator();
         while(it.hasNext()){
             Feature f = (Feature)it.next();
-            if (f.getGeometry() instanceof Point || f.getGeometry() instanceof MultiPoint){
+            if (f.getGeometry() instanceof Point){
                 allPoint.add(f);                        
             }
-            else if (f.getGeometry() instanceof Polygon || f.getGeometry() instanceof MultiPolygon){
+            else if (f.getGeometry() instanceof Polygon){
                 allPoly.add(f);
             }
-            else if (f.getGeometry() instanceof LineString || f.getGeometry() instanceof MultiLineString){
+            else if (f.getGeometry() instanceof LineString){
                 allLine.add(f);
+            }
+            else if (f.getGeometry() instanceof MultiPolygon){
+                allMPoly.add(f);
+            }
+            else if (f.getGeometry() instanceof MultiPoint){
+                allMPoint.add(f);
+            }
+            else if (f.getGeometry() instanceof MultiLineString){
+                allMLine.add(f);
             }else{
                 log.error("Geometry type not found"+f.getGeometry().getClass().toString());
             }
         }
         ArrayList files= new ArrayList();
         if (allPoint.size()>0){
-            if (allPoly.size()==0 && allLine.size()==0)
-                files.addAll(writeShape(allPoint,filename));
-            else
-                files.addAll(writeShape(allPoint,filename+"_p.shp"));
+            files.addAll(writeShape(allPoint,filename+"_p.shp"));
         }
         if (allPoly.size()>0){
-            if (allPoint.size()==0 && allLine.size()==0)
-                files.addAll(writeShape(allPoly,filename));
-            else
-                files.addAll(writeShape(allPoly,filename+"_v.shp"));
+            files.addAll(writeShape(allPoly,filename+"_v.shp"));
         }
         if(allLine.size()>0){
-            if (allPoint.size()==0 && allPoly.size()==0)
-                files.addAll(writeShape(allLine,filename));
-            else
-                files.addAll(writeShape(allLine,filename+"_l.shp"));
+            files.addAll(writeShape(allLine,filename+"_l.shp"));
+        }
+        if (allMPoint.size()>0){
+            files.addAll(writeShape(allPoint,filename+"_mp.shp"));
+        }
+        if (allMPoly.size()>0){
+            files.addAll(writeShape(allPoly,filename+"_mv.shp"));
+        }
+        if(allMLine.size()>0){
+            files.addAll(writeShape(allLine,filename+"_ml.shp"));
         }
         return files;
     }
