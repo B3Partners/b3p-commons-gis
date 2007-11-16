@@ -213,7 +213,10 @@ public class OGCRequest implements KBConstants{
                 Map.Entry me= (Entry) it.next();
                 m.setNamespaceMapping((String)me.getKey(), (String)me.getValue());
             }
+            
         }
+        m.setNamespaceMapping("xsi","http://www.w3.org/2001/XMLSchema-instance");
+        m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
         if (brt!=null){
             m.marshal(brt);            
             body=sw.toString();
@@ -225,6 +228,7 @@ public class OGCRequest implements KBConstants{
         OGCRequest ogcu=(OGCRequest)this.clone();
         ogcu.removeAllWMSParameters();
         ogcu.removeAllWFSParameters();
+        ogcu.setNameSpaces(null);
         return ogcu.getUrl();
     }
      /** Removes a parameter

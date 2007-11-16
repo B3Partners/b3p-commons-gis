@@ -106,11 +106,10 @@ public class B3pGMLReader extends GMLReader{
             if (status== HttpStatus.SC_OK){
                 log.debug("Response ok, trying to create FeatureCollection....");
                 Reader r = null;
-                
                 r=new InputStreamReader(method.getResponseBodyAsStream());                    
                 GMLReader gr= new GMLReader();
                 gr.setInputTemplate(git);                
-                FeatureCollection fc=gr.read(r);
+                FeatureCollection fc=gr.read(r);               
                 if (fc.size()==0){
                     //There are no Features loaded. So redo the post method and show the response to user.
                     PostMethod method2= new PostMethod(host);
@@ -246,12 +245,13 @@ public class B3pGMLReader extends GMLReader{
                             if (cols.length()>0){
                                 sb.append("<ColumnDefinitions>");
                                 sb.append(cols.toString());
+                                //sb.append("<column><name>naam</name><type>STRING</type><valueelement elementname=\"app:naam\"/><valuelocation position=\"body\"/></column>");
                                 sb.append("</ColumnDefinitions>");
                             }
                             sb.append("</JCSGMLInputTemplate>");
                             GMLInputTemplate git = new GMLInputTemplate();
                             String template=sb.toString();
-                            git.load(new StringReader(sb.toString()));
+                            git.load(new StringReader(sb.toString()),type);
                             templates.put(name,git);
                             log.debug("Template: "+sb.toString());
 

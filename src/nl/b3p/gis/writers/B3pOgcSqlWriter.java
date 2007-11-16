@@ -34,7 +34,7 @@ public class B3pOgcSqlWriter {
     private static final Log log = LogFactory.getLog(B3pOgcSqlWriter.class);
     
     private Connection connection;    
-    
+    private int batchValue=20;
     public static final String DEFAULT_GEOM_COLUMN="the_geom";    
     public static final String POSTGRES_GLOBALGEOMETRY="GEOMETRY";
     public static final List SUPPORTED_DIALECTS= Arrays.asList(new String[] {
@@ -254,7 +254,7 @@ public class B3pOgcSqlWriter {
             Iterator it= fc.iterator();
             //Create the insert script.
             StringBuffer q = null;
-            while (it.hasNext()){
+            for (int inserts=0; it.hasNext();inserts++){
                 if (q==null)
                     q=new StringBuffer();
                 Feature f= (Feature)it.next();
@@ -303,23 +303,25 @@ public class B3pOgcSqlWriter {
                     }
                     
                 }
-                q.append(");");                
+                q.append(");");
+                //execute the statement if the amount of inserts reaches the batchValue
+                if (inserts==getBatchValue()){
+                    PreparedStatement statement=null;
+                    statement=connection.prepareStatement(q.toString());
+                    statement.execute();
+                    statement.close();
+                    q=null;
+                }
             }
             //excecute the insert script if there is data to add.
-            if (q!=null){
+            if (q!=null && q.length()>0){
                 PreparedStatement statement=null;
                 statement=connection.prepareStatement(q.toString());
                 statement.execute();
                 statement.close();
             }
         }
-    }    
-    public Connection getConnection() {
-        return connection;
-    }
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
+    } 
     /**
      * Check if the given attributetype is compatible with the given sql type
      * @param attributeType the attributeType of the feature attribute
@@ -348,12 +350,13 @@ public class B3pOgcSqlWriter {
         }
         return false;        
     }
-    /*
-     public static void main(String [] args) throws IOException, ParseException, Exception{
+    
+  /*  public static void main(String [] args) throws IOException, ParseException, Exception{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
          String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
-         String degree="http://portal.prvlimburg.nl/risicokaart_prof/ogcwebservices?SRSNAME=EPSG:28992&TYPENAME=app:V_RB10_PUNT_PROF,app:V_KWO_PUNT_PROF,app:V_RB10_LIJN_PROF,app:RGS_IRG_KRN_PROF,app:V_RB9_LIJN_PROF,app:V_RB8_POLY_PROF,app:RGS_ISDFE_ZONE_PROF,app:Incident,app:V_RB9_POLY_PROF,app:gg,app:euregio_hulpverlening,app:V_RB10_POLY_PROF,app:RGS_ISG_AFST_PROF,app:RGS_ISB_EADPUNT_PROF,app:V_RB11_POLY_PROF,app:V_RB6_POLY_PROF,app:RGS_ISB_EAD_PROF,app:V_RB4_LIJN_PROF,app:V_RB5_POLY_PROF,app:V_RB8_LIJN_PROF,app:V_RB8_PUNT_PROF,app:RGS_IRG_LOK_PROF,app:RGS_IRG_EAD_PROF,app:V_RB6_LIJN_PROF,app:RGS_IRG_POS_PROF,app:seveso_1,app:V_RB6_PUNT_PROF,app:V_RB7_LIJN_PROF,app:V_RB5_POS_PROF,app:RGS_IRG_CTR_PROF,app:RGS_ISB_CTR_PROF,app:data_brussel,app:RGS_ISB_LOK_PROF,app:RGS_IRG_EADPUNT_PROF&VERSION=1.1.0&SERVICE=WFS&REQUEST=GetFeature";
-         String url="jdbc:postgresql://localhost:5432/pnb_wis";
+         //,POL2006_P5B_V,POL2006_P5A_V,POL2006_P4_V,POL2006_P3_V,POL2006_P6_V,POL2006_P2_V,POL2006_P1_V,POL2006_Grens_sted_dynam_V,POL2006_P13_Water_V,POL2006_AEF_beek_L,POL2006_SEF_beek_L,POL2006_P7_Transportas_L
+         String degree="http://lin017.prvlimburg.nl/cgi-bin/oru/pol2006_1_perspectieven?SRSNAME=EPSG:28992&TYPENAME=POL2006_P9_V,POL2006_P8_V&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature";
+         String url="jdbc:postgresql://localhost:5432/gistest";
          String user="postgres";
          String password="***REMOVED***";
          B3pGMLReader reader = new B3pGMLReader();
@@ -374,10 +377,32 @@ public class B3pOgcSqlWriter {
                  }
                  FeatureCollection fc= (FeatureCollection) features.get(featureType);                 
                  B3pOgcSqlWriter bosw = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
+                 bosw.setBatchValue(10);
                  if (fc!=null)
                      bosw.write(fc,tableName.toLowerCase(),"the_geom","28992",2,true,true);
              }
          }
-     }
+     }*/
+    /**Get the connection
      */
+    public Connection getConnection() {
+        return connection;
+    }
+    /**Set the Connection
+     *@param connection the connection used to access the database
+     */
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+    /**Get the batch value for committing inserts
+     */
+    public int getBatchValue() {
+        return batchValue;
+    }
+    /** Set the batch value for committing inserts. Default 2.
+     * @param batchValue the new value. Default it is 20
+     */
+    public void setBatchValue(int batchValue) {
+        this.batchValue = batchValue;
+    }
 }
