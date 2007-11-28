@@ -58,6 +58,8 @@ public class B3pGMLReader extends GMLReader{
     private static final String EXTENSION= "extension";
     private static final String ELEMENT= "element";
     
+    private int maxColumnNameLength=0;
+    
     /** Creates a new instance of B3pGMLReader */
     public B3pGMLReader() {
         super();        
@@ -156,6 +158,7 @@ public class B3pGMLReader extends GMLReader{
         //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.
         String[] types =ogcrequest.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
         for (int b=0; b < types.length; b++){
+            ArrayList usedColumnames=new ArrayList();
             wfsDFT.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,types[b]);
             String body=wfsDFT.getXMLBody();
             Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
@@ -217,7 +220,29 @@ public class B3pGMLReader extends GMLReader{
                             }                                            
                             if (e.getAttribute("type")!=null && allowedType(e.getAttribute("type")) && e.getAttribute("name")!=null){                        
                                 cols.append("<column><name>");
-                                cols.append(e.getAttribute("name"));
+                                if (maxColumnNameLength>0 && e.getAttribute("name").length()>maxColumnNameLength){
+                                    String newName=e.getAttribute("name").substring(0,maxColumnNameLength);
+                                    if (usedColumnames.contains(newName)){
+                                        newName=newName.substring(0,maxColumnNameLength-1);
+                                        int nameCounter=1;
+                                        newName+=nameCounter;
+                                        while (usedColumnames.contains(newName)){
+                                            nameCounter++;
+                                            String nn=""+nameCounter;
+                                            if (nn.length()>=newName.length()){
+                                                //can't create a unique name
+                                                newName=e.getAttribute("name");
+                                                break;
+                                            }  
+                                            newName=newName.substring(0,newName.length()-nn.length());
+                                            newName+=nameCounter;
+                                        }                                                
+                                    }
+                                    usedColumnames.add(newName);
+                                    cols.append(newName);
+                                }else{
+                                    cols.append(e.getAttribute("name"));
+                                }
                                 cols.append("</name><type>");
                                 //if (defaultPrefix!=null)
                                 //    cols.append(defaultPrefix+":");
@@ -329,5 +354,18 @@ public class B3pGMLReader extends GMLReader{
         }                
         
         return doc;
+    }
+    /**Get the maximal ColumnName Length. Default it's 0. If it is 0 the columnname length has no Maximum
+     *
+     *@return the maximal columnName length
+     */
+    public int getMaxColumnNameLength() {
+        return maxColumnNameLength;
+    }
+    /**Set the maximal ColumnName Length. Default it's 0. If it is 0 the columnname length has no Maximum
+     *@param maxColumnNameLength the new maximum columnlength
+     */
+    public void setMaxColumnNameLength(int maxColumnNameLength) {
+        this.maxColumnNameLength = maxColumnNameLength;
     }
 }
