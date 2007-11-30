@@ -94,13 +94,13 @@ public class B3pShapeWriter {
             files.addAll(writeShape(allLine,filename+"_l.shp"));
         }
         if (allMPoint.size()>0){
-            files.addAll(writeShape(allPoint,filename+"_mp.shp"));
+            files.addAll(writeShape(allMPoint,filename+"_mp.shp"));
         }
         if (allMPoly.size()>0){
-            files.addAll(writeShape(allPoly,filename+"_mv.shp"));
+            files.addAll(writeShape(allMPoly,filename+"_mv.shp"));
         }
         if(allMLine.size()>0){
-            files.addAll(writeShape(allLine,filename+"_ml.shp"));
+            files.addAll(writeShape(allMLine,filename+"_ml.shp"));
         }
         return files;
     }
