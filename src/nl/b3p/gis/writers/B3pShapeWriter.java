@@ -56,31 +56,22 @@ public class B3pShapeWriter {
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allPoly = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allMPoint = new FeatureDataset(fcAll.getFeatureSchema());
+        /*FeatureDataset allMPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allMPoly = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());*/
         Iterator it = fcAll.iterator();
         while(it.hasNext()){
             Feature f = (Feature)it.next();
-            if (f.getGeometry() instanceof Point){
+            if (f.getGeometry() instanceof Point || f.getGeometry() instanceof MultiPoint){
                 allPoint.add(f);                        
             }
-            else if (f.getGeometry() instanceof Polygon){
+            else if (f.getGeometry() instanceof Polygon || f.getGeometry() instanceof MultiPolygon){
                 allPoly.add(f);
             }
-            else if (f.getGeometry() instanceof LineString){
+            else if (f.getGeometry() instanceof LineString || f.getGeometry() instanceof MultiLineString){
                 allLine.add(f);
-            }
-            else if (f.getGeometry() instanceof MultiPolygon){
-                allMPoly.add(f);
-            }
-            else if (f.getGeometry() instanceof MultiPoint){
-                allMPoint.add(f);
-            }
-            else if (f.getGeometry() instanceof MultiLineString){
-                allMLine.add(f);
             }else{
-                log.error("Geometry type not found"+f.getGeometry().getClass().toString());
+                log.error("Geometry type not found: "+f.getGeometry().getClass().toString());
             }
         }
         ArrayList files= new ArrayList();
@@ -92,16 +83,7 @@ public class B3pShapeWriter {
         }
         if(allLine.size()>0){
             files.addAll(writeShape(allLine,filename+"_l.shp"));
-        }
-        if (allMPoint.size()>0){
-            files.addAll(writeShape(allMPoint,filename+"_mp.shp"));
-        }
-        if (allMPoly.size()>0){
-            files.addAll(writeShape(allMPoly,filename+"_mv.shp"));
-        }
-        if(allMLine.size()>0){
-            files.addAll(writeShape(allMLine,filename+"_ml.shp"));
-        }
+        }        
         return files;
     }
     /**
