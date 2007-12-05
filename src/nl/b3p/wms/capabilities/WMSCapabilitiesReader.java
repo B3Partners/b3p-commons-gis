@@ -130,6 +130,9 @@ public class WMSCapabilitiesReader implements KBConstants {
             if (mimeType==null || mimeType.indexOf("xml")==-1) {
                 throw new Exception("Cannot get a GetCapabilities document from server");
             }
+            if (mimeType.equals("application/vnd.ogc.se_xml")){
+                throw new Exception("Cannot get a GetCapabilities document. reason: "+method.getResponseBodyAsString());
+            }
             
             //Nu kan het service provider object gemaakt en gevuld worden
             serviceProvider = new ServiceProvider();
