@@ -133,6 +133,7 @@ public interface OGCConstants {
     public static final String WFS_VERSION_110="1.1.0";
     public static final String WFS_REQUEST_GetFeature="GetFeature";
     public static final String WFS_REQUEST_DiscribeFeatureType="DescribeFeatureType";
+    public static final String WFS_REQUEST_GetCapabilities="GetCapabilities";
     public static final String WFS_SERVICE_WFS="WFS";
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";    
     // </editor-fold>
