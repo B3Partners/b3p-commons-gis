@@ -1,0 +1,11 @@
+#Thu Dec 13 16:07:23 CET 2007
+nl.b3p.xml.wfs.v100.FeatureCollection=nl.b3p.xml.wfs.v100.FeatureCollectionDescriptor
+nl.b3p.xml.wfs.v100.GetCapabilitiesType=nl.b3p.xml.wfs.v100.GetCapabilitiesTypeDescriptor
+nl.b3p.xml.wfs.v100.FeatureCollectionType=nl.b3p.xml.wfs.v100.FeatureCollectionTypeDescriptor
+nl.b3p.xml.wfs.v100.DescribeFeatureTypeType=nl.b3p.xml.wfs.v100.DescribeFeatureTypeTypeDescriptor
+nl.b3p.xml.wfs.v100.DescribeFeatureType=nl.b3p.xml.wfs.v100.DescribeFeatureTypeDescriptor
+nl.b3p.xml.wfs.v100.Query=nl.b3p.xml.wfs.v100.QueryDescriptor
+nl.b3p.xml.wfs.v100.GetFeatureType=nl.b3p.xml.wfs.v100.GetFeatureTypeDescriptor
+nl.b3p.xml.wfs.v100.QueryType=nl.b3p.xml.wfs.v100.QueryTypeDescriptor
+nl.b3p.xml.wfs.v100.GetCapabilities=nl.b3p.xml.wfs.v100.GetCapabilitiesDescriptor
+nl.b3p.xml.wfs.v100.GetFeature=nl.b3p.xml.wfs.v100.GetFeatureDescriptor
