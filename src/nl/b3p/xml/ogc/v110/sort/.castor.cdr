@@ -1,0 +1,18 @@
+#Fri Dec 14 15:57:16 CET 2007
+nl.b3p.xml.ogc.v110.sort.Div=nl.b3p.xml.ogc.v110.sort.DivDescriptor
+nl.b3p.xml.ogc.v110.sort.SortPropertyType=nl.b3p.xml.ogc.v110.sort.SortPropertyTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.PropertyNameType=nl.b3p.xml.ogc.v110.sort.PropertyNameTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.Mul=nl.b3p.xml.ogc.v110.sort.MulDescriptor
+nl.b3p.xml.ogc.v110.sort.Literal=nl.b3p.xml.ogc.v110.sort.LiteralDescriptor
+nl.b3p.xml.ogc.v110.sort.ExpressionType=nl.b3p.xml.ogc.v110.sort.ExpressionTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.LiteralType=nl.b3p.xml.ogc.v110.sort.LiteralTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.Function=nl.b3p.xml.ogc.v110.sort.FunctionDescriptor
+nl.b3p.xml.ogc.v110.sort.BinaryOperatorType=nl.b3p.xml.ogc.v110.sort.BinaryOperatorTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.FunctionType=nl.b3p.xml.ogc.v110.sort.FunctionTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.SortProperty=nl.b3p.xml.ogc.v110.sort.SortPropertyDescriptor
+nl.b3p.xml.ogc.v110.sort.SortByType=nl.b3p.xml.ogc.v110.sort.SortByTypeDescriptor
+nl.b3p.xml.ogc.v110.sort.PropertyName=nl.b3p.xml.ogc.v110.sort.PropertyNameDescriptor
+nl.b3p.xml.ogc.v110.sort.Expression=nl.b3p.xml.ogc.v110.sort.ExpressionDescriptor
+nl.b3p.xml.ogc.v110.sort.Add=nl.b3p.xml.ogc.v110.sort.AddDescriptor
+nl.b3p.xml.ogc.v110.sort.SortBy=nl.b3p.xml.ogc.v110.sort.SortByDescriptor
+nl.b3p.xml.ogc.v110.sort.Sub=nl.b3p.xml.ogc.v110.sort.SubDescriptor

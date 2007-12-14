@@ -1,0 +1,7 @@
+#Fri Dec 14 15:44:22 CET 2007
+nl.b3p.xml.ows.v100.common.WGS84BoundingBox=nl.b3p.xml.ows.v100.common.WGS84BoundingBoxDescriptor
+nl.b3p.xml.ows.v100.common.Metadata=nl.b3p.xml.ows.v100.common.MetadataDescriptor
+nl.b3p.xml.ows.v100.common.WGS84BoundingBoxType=nl.b3p.xml.ows.v100.common.WGS84BoundingBoxTypeDescriptor
+nl.b3p.xml.ows.v100.common.BoundingBoxType=nl.b3p.xml.ows.v100.common.BoundingBoxTypeDescriptor
+nl.b3p.xml.ows.v100.common.BoundingBox=nl.b3p.xml.ows.v100.common.BoundingBoxDescriptor
+nl.b3p.xml.ows.v100.common.MetadataType=nl.b3p.xml.ows.v100.common.MetadataTypeDescriptor

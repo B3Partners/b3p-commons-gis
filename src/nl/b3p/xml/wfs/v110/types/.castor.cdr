@@ -1,0 +1,7 @@
+#Fri Dec 14 15:59:07 CET 2007
+nl.b3p.xml.wfs.v110.types.IdentifierGenerationOptionType=nl.b3p.xml.wfs.v110.types.IdentifierGenerationOptionTypeDescriptor
+nl.b3p.xml.wfs.v110.types.MetadataURLTypeFormatType=nl.b3p.xml.wfs.v110.types.MetadataURLTypeFormatTypeDescriptor
+nl.b3p.xml.wfs.v110.types.OperationType=nl.b3p.xml.wfs.v110.types.OperationTypeDescriptor
+nl.b3p.xml.wfs.v110.types.AllSomeType=nl.b3p.xml.wfs.v110.types.AllSomeTypeDescriptor
+nl.b3p.xml.wfs.v110.types.ResultTypeType=nl.b3p.xml.wfs.v110.types.ResultTypeTypeDescriptor
+nl.b3p.xml.wfs.v110.types.MetadataURLTypeTypeType=nl.b3p.xml.wfs.v110.types.MetadataURLTypeTypeTypeDescriptor

@@ -1,0 +1,5 @@
+#Fri Dec 14 15:32:23 CET 2007
+nl.b3p.xml.ogc.v110.types.ComparisonOperatorType=nl.b3p.xml.ogc.v110.types.ComparisonOperatorTypeDescriptor
+nl.b3p.xml.ogc.v110.types.GeometryOperandType=nl.b3p.xml.ogc.v110.types.GeometryOperandTypeDescriptor
+nl.b3p.xml.ogc.v110.types.SortOrderType=nl.b3p.xml.ogc.v110.types.SortOrderTypeDescriptor
+nl.b3p.xml.ogc.v110.types.SpatialOperatorNameType=nl.b3p.xml.ogc.v110.types.SpatialOperatorNameTypeDescriptor

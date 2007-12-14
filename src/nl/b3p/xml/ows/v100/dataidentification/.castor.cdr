@@ -1,0 +1,26 @@
+#Fri Dec 14 15:45:19 CET 2007
+nl.b3p.xml.ows.v100.dataidentification.ContactType=nl.b3p.xml.ows.v100.dataidentification.ContactTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.WGS84BoundingBox=nl.b3p.xml.ows.v100.dataidentification.WGS84BoundingBoxDescriptor
+nl.b3p.xml.ows.v100.dataidentification.DescriptionType=nl.b3p.xml.ows.v100.dataidentification.DescriptionTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Identifier=nl.b3p.xml.ows.v100.dataidentification.IdentifierDescriptor
+nl.b3p.xml.ows.v100.dataidentification.KeywordsType=nl.b3p.xml.ows.v100.dataidentification.KeywordsTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Phone=nl.b3p.xml.ows.v100.dataidentification.PhoneDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Address=nl.b3p.xml.ows.v100.dataidentification.AddressDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Keywords=nl.b3p.xml.ows.v100.dataidentification.KeywordsDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Role=nl.b3p.xml.ows.v100.dataidentification.RoleDescriptor
+nl.b3p.xml.ows.v100.dataidentification.AddressType=nl.b3p.xml.ows.v100.dataidentification.AddressTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.OnlineResourceType=nl.b3p.xml.ows.v100.dataidentification.OnlineResourceTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.WGS84BoundingBoxType=nl.b3p.xml.ows.v100.dataidentification.WGS84BoundingBoxTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Type=nl.b3p.xml.ows.v100.dataidentification.TypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.TelephoneType=nl.b3p.xml.ows.v100.dataidentification.TelephoneTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.ResponsiblePartySubsetType=nl.b3p.xml.ows.v100.dataidentification.ResponsiblePartySubsetTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.OnlineResource=nl.b3p.xml.ows.v100.dataidentification.OnlineResourceDescriptor
+nl.b3p.xml.ows.v100.dataidentification.CodeType=nl.b3p.xml.ows.v100.dataidentification.CodeTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.IdentificationType=nl.b3p.xml.ows.v100.dataidentification.IdentificationTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.ContactInfo=nl.b3p.xml.ows.v100.dataidentification.ContactInfoDescriptor
+nl.b3p.xml.ows.v100.dataidentification.BoundingBox=nl.b3p.xml.ows.v100.dataidentification.BoundingBoxDescriptor
+nl.b3p.xml.ows.v100.dataidentification.ResponsiblePartyType=nl.b3p.xml.ows.v100.dataidentification.ResponsiblePartyTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.PointOfContact=nl.b3p.xml.ows.v100.dataidentification.PointOfContactDescriptor
+nl.b3p.xml.ows.v100.dataidentification.Metadata=nl.b3p.xml.ows.v100.dataidentification.MetadataDescriptor
+nl.b3p.xml.ows.v100.dataidentification.BoundingBoxType=nl.b3p.xml.ows.v100.dataidentification.BoundingBoxTypeDescriptor
+nl.b3p.xml.ows.v100.dataidentification.MetadataType=nl.b3p.xml.ows.v100.dataidentification.MetadataTypeDescriptor
