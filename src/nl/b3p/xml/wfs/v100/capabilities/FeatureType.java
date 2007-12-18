@@ -20,7 +20,7 @@ import org.exolab.castor.xml.Unmarshaller;
  * @version $Revision$ $Date$
  */
 public class FeatureType extends FeatureTypeType 
-implements java.io.Serializable
+implements java.io.Serializable, nl.b3p.xml.wfs.FeatureType
 {
 
 

@@ -19,8 +19,7 @@ import org.exolab.castor.xml.Unmarshaller;
  * 
  * @version $Revision$ $Date$
  */
-public class WFS_Capabilities extends WFS_CapabilitiesType 
-implements java.io.Serializable
+public class WFS_Capabilities extends WFS_CapabilitiesType implements java.io.Serializable,nl.b3p.xml.wfs.WFS_Capabilities
 {
 
 

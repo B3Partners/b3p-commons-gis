@@ -135,7 +135,10 @@ public interface OGCConstants {
     public static final String WFS_REQUEST_DiscribeFeatureType="DescribeFeatureType";
     public static final String WFS_REQUEST_GetCapabilities="GetCapabilities";
     public static final String WFS_SERVICE_WFS="WFS";
-    public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";    
+    public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";
+    
+    public static final String WFS_OBJECT_CAPABILITIES="WFS_Capabilities";
+    public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT="ServiceExceptionReport";
     // </editor-fold>
     
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
