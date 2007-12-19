@@ -141,8 +141,9 @@ public class BoundingBoxTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         desc.setValidator(fieldValidator);
         //-- initialize element descriptors
         
-        //-- _lowerCornerList
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Double.TYPE, "_lowerCornerList", "LowerCorner", org.exolab.castor.xml.NodeType.Element);
+        //-- _lowerCorner
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_lowerCorner", "LowerCorner", org.exolab.castor.xml.NodeType.Element);
+        desc.setImmutable(true);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -155,10 +156,7 @@ public class BoundingBoxTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
             {
                 try {
                     BoundingBoxType target = (BoundingBoxType) object;
-                    // ignore null values for non optional primitives
-                    if (value == null) return;
-                    
-                    target.addLowerCorner( ((java.lang.Double)value).doubleValue());
+                    target.setLowerCorner( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -171,19 +169,21 @@ public class BoundingBoxTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         desc.setHandler(handler);
         desc.setNameSpaceURI("http://www.opengis.net/ows");
         desc.setRequired(true);
-        desc.setMultivalued(true);
+        desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _lowerCornerList
+        //-- validation code for: _lowerCorner
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
+        fieldValidator.setMinOccurs(1);
         { //-- local scope
-            org.exolab.castor.xml.validators.DoubleValidator typeValidator = new org.exolab.castor.xml.validators.DoubleValidator();
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
-        //-- _upperCornerList
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Double.TYPE, "_upperCornerList", "UpperCorner", org.exolab.castor.xml.NodeType.Element);
+        //-- _upperCorner
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_upperCorner", "UpperCorner", org.exolab.castor.xml.NodeType.Element);
+        desc.setImmutable(true);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -196,10 +196,7 @@ public class BoundingBoxTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
             {
                 try {
                     BoundingBoxType target = (BoundingBoxType) object;
-                    // ignore null values for non optional primitives
-                    if (value == null) return;
-                    
-                    target.addUpperCorner( ((java.lang.Double)value).doubleValue());
+                    target.setUpperCorner( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -212,14 +209,15 @@ public class BoundingBoxTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         desc.setHandler(handler);
         desc.setNameSpaceURI("http://www.opengis.net/ows");
         desc.setRequired(true);
-        desc.setMultivalued(true);
+        desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _upperCornerList
+        //-- validation code for: _upperCorner
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
+        fieldValidator.setMinOccurs(1);
         { //-- local scope
-            org.exolab.castor.xml.validators.DoubleValidator typeValidator = new org.exolab.castor.xml.validators.DoubleValidator();
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);

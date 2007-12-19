@@ -48,9 +48,8 @@ public class OgcWfsClient {
         method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
         int status = client.executeMethod(method);
         if (status == HttpStatus.SC_OK) {
-            String s=method.getResponseBodyAsString();
-            Element el=readXml2Element(new StringReader(s));
-            if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_CAPABILITIES)){
+            Element el=readXml2Element(new InputStreamReader(method.getResponseBodyAsStream()));
+            if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)){
                 String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
                 if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                     return getCapabilitiesVersion100(el);

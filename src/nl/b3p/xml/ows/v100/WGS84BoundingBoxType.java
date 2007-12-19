@@ -191,7 +191,7 @@ implements java.io.Serializable
      * 
      * @return double
      */
-    public double[] getLowerCorner()
+    /*public double[] getLowerCorner()
     {
         int size = _lowerCornerList.size();
         double[] mArray = new double[size];
@@ -199,7 +199,7 @@ implements java.io.Serializable
             mArray[index] = ((java.lang.Double)_lowerCornerList.get(index)).doubleValue();
         }
         return mArray;
-    } //-- double[] getLowerCorner() 
+    } //-- double[] getLowerCorner() */
 
     /**
      * Method getLowerCornerCount
@@ -239,7 +239,7 @@ implements java.io.Serializable
      * 
      * @return double
      */
-    public double[] getUpperCorner()
+   /* public double[] getUpperCorner()
     {
         int size = _upperCornerList.size();
         double[] mArray = new double[size];
@@ -247,7 +247,7 @@ implements java.io.Serializable
             mArray[index] = ((java.lang.Double)_upperCornerList.get(index)).doubleValue();
         }
         return mArray;
-    } //-- double[] getUpperCorner() 
+    } //-- double[] getUpperCorner() */
 
     /**
      * Method getUpperCornerCount
