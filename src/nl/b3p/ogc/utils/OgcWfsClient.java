@@ -8,6 +8,7 @@ import com.vividsolutions.wms.Capabilities;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.List;
 import javax.print.Doc;
 import nl.b3p.xml.ogc.v100.exception.ServiceException;
 import nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport;
@@ -27,6 +28,7 @@ import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
@@ -37,8 +39,9 @@ import org.xml.sax.InputSource;
 public class OgcWfsClient {
     private static final Log log = LogFactory.getLog(OgcWfsClient.class);
     
-    public static WFS_Capabilities getCapabilities(OGCRequest or) throws Exception{
+    public static WFS_Capabilities getCapabilities(OGCRequest original) throws Exception{
         WFS_Capabilities returnvalue;
+        OGCRequest or=(OGCRequest) original.clone();
         or.addOrReplaceParameter(OGCRequest.WMS_SERVICE, OGCRequest.WFS_SERVICE_WFS);
         or.addOrReplaceParameter(OGCRequest.WMS_REQUEST, OGCRequest.WFS_REQUEST_GetCapabilities);        
         HttpClient client = new HttpClient();
@@ -51,13 +54,16 @@ public class OgcWfsClient {
             Element el=readXml2Element(new InputStreamReader(method.getResponseBodyAsStream()));
             if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)){
                 String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
-                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                    
+                    original.addOrReplaceParameter(OGCRequest.WMS_VERSION,version);
                     return getCapabilitiesVersion100(el);
                 }else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
+                    original.addOrReplaceParameter(OGCRequest.WMS_VERSION,version);
                     return getCapabilitiesVersion110(el);
                 }else{
                     throw new UnsupportedOperationException("WFS GetCapabilities version: "+version+" not supported");
                 }
+                
             }else{
                 throw new Exception ("Unsuspected element returned: "+el.getTagName());
             }
@@ -68,10 +74,14 @@ public class OgcWfsClient {
         
     }
     
-    public static Element getDescribeFeatureType(OGCRequest or) throws Exception{
+    public static Element getDescribeFeatureType(OGCRequest original) throws Exception{
         Element returnvalue = null;
+        OGCRequest or=(OGCRequest) original.clone();
         or.addOrReplaceParameter(OGCRequest.WMS_SERVICE, OGCRequest.WFS_SERVICE_WFS);
-        or.addOrReplaceParameter(OGCRequest.WMS_REQUEST, OGCRequest.WFS_REQUEST_DiscribeFeatureType);        
+        or.addOrReplaceParameter(OGCRequest.WMS_REQUEST, OGCRequest.WFS_REQUEST_DiscribeFeatureType);
+        if (or.getParameter(OGCRequest.WMS_VERSION)==null){
+            getCapabilities(or);
+        }
         HttpClient client = new HttpClient();
         String host = or.getUrlWithNonOGCparams();
         PostMethod method = new PostMethod(host);
@@ -83,8 +93,9 @@ public class OgcWfsClient {
             if (returnvalue.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)){
                 ServiceExceptionReport ser= getServiceExceptionReport(returnvalue);
                 StringBuffer sb=new StringBuffer();
+                ServiceException se=null;
                 for (int i=0; i < ser.getServiceExceptionCount(); i++){
-                    ServiceException se= ser.getServiceException(i);
+                    se= ser.getServiceException(i);
                     sb.append(se.getContent());
                     sb.append(" and ");                    
                 }
@@ -96,6 +107,23 @@ public class OgcWfsClient {
            return null;
         }
         return returnvalue;
+    }
+    
+    public static NodeList getFeatureElements(OGCRequest or) throws Exception{
+            Element el=OgcWfsClient.getDescribeFeatureType(or);            
+            if (el==null)
+                return null;
+            NodeList nlist=el.getElementsByTagName("complexType");
+            if (!(nlist.getLength()>0))
+                nlist=el.getElementsByTagName("xsd:complexType");
+            if (!(nlist.getLength()>0)){
+                log.error("no complexType element found");
+                return null;
+            }
+            NodeList nl=((Element)nlist.item(0)).getElementsByTagName("element");
+            if (nl==null || !(nl.getLength()>0))
+                nl=((Element)nlist.item(0)).getElementsByTagName("xsd:element");
+            return nl;
     }
     
     public static ServiceExceptionReport getServiceExceptionReport(Element element) throws MarshalException, ValidationException{
