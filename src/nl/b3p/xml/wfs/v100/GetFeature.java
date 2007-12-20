@@ -22,7 +22,7 @@ import org.exolab.castor.xml.Unmarshaller;
  * @version $Revision$ $Date$
  */
 public class GetFeature extends GetFeatureType 
-implements java.io.Serializable
+implements java.io.Serializable, nl.b3p.xml.wfs.GetFeature
 {
 
 
@@ -110,5 +110,5 @@ implements java.io.Serializable
         org.exolab.castor.xml.Validator validator = new org.exolab.castor.xml.Validator();
         validator.validate(this);
     } //-- void validate() 
-
+   
 }

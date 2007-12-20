@@ -152,7 +152,7 @@ public class B3pGMLReader extends GMLReader{
         wfsDFT.addOrReplaceParameter(OGCRequest.WMS_VERSION,ogcrequest.getParameter(OGCRequest.WMS_VERSION));
         
         wfsDFT.addOrReplaceParameter(OGCRequest.WMS_SERVICE,OGCRequest.WFS_SERVICE_WFS);
-        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_REQUEST,OGCRequest.WFS_REQUEST_DiscribeFeatureType);
+        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_REQUEST,OGCRequest.WFS_REQUEST_DescribeFeatureType);
         
         //TODO: Helaas is het bij degree niet mogelijk om meerdere typenames tegelijk op te vragen in een DescribeFeatureType
         //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.

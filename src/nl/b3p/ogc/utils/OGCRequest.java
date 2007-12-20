@@ -150,11 +150,16 @@ public class OGCRequest implements KBConstants {
             return null;
         }
     }
-
+    /**
+     * 
+     */
+     public String getXMLBody() throws Exception{
+         return OgcWfsClient.getRequestBody(this);
+     }
     /**
      * Get XMLBody creates the body string for a post message. For now only supports getFeature en DiscribeFeatureType
      */
-    public String getXMLBody() throws MarshalException, ValidationException, IOException, ParserConfigurationException, SAXException {
+ /*   public String getXMLBody() throws MarshalException, ValidationException, IOException, ParserConfigurationException, SAXException {
         Object brt = null;
         String body = null;
         if (getParameter(WMS_REQUEST) == null || getParameter(WMS_REQUEST).length() <= 0) {
@@ -244,7 +249,7 @@ public class OGCRequest implements KBConstants {
             body = sw.toString();
         }
         return body;
-    }
+    }*/
 
     public String getUrlWithNonOGCparams() {
         OGCRequest ogcu = (OGCRequest) this.clone();
