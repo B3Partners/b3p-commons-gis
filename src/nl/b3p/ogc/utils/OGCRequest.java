@@ -589,7 +589,7 @@ public class OGCRequest implements KBConstants {
                         if (service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
                             requiredParams = REQUIRED_PARAMS_GetCapabilities;
                         } else if (service.equalsIgnoreCase(WFS_SERVICE_WFS)) {
-                        //het is een WFS request
+                            throw new UnsupportedOperationException("Service '" + service + "' not yet supported!");
                         } else {
                             throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                         }

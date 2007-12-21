@@ -19,7 +19,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import nl.b3p.ogc.utils.SqlMetaDataUtils;
@@ -66,7 +69,8 @@ public class B3pOgcSqlWriter {
         boolean sameGeomType=true;
         while (fcit.hasNext() && sameGeomType){
             Feature f= (Feature)fcit.next();
-            if (f.getGeometry()!=null){
+            FeatureSchema fs = f.getSchema();
+            if (fs.getGeometryIndex() > 0 && f.getGeometry()!=null){
                 if (aGeom==null){
                     aGeom=f.getGeometry();
                 }else{
@@ -288,9 +292,9 @@ public class B3pOgcSqlWriter {
                          if (o==null)
                             q.append(o);
                         else{
-                            q.append("\'");
-                            q.append(o);
-                            q.append("\'");
+                             q.append("\'");
+                             q.append(formatDate("dd-MM-yyyy", "yyyy-MM-dd", (String) o));
+                             q.append("\'");
                         }
                     }else if (fs.getAttributeType(i).equals(AttributeType.OBJECT)){
                          if (o==null)
@@ -322,6 +326,17 @@ public class B3pOgcSqlWriter {
             }
         }
     } 
+    
+    private String formatDate(String oldstyle, String newstyle, String parse_date) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(oldstyle);
+        Date date = null;
+        try {
+            date = dateFormat.parse(parse_date);
+        } catch (ParseException e) {}
+        dateFormat = new SimpleDateFormat(newstyle);
+        return dateFormat.format(date);
+    }
+    
     /**
      * Check if the given attributetype is compatible with the given sql type
      * @param attributeType the attributeType of the feature attribute
