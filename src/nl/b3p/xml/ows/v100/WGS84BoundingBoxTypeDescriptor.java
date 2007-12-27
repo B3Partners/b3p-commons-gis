@@ -83,20 +83,22 @@ public class WGS84BoundingBoxTypeDescriptor extends nl.b3p.xml.ows.v100.Bounding
         //-- initialize element descriptors
         
         desc = (org.exolab.castor.xml.util.XMLFieldDescriptorImpl) getFieldDescriptor("LowerCorner", nsURI, org.exolab.castor.xml.NodeType.Element);
-        //-- validation code for: _lowerCornerList
+        //-- validation code for: _lowerCorner
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
+        fieldValidator.setMinOccurs(1);
         { //-- local scope
-            org.exolab.castor.xml.validators.DoubleValidator typeValidator = new org.exolab.castor.xml.validators.DoubleValidator();
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
         desc = (org.exolab.castor.xml.util.XMLFieldDescriptorImpl) getFieldDescriptor("UpperCorner", nsURI, org.exolab.castor.xml.NodeType.Element);
-        //-- validation code for: _upperCornerList
+        //-- validation code for: _upperCorner
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
+        fieldValidator.setMinOccurs(1);
         { //-- local scope
-            org.exolab.castor.xml.validators.DoubleValidator typeValidator = new org.exolab.castor.xml.validators.DoubleValidator();
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);

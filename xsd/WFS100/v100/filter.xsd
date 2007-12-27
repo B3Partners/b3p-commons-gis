@@ -53,7 +53,17 @@
 	<!-- ============================================= -->
 	<xsd:complexType name="FilterType">
 		<xsd:choice>
-			<xsd:element ref="ogc:spatialOps"/>
+			<xsd:element ref="ogc:Beyond"/>
+			<xsd:element ref="ogc:Contains"/>
+			<xsd:element ref="ogc:Crosses"/>
+			<xsd:element ref="ogc:DWithin"/>
+			<xsd:element ref="ogc:Disjoint"/>
+			<xsd:element ref="ogc:Equals"/>
+			<xsd:element ref="ogc:Intersects"/>
+			<xsd:element ref="ogc:Overlaps"/>
+			<xsd:element ref="ogc:Touches"/>
+			<xsd:element ref="ogc:Within"/>
+			<xsd:element ref="ogc:BBOX"/>
 			<xsd:element ref="ogc:comparisonOps"/>
 			<xsd:element ref="ogc:logicOps"/>
 			<xsd:element ref="ogc:FeatureId" maxOccurs="unbounded"/>

@@ -33,9 +33,59 @@ public class FilterType implements java.io.Serializable {
     private java.lang.Object _choiceValue;
 
     /**
-     * Field _spatialOps
+     * Field _beyond
      */
-    private nl.b3p.xml.ogc.v100.SpatialOps _spatialOps;
+    private nl.b3p.xml.ogc.v100.Beyond _beyond;
+
+    /**
+     * Field _contains
+     */
+    private nl.b3p.xml.ogc.v100.Contains _contains;
+
+    /**
+     * Field _crosses
+     */
+    private nl.b3p.xml.ogc.v100.Crosses _crosses;
+
+    /**
+     * Field _DWithin
+     */
+    private nl.b3p.xml.ogc.v100.DWithin _DWithin;
+
+    /**
+     * Field _disjoint
+     */
+    private nl.b3p.xml.ogc.v100.Disjoint _disjoint;
+
+    /**
+     * Field _equals
+     */
+    private nl.b3p.xml.ogc.v100.Equals _equals;
+
+    /**
+     * Field _intersects
+     */
+    private nl.b3p.xml.ogc.v100.Intersects _intersects;
+
+    /**
+     * Field _overlaps
+     */
+    private nl.b3p.xml.ogc.v100.Overlaps _overlaps;
+
+    /**
+     * Field _touches
+     */
+    private nl.b3p.xml.ogc.v100.Touches _touches;
+
+    /**
+     * Field _within
+     */
+    private nl.b3p.xml.ogc.v100.Within _within;
+
+    /**
+     * Field _BBOX
+     */
+    private nl.b3p.xml.ogc.v100.BBOX _BBOX;
 
     /**
      * Field _comparisonOps
@@ -117,6 +167,28 @@ public class FilterType implements java.io.Serializable {
     } //-- java.util.Enumeration enumerateFeatureId() 
 
     /**
+     * Returns the value of field 'BBOX'.
+     * 
+     * @return BBOX
+     * @return the value of field 'BBOX'.
+     */
+    public nl.b3p.xml.ogc.v100.BBOX getBBOX()
+    {
+        return this._BBOX;
+    } //-- nl.b3p.xml.ogc.v100.BBOX getBBOX() 
+
+    /**
+     * Returns the value of field 'beyond'.
+     * 
+     * @return Beyond
+     * @return the value of field 'beyond'.
+     */
+    public nl.b3p.xml.ogc.v100.Beyond getBeyond()
+    {
+        return this._beyond;
+    } //-- nl.b3p.xml.ogc.v100.Beyond getBeyond() 
+
+    /**
      * Returns the value of field 'choiceValue'. The field
      * 'choiceValue' has the following description: Internal choice
      * value storage
@@ -139,6 +211,61 @@ public class FilterType implements java.io.Serializable {
     {
         return this._comparisonOps;
     } //-- nl.b3p.xml.ogc.v100.ComparisonOps getComparisonOps() 
+
+    /**
+     * Returns the value of field 'contains'.
+     * 
+     * @return Contains
+     * @return the value of field 'contains'.
+     */
+    public nl.b3p.xml.ogc.v100.Contains getContains()
+    {
+        return this._contains;
+    } //-- nl.b3p.xml.ogc.v100.Contains getContains() 
+
+    /**
+     * Returns the value of field 'crosses'.
+     * 
+     * @return Crosses
+     * @return the value of field 'crosses'.
+     */
+    public nl.b3p.xml.ogc.v100.Crosses getCrosses()
+    {
+        return this._crosses;
+    } //-- nl.b3p.xml.ogc.v100.Crosses getCrosses() 
+
+    /**
+     * Returns the value of field 'DWithin'.
+     * 
+     * @return DWithin
+     * @return the value of field 'DWithin'.
+     */
+    public nl.b3p.xml.ogc.v100.DWithin getDWithin()
+    {
+        return this._DWithin;
+    } //-- nl.b3p.xml.ogc.v100.DWithin getDWithin() 
+
+    /**
+     * Returns the value of field 'disjoint'.
+     * 
+     * @return Disjoint
+     * @return the value of field 'disjoint'.
+     */
+    public nl.b3p.xml.ogc.v100.Disjoint getDisjoint()
+    {
+        return this._disjoint;
+    } //-- nl.b3p.xml.ogc.v100.Disjoint getDisjoint() 
+
+    /**
+     * Returns the value of field 'equals'.
+     * 
+     * @return Equals
+     * @return the value of field 'equals'.
+     */
+    public nl.b3p.xml.ogc.v100.Equals getEquals()
+    {
+        return this._equals;
+    } //-- nl.b3p.xml.ogc.v100.Equals getEquals() 
 
     /**
      * Method getFeatureId
@@ -189,6 +316,17 @@ public class FilterType implements java.io.Serializable {
     } //-- int getFeatureIdCount() 
 
     /**
+     * Returns the value of field 'intersects'.
+     * 
+     * @return Intersects
+     * @return the value of field 'intersects'.
+     */
+    public nl.b3p.xml.ogc.v100.Intersects getIntersects()
+    {
+        return this._intersects;
+    } //-- nl.b3p.xml.ogc.v100.Intersects getIntersects() 
+
+    /**
      * Returns the value of field 'logicOps'.
      * 
      * @return LogicOps
@@ -200,15 +338,37 @@ public class FilterType implements java.io.Serializable {
     } //-- nl.b3p.xml.ogc.v100.LogicOps getLogicOps() 
 
     /**
-     * Returns the value of field 'spatialOps'.
+     * Returns the value of field 'overlaps'.
      * 
-     * @return SpatialOps
-     * @return the value of field 'spatialOps'.
+     * @return Overlaps
+     * @return the value of field 'overlaps'.
      */
-    public nl.b3p.xml.ogc.v100.SpatialOps getSpatialOps()
+    public nl.b3p.xml.ogc.v100.Overlaps getOverlaps()
     {
-        return this._spatialOps;
-    } //-- nl.b3p.xml.ogc.v100.SpatialOps getSpatialOps() 
+        return this._overlaps;
+    } //-- nl.b3p.xml.ogc.v100.Overlaps getOverlaps() 
+
+    /**
+     * Returns the value of field 'touches'.
+     * 
+     * @return Touches
+     * @return the value of field 'touches'.
+     */
+    public nl.b3p.xml.ogc.v100.Touches getTouches()
+    {
+        return this._touches;
+    } //-- nl.b3p.xml.ogc.v100.Touches getTouches() 
+
+    /**
+     * Returns the value of field 'within'.
+     * 
+     * @return Within
+     * @return the value of field 'within'.
+     */
+    public nl.b3p.xml.ogc.v100.Within getWithin()
+    {
+        return this._within;
+    } //-- nl.b3p.xml.ogc.v100.Within getWithin() 
 
     /**
      * Method isValid
@@ -271,6 +431,28 @@ public class FilterType implements java.io.Serializable {
     } //-- boolean removeFeatureId(nl.b3p.xml.ogc.v100.FeatureId) 
 
     /**
+     * Sets the value of field 'BBOX'.
+     * 
+     * @param BBOX the value of field 'BBOX'.
+     */
+    public void setBBOX(nl.b3p.xml.ogc.v100.BBOX BBOX)
+    {
+        this._BBOX = BBOX;
+        this._choiceValue = BBOX;
+    } //-- void setBBOX(nl.b3p.xml.ogc.v100.BBOX) 
+
+    /**
+     * Sets the value of field 'beyond'.
+     * 
+     * @param beyond the value of field 'beyond'.
+     */
+    public void setBeyond(nl.b3p.xml.ogc.v100.Beyond beyond)
+    {
+        this._beyond = beyond;
+        this._choiceValue = beyond;
+    } //-- void setBeyond(nl.b3p.xml.ogc.v100.Beyond) 
+
+    /**
      * Sets the value of field 'comparisonOps'.
      * 
      * @param comparisonOps the value of field 'comparisonOps'.
@@ -280,6 +462,61 @@ public class FilterType implements java.io.Serializable {
         this._comparisonOps = comparisonOps;
         this._choiceValue = comparisonOps;
     } //-- void setComparisonOps(nl.b3p.xml.ogc.v100.ComparisonOps) 
+
+    /**
+     * Sets the value of field 'contains'.
+     * 
+     * @param contains the value of field 'contains'.
+     */
+    public void setContains(nl.b3p.xml.ogc.v100.Contains contains)
+    {
+        this._contains = contains;
+        this._choiceValue = contains;
+    } //-- void setContains(nl.b3p.xml.ogc.v100.Contains) 
+
+    /**
+     * Sets the value of field 'crosses'.
+     * 
+     * @param crosses the value of field 'crosses'.
+     */
+    public void setCrosses(nl.b3p.xml.ogc.v100.Crosses crosses)
+    {
+        this._crosses = crosses;
+        this._choiceValue = crosses;
+    } //-- void setCrosses(nl.b3p.xml.ogc.v100.Crosses) 
+
+    /**
+     * Sets the value of field 'DWithin'.
+     * 
+     * @param DWithin the value of field 'DWithin'.
+     */
+    public void setDWithin(nl.b3p.xml.ogc.v100.DWithin DWithin)
+    {
+        this._DWithin = DWithin;
+        this._choiceValue = DWithin;
+    } //-- void setDWithin(nl.b3p.xml.ogc.v100.DWithin) 
+
+    /**
+     * Sets the value of field 'disjoint'.
+     * 
+     * @param disjoint the value of field 'disjoint'.
+     */
+    public void setDisjoint(nl.b3p.xml.ogc.v100.Disjoint disjoint)
+    {
+        this._disjoint = disjoint;
+        this._choiceValue = disjoint;
+    } //-- void setDisjoint(nl.b3p.xml.ogc.v100.Disjoint) 
+
+    /**
+     * Sets the value of field 'equals'.
+     * 
+     * @param equals the value of field 'equals'.
+     */
+    public void setEquals(nl.b3p.xml.ogc.v100.Equals equals)
+    {
+        this._equals = equals;
+        this._choiceValue = equals;
+    } //-- void setEquals(nl.b3p.xml.ogc.v100.Equals) 
 
     /**
      * Method setFeatureId
@@ -316,6 +553,17 @@ public class FilterType implements java.io.Serializable {
     } //-- void setFeatureId(nl.b3p.xml.ogc.v100.FeatureId) 
 
     /**
+     * Sets the value of field 'intersects'.
+     * 
+     * @param intersects the value of field 'intersects'.
+     */
+    public void setIntersects(nl.b3p.xml.ogc.v100.Intersects intersects)
+    {
+        this._intersects = intersects;
+        this._choiceValue = intersects;
+    } //-- void setIntersects(nl.b3p.xml.ogc.v100.Intersects) 
+
+    /**
      * Sets the value of field 'logicOps'.
      * 
      * @param logicOps the value of field 'logicOps'.
@@ -327,15 +575,37 @@ public class FilterType implements java.io.Serializable {
     } //-- void setLogicOps(nl.b3p.xml.ogc.v100.LogicOps) 
 
     /**
-     * Sets the value of field 'spatialOps'.
+     * Sets the value of field 'overlaps'.
      * 
-     * @param spatialOps the value of field 'spatialOps'.
+     * @param overlaps the value of field 'overlaps'.
      */
-    public void setSpatialOps(nl.b3p.xml.ogc.v100.SpatialOps spatialOps)
+    public void setOverlaps(nl.b3p.xml.ogc.v100.Overlaps overlaps)
     {
-        this._spatialOps = spatialOps;
-        this._choiceValue = spatialOps;
-    } //-- void setSpatialOps(nl.b3p.xml.ogc.v100.SpatialOps) 
+        this._overlaps = overlaps;
+        this._choiceValue = overlaps;
+    } //-- void setOverlaps(nl.b3p.xml.ogc.v100.Overlaps) 
+
+    /**
+     * Sets the value of field 'touches'.
+     * 
+     * @param touches the value of field 'touches'.
+     */
+    public void setTouches(nl.b3p.xml.ogc.v100.Touches touches)
+    {
+        this._touches = touches;
+        this._choiceValue = touches;
+    } //-- void setTouches(nl.b3p.xml.ogc.v100.Touches) 
+
+    /**
+     * Sets the value of field 'within'.
+     * 
+     * @param within the value of field 'within'.
+     */
+    public void setWithin(nl.b3p.xml.ogc.v100.Within within)
+    {
+        this._within = within;
+        this._choiceValue = within;
+    } //-- void setWithin(nl.b3p.xml.ogc.v100.Within) 
 
     /**
      * Method unmarshal

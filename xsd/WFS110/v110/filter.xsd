@@ -11,10 +11,31 @@
 	<xsd:element name="Filter" type="ogc:FilterType"/>
 	<xsd:complexType name="FilterType">
 		<xsd:choice>
-			<xsd:element ref="ogc:spatialOps"/>
-			<xsd:element ref="ogc:comparisonOps"/>
-			<xsd:element ref="ogc:logicOps"/>
-			<xsd:element ref="ogc:_Id" maxOccurs="unbounded"/>
+			<xsd:element ref="ogc:Within"/>
+			<xsd:element ref="ogc:Touches"/>
+			<xsd:element ref="ogc:Overlaps"/>
+			<xsd:element ref="ogc:Intersects"/>
+			<xsd:element ref="ogc:Equals"/>
+			<xsd:element ref="ogc:Disjoint"/>
+			<xsd:element ref="ogc:DWithin"/>
+			<xsd:element ref="ogc:Crosses"/>
+			<xsd:element ref="ogc:Contains"/>
+			<xsd:element ref="ogc:Beyond"/>
+			<xsd:element ref="ogc:BBOX"/>
+			<xsd:element ref="ogc:PropertyIsNull"/>
+			<xsd:element ref="ogc:PropertyIsNotEqualTo"/>
+			<xsd:element ref="ogc:PropertyIsLike"/>
+			<xsd:element ref="ogc:PropertyIsLessThanOrEqualTo"/>
+			<xsd:element ref="ogc:PropertyIsLessThan"/>
+			<xsd:element ref="ogc:PropertyIsGreaterThanOrEqualTo"/>
+			<xsd:element ref="ogc:PropertyIsGreaterThan"/>
+			<xsd:element ref="ogc:PropertyIsEqualTo"/>
+			<xsd:element ref="ogc:PropertyIsBetween"/>
+			<xsd:element ref="ogc:Or"/>
+			<xsd:element ref="ogc:Not"/>
+			<xsd:element ref="ogc:And"/>
+			<xsd:element ref="ogc:FeatureId"/>
+			<xsd:element ref="ogc:GmlObjectId"/>
 		</xsd:choice>
 	</xsd:complexType>
 	<xsd:element name="comparisonOps" type="ogc:ComparisonOpsType" abstract="false"/>

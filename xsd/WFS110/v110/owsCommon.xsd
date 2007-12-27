@@ -110,12 +110,12 @@ b)  If the bounding box is continuous across the value discontinuity but is not 
 		<complexContent>
 			<restriction base="ows:BoundingBoxType">
 				<sequence>
-					<element name="LowerCorner" type="ows:PositionType2D">
+					<element name="LowerCorner" type="string">
 						<annotation>
 							<documentation>Position of the bounding box corner at which the values of longitude and latitude normally are the algebraic minimums within this bounding box. For more information, see Subclauses 10.4.5 and C.13. </documentation>
 						</annotation>
 					</element>
-					<element name="UpperCorner" type="ows:PositionType2D">
+					<element name="UpperCorner" type="string">
 						<annotation>
 							<documentation>Position of the bounding box corner at which the values of longitude and latitude normally are the algebraic minimums within this bounding box. For more information, see Subclauses 10.4.5 and C.13. </documentation>
 						</annotation>

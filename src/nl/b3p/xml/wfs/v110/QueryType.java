@@ -52,7 +52,7 @@ public class QueryType implements java.io.Serializable {
      *  as defined by the GML Application Schema.
      *  
      */
-    private java.util.ArrayList _typeNameList;
+    private java.lang.String _typeName;
 
     /**
      * For systems that implement versioning, the featureVersion
@@ -117,7 +117,6 @@ public class QueryType implements java.io.Serializable {
     public QueryType() 
      {
         super();
-        _typeNameList = new java.util.ArrayList();
         _queryTypeChoiceList = new java.util.ArrayList();
     } //-- nl.b3p.xml.wfs.v110.QueryType()
 
@@ -154,33 +153,6 @@ public class QueryType implements java.io.Serializable {
     } //-- void addQueryTypeChoice(int, nl.b3p.xml.wfs.v110.QueryTypeChoice) 
 
     /**
-     * Method addTypeName
-     * 
-     * 
-     * 
-     * @param vTypeName
-     */
-    public void addTypeName(java.lang.String vTypeName)
-        throws java.lang.IndexOutOfBoundsException
-    {
-        _typeNameList.add(vTypeName);
-    } //-- void addTypeName(java.lang.String) 
-
-    /**
-     * Method addTypeName
-     * 
-     * 
-     * 
-     * @param index
-     * @param vTypeName
-     */
-    public void addTypeName(int index, java.lang.String vTypeName)
-        throws java.lang.IndexOutOfBoundsException
-    {
-        _typeNameList.add(index, vTypeName);
-    } //-- void addTypeName(int, java.lang.String) 
-
-    /**
      * Method clearQueryTypeChoice
      * 
      */
@@ -188,15 +160,6 @@ public class QueryType implements java.io.Serializable {
     {
         _queryTypeChoiceList.clear();
     } //-- void clearQueryTypeChoice() 
-
-    /**
-     * Method clearTypeName
-     * 
-     */
-    public void clearTypeName()
-    {
-        _typeNameList.clear();
-    } //-- void clearTypeName() 
 
     /**
      * Method enumerateQueryTypeChoice
@@ -209,18 +172,6 @@ public class QueryType implements java.io.Serializable {
     {
         return Collections.enumeration(_queryTypeChoiceList);
     } //-- java.util.Enumeration enumerateQueryTypeChoice() 
-
-    /**
-     * Method enumerateTypeName
-     * 
-     * 
-     * 
-     * @return Enumeration
-     */
-    public java.util.Enumeration enumerateTypeName()
-    {
-        return Collections.enumeration(_typeNameList);
-    } //-- java.util.Enumeration enumerateTypeName() 
 
     /**
      * Returns the value of field 'featureVersion'. The field
@@ -372,52 +323,25 @@ public class QueryType implements java.io.Serializable {
     } //-- java.lang.String getSrsName() 
 
     /**
-     * Method getTypeName
-     * 
-     * 
-     * 
-     * @param index
-     * @return String
-     */
-    public java.lang.String getTypeName(int index)
-        throws java.lang.IndexOutOfBoundsException
-    {
-        //-- check bounds for index
-        if ((index < 0) || (index >= _typeNameList.size())) {
-            throw new IndexOutOfBoundsException();
-        }
-        
-        return (String)_typeNameList.get(index);
-    } //-- java.lang.String getTypeName(int) 
-
-    /**
-     * Method getTypeName
-     * 
-     * 
+     * Returns the value of field 'typeName'. The field 'typeName'
+     * has the following description: The typeName attribute is a
+     * list of one or more
+     *  feature type names that indicate which types 
+     *  of feature instances should be included in the
+     *  reponse set. Specifying more than one typename
+     *  indicates that a join operation is being performed.
+     *  All the names in the typeName list must be valid
+     *  types that belong to this query's feature content
+     *  as defined by the GML Application Schema.
+     *  
      * 
      * @return String
+     * @return the value of field 'typeName'.
      */
-    public java.lang.String[] getTypeName()
+    public java.lang.String getTypeName()
     {
-        int size = _typeNameList.size();
-        java.lang.String[] mArray = new java.lang.String[size];
-        for (int index = 0; index < size; index++) {
-            mArray[index] = (String)_typeNameList.get(index);
-        }
-        return mArray;
-    } //-- java.lang.String[] getTypeName() 
-
-    /**
-     * Method getTypeNameCount
-     * 
-     * 
-     * 
-     * @return int
-     */
-    public int getTypeNameCount()
-    {
-        return _typeNameList.size();
-    } //-- int getTypeNameCount() 
+        return this._typeName;
+    } //-- java.lang.String getTypeName() 
 
     /**
      * Method isValid
@@ -478,20 +402,6 @@ public class QueryType implements java.io.Serializable {
         boolean removed = _queryTypeChoiceList.remove(vQueryTypeChoice);
         return removed;
     } //-- boolean removeQueryTypeChoice(nl.b3p.xml.wfs.v110.QueryTypeChoice) 
-
-    /**
-     * Method removeTypeName
-     * 
-     * 
-     * 
-     * @param vTypeName
-     * @return boolean
-     */
-    public boolean removeTypeName(java.lang.String vTypeName)
-    {
-        boolean removed = _typeNameList.remove(vTypeName);
-        return removed;
-    } //-- boolean removeTypeName(java.lang.String) 
 
     /**
      * Sets the value of field 'featureVersion'. The field
@@ -624,37 +534,23 @@ public class QueryType implements java.io.Serializable {
     } //-- void setSrsName(java.lang.String) 
 
     /**
-     * Method setTypeName
+     * Sets the value of field 'typeName'. The field 'typeName' has
+     * the following description: The typeName attribute is a list
+     * of one or more
+     *  feature type names that indicate which types 
+     *  of feature instances should be included in the
+     *  reponse set. Specifying more than one typename
+     *  indicates that a join operation is being performed.
+     *  All the names in the typeName list must be valid
+     *  types that belong to this query's feature content
+     *  as defined by the GML Application Schema.
+     *  
      * 
-     * 
-     * 
-     * @param index
-     * @param vTypeName
+     * @param typeName the value of field 'typeName'.
      */
-    public void setTypeName(int index, java.lang.String vTypeName)
-        throws java.lang.IndexOutOfBoundsException
+    public void setTypeName(java.lang.String typeName)
     {
-        //-- check bounds for index
-        if ((index < 0) || (index >= _typeNameList.size())) {
-            throw new IndexOutOfBoundsException();
-        }
-        _typeNameList.set(index, vTypeName);
-    } //-- void setTypeName(int, java.lang.String) 
-
-    /**
-     * Method setTypeName
-     * 
-     * 
-     * 
-     * @param typeNameArray
-     */
-    public void setTypeName(java.lang.String[] typeNameArray)
-    {
-        //-- copy array
-        _typeNameList.clear();
-        for (int i = 0; i < typeNameArray.length; i++) {
-            _typeNameList.add(typeNameArray[i]);
-        }
+        this._typeName = typeName;
     } //-- void setTypeName(java.lang.String) 
 
     /**

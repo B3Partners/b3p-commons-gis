@@ -100,8 +100,8 @@ public class QueryTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDesc
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
-        //-- _typeNameList
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_typeNameList", "typeName", org.exolab.castor.xml.NodeType.Attribute);
+        //-- _typeName
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_typeName", "typeName", org.exolab.castor.xml.NodeType.Attribute);
         desc.setSchemaType("QName");
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
@@ -115,7 +115,7 @@ public class QueryTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDesc
             {
                 try {
                     QueryType target = (QueryType) object;
-                    target.addTypeName( (java.lang.String) value);
+                    target.setTypeName( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -125,15 +125,14 @@ public class QueryTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDesc
                 return new java.lang.String();
             }
         };
-        handler = new org.exolab.castor.xml.handlers.CollectionFieldHandler(handler, null);
         desc.setHandler(handler);
         desc.setRequired(true);
-        desc.setMultivalued(true);
+        desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _typeNameList
+        //-- validation code for: _typeName
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
+        fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);

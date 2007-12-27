@@ -19,7 +19,7 @@ import org.exolab.castor.xml.Unmarshaller;
  * 
  * @version $Revision$ $Date$
  */
-public class Filter_Capabilities implements java.io.Serializable,nl.b3p.xml.wfs.Filter_Capabilities {
+public class Filter_Capabilities implements java.io.Serializable, nl.b3p.xml.wfs.Filter_Capabilities {
 
 
       //--------------------------/

@@ -498,7 +498,7 @@ public class OGCRequest implements KBConstants {
         }
         if (!nameSpaces.containsKey("gml")) {
             addOrReplaceNameSpace("gml", "http://www.opengis.net/gml");
-        }
+        }     
         if (!nameSpaces.containsKey("ogc")) {
             addOrReplaceNameSpace("ogc", "http://www.opengis.net/ogc");
         }
@@ -663,7 +663,6 @@ public class OGCRequest implements KBConstants {
 
         return true;
     }
-
     private void setBasicRequest(BaseRequestType brt) {
         if (this.getParameter(OGCRequest.WMS_VERSION) != null) {
             brt.setVersion(this.getParameter(OGCRequest.WMS_VERSION));
@@ -674,23 +673,5 @@ public class OGCRequest implements KBConstants {
         if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES) != null) {
             log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
         }
-    }
-
-    public AnyNode xmlStringToAnyNode(String xml) throws ParserConfigurationException, SAXException, IOException {
-        AnyNode anyNode = null;
-        SAXParserFactory factory = SAXParserFactory.newInstance();
-        SAXParser saxParser = factory.newSAXParser();
-        XMLReader reader = saxParser.getXMLReader();
-
-        org.exolab.castor.xml.util.SAX2ANY handler = new org.exolab.castor.xml.util.SAX2ANY();
-
-        reader.setContentHandler(handler);
-        reader.setErrorHandler(handler);
-        InputSource source = new InputSource(new StringReader(xml));
-        reader.parse(source);
-
-        anyNode = handler.getStartingNode();
-
-        return anyNode;
-    }
+    }    
 }
