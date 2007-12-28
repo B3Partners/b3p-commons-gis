@@ -86,7 +86,13 @@
 		<xsd:complexContent>
 			<xsd:extension base="ogc:ComparisonOpsType">
 				<xsd:sequence>
-					<xsd:element ref="ogc:expression" minOccurs="2" maxOccurs="2"/>
+					<xsd:element ref="ogc:Sub" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyName" minOccurs="0"/>
+					<xsd:element ref="ogc:Mul" minOccurs="0"/>
+					<xsd:element ref="ogc:Literal" minOccurs="0"/>
+					<xsd:element ref="ogc:Function" minOccurs="0"/>
+					<xsd:element ref="ogc:Div" minOccurs="0"/>
+					<xsd:element ref="ogc:Add" minOccurs="0"/>
 				</xsd:sequence>
 				<xsd:attribute name="matchCase" type="xsd:boolean" use="optional" default="true"/>
 			</xsd:extension>

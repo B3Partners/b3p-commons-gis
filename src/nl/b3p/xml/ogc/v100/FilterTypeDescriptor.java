@@ -461,28 +461,28 @@ public class FilterTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDes
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-        //-- _comparisonOps
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.ComparisonOps.class, "_comparisonOps", "comparisonOps", org.exolab.castor.xml.NodeType.Element);
+        //-- _propertyIsNull
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsNull.class, "_propertyIsNull", "PropertyIsNull", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
             {
                 FilterType target = (FilterType) object;
-                return target.getComparisonOps();
+                return target.getPropertyIsNull();
             }
             public void setValue( java.lang.Object object, java.lang.Object value) 
                 throws IllegalStateException, IllegalArgumentException
             {
                 try {
                     FilterType target = (FilterType) object;
-                    target.setComparisonOps( (nl.b3p.xml.ogc.v100.ComparisonOps) value);
+                    target.setPropertyIsNull( (nl.b3p.xml.ogc.v100.PropertyIsNull) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
                 }
             }
             public java.lang.Object newInstance( java.lang.Object parent ) {
-                return new nl.b3p.xml.ogc.v100.ComparisonOps();
+                return new nl.b3p.xml.ogc.v100.PropertyIsNull();
             }
         };
         desc.setHandler(handler);
@@ -491,34 +491,34 @@ public class FilterTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDes
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _comparisonOps
+        //-- validation code for: _propertyIsNull
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-        //-- _logicOps
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.LogicOps.class, "_logicOps", "logicOps", org.exolab.castor.xml.NodeType.Element);
+        //-- _propertyIsNotEqualTo
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo.class, "_propertyIsNotEqualTo", "PropertyIsNotEqualTo", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
             {
                 FilterType target = (FilterType) object;
-                return target.getLogicOps();
+                return target.getPropertyIsNotEqualTo();
             }
             public void setValue( java.lang.Object object, java.lang.Object value) 
                 throws IllegalStateException, IllegalArgumentException
             {
                 try {
                     FilterType target = (FilterType) object;
-                    target.setLogicOps( (nl.b3p.xml.ogc.v100.LogicOps) value);
+                    target.setPropertyIsNotEqualTo( (nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
                 }
             }
             public java.lang.Object newInstance( java.lang.Object parent ) {
-                return new nl.b3p.xml.ogc.v100.LogicOps();
+                return new nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo();
             }
         };
         desc.setHandler(handler);
@@ -527,7 +527,367 @@ public class FilterTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDes
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _logicOps
+        //-- validation code for: _propertyIsNotEqualTo
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsLike
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsLike.class, "_propertyIsLike", "PropertyIsLike", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsLike();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsLike( (nl.b3p.xml.ogc.v100.PropertyIsLike) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsLike();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsLike
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsLessThanOrEqualTo
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo.class, "_propertyIsLessThanOrEqualTo", "PropertyIsLessThanOrEqualTo", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsLessThanOrEqualTo();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsLessThanOrEqualTo( (nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsLessThanOrEqualTo
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsLessThan
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsLessThan.class, "_propertyIsLessThan", "PropertyIsLessThan", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsLessThan();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsLessThan( (nl.b3p.xml.ogc.v100.PropertyIsLessThan) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsLessThan();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsLessThan
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsGreaterThanOrEqualTo
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo.class, "_propertyIsGreaterThanOrEqualTo", "PropertyIsGreaterThanOrEqualTo", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsGreaterThanOrEqualTo();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsGreaterThanOrEqualTo( (nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsGreaterThanOrEqualTo
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsGreaterThan
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsGreaterThan.class, "_propertyIsGreaterThan", "PropertyIsGreaterThan", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsGreaterThan();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsGreaterThan( (nl.b3p.xml.ogc.v100.PropertyIsGreaterThan) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsGreaterThan();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsGreaterThan
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsEqualTo
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsEqualTo.class, "_propertyIsEqualTo", "PropertyIsEqualTo", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsEqualTo();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsEqualTo( (nl.b3p.xml.ogc.v100.PropertyIsEqualTo) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsEqualTo();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsEqualTo
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _propertyIsBetween
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyIsBetween.class, "_propertyIsBetween", "PropertyIsBetween", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getPropertyIsBetween();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setPropertyIsBetween( (nl.b3p.xml.ogc.v100.PropertyIsBetween) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyIsBetween();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyIsBetween
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _or
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.Or.class, "_or", "Or", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getOr();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setOr( (nl.b3p.xml.ogc.v100.Or) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.Or();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _or
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _not
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.Not.class, "_not", "Not", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getNot();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setNot( (nl.b3p.xml.ogc.v100.Not) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.Not();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _not
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _and
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.And.class, "_and", "And", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                FilterType target = (FilterType) object;
+                return target.getAnd();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    FilterType target = (FilterType) object;
+                    target.setAnd( (nl.b3p.xml.ogc.v100.And) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.And();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _and
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope

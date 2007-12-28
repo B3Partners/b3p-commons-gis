@@ -1,4 +1,0 @@
-#Fri Dec 14 15:33:10 CET 2007
-nl.b3p.xml.ogc.v110.capabilities.types.ComparisonOperatorType=nl.b3p.xml.ogc.v110.capabilities.types.ComparisonOperatorTypeDescriptor
-nl.b3p.xml.ogc.v110.capabilities.types.GeometryOperandType=nl.b3p.xml.ogc.v110.capabilities.types.GeometryOperandTypeDescriptor
-nl.b3p.xml.ogc.v110.capabilities.types.SpatialOperatorNameType=nl.b3p.xml.ogc.v110.capabilities.types.SpatialOperatorNameTypeDescriptor

@@ -88,14 +88,64 @@ public class FilterType implements java.io.Serializable {
     private nl.b3p.xml.ogc.v100.BBOX _BBOX;
 
     /**
-     * Field _comparisonOps
+     * Field _propertyIsNull
      */
-    private nl.b3p.xml.ogc.v100.ComparisonOps _comparisonOps;
+    private nl.b3p.xml.ogc.v100.PropertyIsNull _propertyIsNull;
 
     /**
-     * Field _logicOps
+     * Field _propertyIsNotEqualTo
      */
-    private nl.b3p.xml.ogc.v100.LogicOps _logicOps;
+    private nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo _propertyIsNotEqualTo;
+
+    /**
+     * Field _propertyIsLike
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsLike _propertyIsLike;
+
+    /**
+     * Field _propertyIsLessThanOrEqualTo
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo _propertyIsLessThanOrEqualTo;
+
+    /**
+     * Field _propertyIsLessThan
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsLessThan _propertyIsLessThan;
+
+    /**
+     * Field _propertyIsGreaterThanOrEqualTo
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo _propertyIsGreaterThanOrEqualTo;
+
+    /**
+     * Field _propertyIsGreaterThan
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsGreaterThan _propertyIsGreaterThan;
+
+    /**
+     * Field _propertyIsEqualTo
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsEqualTo _propertyIsEqualTo;
+
+    /**
+     * Field _propertyIsBetween
+     */
+    private nl.b3p.xml.ogc.v100.PropertyIsBetween _propertyIsBetween;
+
+    /**
+     * Field _or
+     */
+    private nl.b3p.xml.ogc.v100.Or _or;
+
+    /**
+     * Field _not
+     */
+    private nl.b3p.xml.ogc.v100.Not _not;
+
+    /**
+     * Field _and
+     */
+    private nl.b3p.xml.ogc.v100.And _and;
 
     /**
      * Field _featureIdList
@@ -167,6 +217,17 @@ public class FilterType implements java.io.Serializable {
     } //-- java.util.Enumeration enumerateFeatureId() 
 
     /**
+     * Returns the value of field 'and'.
+     * 
+     * @return And
+     * @return the value of field 'and'.
+     */
+    public nl.b3p.xml.ogc.v100.And getAnd()
+    {
+        return this._and;
+    } //-- nl.b3p.xml.ogc.v100.And getAnd() 
+
+    /**
      * Returns the value of field 'BBOX'.
      * 
      * @return BBOX
@@ -200,17 +261,6 @@ public class FilterType implements java.io.Serializable {
     {
         return this._choiceValue;
     } //-- java.lang.Object getChoiceValue() 
-
-    /**
-     * Returns the value of field 'comparisonOps'.
-     * 
-     * @return ComparisonOps
-     * @return the value of field 'comparisonOps'.
-     */
-    public nl.b3p.xml.ogc.v100.ComparisonOps getComparisonOps()
-    {
-        return this._comparisonOps;
-    } //-- nl.b3p.xml.ogc.v100.ComparisonOps getComparisonOps() 
 
     /**
      * Returns the value of field 'contains'.
@@ -327,15 +377,26 @@ public class FilterType implements java.io.Serializable {
     } //-- nl.b3p.xml.ogc.v100.Intersects getIntersects() 
 
     /**
-     * Returns the value of field 'logicOps'.
+     * Returns the value of field 'not'.
      * 
-     * @return LogicOps
-     * @return the value of field 'logicOps'.
+     * @return Not
+     * @return the value of field 'not'.
      */
-    public nl.b3p.xml.ogc.v100.LogicOps getLogicOps()
+    public nl.b3p.xml.ogc.v100.Not getNot()
     {
-        return this._logicOps;
-    } //-- nl.b3p.xml.ogc.v100.LogicOps getLogicOps() 
+        return this._not;
+    } //-- nl.b3p.xml.ogc.v100.Not getNot() 
+
+    /**
+     * Returns the value of field 'or'.
+     * 
+     * @return Or
+     * @return the value of field 'or'.
+     */
+    public nl.b3p.xml.ogc.v100.Or getOr()
+    {
+        return this._or;
+    } //-- nl.b3p.xml.ogc.v100.Or getOr() 
 
     /**
      * Returns the value of field 'overlaps'.
@@ -347,6 +408,105 @@ public class FilterType implements java.io.Serializable {
     {
         return this._overlaps;
     } //-- nl.b3p.xml.ogc.v100.Overlaps getOverlaps() 
+
+    /**
+     * Returns the value of field 'propertyIsBetween'.
+     * 
+     * @return PropertyIsBetween
+     * @return the value of field 'propertyIsBetween'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsBetween getPropertyIsBetween()
+    {
+        return this._propertyIsBetween;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsBetween getPropertyIsBetween() 
+
+    /**
+     * Returns the value of field 'propertyIsEqualTo'.
+     * 
+     * @return PropertyIsEqualTo
+     * @return the value of field 'propertyIsEqualTo'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsEqualTo getPropertyIsEqualTo()
+    {
+        return this._propertyIsEqualTo;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsEqualTo getPropertyIsEqualTo() 
+
+    /**
+     * Returns the value of field 'propertyIsGreaterThan'.
+     * 
+     * @return PropertyIsGreaterThan
+     * @return the value of field 'propertyIsGreaterThan'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsGreaterThan getPropertyIsGreaterThan()
+    {
+        return this._propertyIsGreaterThan;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsGreaterThan getPropertyIsGreaterThan() 
+
+    /**
+     * Returns the value of field 'propertyIsGreaterThanOrEqualTo'.
+     * 
+     * @return PropertyIsGreaterThanOrEqualTo
+     * @return the value of field 'propertyIsGreaterThanOrEqualTo'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo getPropertyIsGreaterThanOrEqualTo()
+    {
+        return this._propertyIsGreaterThanOrEqualTo;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo getPropertyIsGreaterThanOrEqualTo() 
+
+    /**
+     * Returns the value of field 'propertyIsLessThan'.
+     * 
+     * @return PropertyIsLessThan
+     * @return the value of field 'propertyIsLessThan'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsLessThan getPropertyIsLessThan()
+    {
+        return this._propertyIsLessThan;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsLessThan getPropertyIsLessThan() 
+
+    /**
+     * Returns the value of field 'propertyIsLessThanOrEqualTo'.
+     * 
+     * @return PropertyIsLessThanOrEqualTo
+     * @return the value of field 'propertyIsLessThanOrEqualTo'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo getPropertyIsLessThanOrEqualTo()
+    {
+        return this._propertyIsLessThanOrEqualTo;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo getPropertyIsLessThanOrEqualTo() 
+
+    /**
+     * Returns the value of field 'propertyIsLike'.
+     * 
+     * @return PropertyIsLike
+     * @return the value of field 'propertyIsLike'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsLike getPropertyIsLike()
+    {
+        return this._propertyIsLike;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsLike getPropertyIsLike() 
+
+    /**
+     * Returns the value of field 'propertyIsNotEqualTo'.
+     * 
+     * @return PropertyIsNotEqualTo
+     * @return the value of field 'propertyIsNotEqualTo'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo getPropertyIsNotEqualTo()
+    {
+        return this._propertyIsNotEqualTo;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo getPropertyIsNotEqualTo() 
+
+    /**
+     * Returns the value of field 'propertyIsNull'.
+     * 
+     * @return PropertyIsNull
+     * @return the value of field 'propertyIsNull'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyIsNull getPropertyIsNull()
+    {
+        return this._propertyIsNull;
+    } //-- nl.b3p.xml.ogc.v100.PropertyIsNull getPropertyIsNull() 
 
     /**
      * Returns the value of field 'touches'.
@@ -431,6 +591,17 @@ public class FilterType implements java.io.Serializable {
     } //-- boolean removeFeatureId(nl.b3p.xml.ogc.v100.FeatureId) 
 
     /**
+     * Sets the value of field 'and'.
+     * 
+     * @param and the value of field 'and'.
+     */
+    public void setAnd(nl.b3p.xml.ogc.v100.And and)
+    {
+        this._and = and;
+        this._choiceValue = and;
+    } //-- void setAnd(nl.b3p.xml.ogc.v100.And) 
+
+    /**
      * Sets the value of field 'BBOX'.
      * 
      * @param BBOX the value of field 'BBOX'.
@@ -451,17 +622,6 @@ public class FilterType implements java.io.Serializable {
         this._beyond = beyond;
         this._choiceValue = beyond;
     } //-- void setBeyond(nl.b3p.xml.ogc.v100.Beyond) 
-
-    /**
-     * Sets the value of field 'comparisonOps'.
-     * 
-     * @param comparisonOps the value of field 'comparisonOps'.
-     */
-    public void setComparisonOps(nl.b3p.xml.ogc.v100.ComparisonOps comparisonOps)
-    {
-        this._comparisonOps = comparisonOps;
-        this._choiceValue = comparisonOps;
-    } //-- void setComparisonOps(nl.b3p.xml.ogc.v100.ComparisonOps) 
 
     /**
      * Sets the value of field 'contains'.
@@ -564,15 +724,26 @@ public class FilterType implements java.io.Serializable {
     } //-- void setIntersects(nl.b3p.xml.ogc.v100.Intersects) 
 
     /**
-     * Sets the value of field 'logicOps'.
+     * Sets the value of field 'not'.
      * 
-     * @param logicOps the value of field 'logicOps'.
+     * @param not the value of field 'not'.
      */
-    public void setLogicOps(nl.b3p.xml.ogc.v100.LogicOps logicOps)
+    public void setNot(nl.b3p.xml.ogc.v100.Not not)
     {
-        this._logicOps = logicOps;
-        this._choiceValue = logicOps;
-    } //-- void setLogicOps(nl.b3p.xml.ogc.v100.LogicOps) 
+        this._not = not;
+        this._choiceValue = not;
+    } //-- void setNot(nl.b3p.xml.ogc.v100.Not) 
+
+    /**
+     * Sets the value of field 'or'.
+     * 
+     * @param or the value of field 'or'.
+     */
+    public void setOr(nl.b3p.xml.ogc.v100.Or or)
+    {
+        this._or = or;
+        this._choiceValue = or;
+    } //-- void setOr(nl.b3p.xml.ogc.v100.Or) 
 
     /**
      * Sets the value of field 'overlaps'.
@@ -584,6 +755,112 @@ public class FilterType implements java.io.Serializable {
         this._overlaps = overlaps;
         this._choiceValue = overlaps;
     } //-- void setOverlaps(nl.b3p.xml.ogc.v100.Overlaps) 
+
+    /**
+     * Sets the value of field 'propertyIsBetween'.
+     * 
+     * @param propertyIsBetween the value of field
+     * 'propertyIsBetween'.
+     */
+    public void setPropertyIsBetween(nl.b3p.xml.ogc.v100.PropertyIsBetween propertyIsBetween)
+    {
+        this._propertyIsBetween = propertyIsBetween;
+        this._choiceValue = propertyIsBetween;
+    } //-- void setPropertyIsBetween(nl.b3p.xml.ogc.v100.PropertyIsBetween) 
+
+    /**
+     * Sets the value of field 'propertyIsEqualTo'.
+     * 
+     * @param propertyIsEqualTo the value of field
+     * 'propertyIsEqualTo'.
+     */
+    public void setPropertyIsEqualTo(nl.b3p.xml.ogc.v100.PropertyIsEqualTo propertyIsEqualTo)
+    {
+        this._propertyIsEqualTo = propertyIsEqualTo;
+        this._choiceValue = propertyIsEqualTo;
+    } //-- void setPropertyIsEqualTo(nl.b3p.xml.ogc.v100.PropertyIsEqualTo) 
+
+    /**
+     * Sets the value of field 'propertyIsGreaterThan'.
+     * 
+     * @param propertyIsGreaterThan the value of field
+     * 'propertyIsGreaterThan'.
+     */
+    public void setPropertyIsGreaterThan(nl.b3p.xml.ogc.v100.PropertyIsGreaterThan propertyIsGreaterThan)
+    {
+        this._propertyIsGreaterThan = propertyIsGreaterThan;
+        this._choiceValue = propertyIsGreaterThan;
+    } //-- void setPropertyIsGreaterThan(nl.b3p.xml.ogc.v100.PropertyIsGreaterThan) 
+
+    /**
+     * Sets the value of field 'propertyIsGreaterThanOrEqualTo'.
+     * 
+     * @param propertyIsGreaterThanOrEqualTo the value of field
+     * 'propertyIsGreaterThanOrEqualTo'.
+     */
+    public void setPropertyIsGreaterThanOrEqualTo(nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo propertyIsGreaterThanOrEqualTo)
+    {
+        this._propertyIsGreaterThanOrEqualTo = propertyIsGreaterThanOrEqualTo;
+        this._choiceValue = propertyIsGreaterThanOrEqualTo;
+    } //-- void setPropertyIsGreaterThanOrEqualTo(nl.b3p.xml.ogc.v100.PropertyIsGreaterThanOrEqualTo) 
+
+    /**
+     * Sets the value of field 'propertyIsLessThan'.
+     * 
+     * @param propertyIsLessThan the value of field
+     * 'propertyIsLessThan'.
+     */
+    public void setPropertyIsLessThan(nl.b3p.xml.ogc.v100.PropertyIsLessThan propertyIsLessThan)
+    {
+        this._propertyIsLessThan = propertyIsLessThan;
+        this._choiceValue = propertyIsLessThan;
+    } //-- void setPropertyIsLessThan(nl.b3p.xml.ogc.v100.PropertyIsLessThan) 
+
+    /**
+     * Sets the value of field 'propertyIsLessThanOrEqualTo'.
+     * 
+     * @param propertyIsLessThanOrEqualTo the value of field
+     * 'propertyIsLessThanOrEqualTo'.
+     */
+    public void setPropertyIsLessThanOrEqualTo(nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo propertyIsLessThanOrEqualTo)
+    {
+        this._propertyIsLessThanOrEqualTo = propertyIsLessThanOrEqualTo;
+        this._choiceValue = propertyIsLessThanOrEqualTo;
+    } //-- void setPropertyIsLessThanOrEqualTo(nl.b3p.xml.ogc.v100.PropertyIsLessThanOrEqualTo) 
+
+    /**
+     * Sets the value of field 'propertyIsLike'.
+     * 
+     * @param propertyIsLike the value of field 'propertyIsLike'.
+     */
+    public void setPropertyIsLike(nl.b3p.xml.ogc.v100.PropertyIsLike propertyIsLike)
+    {
+        this._propertyIsLike = propertyIsLike;
+        this._choiceValue = propertyIsLike;
+    } //-- void setPropertyIsLike(nl.b3p.xml.ogc.v100.PropertyIsLike) 
+
+    /**
+     * Sets the value of field 'propertyIsNotEqualTo'.
+     * 
+     * @param propertyIsNotEqualTo the value of field
+     * 'propertyIsNotEqualTo'.
+     */
+    public void setPropertyIsNotEqualTo(nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo propertyIsNotEqualTo)
+    {
+        this._propertyIsNotEqualTo = propertyIsNotEqualTo;
+        this._choiceValue = propertyIsNotEqualTo;
+    } //-- void setPropertyIsNotEqualTo(nl.b3p.xml.ogc.v100.PropertyIsNotEqualTo) 
+
+    /**
+     * Sets the value of field 'propertyIsNull'.
+     * 
+     * @param propertyIsNull the value of field 'propertyIsNull'.
+     */
+    public void setPropertyIsNull(nl.b3p.xml.ogc.v100.PropertyIsNull propertyIsNull)
+    {
+        this._propertyIsNull = propertyIsNull;
+        this._choiceValue = propertyIsNull;
+    } //-- void setPropertyIsNull(nl.b3p.xml.ogc.v100.PropertyIsNull) 
 
     /**
      * Sets the value of field 'touches'.

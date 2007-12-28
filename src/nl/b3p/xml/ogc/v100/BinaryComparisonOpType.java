@@ -11,7 +11,6 @@ package nl.b3p.xml.ogc.v100;
  //- Imported classes and packages -/
 //---------------------------------/
 
-import java.util.Collections;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 
@@ -30,9 +29,39 @@ implements java.io.Serializable
     //--------------------------/
 
     /**
-     * Field _expressionList
+     * Field _div
      */
-    private java.util.ArrayList _expressionList;
+    private nl.b3p.xml.ogc.v100.Div _div;
+
+    /**
+     * Field _function
+     */
+    private nl.b3p.xml.ogc.v100.Function _function;
+
+    /**
+     * Field _literal
+     */
+    private nl.b3p.xml.ogc.v100.Literal _literal;
+
+    /**
+     * Field _mul
+     */
+    private nl.b3p.xml.ogc.v100.Mul _mul;
+
+    /**
+     * Field _propertyName
+     */
+    private nl.b3p.xml.ogc.v100.PropertyName _propertyName;
+
+    /**
+     * Field _sub
+     */
+    private nl.b3p.xml.ogc.v100.Sub _sub;
+
+    /**
+     * Field _add
+     */
+    private nl.b3p.xml.ogc.v100.Add _add;
 
 
       //----------------/
@@ -42,7 +71,6 @@ implements java.io.Serializable
     public BinaryComparisonOpType() 
      {
         super();
-        _expressionList = new java.util.ArrayList();
     } //-- nl.b3p.xml.ogc.v100.BinaryComparisonOpType()
 
 
@@ -51,106 +79,81 @@ implements java.io.Serializable
     //-----------/
 
     /**
-     * Method addExpression
+     * Returns the value of field 'add'.
      * 
-     * 
-     * 
-     * @param vExpression
+     * @return Add
+     * @return the value of field 'add'.
      */
-    public void addExpression(nl.b3p.xml.ogc.v100.Expression vExpression)
-        throws java.lang.IndexOutOfBoundsException
+    public nl.b3p.xml.ogc.v100.Add getAdd()
     {
-        if (!(_expressionList.size() < 2)) {
-            throw new IndexOutOfBoundsException();
-        }
-        _expressionList.add(vExpression);
-    } //-- void addExpression(nl.b3p.xml.ogc.v100.Expression) 
+        return this._add;
+    } //-- nl.b3p.xml.ogc.v100.Add getAdd() 
 
     /**
-     * Method addExpression
+     * Returns the value of field 'div'.
      * 
-     * 
-     * 
-     * @param index
-     * @param vExpression
+     * @return Div
+     * @return the value of field 'div'.
      */
-    public void addExpression(int index, nl.b3p.xml.ogc.v100.Expression vExpression)
-        throws java.lang.IndexOutOfBoundsException
+    public nl.b3p.xml.ogc.v100.Div getDiv()
     {
-        if (!(_expressionList.size() < 2)) {
-            throw new IndexOutOfBoundsException();
-        }
-        _expressionList.add(index, vExpression);
-    } //-- void addExpression(int, nl.b3p.xml.ogc.v100.Expression) 
+        return this._div;
+    } //-- nl.b3p.xml.ogc.v100.Div getDiv() 
 
     /**
-     * Method clearExpression
+     * Returns the value of field 'function'.
      * 
+     * @return Function
+     * @return the value of field 'function'.
      */
-    public void clearExpression()
+    public nl.b3p.xml.ogc.v100.Function getFunction()
     {
-        _expressionList.clear();
-    } //-- void clearExpression() 
+        return this._function;
+    } //-- nl.b3p.xml.ogc.v100.Function getFunction() 
 
     /**
-     * Method enumerateExpression
+     * Returns the value of field 'literal'.
      * 
-     * 
-     * 
-     * @return Enumeration
+     * @return Literal
+     * @return the value of field 'literal'.
      */
-    public java.util.Enumeration enumerateExpression()
+    public nl.b3p.xml.ogc.v100.Literal getLiteral()
     {
-        return Collections.enumeration(_expressionList);
-    } //-- java.util.Enumeration enumerateExpression() 
+        return this._literal;
+    } //-- nl.b3p.xml.ogc.v100.Literal getLiteral() 
 
     /**
-     * Method getExpression
+     * Returns the value of field 'mul'.
      * 
-     * 
-     * 
-     * @param index
-     * @return Expression
+     * @return Mul
+     * @return the value of field 'mul'.
      */
-    public nl.b3p.xml.ogc.v100.Expression getExpression(int index)
-        throws java.lang.IndexOutOfBoundsException
+    public nl.b3p.xml.ogc.v100.Mul getMul()
     {
-        //-- check bounds for index
-        if ((index < 0) || (index >= _expressionList.size())) {
-            throw new IndexOutOfBoundsException();
-        }
-        
-        return (nl.b3p.xml.ogc.v100.Expression) _expressionList.get(index);
-    } //-- nl.b3p.xml.ogc.v100.Expression getExpression(int) 
+        return this._mul;
+    } //-- nl.b3p.xml.ogc.v100.Mul getMul() 
 
     /**
-     * Method getExpression
+     * Returns the value of field 'propertyName'.
      * 
-     * 
-     * 
-     * @return Expression
+     * @return PropertyName
+     * @return the value of field 'propertyName'.
      */
-    public nl.b3p.xml.ogc.v100.Expression[] getExpression()
+    public nl.b3p.xml.ogc.v100.PropertyName getPropertyName()
     {
-        int size = _expressionList.size();
-        nl.b3p.xml.ogc.v100.Expression[] mArray = new nl.b3p.xml.ogc.v100.Expression[size];
-        for (int index = 0; index < size; index++) {
-            mArray[index] = (nl.b3p.xml.ogc.v100.Expression) _expressionList.get(index);
-        }
-        return mArray;
-    } //-- nl.b3p.xml.ogc.v100.Expression[] getExpression() 
+        return this._propertyName;
+    } //-- nl.b3p.xml.ogc.v100.PropertyName getPropertyName() 
 
     /**
-     * Method getExpressionCount
+     * Returns the value of field 'sub'.
      * 
-     * 
-     * 
-     * @return int
+     * @return Sub
+     * @return the value of field 'sub'.
      */
-    public int getExpressionCount()
+    public nl.b3p.xml.ogc.v100.Sub getSub()
     {
-        return _expressionList.size();
-    } //-- int getExpressionCount() 
+        return this._sub;
+    } //-- nl.b3p.xml.ogc.v100.Sub getSub() 
 
     /**
      * Method isValid
@@ -199,55 +202,74 @@ implements java.io.Serializable
     } //-- void marshal(org.xml.sax.ContentHandler) 
 
     /**
-     * Method removeExpression
+     * Sets the value of field 'add'.
      * 
-     * 
-     * 
-     * @param vExpression
-     * @return boolean
+     * @param add the value of field 'add'.
      */
-    public boolean removeExpression(nl.b3p.xml.ogc.v100.Expression vExpression)
+    public void setAdd(nl.b3p.xml.ogc.v100.Add add)
     {
-        boolean removed = _expressionList.remove(vExpression);
-        return removed;
-    } //-- boolean removeExpression(nl.b3p.xml.ogc.v100.Expression) 
+        this._add = add;
+    } //-- void setAdd(nl.b3p.xml.ogc.v100.Add) 
 
     /**
-     * Method setExpression
+     * Sets the value of field 'div'.
      * 
-     * 
-     * 
-     * @param index
-     * @param vExpression
+     * @param div the value of field 'div'.
      */
-    public void setExpression(int index, nl.b3p.xml.ogc.v100.Expression vExpression)
-        throws java.lang.IndexOutOfBoundsException
+    public void setDiv(nl.b3p.xml.ogc.v100.Div div)
     {
-        //-- check bounds for index
-        if ((index < 0) || (index >= _expressionList.size())) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (!(index < 2)) {
-            throw new IndexOutOfBoundsException();
-        }
-        _expressionList.set(index, vExpression);
-    } //-- void setExpression(int, nl.b3p.xml.ogc.v100.Expression) 
+        this._div = div;
+    } //-- void setDiv(nl.b3p.xml.ogc.v100.Div) 
 
     /**
-     * Method setExpression
+     * Sets the value of field 'function'.
      * 
-     * 
-     * 
-     * @param expressionArray
+     * @param function the value of field 'function'.
      */
-    public void setExpression(nl.b3p.xml.ogc.v100.Expression[] expressionArray)
+    public void setFunction(nl.b3p.xml.ogc.v100.Function function)
     {
-        //-- copy array
-        _expressionList.clear();
-        for (int i = 0; i < expressionArray.length; i++) {
-            _expressionList.add(expressionArray[i]);
-        }
-    } //-- void setExpression(nl.b3p.xml.ogc.v100.Expression) 
+        this._function = function;
+    } //-- void setFunction(nl.b3p.xml.ogc.v100.Function) 
+
+    /**
+     * Sets the value of field 'literal'.
+     * 
+     * @param literal the value of field 'literal'.
+     */
+    public void setLiteral(nl.b3p.xml.ogc.v100.Literal literal)
+    {
+        this._literal = literal;
+    } //-- void setLiteral(nl.b3p.xml.ogc.v100.Literal) 
+
+    /**
+     * Sets the value of field 'mul'.
+     * 
+     * @param mul the value of field 'mul'.
+     */
+    public void setMul(nl.b3p.xml.ogc.v100.Mul mul)
+    {
+        this._mul = mul;
+    } //-- void setMul(nl.b3p.xml.ogc.v100.Mul) 
+
+    /**
+     * Sets the value of field 'propertyName'.
+     * 
+     * @param propertyName the value of field 'propertyName'.
+     */
+    public void setPropertyName(nl.b3p.xml.ogc.v100.PropertyName propertyName)
+    {
+        this._propertyName = propertyName;
+    } //-- void setPropertyName(nl.b3p.xml.ogc.v100.PropertyName) 
+
+    /**
+     * Sets the value of field 'sub'.
+     * 
+     * @param sub the value of field 'sub'.
+     */
+    public void setSub(nl.b3p.xml.ogc.v100.Sub sub)
+    {
+        this._sub = sub;
+    } //-- void setSub(nl.b3p.xml.ogc.v100.Sub) 
 
     /**
      * Method unmarshal

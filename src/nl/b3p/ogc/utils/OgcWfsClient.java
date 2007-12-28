@@ -98,9 +98,10 @@ public class OgcWfsClient {
             StringBuffer sb=new StringBuffer();
             ServiceException se=null;
             for (int i=0; i < ser.getServiceExceptionCount(); i++){
+                if (i!=0)sb.append(" and ");                    
                 se= ser.getServiceException(i);
                 sb.append(se.getContent());
-                sb.append(" and ");                    
+                
             }
             throw new Exception(sb.toString());                
         }
@@ -148,7 +149,7 @@ public class OgcWfsClient {
     }    
     /** Haal de elementen uit de describefeaturetype request
      */
-    public static NodeList getFeatureElements(Element el) throws Exception{
+    public static NodeList getDescribeFeatureElements(Element el) throws Exception{
         //Haal eerst de complexTypes type elementen op en de prefix.
         NodeList childs=el.getChildNodes();
         String prefix="";
@@ -416,52 +417,88 @@ public class OgcWfsClient {
      */
     public static nl.b3p.xml.wfs.Filter createBboxFilter(String attributeName, double[] bbox, nl.b3p.xml.wfs.FeatureType feature) throws Exception{
         if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType){
-            return createBboxFilter(attributeName, bbox,(nl.b3p.xml.wfs.v100.capabilities.FeatureType)feature);
+            StringBuffer sb = new StringBuffer();
+            sb.append("<Filter><BBOX><PropertyName>");
+            sb.append(attributeName);
+            sb.append("</PropertyName>");
+            sb.append("<gml:Box srsName=\"");
+            if (((nl.b3p.xml.wfs.v100.capabilities.FeatureType)feature).getSRS()!=null)
+                sb.append(((nl.b3p.xml.wfs.v100.capabilities.FeatureType)feature).getSRS());
+            else
+                sb.append(28992);
+            sb.append("\"><gml:coordinates>");
+            sb.append(bbox[0]).append(",").append(bbox[1]);
+            sb.append(" ");
+            sb.append(bbox[2]).append(",").append(bbox[3]);
+            sb.append("</gml:coordinates></gml:Box>");
+            sb.append("</BBOX></Filter>");
+            return (nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
         }else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType){
-            return createBboxFilter(attributeName, bbox,(nl.b3p.xml.wfs.v110.FeatureType)feature);
+            StringBuffer sb = new StringBuffer();
+            sb.append("<Filter><Within><PropertyName>");
+            sb.append(attributeName);        
+            //sb.append("app:geom");
+            sb.append("</PropertyName>");
+            sb.append("<gml:Envelope srsName=\"");
+            if (((nl.b3p.xml.wfs.v110.FeatureType)feature).getFeatureTypeTypeChoice().getFeatureTypeTypeChoiceSequence().getDefaultSRS()!=null)
+                sb.append(((nl.b3p.xml.wfs.v110.FeatureType)feature).getFeatureTypeTypeChoice().getFeatureTypeTypeChoiceSequence().getDefaultSRS());
+            else
+                sb.append(28992);
+            sb.append("\"><gml:lowerCorner>");
+            sb.append(bbox[0]).append(" ").append(bbox[1]);
+            sb.append("</gml:lowerCorner><gml:upperCorner>");
+            sb.append(bbox[2]).append(" ").append(bbox[3]);
+            sb.append("</gml:upperCorner></gml:Envelope>");
+            sb.append("</Within></Filter>");
+            return (nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
         }else{
             throw new UnsupportedOperationException("Given Feature not supported");
         }
     }
-    /**
-     *Creates a bbox filter
-     */
-    private static nl.b3p.xml.ogc.v100.Filter createBboxFilter(String attributeName, double[] bbox, nl.b3p.xml.wfs.v100.capabilities.FeatureType feature) throws Exception{        
-        StringBuffer sb = new StringBuffer();
-        sb.append("<Filter><BBOX><PropertyName>");
-        sb.append(attributeName);
-        sb.append("</PropertyName>");
-        sb.append("<gml:Box srsName=\"http://www.opengis.net/gml/srs/epsg.xml#");
-        sb.append(28992);
-        sb.append("\"><gml:coordinates>");
-        sb.append(bbox[0]).append(",").append(bbox[1]);
-        sb.append(" ");
-        sb.append(bbox[2]).append(",").append(bbox[3]);
-        sb.append("</gml:coordinates></gml:Box>");
-        sb.append("</BBOX></Filter>");
-        return (nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
-        
-    }
-    /**
-     *Creates a bbox filter
-     */
-    private static nl.b3p.xml.ogc.v110.Filter createBboxFilter(String attributeName, double[] bbox, nl.b3p.xml.wfs.v110.FeatureType feature) throws Exception{        
-        StringBuffer sb = new StringBuffer();
-        sb.append("<Filter><Within><PropertyName>");
-        sb.append(attributeName);        
-        //sb.append("app:geom");
-        sb.append("</PropertyName>");
-        sb.append("<gml:Envelope srsName=\"http://www.opengis.net/gml/srs/epsg.xml#");
-        sb.append(28992);
-        sb.append("\"><gml:lowerCorner>");
-        sb.append(bbox[0]).append(" ").append(bbox[1]);
-        sb.append("</gml:lowerCorner><gml:upperCorner>");
-        sb.append(bbox[2]).append(" ").append(bbox[3]);
-        sb.append("</gml:upperCorner></gml:Envelope>");
-        sb.append("</Within></Filter>");
-        return (nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
-    }
     
+    public static void addPropertyIsEqualToFilter(GetFeature gf, String propertyName, String compareValue) {
+        
+        if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature){
+            Filter filter= OgcWfsClient.createPropertyIsEqualToFilter(propertyName,compareValue,OGCConstants.WFS_VERSION_100);            
+            ((nl.b3p.xml.wfs.v100.GetFeature)gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v100.Filter)filter);            
+        }else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature){
+            Filter filter= OgcWfsClient.createPropertyIsEqualToFilter(propertyName,compareValue,OGCConstants.WFS_VERSION_110);
+            ((nl.b3p.xml.wfs.v110.GetFeature)gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v110.Filter)filter);
+            
+        }
+    }
+    private static Filter createPropertyIsEqualToFilter(String propertyName, String compareValue, String version) {
+        if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+            nl.b3p.xml.ogc.v100.Filter filter = new nl.b3p.xml.ogc.v100.Filter();
+            nl.b3p.xml.ogc.v100.PropertyIsEqualTo piet = new nl.b3p.xml.ogc.v100.PropertyIsEqualTo();            
+            nl.b3p.xml.ogc.v100.PropertyName pn = new nl.b3p.xml.ogc.v100.PropertyName();
+            nl.b3p.xml.ogc.v100.Literal l = new nl.b3p.xml.ogc.v100.Literal();
+            //bij mapserver gaat dit niet helemaal goed. Omdat de query geen ms: aan kan. (de prefix van de namespace)
+            if (propertyName.contains(":")){
+                propertyName=propertyName.replaceAll("ms:","");
+            }
+            pn.setContent(propertyName);
+            l.setContent(compareValue);
+            piet.setPropertyName(pn);
+            piet.setLiteral(l);
+            filter.setPropertyIsEqualTo(piet);
+            return filter;
+            
+        }else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
+            nl.b3p.xml.ogc.v110.Filter filter = new nl.b3p.xml.ogc.v110.Filter();
+            nl.b3p.xml.ogc.v110.PropertyIsEqualTo piet = new nl.b3p.xml.ogc.v110.PropertyIsEqualTo();            
+            nl.b3p.xml.ogc.v110.PropertyName pn= new nl.b3p.xml.ogc.v110.PropertyName();
+            nl.b3p.xml.ogc.v110.Literal l = new nl.b3p.xml.ogc.v110.Literal();
+            pn.setContent(propertyName);
+            l.setContent(compareValue);
+            piet.setPropertyName(pn);
+            piet.setLiteral(l);            
+            filter.setPropertyIsEqualTo(piet);
+            return filter;
+        }else{
+            throw new UnsupportedOperationException("Given Version not supported: "+version);
+        }
+    }
     
     public static ArrayList getFeatureElements(GetFeature gf, OGCRequest or) throws Exception{
         ArrayList returnList= new ArrayList();
@@ -473,7 +510,7 @@ public class OgcWfsClient {
             GMLInputTemplate template= (GMLInputTemplate) it.next();  
             bgr.setInputTemplate(template);
             FeatureCollection fc=bgr.read(new StringReader(elementToString(e)));
-            returnList.addAll(fc.getFeatures());
+            returnList.addAll(fc.getFeatures());            
         }
         return returnList;
     }
@@ -522,9 +559,4 @@ public class OgcWfsClient {
         return anyNode;
         
     }
-
-    
-    
-    
-    
 }
