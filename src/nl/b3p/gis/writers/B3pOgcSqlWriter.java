@@ -135,8 +135,8 @@ public class B3pOgcSqlWriter {
                 
                 boolean update = false;
                 if (columnNamesToCheck != null) {
-                    ArrayList values = getPrimaryValues(fs, f, columnNamesToCheck);
-                    update = checkExinstenceInDB(values, tablename);
+                    //ArrayList values = getPrimaryValues(fs, f, columnNamesToCheck);
+                    update = checkExinstenceInDB(columnNamesToCheck,f, tablename);
                 }
                 
                 if(update) {
@@ -149,8 +149,10 @@ public class B3pOgcSqlWriter {
                     q.append(");");
                 }
                 if(getBatchValue() != 0) {
-                    if (inserts == getBatchValue())
-                    executeStatement(q.toString());
+                    if ((inserts+1)%getBatchValue()==0){
+                        executeStatement(q.toString());
+                        q=null;
+                    }                   
                 }
             }
             if (q != null && q.length() > 0){
@@ -159,20 +161,21 @@ public class B3pOgcSqlWriter {
         }
     }
     
-    private boolean checkExinstenceInDB(ArrayList values, String tablename) throws SQLException {
+    private boolean checkExinstenceInDB(String[] columnNamesToCheck, Feature f, String tablename) throws SQLException {
         StringBuffer sql = new StringBuffer();
         sql.append("SELECT * FROM ");
         sql.append(tablename);
-        sql.append(" WHERE ");
-        Iterator it = values.iterator();
-        while (it.hasNext()) {
-            Object [] obj = (Object[])it.next();
-            sql.append(obj[0]);
+        sql.append(" WHERE ");        
+        for (int i=0; i < columnNamesToCheck.length; i++){            
+            if (i!=0){
+                sql.append(" AND ");
+            }
+            sql.append(columnNamesToCheck[i]);
             sql.append(" = ");
-            sql.append("'" + obj[1] + "'");
-            sql.append(" AND ");
-        }        
-        PreparedStatement statement = connection.prepareStatement(sql.substring(0, sql.length() - 5));
+            sql.append(getSqlValue(f,f.getSchema(),columnNamesToCheck[i]));
+        }
+        sql.append(";");
+        PreparedStatement statement = connection.prepareStatement(sql.toString());
         ResultSet rs = statement.executeQuery();
         boolean found = rs.next(); 
         statement.execute();
@@ -211,101 +214,98 @@ public class B3pOgcSqlWriter {
         }
     }
     
-    private ArrayList getPrimaryValues(FeatureSchema fs, Feature f, String [] columnNamesToCheck) {
-        ArrayList values = null;
-        for (int i = 0; i < fs.getAttributeCount(); i++) {
-            String columnName = fs.getAttributeName(i);
-            Object columnValue = f.getAttribute(columnName);
-            for (int j = 0; j < columnNamesToCheck.length; j++) {
-                if (columnName.equalsIgnoreCase(columnNamesToCheck[j])) {
-                    if (values == null)
-                        values = new ArrayList();
-                    values.add(new Object[]{columnName, columnValue});
-                }
-            }
+    private void executeStatement(String statementToExecute) throws SQLException{
+        PreparedStatement statement=null;        
+        try{
+            statement=connection.prepareStatement(statementToExecute);
+            statement.execute();                        
+        }catch(SQLException se){
+            log.error(se);
+        }finally {
+            if (statement!=null)
+                statement.close();
         }
-        return values;
-    }
-    
-    private void executeStatement(String statementToExecute) throws SQLException {
-        PreparedStatement statement=null;
-        statement=connection.prepareStatement(statementToExecute);
-        statement.execute();
-        statement.close();
-        statementToExecute = null;
     }
     
     private StringBuffer addInsertValue(FeatureSchema fs, Feature f) {
         StringBuffer values = new StringBuffer();
-        for (int i=0; i < fs.getAttributeCount(); i++) {
-            Object o=f.getAttribute(fs.getAttributeName(i));
+        for (int i=0; i < fs.getAttributeCount(); i++) {            
             if (i!=0)
                 values.append(", ");
-            if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
-                values.append("GeomFromText(\'");
-                values.append(f.getGeometry().toText());
-                //Todo: Srid opzoeken
-                values.append("\', 28992");
-                values.append(")");
-            }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){
-                values.append(o);
-            }else if (fs.getAttributeType(i).equals(AttributeType.INTEGER)){
-                values.append(o);
-            }else if (fs.getAttributeType(i).equals(AttributeType.STRING)){
-                if (o==null)
-                    values.append(o);
-                else{
-                    String s=(String)o;
-                    s=s.replaceAll("'","\'\'");
-                    values.append("\'");
-                    values.append(s);
-                    values.append("\'");
-                }
-            }else if (fs.getAttributeType(i).equals(AttributeType.DATE)){
-                if (o==null)
-                    values.append(o);
-                else{
-                    values.append("\'");
-                    values.append(formatDate("dd-MM-yyyy", "yyyy-MM-dd", (String) o));
-                    values.append("\'");
-                }
-            }else if (fs.getAttributeType(i).equals(AttributeType.OBJECT)){
-                if (o==null)
-                    values.append(o);
-                else{
-                    values.append("\'");
-                    values.append(o);
-                    values.append("\'");
-                }
-            }
+            values.append(getSqlValue(f,fs,i));            
         }
         return values;
+    }
+    private String getSqlValue(Feature f, FeatureSchema fs,String attributeName){
+        return getSqlValue(f,fs.getAttributeIndex(attributeName));
+    }
+    private String getSqlValue(Feature f,int i){
+        return getSqlValue(f,f.getSchema(),i);
+    }
+    private String getSqlValue(Feature f,FeatureSchema fs,int i){
+        Object o=f.getAttribute(fs.getAttributeName(i));
+        StringBuffer values= new StringBuffer();        
+        if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
+            values.append("GeomFromText(\'");
+            values.append(f.getGeometry().toText());
+            //Todo: Srid opzoeken
+            values.append("\', 28992");
+            values.append(")");
+        }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){
+            values.append(o);
+        }else if (fs.getAttributeType(i).equals(AttributeType.INTEGER)){
+            values.append(o);
+        }else if (fs.getAttributeType(i).equals(AttributeType.STRING)){
+            if (o==null)
+                values.append(o);
+            else{
+                String s=(String)o;
+                s=s.replaceAll("'","\'\'");
+                values.append("\'");
+                values.append(s);
+                values.append("\'");
+            }
+        }else if (fs.getAttributeType(i).equals(AttributeType.DATE)){
+            if (o==null)
+                values.append(o);
+            else{
+                values.append("\'");
+                values.append(formatDate("dd-MM-yyyy", "yyyy-MM-dd", (String) o));
+                values.append("\'");
+            }
+        }else if (fs.getAttributeType(i).equals(AttributeType.OBJECT)){
+            if (o==null)
+                values.append(o);
+            else{
+                values.append("\'");
+                values.append(o);
+                values.append("\'");
+            }
+        }
+        return values.toString();
     }
     
     private String addUpdateValue(FeatureSchema fs, Feature f, String [] columnNamesToCheck) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < fs.getAttributeCount(); i++) {
-            String columnName = fs.getAttributeName(i);
-            Object columnValue = f.getAttribute(columnName);
-            for (int j = 0; j < columnNamesToCheck.length; j++) {
-                if (!columnName.equalsIgnoreCase(columnNamesToCheck[j])) {
-                    sb.append(columnName);
-                    sb.append(" = ");
-                    sb.append("'" + columnValue + "'");
-                    sb.append(" AND ");
-                    
-                }
-            }
-        }
-        sb = new StringBuffer(sb.substring(0, sb.length() - 4));
-        sb.append(" WHERE ");
-        for (int j = 0; j < columnNamesToCheck.length; j++) {
-            sb.append(columnNamesToCheck[j]);
+            if (i!=0)
+                sb.append(", ");            
+            sb.append(fs.getAttributeName(i));
             sb.append(" = ");
-            sb.append("'" + f.getAttribute(columnNamesToCheck[j]) + "'");
-            sb.append(" AND ");
+            sb.append(getSqlValue(f,fs,i));
+            
         }
-        return sb.substring(0, sb.length() - 5);
+        sb.append(" WHERE ");
+        for (int i = 0; i < columnNamesToCheck.length; i++) {
+            if (i!=0)
+                sb.append(" AND ");
+            sb.append(columnNamesToCheck[i]);
+            sb.append(" = ");
+            sb.append(getSqlValue(f,fs,columnNamesToCheck[i]));
+            
+        }
+        sb.append(";");
+        return sb.toString();
     }
     
     private String formatDate(String oldstyle, String newstyle, String parse_date) {
