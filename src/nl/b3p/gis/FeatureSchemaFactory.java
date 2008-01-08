@@ -40,46 +40,56 @@ public class FeatureSchemaFactory {
      * @param table The name of the table in the given database. From this table a FeatureSchema is created
      * @return a FeatureSchema
      */
-    static public FeatureSchema createFeatureSchemaFromDbTable(String url,String user,String password, java.sql.Driver driver, String table) throws SQLException, NotSupportedException, Exception{
+    static public FeatureSchema createFeatureSchemaFromDbTable(String url,String user,String password, java.sql.Driver driver, String table, String[] dontAddColumns) throws SQLException, NotSupportedException, Exception{
         DriverManager.registerDriver(driver);
-        return createFeatureSchemaFromDbTable(DriverManager.getConnection(url,user,password),table);
+        return createFeatureSchemaFromDbTable(DriverManager.getConnection(url,user,password),table,dontAddColumns);
     }
     /**Creates a FeatureSchema from a table.
      * @param conn The connection to the database.
      * @param table The name of the table in the given database. From this table a FeatureSchema is created
      * @return a FeatureSchema
      */
-    static public FeatureSchema createFeatureSchemaFromDbTable(Connection conn,String table) throws SQLException, NotSupportedException, Exception{
+    static public FeatureSchema createFeatureSchemaFromDbTable(Connection conn,String table, String[] dontAddColumns) throws SQLException, NotSupportedException, Exception{
         FeatureSchema fs = new FeatureSchema();
         List tableNames=SqlMetaDataUtils.getTableAndViewNames(conn);
         DatabaseMetaData dbmd = conn.getMetaData();     
         if (tableNames.contains(table)){
             ResultSet rs = dbmd.getColumns(null, null, table, null);
             for (int i=0; rs.next(); i++){
-                String columnName= rs.getString("COLUMN_NAME");                
-                int dataType= rs.getInt("DATA_TYPE");
-                AttributeType at=SqlMetaDataUtils.getAttributeTypeFromSqlType(dataType);
-                if (at.equals(AttributeType.OBJECT))
-                    //probably a Geom object, otherwise unknown type so don't at the attribute.
-                    if (dbmd.getDatabaseProductName().equalsIgnoreCase(SqlMetaDataUtils.PRODUCT_POSTGRES)){
-                        //the geom columns in postgis are stored in the "geometry_columns" table
-                        PreparedStatement statement = null;                        
-                        statement=conn.prepareStatement("SELECT * FROM geometry_columns g WHERE g.f_table_name = '"+table+"';");
-                        ResultSet rsgeom=statement.executeQuery();
-                        //if there is a geometry_columns record then this is a geometry
-                        if (rsgeom.next()){
-                            int epsgCode= rsgeom.getInt("srid");
-                            CoordinateSystem cs= new CoordinateSystem("EPSG:"+epsgCode,epsgCode,null);
-                            fs.setCoordinateSystem(cs);
-                            fs.addAttribute(columnName,AttributeType.GEOMETRY);
+                String columnName= rs.getString("COLUMN_NAME");
+                boolean add=true;
+                if (dontAddColumns!=null){
+                    for (int d=0; d < dontAddColumns.length && add; d++){
+                        if (dontAddColumns[d].equalsIgnoreCase(columnName)){
+                            add=false;
                         }
-                        statement.close();
                     }
+                }
+                if (add){
+                    int dataType= rs.getInt("DATA_TYPE");
+                    AttributeType at=SqlMetaDataUtils.getAttributeTypeFromSqlType(dataType);
+                    if (at.equals(AttributeType.OBJECT))
+                        //probably a Geom object, otherwise unknown type so don't at the attribute.
+                        if (dbmd.getDatabaseProductName().equalsIgnoreCase(SqlMetaDataUtils.PRODUCT_POSTGRES)){
+                            //the geom columns in postgis are stored in the "geometry_columns" table
+                            PreparedStatement statement = null;                        
+                            statement=conn.prepareStatement("SELECT * FROM geometry_columns g WHERE g.f_table_name = '"+table+"';");
+                            ResultSet rsgeom=statement.executeQuery();
+                            //if there is a geometry_columns record then this is a geometry
+                            if (rsgeom.next()){
+                                int epsgCode= rsgeom.getInt("srid");
+                                CoordinateSystem cs= new CoordinateSystem("EPSG:"+epsgCode,epsgCode,null);
+                                fs.setCoordinateSystem(cs);
+                                fs.addAttribute(columnName,AttributeType.GEOMETRY);
+                            }
+                            statement.close();
+                        }
+                        else{
+                           log.info("create geometry feature not supported for "+dbmd.getDatabaseProductName());
+                        }
                     else{
-                       log.info("create geometry feature not supported for "+dbmd.getDatabaseProductName());
+                        fs.addAttribute(columnName,at);                    
                     }
-                else{
-                    fs.addAttribute(columnName,at);                    
                 }
             }
              //set the coordinateSystem without the projection. Don't need it (yet)
