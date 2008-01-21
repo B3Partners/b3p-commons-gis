@@ -40,6 +40,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
     private Set layers;
     private Layer topLayer;
     private Set allRoles;
+    private String code;
     private boolean isSynchronized = false;
     
     /** default ServiceProvider() constructor.
@@ -181,6 +182,14 @@ public class ServiceProvider implements XMLElement, KBConstants {
             allRoles = new HashSet();
         }
         allRoles.add(role);
+    }
+    
+    public String getOrganizationCode() {
+        return code;
+    }
+    
+    public void setOrganizationCode(String code) {
+        this.code = code;
     }
     
     public Set getAllLayers() {
@@ -407,6 +416,14 @@ public class ServiceProvider implements XMLElement, KBConstants {
             roleElement.setAttribute("id", KB_DEFAULT_ROLE);
             vendorSpecificElement.appendChild(roleElement);
         }
+        
+        if (this.getOrganizationCode()!=null) {
+            Element orgcode = doc.createElement("OrganizationCode");
+            Text text = doc.createTextNode(this.getOrganizationCode());
+            orgcode.appendChild(text);
+            vendorSpecificElement.appendChild(orgcode);
+        }
+        
         capabilityElement.appendChild(vendorSpecificElement);
         
         //De beschikbare layers.
