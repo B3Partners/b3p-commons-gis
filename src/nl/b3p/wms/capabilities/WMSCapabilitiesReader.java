@@ -126,7 +126,9 @@ public class WMSCapabilitiesReader implements KBConstants {
             if (statusCode != HttpStatus.SC_OK) {
                 throw new Exception(method.getStatusLine().getReasonPhrase());
             }
-            String mimeType = method.getResponseHeader("Content-Type").getValue();
+            String mimeType=null;
+            if (method.getResponseHeader("Content-Type")!=null)
+                mimeType= method.getResponseHeader("Content-Type").getValue();
             if (mimeType==null || mimeType.indexOf("xml")==-1) {
                 throw new Exception("Cannot get a GetCapabilities document from server");
             }
