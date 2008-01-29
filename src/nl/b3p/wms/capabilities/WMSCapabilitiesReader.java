@@ -245,6 +245,7 @@ public class WMSCapabilitiesReader implements KBConstants {
         //These two Handlers are not being used
         s.setElementHandler("VendorSpecificCapabilities", new VendorSpecificCapabilitiesHandler());
         s.setElementHandler("Role", new RoleHandler());
+        s.setElementHandler("OrganizationCode", new OrganizationCodeHandler());
         //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
     }
     // </editor-fold>
@@ -1388,6 +1389,23 @@ public class WMSCapabilitiesReader implements KBConstants {
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
             checkObject(serviceProvider);
             serviceProvider.addRole(roles);
+        }
+    }
+    
+    private class OrganizationCodeHandler extends ElementHandler {
+        StringBuffer sb;
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+        
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+        
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
+            serviceProvider.setOrganizationCode(sb.toString()); 
         }
     }
     
