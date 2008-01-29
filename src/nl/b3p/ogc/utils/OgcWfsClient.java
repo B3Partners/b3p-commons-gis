@@ -435,7 +435,7 @@ public class OgcWfsClient {
             return (nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
         }else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType){
             StringBuffer sb = new StringBuffer();
-            sb.append("<Filter><Within><PropertyName>");
+            sb.append("<Filter><Intersects><PropertyName>");
             sb.append(attributeName);        
             //sb.append("app:geom");
             sb.append("</PropertyName>");
@@ -449,7 +449,7 @@ public class OgcWfsClient {
             sb.append("</gml:lowerCorner><gml:upperCorner>");
             sb.append(bbox[2]).append(" ").append(bbox[3]);
             sb.append("</gml:upperCorner></gml:Envelope>");
-            sb.append("</Within></Filter>");
+            sb.append("</Intersects></Filter>");
             return (nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
         }else{
             throw new UnsupportedOperationException("Given Feature not supported");
