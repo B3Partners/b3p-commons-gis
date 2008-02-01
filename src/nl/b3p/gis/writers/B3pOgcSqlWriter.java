@@ -220,7 +220,7 @@ public class B3pOgcSqlWriter {
             statement=connection.prepareStatement(statementToExecute);
             statement.execute();                        
         }catch(SQLException se){
-            log.error(se);
+            throw se;
         }finally {
             if (statement!=null)
                 statement.close();
