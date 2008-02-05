@@ -82,6 +82,7 @@ public interface OGCConstants {
     public static final String WMS_REQUEST_GetStyles = "GetStyles";
     public static final String WMS_REQUEST_PutStyles = "PutStyles";
     public static final String WMS_REQUEST_DescribeLayer = "DescribeLayer";
+
     
     public static final String WMS_SERVICE_WMS = "WMS";
     
@@ -154,7 +155,7 @@ public interface OGCConstants {
     
     public static final List NON_REQUIRED_PARAMS_GetCapabilities = Arrays.asList(new String[] {
         UPDATESEQUENCE
-    });    
+    });
     
     public static final List PARAMS_GetMap = Arrays.asList(new String[] {
         REQUEST,
@@ -176,7 +177,7 @@ public interface OGCConstants {
         WMS_PARAM_ELEVATION,
         WMS_PARAM_SLD,
         WMS_PARAM_WFS
-    });    
+    });
     
     public static final List PARAMS_GetFeatureInfo = Arrays.asList(new String[] {
         REQUEST,
@@ -203,7 +204,7 @@ public interface OGCConstants {
         REQUEST,
         VERSION,
         WMS_PARAM_FORMAT,
-        WMS_PARAM_LAYER       
+        WMS_PARAM_LAYER
     });
     
     public static final List NON_REQUIRED_PARAMS_GetLegendGraphic = Arrays.asList(new String[] {
@@ -211,9 +212,9 @@ public interface OGCConstants {
         WMS_PARAM_FEATURETYPE,
         WMS_PARAM_RULE,
         WMS_PARAM_SCALE,
-        WMS_PARAM_SLD,        
+        WMS_PARAM_SLD,
         WMS_PARAM_WIDTH,
-        WMS_PARAM_HEIGHT,        
+        WMS_PARAM_HEIGHT,
         WMS_PARAM_EXCEPTIONS,
         WMS_PARAM_SLD_BODY
     });

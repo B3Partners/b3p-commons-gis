@@ -10,8 +10,6 @@
 
 package nl.b3p.ogc.utils;
 
-import java.util.Arrays;
-import java.util.List;
 /*TODO: KB Constants moet nog een keer worden opgesplitst in KBconstants en OGCconstants.
  */
 public interface KBConstants extends OGCConstants {
@@ -43,6 +41,9 @@ public interface KBConstants extends OGCConstants {
     public static final String SERVICEPROVIDER_FEES = "none";
     public static final String SERVICEPROVIDER_ACCESSCONSTRAINTS = "none";
     
+    public static final String SERVICEPROVIDER_BASE_ABBR = "B3P";
+    
+    
     public static final String TOPLAYERNAME = "B3P_Kaartenbalie";
     // </editor-fold>
     
@@ -65,8 +66,37 @@ public interface KBConstants extends OGCConstants {
     public static final String UNSUPPORTED_VERSION = "Opgegeven VERSION wordt niet ondersteund door Kaartenbalie";
     public static final String UNSUPPORTED_SERVICE = "Opgegeven SERVICE wordt niet ondersteund door Kaartenbalie";
     public static final String UNSUPPORTED_REQUEST = "Opgegeven REQUEST is niet geldig voor het ophalen van een GetCapability";
+    
+    
+    /*
+     * For Accounting...
+     */
+    public static final String MESSAGE_AUTHORIZATION_START = "Authoriseer dit eenmalig door de goedkeuringslaag voor '";
+    public static final String MESSAGE_AUTHORIZATION_END = "' mee te sturen/te valideren met uw kaartaanvraag.";
+    public static final String MESSAGE_NO_DISPLAY_AGAIN = "Hierna zal de kaart worden getoond en dit bericht niet meer weergegeven worden.";
+    public static final String MESSAGE_REQUIRED_CREDITS = "Het aantal vereistte credits voor deze opvraag bedraagt ";
+    
+    public static final String REQUIRES_PAYMENT_AUTHORIZATION_EXCEPTION =
+            "Eén of meer van de door u opgevraagde lagen vereisen authorizatie voor het afboeken van het credittegoed. " +
+            MESSAGE_AUTHORIZATION_START + "betalingen" + MESSAGE_AUTHORIZATION_END +
+            MESSAGE_NO_DISPLAY_AGAIN + MESSAGE_REQUIRED_CREDITS;
+    
+    public static final String MORE_THEN_100_CREDITS_EXCEPTION =
+            "Uw kaartaanvraag zal voor een afschrijnving van meer dan 100 credits per opvraag zorgen. " +
+            MESSAGE_AUTHORIZATION_START + "betalingen met meer dan 100 credits" + MESSAGE_AUTHORIZATION_END +
+            MESSAGE_NO_DISPLAY_AGAIN + MESSAGE_REQUIRED_CREDITS;
+    
+    public static final String[] ACCOUNTING_WMS_REQUESTS = new String[] {
+        WMS_REQUEST_GetMap,
+        WMS_REQUEST_GetFeatureInfo,
+        WMS_REQUEST_GetLegendGraphic};
+    public static final String[] ACCOUNTING_WFS_REQUESTS = new String[] {
+    };
+    
+    //public static final String ABBR_RESERVED = "De afkorting '" + SERVICEPROVIDER_BASE_ABBR + "' is gereserveerd en kan daarom niet gekozen worden.";
     // </editor-fold>
     
     public static final String CHARSET = "UTF-8";
     public static final String MD_ALGORITHM= "MD5";
+    
 }

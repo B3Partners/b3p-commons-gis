@@ -48,7 +48,6 @@ public class Layer implements XMLElement {
     private Set organizationLayers;
     private Set srsbb;
     private Set layers;
-    private Set layerPricings;
     private String metaData;
     
     // <editor-fold defaultstate="" desc="getter and setter methods.">
@@ -805,12 +804,6 @@ public class Layer implements XMLElement {
         return false;
     }
     
-    public Set getLayerPricings() {
-        return layerPricings;
-    }
-    
-    public void setLayerPricings(Set layerPricings) {
-        this.layerPricings = layerPricings;
-    }
+   
     
 }
