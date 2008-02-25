@@ -41,7 +41,7 @@ public interface KBConstants extends OGCConstants {
     public static final String SERVICEPROVIDER_FEES = "none";
     public static final String SERVICEPROVIDER_ACCESSCONSTRAINTS = "none";
     
-    public static final String SERVICEPROVIDER_BASE_ABBR = "B3P";
+    
     
     
     public static final String TOPLAYERNAME = "B3P_Kaartenbalie";
@@ -72,19 +72,9 @@ public interface KBConstants extends OGCConstants {
      * For Accounting...
      */
     public static final String MESSAGE_AUTHORIZATION_START = "Authoriseer dit eenmalig door de goedkeuringslaag voor '";
-    public static final String MESSAGE_AUTHORIZATION_END = "' mee te sturen/te valideren met uw kaartaanvraag.";
-    public static final String MESSAGE_NO_DISPLAY_AGAIN = "Hierna zal de kaart worden getoond en dit bericht niet meer weergegeven worden.";
+    public static final String MESSAGE_AUTHORIZATION_END = "' mee te sturen/te valideren met uw kaartaanvraag.\n";
+    public static final String MESSAGE_NO_DISPLAY_AGAIN = "Hierna zal de kaart worden getoond en dit bericht niet meer weergegeven worden.\n";
     public static final String MESSAGE_REQUIRED_CREDITS = "Het aantal vereistte credits voor deze opvraag bedraagt ";
-    
-    public static final String REQUIRES_PAYMENT_AUTHORIZATION_EXCEPTION =
-            "Eén of meer van de door u opgevraagde lagen vereisen authorizatie voor het afboeken van het credittegoed. " +
-            MESSAGE_AUTHORIZATION_START + "betalingen" + MESSAGE_AUTHORIZATION_END +
-            MESSAGE_NO_DISPLAY_AGAIN + MESSAGE_REQUIRED_CREDITS;
-    
-    public static final String MORE_THEN_100_CREDITS_EXCEPTION =
-            "Uw kaartaanvraag zal voor een afschrijnving van meer dan 100 credits per opvraag zorgen. " +
-            MESSAGE_AUTHORIZATION_START + "betalingen met meer dan 100 credits" + MESSAGE_AUTHORIZATION_END +
-            MESSAGE_NO_DISPLAY_AGAIN + MESSAGE_REQUIRED_CREDITS;
     
     public static final String[] ACCOUNTING_WMS_REQUESTS = new String[] {
         WMS_REQUEST_GetMap,
@@ -92,8 +82,14 @@ public interface KBConstants extends OGCConstants {
         WMS_REQUEST_GetLegendGraphic};
     public static final String[] ACCOUNTING_WFS_REQUESTS = new String[] {
     };
+    /*
+     * Layering...
+     */
+    public static final String SERVICEPROVIDER_BASE_ABBR = "b3p";
+    public static final String SERVICEPROVIDER_BASE_HTTP = "http://layering.kaartenbalie.nl/";
+    public static final String[] SUPPORTED_PROJECTIONS = new String[] {"EPSG:28992","EPSG:CHRIS"};
+    public static final String DEFAULT_PROJECTION = "EPSG:28992";
     
-    //public static final String ABBR_RESERVED = "De afkorting '" + SERVICEPROVIDER_BASE_ABBR + "' is gereserveerd en kan daarom niet gekozen worden.";
     // </editor-fold>
     
     public static final String CHARSET = "UTF-8";
