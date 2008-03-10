@@ -10,11 +10,8 @@
 
 package nl.b3p.ogc.utils;
 
-/*TODO: KB Constants moet nog een keer worden opgesplitst in KBconstants en OGCconstants.
- */
 public interface KBConstants extends OGCConstants {
     
-    // <editor-fold defaultstate="" desc="Predefined static final CapabilityRequest strings">
     public static final String SERVICE_NAME = "OGC:WMS";
     public static final String SERVICE_TITLE = "Kaartenbalie Map Portal";
     public static final String SERVICE_ABSTRACT = "Controlled access to OGC WMS maps. See B3P GIS at http://www.b3partners.nl/";
@@ -42,18 +39,17 @@ public interface KBConstants extends OGCConstants {
     public static final String SERVICEPROVIDER_ACCESSCONSTRAINTS = "none";
     
     
-    
-    
     public static final String TOPLAYERNAME = "B3P_Kaartenbalie";
-    // </editor-fold>
     
-    // <editor-fold defaultstate="" desc="Predefined static final user strings">
     public static final String KB_USER = "user" ;
     public static final String KB_PERSONAL_URL = "personalURL" ;
     public static final String KB_DEFAULT_ROLE = "gebruiker";
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="" desc="Predefined static final exception strings">
+
+    public static final String KB_PROXY_URL = "purl";
+    public static final String KB_PROXY = "proxy";
+    public static final String KB_PROXY_KEY = "proxy007"; // minimaal 8 bytes voor url encrypting
+    public static final String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
+
     public static final String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
     public static final String GETMAP_QUERYABLE_EXCEPTION = "Kaartenbalie GetMap fout: Gevraagde kaartlaag is niet queryable.";
     public static final String FEATUREINFO_EXCEPTION = "Kaartenbalie GetFeatureInfo fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
@@ -71,10 +67,11 @@ public interface KBConstants extends OGCConstants {
     /*
      * For Accounting...
      */
-    public static final String MESSAGE_AUTHORIZATION_START = "Authoriseer dit eenmalig door de goedkeuringslaag voor '";
-    public static final String MESSAGE_AUTHORIZATION_END = "' mee te sturen/te valideren met uw kaartaanvraag.\n";
+    public static final String MESSAGE_AUTHORIZATION_INTRO = "Eén of meer van de door u opgevraagde kaarten vereisen autorisatie voor het afboeken van het credittegoed. ";
+    public static final String MESSAGE_AUTHORIZATION_START = "Vink hiertoe de goedkeuringskaart '";
+    public static final String MESSAGE_AUTHORIZATION_END = "' aan.\n";
     public static final String MESSAGE_NO_DISPLAY_AGAIN = "Hierna zal de kaart worden getoond en dit bericht niet meer weergegeven worden.\n";
-    public static final String MESSAGE_REQUIRED_CREDITS = "Het aantal vereistte credits voor deze opvraag bedraagt ";
+    public static final String MESSAGE_REQUIRED_CREDITS = "Het aantal benodigde credits voor deze kaart bedraagt:\n ";
     
     public static final String[] ACCOUNTING_WMS_REQUESTS = new String[] {
         WMS_REQUEST_GetMap,
@@ -87,10 +84,9 @@ public interface KBConstants extends OGCConstants {
      */
     public static final String SERVICEPROVIDER_BASE_ABBR = "b3p";
     public static final String SERVICEPROVIDER_BASE_HTTP = "http://layering.kaartenbalie.nl/";
-    public static final String[] SUPPORTED_PROJECTIONS = new String[] {"EPSG:28992","EPSG:CHRIS"};
+    public static final String[] SUPPORTED_PROJECTIONS = new String[] {"EPSG:28992","EPSG:4326"};
     public static final String DEFAULT_PROJECTION = "EPSG:28992";
     
-    // </editor-fold>
     
     public static final String CHARSET = "UTF-8";
     public static final String MD_ALGORITHM= "MD5";

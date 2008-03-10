@@ -4,67 +4,48 @@
  * Created on 1 maart 2007, 14:44
  *
  * This util class is compatible with WFS 1.1.0 and WMS 1.1.1
- * 
+ *
  */
 package nl.b3p.ogc.utils;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import nl.b3p.xml.ogc.v110.Filter;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
-import nl.b3p.xml.wfs.v110.DescribeFeatureType;
-import nl.b3p.xml.wfs.v110.GetCapabilities;
-import nl.b3p.xml.wfs.v110.GetFeature;
-import nl.b3p.xml.wfs.v110.Query;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.exolab.castor.types.AnyNode;
-import org.exolab.castor.xml.MarshalException;
-import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.Unmarshaller;
-import org.exolab.castor.xml.ValidationException;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 
 /**
  * @author Roy Braam
  */
 
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
-en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg 
+en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
 public class OGCRequest implements KBConstants {
-
+    
     private static final Log log = LogFactory.getLog(OGCRequest.class);
     private String httpHost;
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     /*Default constr.*/
-
+    
     public OGCRequest() {
     }
-
+    
     /** Main constructor
      *
      * @param url The url that fills the OGCUrl object
-     * 
+     *
      */
     public OGCRequest(String url) {
         setUrl(url);
     }
-
+    
     /** Main methode to fill the OGUrl object
      *
      * @param url The url that fills the OGCUrl object
@@ -110,7 +91,7 @@ public class OGCRequest implements KBConstants {
             }
         }
     }
-
+    
     /** Gets the full url with the params
      *
      * @return the full url.
@@ -150,12 +131,76 @@ public class OGCRequest implements KBConstants {
             return null;
         }
     }
-    /**
+    
+    public static HashMap scaleCalibrations = new HashMap();
+    static {
+        // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
+        scaleCalibrations.put("EPSG:28992", new Double(3272));
+        // TODO andere omrekenfactor toevoegen!
+    }
+    public double calcScale() {
+        String projection = (String)parameters.get(WMS_PARAM_SRS);
+        if (projection==null)
+            return 0.0;
+        Double scaleCalibration = (Double) scaleCalibrations.get(projection);
+        if (scaleCalibration!=null)
+            return calcScale(scaleCalibration.doubleValue());
+        return 0.0;
+    }
+    /**Deze methode berekent de schaal waarbij de diagonaal van de viewport
+     * in pixels wordt omgerekend naar kaarteenheden.
      * 
+     * @param scaleCalibration omrekenfactor van pixels naar kaarteenheden.
+     * @return schaal van de kaart
      */
-     public String getXMLBody() throws Exception{
-         return OgcWfsClient.getRequestBody(this);
-     }
+    public double calcScale(double scaleCalibration) {
+        double dvm = 0; // diagonaal viewport in kaarteenheden
+        try {
+            String width = (String)parameters.get(WMS_PARAM_WIDTH);
+            String height = (String)parameters.get(WMS_PARAM_HEIGHT);
+            double w = Double.parseDouble(width);
+            double h = Double.parseDouble(height);
+            double d = Math.sqrt(w*w + h*h);
+            dvm = d/scaleCalibration;
+        } catch (NumberFormatException nfe) {
+            log.error("error: ", nfe);
+            return 0.0;
+        }
+        if (dvm==0.0)
+            return 0.0;
+        
+        String bbox = (String)parameters.get(WMS_PARAM_BBOX);
+        if (bbox==null)
+            return 0.0;
+        String[] bboxa = bbox.split(",");
+        if (bboxa.length!=4)
+            return 0.0;
+        
+        double dkm = 0; // diagonaal kaart in kaarteenheden
+        try {
+            String minx = bboxa[0];
+            String maxx = bboxa[2];
+            String miny = bboxa[1];
+            String maxy = bboxa[3];
+            double ix = Double.parseDouble(minx);
+            double ax = Double.parseDouble(maxx);
+            double iy = Double.parseDouble(miny);
+            double ay = Double.parseDouble(maxy);
+            dkm = Math.sqrt((ax-ix)*(ax-ix) + (ay-iy)*(ay-iy));
+        } catch (NumberFormatException nfe) {
+            log.error("error: ", nfe);
+            return 0.0;
+        }
+        
+        return dkm/dvm;
+    }
+    
+    /**
+     *
+     */
+    public String getXMLBody() throws Exception{
+        return OgcWfsClient.getRequestBody(this);
+    }
     /**
      * Get XMLBody creates the body string for a post message. For now only supports getFeature en DiscribeFeatureType
      */
@@ -204,28 +249,28 @@ public class OGCRequest implements KBConstants {
             }
             if (getParameter(WFS_PARAM_FILTER) != null) {
                 try{
-                    Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(getParameter(WFS_PARAM_FILTER)));                    
+                    Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(getParameter(WFS_PARAM_FILTER)));
                     q.setFilter(f);
                 }catch(Exception e){
-                    
+  
                 }
-                
-                
+  
+  
             } else if (getParameter(WMS_PARAM_BBOX) != null) {
                 StringBuffer s = new StringBuffer();
                 String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
                 s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
                 s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
                 s.append("</coordinates></Box></BBOX></Filter>");
-                Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(s.toString()));                    
+                Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(s.toString()));
                 q.setFilter(f);
             }
             gf.addQuery(q);
             brt = gf;
         } else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetCapabilities)) {
             GetCapabilities gc = new GetCapabilities();
-            if (getParameter(WMS_SERVICE) != null) {                
-                
+            if (getParameter(WMS_SERVICE) != null) {
+  
             }
             brt=gc;
         } else {
@@ -240,7 +285,7 @@ public class OGCRequest implements KBConstants {
                 Map.Entry me = (Entry) it.next();
                 m.setNamespaceMapping((String) me.getKey(), (String) me.getValue());
             }
-
+  
         }
         m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
         m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
@@ -250,7 +295,7 @@ public class OGCRequest implements KBConstants {
         }
         return body;
     }*/
-
+    
     public String getUrlWithNonOGCparams() {
         OGCRequest ogcu = (OGCRequest) this.clone();
         ogcu.removeAllWMSParameters();
@@ -258,10 +303,10 @@ public class OGCRequest implements KBConstants {
         ogcu.setNameSpaces(null);
         return ogcu.getUrl();
     }
-
+    
     /** Removes a parameter
      *
-     * @param param The definition of the param that needs to be removed.     
+     * @param param The definition of the param that needs to be removed.
      *
      * @return the param value that is removed or null if the parameter key not is found
      */
@@ -276,7 +321,7 @@ public class OGCRequest implements KBConstants {
         }
         return (String) o;
     }
-
+    
     /**Return the value of the given param
      * @param param the param definition
      *
@@ -293,16 +338,16 @@ public class OGCRequest implements KBConstants {
         }
         return (String) o;
     }
-
+    
     public boolean containsParameter(String param) {
         if (param == null) {
             return false;
         }
-
+        
         param = param.toUpperCase();
         return parameters.containsKey(param);
     }
-
+    
     /*Returns all nonOGC params
      */
     public HashMap getNonOGCParameters() {
@@ -311,10 +356,10 @@ public class OGCRequest implements KBConstants {
         o.removeAllWMSParameters();
         return o.getParameters();
     }
-
+    
     /** Adds or replaces a param with a value
      *
-     * @param param The definition of the param that needs to be added or replaced.     
+     * @param param The definition of the param that needs to be added or replaced.
      * @param value The value that needs to be added
      *
      * @return previous value associated with specified param, or null  if there was no mapping for param
@@ -334,11 +379,11 @@ public class OGCRequest implements KBConstants {
         }
         return (String) o;
     }
-
+    
     /** Adds or replaces a string with params
      *
      * @param params A String with parameters seperated by a '&'
-     * 
+     *
      *
      * @return the number of added params
      */
@@ -359,9 +404,9 @@ public class OGCRequest implements KBConstants {
         }
         return tokens.length;
     }
-
+    
     /** Removes all WMS parameters (version 1.1.1)
-     *    
+     *
      */
     public void removeAllWMSParameters() {
         removeParameter(WMS_PARAM_BBOX);
@@ -387,9 +432,9 @@ public class OGCRequest implements KBConstants {
         removeParameter(WMS_PARAM_WFS);
         removeParameter(WMS_SERVICE);
     }
-
+    
     /** Removes all WFS parameters (version 1.0.0???)
-     *    
+     *
      */
     public void removeAllWFSParameters() {
         /*TODO: misschien niet allwmsparameters verwijderen maar hier alle wfs params defineren.*/
@@ -412,11 +457,11 @@ public class OGCRequest implements KBConstants {
         removeParameter(WFS_PARAM_GMLOBJECTID);
         removeParameter(WFS_PARAM_RESULTTYPE);
     }
-
+    
     public String toString() {
         return this.getUrl();
     }
-
+    
     public String[] getParametersArray() {
         if (parameters == null) {
             return null;
@@ -434,7 +479,7 @@ public class OGCRequest implements KBConstants {
         }
         return returnvalue;
     }
-
+    
     public String[] getNameSpacesArray() {
         if (nameSpaces == null) {
             return null;
@@ -449,7 +494,7 @@ public class OGCRequest implements KBConstants {
         }
         return returnvalue;
     }
-
+    
     public void addOrReplaceNameSpace(String prefix, String nsUrl) {
         if (prefix != null && nsUrl != null) {
             if (nameSpaces == null) {
@@ -458,7 +503,7 @@ public class OGCRequest implements KBConstants {
             nameSpaces.put(prefix, nsUrl);
         }
     }
-
+    
     private String[] getSchemaLocationsArray() {
         if (schemaLocations == null) {
             return null;
@@ -473,7 +518,7 @@ public class OGCRequest implements KBConstants {
         }
         return returnvalue;
     }
-
+    
     public void addOrReplaceSchemaLocation(String prefix, String location) {
         if (prefix != null && location != null) {
             if (schemaLocations == null) {
@@ -482,7 +527,7 @@ public class OGCRequest implements KBConstants {
             schemaLocations.put(prefix, location);
         }
     }
-
+    
     /**
      *Adds all namespaces needed for OpenGis
      */
@@ -498,12 +543,12 @@ public class OGCRequest implements KBConstants {
         }
         if (!nameSpaces.containsKey("gml")) {
             addOrReplaceNameSpace("gml", "http://www.opengis.net/gml");
-        }     
+        }
         if (!nameSpaces.containsKey("ogc")) {
             addOrReplaceNameSpace("ogc", "http://www.opengis.net/ogc");
         }
     }
-
+    
     /**
      *Adds all Schemalocations needed for OpenGis
      */
@@ -515,7 +560,7 @@ public class OGCRequest implements KBConstants {
             addOrReplaceSchemaLocation("xsi", "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
         }
     }
-
+    
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
@@ -530,54 +575,49 @@ public class OGCRequest implements KBConstants {
         }
         return returnv;
     }
-
+    
     protected String getHttpHost() {
         return httpHost;
     }
-
+    
     protected void setHttpHost(String httpHost) {
         this.httpHost = httpHost;
     }
-
+    
     protected HashMap getParameters() {
         return parameters;
     }
-
+    
     protected void setParameters(HashMap parameters) {
         this.parameters = parameters;
     }
-
+    
     protected void setNameSpaces(HashMap nameSpaces) {
         this.nameSpaces = nameSpaces;
     }
-
+    
     protected void setSchemaLocations(HashMap schemaLocations) {
         this.schemaLocations = schemaLocations;
     }
-
+    
     public HashMap getNameSpaces() {
         return nameSpaces;
     }
-
+    
     public HashMap getSchemaLocations() {
         return schemaLocations;
     }
-
-    public boolean isValidRequestURL(StringBuffer reason) throws Exception {
-        if (parameters == null) {
-            return false;
-        }
-
-        if (reason == null) {
-            reason = new StringBuffer();
-        }
-
+    
+    public void checkRequestURL() throws Exception {
+        if (parameters == null)
+            throw new UnsupportedOperationException("No parameters found in url!");
+        
         if (containsParameter(REQUEST)) {
             String request = (String) parameters.get(REQUEST);
             if (request == null || request.equals("")) {
                 throw new UnsupportedOperationException("No request parameter found in url!");
             }
-
+            
             List requiredParams = null;
             if (SUPPORTED_REQUESTS.contains(request)) {
                 if (request.equals(WMS_REQUEST_GetCapabilities)) {
@@ -603,25 +643,24 @@ public class OGCRequest implements KBConstants {
                 } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                     requiredParams = PARAMS_GetLegendGraphic;
                 }
-                if (isValidRequestURL(requiredParams, request, reason)) {
-                    return true;
-                }
+                checkRequestURL(requiredParams, request);
             } else {
                 throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
                         "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
                         "VERSION=1.1.1&SERVICE=WMS");
             }
-        } else {
-            throw new UnsupportedOperationException("No request parameter found in url!");
         }
-        return false;
     }
-
-    private boolean isValidRequestURL(List requiredParams, String request, StringBuffer reason) throws Exception {
+    
+    private void checkRequestURL(List requiredParams, String request) throws Exception {
+        StringBuffer reason = new StringBuffer();
         if (parameters == null || requiredParams == null || (parameters.isEmpty() && !requiredParams.isEmpty())) {
-            return false;
+            reason.append("Not all parameters for request '");
+            reason.append(request);
+            reason.append("' are available.");
+            throw new UnsupportedOperationException(reason.toString());
         }
-
+        
         Iterator it = requiredParams.iterator();
         while (it.hasNext()) {
             String parameter = (String) it.next();
@@ -631,38 +670,25 @@ public class OGCRequest implements KBConstants {
                 reason.append("' are available, missing parameter: ");
                 reason.append(parameter);
                 reason.append(".");
-                return false;
+                throw new UnsupportedOperationException(reason.toString());
             }
-
         }
-
+        
         //Alle parameter keys zijn wel aanwezig, test nu op waarden
         it = requiredParams.iterator();
         while (it.hasNext()) {
             String parameter = (String) it.next();
             if (!parameter.equalsIgnoreCase(WMS_PARAM_STYLES)) {
                 if (this.getParameter(parameter) == null) {
-                    //TODO:
-                    //Deze throw clausule straks nog uitbreiden met eventuele hints als
-                    //deze voor handen zijn, door in de constanten voor de verschillende
-                    //params een lijst te generenen met waarden die daar voor verplicht zijn
-                    //en wat de maximum waarden dan zijn....
                     reason.append("Value for parameter ");
                     reason.append(parameter);
                     reason.append(" is missing.");
-                    return false;
-
-                //Hier moet dus niet alleen een controle uitgevoerd worden of een value
-                //bestaat, maar ook of deze value voor de betreffende parameter kolpt
-                //indien ja, dan kan gewoon true gereturned worden, anders moet er OF
-                //een foutmelding gegeven worden dat de value niet bestaat OF
-                //een foutmelding gegeven worden dat de value niet klopt!
+                    throw new UnsupportedOperationException(reason.toString());
                 }
             }
         }
-
-        return true;
     }
+    
     private void setBasicRequest(BaseRequestType brt) {
         if (this.getParameter(OGCRequest.WMS_VERSION) != null) {
             brt.setVersion(this.getParameter(OGCRequest.WMS_VERSION));
@@ -673,5 +699,5 @@ public class OGCRequest implements KBConstants {
         if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES) != null) {
             log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
         }
-    }    
+    }
 }
