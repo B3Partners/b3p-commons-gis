@@ -136,6 +136,8 @@ public class OGCRequest implements KBConstants {
     static {
         // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
         scaleCalibrations.put("EPSG:28992", new Double(3272));
+        // defaultPixelsPerlatLonDegree = 284479860
+        scaleCalibrations.put("EPSG:4326", new Double(284479860));
         // TODO andere omrekenfactor toevoegen!
     }
     public double calcScale() {
