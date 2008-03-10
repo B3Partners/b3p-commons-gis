@@ -65,6 +65,14 @@ public interface KBConstants extends OGCConstants {
     
     
     /*
+     * For titel layer
+     */
+    public static final String MESSAGE_TITLE_LAYER = "B3P Kaartenbalie";
+    public static final String MESSAGE_TITLE_BALANCE = "Tegoed: ";
+    public static final String MESSAGE_TITLE_CREDITS = "Kosten: ";
+    public static final String MESSAGE_TITLE_UNIT = "c";
+
+    /*
      * For Accounting...
      */
     public static final String MESSAGE_AUTHORIZATION_INTRO = "Eén of meer van de door u opgevraagde kaarten vereisen autorisatie voor het afboeken van het credittegoed. ";
