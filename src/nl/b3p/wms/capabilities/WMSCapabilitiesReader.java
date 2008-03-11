@@ -27,7 +27,7 @@ package nl.b3p.wms.capabilities;
 
 
 import java.io.ByteArrayOutputStream;
-import nl.b3p.ogc.utils.KBConstants;
+import nl.b3p.ogc.utils.KBConfiguration;
 import nl.b3p.wms.capabilities.Roles;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -52,7 +52,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.xml.sax.SAXException;
 
-public class WMSCapabilitiesReader implements KBConstants {
+public class WMSCapabilitiesReader {
     private static final Log log = LogFactory.getLog(WMSCapabilitiesReader.class);
     private static final String VALIDATION_FEATURE = "http://xml.org/sax/features/validation";
     private static final String SCHEMA_FEATURE = "http://apache.org/xml/features/validation/schema";
@@ -143,7 +143,7 @@ public class WMSCapabilitiesReader implements KBConstants {
             reader.setFeature(SCHEMA_FEATURE,true);
             reader.setContentHandler(s);
             InputSource is = new InputSource(method.getResponseBodyAsStream());
-            is.setEncoding(CHARSET);
+            is.setEncoding(KBConfiguration.CHARSET);
             reader.parse(is);
         } finally {
             // Release the connection.

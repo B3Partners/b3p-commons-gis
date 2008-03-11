@@ -15,12 +15,12 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import nl.b3p.ogc.utils.KBConstants;
+import nl.b3p.ogc.utils.KBConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class ServiceProvider implements XMLElement, KBConstants {
+public class ServiceProvider implements XMLElement {
     
     private Integer id;
     private String abbr;
@@ -47,11 +47,11 @@ public class ServiceProvider implements XMLElement, KBConstants {
      */
     // <editor-fold defaultstate="" desc="default ServiceProvider() constructor">
     public ServiceProvider() {
-        name                = SERVICEPROVIDER_NAME;
-        title               = SERVICEPROVIDER_TITLE;
-        abstracts           = SERVICEPROVIDER_ABSTRACT;
-        fees                = SERVICEPROVIDER_FEES;
-        accessConstraints   = SERVICEPROVIDER_ACCESSCONSTRAINTS;
+        name                = KBConfiguration.SERVICEPROVIDER_NAME;
+        title               = KBConfiguration.SERVICEPROVIDER_TITLE;
+        abstracts           = KBConfiguration.SERVICEPROVIDER_ABSTRACT;
+        fees                = KBConfiguration.SERVICEPROVIDER_FEES;
+        accessConstraints   = KBConfiguration.SERVICEPROVIDER_ACCESSCONSTRAINTS;
     }
     // </editor-fold>
     
@@ -413,7 +413,7 @@ public class ServiceProvider implements XMLElement, KBConstants {
             }
         } else {
             Element roleElement = doc.createElement("Role");
-            roleElement.setAttribute("id", KB_DEFAULT_ROLE);
+            roleElement.setAttribute("id", KBConfiguration.KB_DEFAULT_ROLE);
             vendorSpecificElement.appendChild(roleElement);
         }
         

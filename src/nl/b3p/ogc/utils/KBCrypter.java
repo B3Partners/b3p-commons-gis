@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Chris
  */
-public class KBCrypter implements KBConstants {
+public class KBCrypter {
     
     private static final Log log = LogFactory.getLog(KBCrypter.class);
     /**
@@ -38,7 +38,7 @@ public class KBCrypter implements KBConstants {
     static {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(encryptionAlgorithm);
-            DESKeySpec desKeySpec = new DESKeySpec(KB_PROXY_KEY.getBytes(CHARSET));
+            DESKeySpec desKeySpec = new DESKeySpec(KBConfiguration.KB_PROXY_KEY.getBytes(CHARSET));
             secretKey = keyFactory.generateSecret(desKeySpec);
         } catch (Exception e) {
             log.error("error: ", e);

@@ -10,12 +10,12 @@
 
 package nl.b3p.wms.capabilities;
 
-import nl.b3p.ogc.utils.KBConstants;
+import nl.b3p.ogc.utils.KBConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class ContactInformation implements XMLElement, KBConstants {
+public class ContactInformation implements XMLElement {
     
     private Integer id;
     private String contactPerson;
@@ -36,18 +36,18 @@ public class ContactInformation implements XMLElement, KBConstants {
      */
     // <editor-fold defaultstate="" desc="default ContactInformation() constructor">
     public ContactInformation() {
-        contactPerson       = CONTACT_PERSON;
-        contactPosition     = CONTACT_POSITION;
-        contactOrganization = CONTACT_ORGANIZATION;
-        address             = CONTACT_ADDRESS;
-        addressType         = CONTACT_ADDRESS_TYPE;
-        postcode            = CONTACT_POSTCODE;
-        city                = CONTACT_CITY;
-        stateOrProvince     = CONTACT_STATE_OR_PROVINCE;
-        country             = CONTACT_COUNTRY;
-        voiceTelephone      = CONTACT_VOICETELEPHONE;
-        fascimileTelephone  = CONTACT_FASCIMILEPHONE;
-        emailAddress        = CONTACT_EMAIL;
+        contactPerson       = KBConfiguration.CONTACT_PERSON;
+        contactPosition     = KBConfiguration.CONTACT_POSITION;
+        contactOrganization = KBConfiguration.CONTACT_ORGANIZATION;
+        address             = KBConfiguration.CONTACT_ADDRESS;
+        addressType         = KBConfiguration.CONTACT_ADDRESS_TYPE;
+        postcode            = KBConfiguration.CONTACT_POSTCODE;
+        city                = KBConfiguration.CONTACT_CITY;
+        stateOrProvince     = KBConfiguration.CONTACT_STATE_OR_PROVINCE;
+        country             = KBConfiguration.CONTACT_COUNTRY;
+        voiceTelephone      = KBConfiguration.CONTACT_VOICETELEPHONE;
+        fascimileTelephone  = KBConfiguration.CONTACT_FASCIMILEPHONE;
+        emailAddress        = KBConfiguration.CONTACT_EMAIL;
     }
     // </editor-fold>
     

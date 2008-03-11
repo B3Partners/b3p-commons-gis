@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
 en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
-public class OGCRequest implements KBConstants {
+public class OGCRequest implements OGCConstants {
     
     private static final Log log = LogFactory.getLog(OGCRequest.class);
     private String httpHost;
@@ -692,13 +692,13 @@ public class OGCRequest implements KBConstants {
     }
     
     private void setBasicRequest(BaseRequestType brt) {
-        if (this.getParameter(OGCRequest.WMS_VERSION) != null) {
-            brt.setVersion(this.getParameter(OGCRequest.WMS_VERSION));
+        if (this.getParameter(WMS_VERSION) != null) {
+            brt.setVersion(this.getParameter(WMS_VERSION));
         }
-        if (this.getParameter(OGCRequest.WMS_SERVICE) != null) {
-            brt.setService(this.getParameter(OGCRequest.WMS_SERVICE));
+        if (this.getParameter(WMS_SERVICE) != null) {
+            brt.setService(this.getParameter(WMS_SERVICE));
         }
-        if (this.getParameter(OGCRequest.WFS_PARAM_MAXFEATURES) != null) {
+        if (this.getParameter(WFS_PARAM_MAXFEATURES) != null) {
             log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
         }
     }

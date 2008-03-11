@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Set;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
+import nl.b3p.ogc.utils.OGCConstants;
 import nl.b3p.ogc.utils.OgcWfsClient;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.xerces.parsers.DOMParser;
@@ -84,8 +85,8 @@ public class B3pGMLReader extends GMLReader{
         HashMap features= new HashMap();
         PostMethod method = null;
         String[] featureTypes=null;
-        if (wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME)!=null)
-            featureTypes= wfsgf.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
+        if (wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME)!=null)
+            featureTypes= wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
         for (int i=0; i < featureTypes.length; i++){            
             Object o=null;
             o=templates.get(featureTypes[i]);
@@ -99,7 +100,7 @@ public class B3pGMLReader extends GMLReader{
                 log.error("Kan template niet vinden voor "+featureTypes[i]);
             }
             GMLInputTemplate git = (GMLInputTemplate)o;
-            wfsgf.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,featureTypes[i]);
+            wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME,featureTypes[i]);
             HttpClient client = new HttpClient();        
             String host=wfsgf.getUrlWithNonOGCparams();
             method = new PostMethod(host); 
@@ -272,21 +273,21 @@ public class B3pGMLReader extends GMLReader{
     public HashMap createGMLInputTemplateFromWFS(OGCRequest ogcrequest) throws TransformerException, Exception{
         HashMap templates = null;
         //validate the url
-        if (ogcrequest.getParameter(OGCRequest.WMS_VERSION)==null || ogcrequest.getParameter(OGCRequest.WFS_PARAM_TYPENAME)==null){
+        if (ogcrequest.getParameter(OGCConstants.WMS_VERSION)==null || ogcrequest.getParameter(OGCConstants.WFS_PARAM_TYPENAME)==null){
             return null;
         }
         OGCRequest wfsDFT= (OGCRequest)ogcrequest.clone();
         wfsDFT.removeAllWFSParameters();
-        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_VERSION,ogcrequest.getParameter(OGCRequest.WMS_VERSION));
+        wfsDFT.addOrReplaceParameter(OGCConstants.WMS_VERSION,ogcrequest.getParameter(OGCConstants.WMS_VERSION));
         
-        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_SERVICE,OGCRequest.WFS_SERVICE_WFS);
-        wfsDFT.addOrReplaceParameter(OGCRequest.WMS_REQUEST,OGCRequest.WFS_REQUEST_DescribeFeatureType);
+        wfsDFT.addOrReplaceParameter(OGCConstants.WMS_SERVICE,OGCConstants.WFS_SERVICE_WFS);
+        wfsDFT.addOrReplaceParameter(OGCConstants.WMS_REQUEST,OGCConstants.WFS_REQUEST_DescribeFeatureType);
         
         //TODO: Helaas is het bij degree niet mogelijk om meerdere typenames tegelijk op te vragen in een DescribeFeatureType
         //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.
-        String[] types =ogcrequest.getParameter(OGCRequest.WFS_PARAM_TYPENAME).split(",");
+        String[] types =ogcrequest.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
         for (int b=0; b < types.length; b++){            
-            wfsDFT.addOrReplaceParameter(OGCRequest.WFS_PARAM_TYPENAME,types[b]);
+            wfsDFT.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME,types[b]);
             //String body=wfsDFT.getXMLBody();
             //Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
             Element el=OgcWfsClient.getDescribeFeatureType(wfsDFT);
