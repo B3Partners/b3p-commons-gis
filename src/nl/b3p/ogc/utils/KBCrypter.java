@@ -38,7 +38,7 @@ public class KBCrypter {
     static {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(encryptionAlgorithm);
-            DESKeySpec desKeySpec = new DESKeySpec(KBConfiguration.KB_PROXY_KEY.getBytes(CHARSET));
+            DESKeySpec desKeySpec = new DESKeySpec(KBConfiguration.KB_ENCRYPT_KEY.getBytes(CHARSET));
             secretKey = keyFactory.generateSecret(desKeySpec);
         } catch (Exception e) {
             log.error("error: ", e);
@@ -53,6 +53,8 @@ public class KBCrypter {
      * @return clearText, encrypted
      */
     public static String encryptText(String clearText) throws Exception {
+        if (clearText==null)
+            throw new Exception("text to encrypt may not be null!");
         Base64 encoder = new Base64();
         Cipher c1 = Cipher.getInstance(cipherParameters);
         c1.init(c1.ENCRYPT_MODE, secretKey);
@@ -70,6 +72,8 @@ public class KBCrypter {
      * @return encryptedText, decrypted
      */
     public static String decryptText(String encryptedText) throws Exception {
+        if (encryptedText==null)
+            return null;
         String et = URLDecoder.decode(encryptedText, "utf-8");
         Base64 decoder = new Base64();
         byte decodedEncryptedText[] = decoder.decode(et.getBytes(CHARSET));

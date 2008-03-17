@@ -20,6 +20,8 @@ import java.util.ResourceBundle;
 
 public class KBConfiguration {
     
+    public static boolean METADATA_ENABLED = true;
+    
     public static String SERVICE_NAME = "OGC:WMS";
     public static String SERVICE_TITLE = "Kaartenbalie Map Portal";
     public static String SERVICE_ABSTRACT = "Controlled access to OGC WMS maps. See B3P GIS at http://www.b3partners.nl/";
@@ -55,7 +57,7 @@ public class KBConfiguration {
     
     public static String KB_PROXY_URL = "purl";
     public static String KB_PROXY = "proxy";
-    public static String KB_PROXY_KEY = "proxy007"; // minimaal 8 bytes voor url encrypting
+    public static String KB_ENCRYPT_KEY = "proxy007"; // minimaal 8 bytes voor encrypting
     public static String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
     
     public static String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
@@ -170,7 +172,7 @@ public class KBConfiguration {
         
         KB_PROXY=prop.getProperty("KB_PROXY",KB_PROXY);
         KB_PROXY_EXECPTION=prop.getProperty("KB_PROXY_EXECPTION",KB_PROXY_EXECPTION);
-        KB_PROXY_KEY=prop.getProperty("KB_PROXY_KEY",KB_PROXY_KEY);
+        KB_ENCRYPT_KEY=prop.getProperty("KB_PROXY_KEY",KB_ENCRYPT_KEY);
         KB_PROXY_URL=prop.getProperty("KB_PROXY_URL",KB_PROXY_URL);
         
         //KB_USER=prop.getProperty("KB_USER",KB_USER);
