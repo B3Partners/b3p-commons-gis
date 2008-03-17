@@ -99,6 +99,7 @@ public class KBConfiguration {
         OGCConstants.WMS_REQUEST_GetLegendGraphic};
     public static final String[] ACCOUNTING_WFS_REQUESTS = new String[] {
     };
+    
     /*
      * Layering...
      */
