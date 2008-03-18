@@ -53,8 +53,10 @@ public class KBCrypter {
      * @return clearText, encrypted
      */
     public static String encryptText(String clearText) throws Exception {
-        if (clearText==null)
+        if (clearText==null) {
+            log.error("text to encrypt may not be null!");
             throw new Exception("text to encrypt may not be null!");
+        }
         Base64 encoder = new Base64();
         Cipher c1 = Cipher.getInstance(cipherParameters);
         c1.init(c1.ENCRYPT_MODE, secretKey);
@@ -83,4 +85,4 @@ public class KBCrypter {
         String decryptedTextString = new String(decryptedText);
         return decryptedTextString;
     }
- }
+}

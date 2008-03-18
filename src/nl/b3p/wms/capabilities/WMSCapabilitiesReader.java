@@ -26,9 +26,7 @@ filter out the different kind of errors:
 package nl.b3p.wms.capabilities;
 
 
-import java.io.ByteArrayOutputStream;
 import nl.b3p.ogc.utils.KBConfiguration;
-import nl.b3p.wms.capabilities.Roles;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import java.util.Stack;
@@ -124,16 +122,19 @@ public class WMSCapabilitiesReader {
         try {
             int statusCode =client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
+                log.error("Host: "+location+" error: "+method.getStatusLine().getReasonPhrase());
                 throw new Exception("Host: "+location+" error: "+method.getStatusLine().getReasonPhrase());
             }
             String mimeType=null;
             if (method.getResponseHeader("Content-Type")!=null)
                 mimeType= method.getResponseHeader("Content-Type").getValue();
             if (mimeType==null || mimeType.indexOf("xml")==-1) {
-                throw new Exception("Cannot get a GetCapabilities document from server");
+                log.error("Host: "+location+" error: Cannot get a GetCapabilities document from server");
+                throw new Exception("Host: "+location+" error: Cannot get a GetCapabilities document from server");
             }
             if (mimeType.equals("application/vnd.ogc.se_xml")){
-                throw new Exception("Cannot get a GetCapabilities document. reason: "+method.getResponseBodyAsString());
+                log.error("Host: "+location+" error: Cannot get a GetCapabilities document. reason: "+method.getResponseBodyAsString());
+                throw new Exception("Host: "+location+" error: Cannot get a GetCapabilities document. reason: "+method.getResponseBodyAsString());
             }
             
             //Nu kan het service provider object gemaakt en gevuld worden
@@ -150,8 +151,10 @@ public class WMSCapabilitiesReader {
             method.releaseConnection();
         }
         
-        if (serviceProvider==null)
-            throw new Exception("No service provider object could be created, unkown reason!");
+        if (serviceProvider==null) {
+            log.error("Host: "+location+" error: No service provider object could be created, unkown reason!");
+            throw new Exception("Host: "+location+" error: No service provider object could be created, unkown reason!");
+        }
         return serviceProvider;
     }
     // </editor-fold>

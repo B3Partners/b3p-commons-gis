@@ -21,7 +21,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
@@ -37,17 +36,17 @@ import org.apache.commons.logging.LogFactory;
 public class B3pOgcSqlWriter {
     private static final Log log = LogFactory.getLog(B3pOgcSqlWriter.class);
     
-    private Connection connection;    
+    private Connection connection;
     private int batchValue=20;
-    public static final String DEFAULT_GEOM_COLUMN="the_geom";    
+    public static final String DEFAULT_GEOM_COLUMN="the_geom";
     public static final String POSTGRES_GLOBALGEOMETRY="GEOMETRY";
     public static final List SUPPORTED_DIALECTS= Arrays.asList(new String[] {
         SqlMetaDataUtils.PRODUCT_POSTGRES
-    });    
+    });
     
     /** Creates a new instance of B3pOgcSqlWriter */
     public B3pOgcSqlWriter(Connection conn){
-        setConnection(conn);  
+        setConnection(conn);
     }
     /* Creates a connection and a B3pOgcSqlWriter*/
     public B3pOgcSqlWriter(String url,String user,String password, java.sql.Driver driver) throws SQLException{
@@ -92,18 +91,21 @@ public class B3pOgcSqlWriter {
         DatabaseMetaData dbmd = connection.getMetaData();
         FeatureSchema fs = fc.getFeatureSchema();
         if (tablename == null) {
+            log.error("No table name given.");
             throw new Exception("No table name given.");
         }
         
         List tableNames = SqlMetaDataUtils.getTableAndViewNames(connection);
         if (tableNames == null) {
-            throw new Exception("Cannont get database tables.");
+            log.error("Cannot get database tables.");
+            throw new Exception("Cannot get database tables.");
         } else {
             if (tableNames.contains(tablename)) {
                 checkcolumns(fs, geomColumn, attributeNamesToLowerCase, dbmd, tablename);
             } else if(createTable) {
                 createTable(dbmd, tablename, fs, geomColumn, attributeNamesToLowerCase, srid, aGeom, sameGeomType, dimension);
             } else {
+                log.error("Table does not exists.");
                 throw new Exception("Table does not exists.");
             }
             
@@ -121,7 +123,7 @@ public class B3pOgcSqlWriter {
                 //TODO:
                 /*
                  * Als er een lijst met kolomnamen meegegeven wordt aan de methode
-                 * dan zal er een check uitgevoerd worden of deze items al in de 
+                 * dan zal er een check uitgevoerd worden of deze items al in de
                  * database bestaan. Indien een item al bestaat zal dan geprobeerd
                  * worden een update uit te voeren in plaats van een insert.
                  * Echter op dit moment werkt de update nog niet naar behoren omdat
@@ -152,7 +154,7 @@ public class B3pOgcSqlWriter {
                     if ((inserts+1)%getBatchValue()==0){
                         executeStatement(q.toString());
                         q=null;
-                    }                   
+                    }
                 }
             }
             if (q != null && q.length() > 0){
@@ -165,8 +167,8 @@ public class B3pOgcSqlWriter {
         StringBuffer sql = new StringBuffer();
         sql.append("SELECT * FROM ");
         sql.append(tablename);
-        sql.append(" WHERE ");        
-        for (int i=0; i < columnNamesToCheck.length; i++){            
+        sql.append(" WHERE ");
+        for (int i=0; i < columnNamesToCheck.length; i++){
             if (i!=0){
                 sql.append(" AND ");
             }
@@ -177,7 +179,7 @@ public class B3pOgcSqlWriter {
         sql.append(";");
         PreparedStatement statement = connection.prepareStatement(sql.toString());
         ResultSet rs = statement.executeQuery();
-        boolean found = rs.next(); 
+        boolean found = rs.next();
         statement.execute();
         statement.close();
         return found;
@@ -203,11 +205,13 @@ public class B3pOgcSqlWriter {
                 }
                 //if there is no correct columFound it is a 'wrong' table
                 if (!columFound){
+                    log.error("Table already exists but has wrong columns.");
                     throw new Exception("Table already exists but has wrong columns.");
                 }
             }else{
                 ResultSet rs = dbmd.getColumns(null, null, tablename, geomColumn);
                 if (!rs.next()){
+                    log.error("Table already exists but has wrong columns.");
                     throw new Exception("Table already exists but has wrong columns.");
                 }
             }
@@ -215,10 +219,10 @@ public class B3pOgcSqlWriter {
     }
     
     private void executeStatement(String statementToExecute) throws SQLException{
-        PreparedStatement statement=null;        
+        PreparedStatement statement=null;
         try{
             statement=connection.prepareStatement(statementToExecute);
-            statement.execute();                        
+            statement.execute();
         }catch(SQLException se){
             throw se;
         }finally {
@@ -229,10 +233,10 @@ public class B3pOgcSqlWriter {
     
     private StringBuffer addInsertValue(FeatureSchema fs, Feature f) {
         StringBuffer values = new StringBuffer();
-        for (int i=0; i < fs.getAttributeCount(); i++) {            
+        for (int i=0; i < fs.getAttributeCount(); i++) {
             if (i!=0)
                 values.append(", ");
-            values.append(getSqlValue(f,fs,i));            
+            values.append(getSqlValue(f,fs,i));
         }
         return values;
     }
@@ -244,7 +248,7 @@ public class B3pOgcSqlWriter {
     }
     private String getSqlValue(Feature f,FeatureSchema fs,int i){
         Object o=f.getAttribute(fs.getAttributeName(i));
-        StringBuffer values= new StringBuffer();        
+        StringBuffer values= new StringBuffer();
         if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
             values.append("GeomFromText(\'");
             values.append(f.getGeometry().toText());
@@ -289,7 +293,7 @@ public class B3pOgcSqlWriter {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < fs.getAttributeCount(); i++) {
             if (i!=0)
-                sb.append(", ");            
+                sb.append(", ");
             sb.append(fs.getAttributeName(i));
             sb.append(" = ");
             sb.append(getSqlValue(f,fs,i));
@@ -318,7 +322,7 @@ public class B3pOgcSqlWriter {
         return dateFormat.format(date);
     }
     
-    private void createTable(DatabaseMetaData dbmd, String tablename, FeatureSchema fs, String geomColumn, 
+    private void createTable(DatabaseMetaData dbmd, String tablename, FeatureSchema fs, String geomColumn,
             boolean attributeNamesToLowerCase, String srid, Geometry aGeom, boolean sameGeomType, int dimension) throws SQLException, Exception {
         //check if the product is supported
         if (SUPPORTED_DIALECTS.contains(dbmd.getDatabaseProductName())) {
@@ -425,6 +429,7 @@ public class B3pOgcSqlWriter {
             statement.close();
             
         }else{
+            log.error("CREATE TABLE not supported for "+dbmd.getDatabaseProductName());
             throw new Exception("CREATE TABLE not supported for "+dbmd.getDatabaseProductName());
         }
     }
@@ -467,15 +472,13 @@ public class B3pOgcSqlWriter {
      * @return true if compatible
      */
     private boolean isCompatibleType(AttributeType attributeType, int type) {
-        if (attributeType.equals(AttributeType.DATE)){         
+        if (attributeType.equals(AttributeType.DATE)){
             if (type==java.sql.Types.DATE || type==java.sql.Types.TIME || type==java.sql.Types.TIMESTAMP)
                 return true;
-        }
-        else if (attributeType.equals(AttributeType.DOUBLE)){
+        } else if (attributeType.equals(AttributeType.DOUBLE)){
             if (type==java.sql.Types.DOUBLE || type==java.sql.Types.DECIMAL || type==java.sql.Types.REAL || type==java.sql.Types.FLOAT)
                 return true;
-        }
-        else if (attributeType.equals(AttributeType.GEOMETRY)){
+        } else if (attributeType.equals(AttributeType.GEOMETRY)){
             return true;
         }else if (attributeType.equals(AttributeType.INTEGER)){
             if (type==java.sql.Types.INTEGER || type==java.sql.Types.BIGINT || type==java.sql.Types.SMALLINT || type==java.sql.Types.TINYINT)
@@ -486,12 +489,12 @@ public class B3pOgcSqlWriter {
             if(type==java.sql.Types.VARCHAR || type==java.sql.Types.CHAR || type==java.sql.Types.BLOB || type==java.sql.Types.CLOB || type==java.sql.Types.LONGVARCHAR )
                 return true;
         }
-        return false;        
+        return false;
     }
     
   /*  public static void main(String [] args) throws IOException, ParseException, Exception{
          String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
-         String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";         
+         String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";
          //,POL2006_P5B_V,POL2006_P5A_V,POL2006_P4_V,POL2006_P3_V,POL2006_P6_V,POL2006_P2_V,POL2006_P1_V,POL2006_Grens_sted_dynam_V,POL2006_P13_Water_V,POL2006_AEF_beek_L,POL2006_SEF_beek_L,POL2006_P7_Transportas_L
          String degree="http://lin017.prvlimburg.nl/cgi-bin/oru/pol2006_1_perspectieven?SRSNAME=EPSG:28992&TYPENAME=POL2006_P9_V,POL2006_P8_V&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature";
          String url="jdbc:postgresql://localhost:5432/gistest";
@@ -506,14 +509,14 @@ public class B3pOgcSqlWriter {
              Iterator it=featureTypes.iterator();
              DriverManager.registerDriver(new org.postgresql.Driver());
              Connection conn= DriverManager.getConnection(url,user,password);
-
+   
              while(it.hasNext()){
                  String featureType= (String)it.next();
                  String tableName=new String(featureType);
                  if (tableName.contains(":")){
                      tableName=featureType.split(":")[1];
                  }
-                 FeatureCollection fc= (FeatureCollection) features.get(featureType);                 
+                 FeatureCollection fc= (FeatureCollection) features.get(featureType);
                  B3pOgcSqlWriter bosw = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
                  bosw.setBatchValue(10);
                  if (fc!=null)

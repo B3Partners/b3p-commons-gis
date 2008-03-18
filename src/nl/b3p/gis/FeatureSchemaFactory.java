@@ -52,7 +52,7 @@ public class FeatureSchemaFactory {
     static public FeatureSchema createFeatureSchemaFromDbTable(Connection conn,String table, String[] dontAddColumns) throws SQLException, NotSupportedException, Exception{
         FeatureSchema fs = new FeatureSchema();
         List tableNames=SqlMetaDataUtils.getTableAndViewNames(conn);
-        DatabaseMetaData dbmd = conn.getMetaData();     
+        DatabaseMetaData dbmd = conn.getMetaData();
         if (tableNames.contains(table)){
             ResultSet rs = dbmd.getColumns(null, null, table, null);
             for (int i=0; rs.next(); i++){
@@ -71,31 +71,30 @@ public class FeatureSchemaFactory {
                     if (at.equals(AttributeType.OBJECT))
                         //probably a Geom object, otherwise unknown type so don't at the attribute.
                         if (dbmd.getDatabaseProductName().equalsIgnoreCase(SqlMetaDataUtils.PRODUCT_POSTGRES)){
-                            //the geom columns in postgis are stored in the "geometry_columns" table
-                            PreparedStatement statement = null;                        
-                            statement=conn.prepareStatement("SELECT * FROM geometry_columns g WHERE g.f_table_name = '"+table+"';");
-                            ResultSet rsgeom=statement.executeQuery();
-                            //if there is a geometry_columns record then this is a geometry
-                            if (rsgeom.next()){
-                                int epsgCode= rsgeom.getInt("srid");
-                                CoordinateSystem cs= new CoordinateSystem("EPSG:"+epsgCode,epsgCode,null);
-                                fs.setCoordinateSystem(cs);
-                                fs.addAttribute(columnName,AttributeType.GEOMETRY);
-                            }
-                            statement.close();
+                        //the geom columns in postgis are stored in the "geometry_columns" table
+                        PreparedStatement statement = null;
+                        statement=conn.prepareStatement("SELECT * FROM geometry_columns g WHERE g.f_table_name = '"+table+"';");
+                        ResultSet rsgeom=statement.executeQuery();
+                        //if there is a geometry_columns record then this is a geometry
+                        if (rsgeom.next()){
+                            int epsgCode= rsgeom.getInt("srid");
+                            CoordinateSystem cs= new CoordinateSystem("EPSG:"+epsgCode,epsgCode,null);
+                            fs.setCoordinateSystem(cs);
+                            fs.addAttribute(columnName,AttributeType.GEOMETRY);
                         }
-                        else{
-                           log.info("create geometry feature not supported for "+dbmd.getDatabaseProductName());
+                        statement.close();
+                        } else{
+                        log.info("create geometry feature not supported for "+dbmd.getDatabaseProductName());
+                        } else{
+                        fs.addAttribute(columnName,at);
                         }
-                    else{
-                        fs.addAttribute(columnName,at);                    
-                    }
                 }
             }
-             //set the coordinateSystem without the projection. Don't need it (yet)
+            //set the coordinateSystem without the projection. Don't need it (yet)
             
         }else{
-            throw new Exception ("Table "+table +" not found");
+            log.error("Table "+table +" not found");
+            throw new Exception("Table "+table +" not found");
         }
         return fs;
     }
@@ -114,7 +113,7 @@ public class FeatureSchemaFactory {
             Feature f=FeatureFactory.createPointFeature(attributes,columns,5,6,fs);
             fc.add(f);
             attributes=cis.readRecord();
-        }        
+        }
         B3pOgcSqlWriter bow = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
         bow.write(fc,"nieuwe_tankstations","the_geom","28992",2,true,true);
     }*/
