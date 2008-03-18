@@ -124,7 +124,7 @@ public class WMSCapabilitiesReader {
         try {
             int statusCode =client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                throw new Exception(method.getStatusLine().getReasonPhrase());
+                throw new Exception("Host: "+location+" error: "+method.getStatusLine().getReasonPhrase());
             }
             String mimeType=null;
             if (method.getResponseHeader("Content-Type")!=null)
