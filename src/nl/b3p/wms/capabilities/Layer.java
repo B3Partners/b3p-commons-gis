@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -778,14 +780,29 @@ public class Layer implements XMLElement {
      * Public method to check wether the given layer as parameter equals this layer.
      */
     public boolean equals(Layer layer) {
-        if (layer==null)
-            return false;
-        if (this.getName() == null && layer.getName() == null && this.getTitle().equalsIgnoreCase(layer.getTitle()))
+        return new EqualsBuilder().
+                append(this.getTitle(), layer.getTitle()).
+                append(this.getName(), layer.getName()).
+                append(this.getCascaded(), layer.getCascaded()).
+                isEquals();
+    }
+    
+    public boolean equals(Object o) {
+        if (o == this)
             return true;
-        else if (this.getName() != null && layer.getName() != null && this.getName().equalsIgnoreCase(layer.getName()))
-            return true;
-        else
+        
+        if (!(o instanceof Layer))
             return false;
+        
+        Layer l = (Layer) o;
+        return equals(l);
+    }
+    
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).
+                append(this.getName()).
+                append(this.getTitle()).
+                toHashCode();
     }
     
     /**
@@ -804,6 +821,6 @@ public class Layer implements XMLElement {
         return false;
     }
     
-   
+    
     
 }
