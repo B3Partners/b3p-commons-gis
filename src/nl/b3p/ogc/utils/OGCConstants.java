@@ -116,6 +116,9 @@ public interface OGCConstants {
      */
     public static final String WFS_PARAM_OUTPUTFORMAT= "OUTPUTFORMAT";
     public static final String WFS_PARAM_TYPENAME= "TYPENAME";
+    public static final String WFS_PARAM_TYPENAMELIST= "TYPENAMELIST";
+    public static final String WFS_PARAM_QUERYLIST = "QUERYLIST";
+    public static final String WFS_PARAM_HANDLE= "HANDLE";
     public static final String WFS_PARAM_RESULTTYPE="RESULTTYPE";
     public static final String WFS_PARAM_PROPERTYNAME="PROPERTYNAME";
     public static final String WFS_PARAM_FEATUREVERSION="FEATUREVERSION";
@@ -139,6 +142,11 @@ public interface OGCConstants {
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";
     
     public static final String WFS_OBJECT_CAPABILITIES="WFS_Capabilities";
+    
+    public static final String WFS_GETCAPABILITIES="wfs:GetCapabilities";
+    public static final String WFS_DESCRIBEFEATURETYPE="wfs:DescribeFeatureType";
+    public static final String WFS_GETFEATURE="wfs:GetFeature";
+    
     public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT="ServiceExceptionReport";
     public static final String WFS_OBJECT_GEOMETRYTYPE="gml:GeometryPropertyType";
     // </editor-fold>
@@ -227,6 +235,40 @@ public interface OGCConstants {
     });
     // </editor-fold>
     
+    // Moet nog goed gecheckt worden of dit klopt
+    public static final List PARAMS_DescribeFeatureType = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION,
+        WFS_PARAM_TYPENAMELIST
+    });
+    // Moet nog goed gecheckt worden of dit klopt
+    public static final List NON_REQUIRED_PARAMS_DescribeFeatureType = Arrays.asList(new String[] {
+        WFS_PARAM_OUTPUTFORMAT
+    });
+    // Moet nog goed gecheckt worden of dit klopt
+    public static final List PARAMS_GetFeature = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION,
+        WFS_PARAM_QUERYLIST
+    });
+    // Moet nog goed gecheckt worden of dit klopt
+    public static final List NON_REQUIRED_PARAMS_GetFeature_V100 = Arrays.asList(new String[] {
+        WFS_PARAM_HANDLE,
+        WFS_PARAM_OUTPUTFORMAT,
+        WFS_PARAM_MAXFEATURES,
+    });
+    // Moet nog goed gecheckt worden of dit klopt
+    public static final List NON_REQUIRED_PARAMS_GetFeature_V110 = Arrays.asList(new String[] {
+        WFS_PARAM_RESULTTYPE,
+        WFS_PARAM_HANDLE,
+        WFS_PARAM_OUTPUTFORMAT,
+        WFS_PARAM_MAXFEATURES,
+        WFS_PARAM_TRAVERSEXLINKDEPTH,
+        WFS_PARAM_TRAVERSEXLINKEXPIRY,
+    });
+    
     // <editor-fold defaultstate="" desc="List with implemented requests.">
     /**
      * List with implemented requests.
@@ -235,7 +277,10 @@ public interface OGCConstants {
         WMS_REQUEST_GetCapabilities,
         WMS_REQUEST_GetMap,
         WMS_REQUEST_GetFeatureInfo,
-        WMS_REQUEST_GetLegendGraphic
+        WMS_REQUEST_GetLegendGraphic,
+        WFS_REQUEST_GetFeature,
+        WFS_REQUEST_DescribeFeatureType,
+        WFS_REQUEST_GetCapabilities
     });
     // </editor-fold>
     

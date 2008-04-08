@@ -17,6 +17,10 @@ import java.util.Set;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.exolab.castor.xml.UnmarshalHandler;
+import org.exolab.castor.xml.Unmarshaller;
+import org.exolab.castor.xml.ValidationException;
+import org.w3c.dom.Element;
 
 /**
  * @author Roy Braam
@@ -41,9 +45,137 @@ public class OGCRequest implements OGCConstants {
      *
      * @param url The url that fills the OGCUrl object
      *
+     *  For HTTP GET 
      */
     public OGCRequest(String url) {
         setUrl(url);
+    }
+    
+    /**
+     * Constructor
+     * For HTTP POST 
+     */
+    public OGCRequest(Element rootElement, String url) throws ValidationException, Exception{ 
+        parameters = new HashMap();
+        Unmarshaller um;
+        Object o;
+        httpHost = url;
+            
+        if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
+            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                                
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetCapabilities.class);
+                o = um.unmarshal(rootElement);              
+                nl.b3p.xml.wfs.v100.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v100.GetCapabilities)o;
+                setGetCapabilitiesV100(getCapabilities);
+            }else{
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.GetCapabilities.class);
+                o = um.unmarshal(rootElement);                
+                nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v110.GetCapabilities)o;                
+                setGetCapabilitiesV110(getCapabilities);
+            }
+        }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)){
+            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.DescribeFeatureType.class);
+                o = um.unmarshal(rootElement);                
+                nl.b3p.xml.wfs.v100.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v100.DescribeFeatureType)o;
+                setDescribeFeatureTypeV100(describeFeatureType);
+            }else{
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.DescribeFeatureType.class);
+                o = um.unmarshal(rootElement);                
+                nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v110.DescribeFeatureType)o;
+                setDescribeFeatureTypeV110(describeFeatureType);;
+            }
+        }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)){
+            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetFeature.class);
+                o = um.unmarshal(rootElement);                
+                nl.b3p.xml.wfs.v100.GetFeature getFeature = (nl.b3p.xml.wfs.v100.GetFeature)o;
+                setGetFeatureV100(getFeature);
+            }else{
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.GetFeature.class);
+                o = um.unmarshal(rootElement);                
+                nl.b3p.xml.wfs.v110.GetFeature getFeature = (nl.b3p.xml.wfs.v110.GetFeature)o; 
+                setGetFeatureV110(getFeature);
+            }
+        }
+        else{
+            throw new UnsupportedOperationException("No WFS service found in request!");
+        }
+    }
+    
+    /**
+     * Serie of methods to fill the HashMap parameters
+     */
+    public void setGetCapabilitiesV100(nl.b3p.xml.wfs.v100.GetCapabilities getCapabilities){
+        addOrReplaceParameter(OGCConstants.VERSION,getCapabilities.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE,getCapabilities.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetCapabilities);
+    }
+    public void setGetCapabilitiesV110(nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities){
+        addOrReplaceParameter(OGCConstants.VERSION, OGCConstants.WFS_VERSION_110);
+        addOrReplaceParameter(OGCConstants.SERVICE,getCapabilities.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetCapabilities);
+    }
+    public void setDescribeFeatureTypeV100(nl.b3p.xml.wfs.v100.DescribeFeatureType describeFeatureType){
+        addOrReplaceParameter(OGCConstants.VERSION,describeFeatureType.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE,describeFeatureType.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_DescribeFeatureType);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT,describeFeatureType.getOutputFormat());
+        String[] list = describeFeatureType.getTypeName();
+        StringBuffer str = new StringBuffer();
+        for (int i = 0; i < list.length; i++){
+            str.append(list[i] + ",");
+        }
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAMELIST, str.toString());
+    }
+    public void setDescribeFeatureTypeV110(nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType){
+        addOrReplaceParameter(OGCConstants.VERSION,describeFeatureType.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE,describeFeatureType.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_DescribeFeatureType);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT,describeFeatureType.getOutputFormat());
+        String[] list = describeFeatureType.getTypeName();
+        StringBuffer str = new StringBuffer();
+        for (int i = 0; i < list.length; i++){
+            str.append(list[i] + ",");
+        }
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAMELIST, str.toString());
+    }
+    public void setGetFeatureV100(nl.b3p.xml.wfs.v100.GetFeature getFeature){
+        addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE,getFeature.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
+        StringBuffer str = new StringBuffer();
+        for (int i = 0; i < qlist.length; i++){
+            str.append(qlist[i].toString() + ",");
+        }
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_QUERYLIST, str.toString());
+    }
+    public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature){
+        addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE,getFeature.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE,getFeature.getResultType().toString());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKDEPTH, getFeature.getTraverseXlinkDepth());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKEXPIRY, "" + getFeature.getTraverseXlinkExpiry());
+        nl.b3p.xml.wfs.v110.Query[] qlist = getFeature.getQuery();
+        StringBuffer str = new StringBuffer();
+        for (int i = 0; i < qlist.length; i++){
+            str.append(qlist[i].toString() + ",");
+        }
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_QUERYLIST, str.toString());
     }
     
     /** Main methode to fill the OGUrl object
@@ -616,34 +748,39 @@ public class OGCRequest implements OGCConstants {
         
         if (containsParameter(REQUEST)) {
             String request = (String) parameters.get(REQUEST);
+            String service = (String) parameters.get(SERVICE);
             if (request == null || request.equals("")) {
                 throw new UnsupportedOperationException("No request parameter found in url!");
             }
             
             List requiredParams = null;
+            
             if (SUPPORTED_REQUESTS.contains(request)) {
-                if (request.equals(WMS_REQUEST_GetCapabilities)) {
-                    if (containsParameter(SERVICE)) {
-                        String service = (String) parameters.get(SERVICE);
-                        if (service == null || service.equals("")) {
-                            throw new UnsupportedOperationException("No service parameter for request found in url!");
-                        }
-                        if (service.equalsIgnoreCase(WMS_SERVICE_WMS)) {
-                            requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                        } else if (service.equalsIgnoreCase(WFS_SERVICE_WFS)) {
-                            throw new UnsupportedOperationException("Service '" + service + "' not yet supported!");
-                        } else {
-                            throw new UnsupportedOperationException("Service '" + service + "' not supported!");
-                        }
-                    } else {
-                        throw new UnsupportedOperationException("No service parameter for request found in url!");
+                //String service = (String) parameters.get(SERVICE);
+                if (service == null || service.equals("")) {
+                    throw new UnsupportedOperationException("No service parameter for request found in url!");
+                } else if(service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS)){
+                    if (request.equals(WMS_REQUEST_GetCapabilities)) {
+                        requiredParams = REQUIRED_PARAMS_GetCapabilities;
+                    } else if (request.equals(WMS_REQUEST_GetMap)) {
+                        requiredParams = PARAMS_GetMap;
+                    } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+                        requiredParams = PARAMS_GetFeatureInfo;
+                    } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+                        requiredParams = PARAMS_GetLegendGraphic;
                     }
-                } else if (request.equals(WMS_REQUEST_GetMap)) {
-                    requiredParams = PARAMS_GetMap;
-                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
-                    requiredParams = PARAMS_GetFeatureInfo;
-                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
-                    requiredParams = PARAMS_GetLegendGraphic;
+                } else if(service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)){
+                    if (request.equals(WFS_REQUEST_GetCapabilities)) {
+                        requiredParams = REQUIRED_PARAMS_GetCapabilities;
+                    } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
+                        // Lijstjes met Params moeten eerst na gekeken worden
+                        //requiredParams = PARAMS_DescribeFeatureType;
+                    } else if (request.equals(WFS_REQUEST_GetFeature)) {
+                        // Lijstjes met Params moeten eerst na gekeken worden
+                        //requiredParams = PARAMS_GetFeature;
+                    }
+                } else{
+                    throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                 }
                 checkRequestURL(requiredParams, request);
             } else {
@@ -651,6 +788,9 @@ public class OGCRequest implements OGCConstants {
                         "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
                         "VERSION=1.1.1&SERVICE=WMS");
             }
+        }
+        else{
+            throw new UnsupportedOperationException("No request parameter found!");
         }
     }
     

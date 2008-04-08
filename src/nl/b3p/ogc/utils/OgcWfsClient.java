@@ -391,13 +391,13 @@ public class OgcWfsClient {
         return (ServiceExceptionReport)o;
     }
     
-    private static nl.b3p.xml.wfs.v110.WFS_Capabilities getCapabilitiesVersion110(Element element) throws ValidationException, Exception{
+    public static nl.b3p.xml.wfs.v110.WFS_Capabilities getCapabilitiesVersion110(Element element) throws ValidationException, Exception{
         //log.debug("Response ok, trying to create FeatureCollection....");
         Unmarshaller um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
         Object o = um.unmarshal(element);
         return (nl.b3p.xml.wfs.v110.WFS_Capabilities)o;
     }
-    private static nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities getCapabilitiesVersion100(Element element) throws ValidationException, Exception {
+    public static nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities getCapabilitiesVersion100(Element element) throws ValidationException, Exception {
         Unmarshaller um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
         Object o = um.unmarshal(element);
         return (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities)o;
