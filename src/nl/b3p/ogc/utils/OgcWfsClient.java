@@ -23,18 +23,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import nl.b3p.gis.readers.B3pGMLReader;
-import nl.b3p.xml.ogc.v100.exception.ServiceException;
-import nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport;
 import nl.b3p.xml.wfs.DescribeFeatureType;
 import nl.b3p.xml.wfs.FeatureType;
 import nl.b3p.xml.wfs.FeatureTypeList;
 import nl.b3p.xml.wfs.Filter;
+import nl.b3p.xml.wfs.GetCapabilities;
 import nl.b3p.xml.wfs.GetFeature;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import nl.b3p.xml.wfs.v100.GetCapabilities;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -95,9 +93,9 @@ public class OgcWfsClient {
     public static Element doRequest(Object o, String host) throws Exception{
         Element el=readXml2Element(new InputStreamReader(doRequestInputStreamReader(o,host)));
         if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)){
-            ServiceExceptionReport ser= getServiceExceptionReport(el);
+            nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser= getServiceExceptionReport(el);
             StringBuffer sb=new StringBuffer();
-            ServiceException se=null;
+            nl.b3p.xml.ogc.v100.exception.ServiceException se=null;
             for (int i=0; i < ser.getServiceExceptionCount(); i++){
                 if (i!=0)sb.append(" and ");
                 se= ser.getServiceException(i);
@@ -244,9 +242,17 @@ public class OgcWfsClient {
     /**Get the GetCapabilities request object
      */
     public static GetCapabilities getGetCapabilitiesRequest(OGCRequest or) {
-        GetCapabilities gc = new GetCapabilities();
-        gc.setService(OGCConstants.WFS_SERVICE_WFS);
-        return gc;
+        if(or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+            nl.b3p.xml.wfs.v100.GetCapabilities gc = new nl.b3p.xml.wfs.v100.GetCapabilities();
+            gc.setService(OGCConstants.WFS_SERVICE_WFS);
+            gc.setVersion(or.getParameter(OGCConstants.VERSION));
+            return gc;
+        } else if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
+           nl.b3p.xml.wfs.v110.GetCapabilities gc = new nl.b3p.xml.wfs.v110.GetCapabilities();
+           gc.setService(OGCConstants.WFS_SERVICE_WFS);
+           return gc;
+        }
+        return null;
     }
     /**Get the GetFeature request object.
      *
@@ -352,17 +358,17 @@ public class OgcWfsClient {
     public static String getRequestBody(OGCRequest or) throws Exception{
         String body = null;
         Object castorObject=null;
-        if (or.getParameter(OGCConstants.WMS_REQUEST) == null || or.getParameter(OGCConstants.WMS_REQUEST).length() <= 0) {
+        if (or.getParameter(OGCConstants.REQUEST) == null || or.getParameter(OGCConstants.REQUEST).length() <= 0) {
             return body;
         }
-        if (or.getParameter(OGCConstants.WMS_REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_DescribeFeatureType)) {
+        if (or.getParameter(OGCConstants.REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_DescribeFeatureType)) {
             castorObject=getDescribeFeatureTypeRequest(or);
-        } else if (or.getParameter(OGCConstants.WMS_REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_GetFeature)) {
+        } else if (or.getParameter(OGCConstants.REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_GetFeature)) {
             castorObject=getGetFeatureRequest(or);
-        } else if (or.getParameter(OGCConstants.WMS_REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_GetCapabilities)) {
+        } else if (or.getParameter(OGCConstants.REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_GetCapabilities)) {
             castorObject=getGetCapabilitiesRequest(or);
         } else {
-            throw new UnsupportedOperationException("Request: " + or.getParameter(OGCConstants.WMS_REQUEST) + " wordt (nog) niet ondersteund");
+            throw new UnsupportedOperationException("Request: " + or.getParameter(OGCConstants.REQUEST) + " wordt (nog) niet ondersteund");
         }
         StringWriter sw = new StringWriter();
         Marshaller m = new Marshaller(sw);
@@ -385,10 +391,10 @@ public class OgcWfsClient {
     /**
      *Unmarshal the object to a serviceexception report.
      */
-    public static ServiceExceptionReport getServiceExceptionReport(Element element) throws MarshalException, ValidationException{
-        Unmarshaller um = new Unmarshaller(ServiceExceptionReport.class);
+    public static nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport getServiceExceptionReport(Element element) throws MarshalException, ValidationException{
+        Unmarshaller um = new Unmarshaller(nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport.class);
         Object o = um.unmarshal(element);
-        return (ServiceExceptionReport)o;
+        return (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport)o;
     }
     
     public static nl.b3p.xml.wfs.v110.WFS_Capabilities getCapabilitiesVersion110(Element element) throws ValidationException, Exception{

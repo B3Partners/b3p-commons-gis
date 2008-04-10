@@ -55,11 +55,10 @@ public class OGCRequest implements OGCConstants {
      * Constructor
      * For HTTP POST 
      */
-    public OGCRequest(Element rootElement, String url) throws ValidationException, Exception{ 
+    public OGCRequest(Element rootElement) throws ValidationException, Exception{ 
         parameters = new HashMap();
         Unmarshaller um;
         Object o;
-        httpHost = url;
             
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
             String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
@@ -769,20 +768,12 @@ public class OGCRequest implements OGCConstants {
                     } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                         requiredParams = PARAMS_GetLegendGraphic;
                     }
+                    checkRequestURL(requiredParams, request);
                 } else if(service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)){
-                    if (request.equals(WFS_REQUEST_GetCapabilities)) {
-                        requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                    } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
-                        // Lijstjes met Params moeten eerst na gekeken worden
-                        //requiredParams = PARAMS_DescribeFeatureType;
-                    } else if (request.equals(WFS_REQUEST_GetFeature)) {
-                        // Lijstjes met Params moeten eerst na gekeken worden
-                        //requiredParams = PARAMS_GetFeature;
-                    }
+                    // validation has been done when unmarshalled with castor
                 } else{
                     throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                 }
-                checkRequestURL(requiredParams, request);
             } else {
                 throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
                         "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
