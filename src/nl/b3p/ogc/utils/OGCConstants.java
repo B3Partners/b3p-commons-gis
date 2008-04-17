@@ -114,10 +114,9 @@ public interface OGCConstants {
     /*TODO: dit moet nog een keer aangepast worden!!
      *Hier moeten alle WFS parameters inkomen.Niet alleen de WFS parameters die WMS niet heeft (zoals nu)
      */
+    public static final String WFS_PARAM_BBOX = "BBOX";
     public static final String WFS_PARAM_OUTPUTFORMAT= "OUTPUTFORMAT";
     public static final String WFS_PARAM_TYPENAME= "TYPENAME";
-    public static final String WFS_PARAM_TYPENAMELIST= "TYPENAMELIST";
-    public static final String WFS_PARAM_QUERYLIST = "QUERYLIST";
     public static final String WFS_PARAM_HANDLE= "HANDLE";
     public static final String WFS_PARAM_RESULTTYPE="RESULTTYPE";
     public static final String WFS_PARAM_PROPERTYNAME="PROPERTYNAME";
@@ -234,40 +233,6 @@ public interface OGCConstants {
         WMS_PARAM_LAYERS
     });
     // </editor-fold>
-    
-    // Moet nog goed gecheckt worden of dit klopt
-    public static final List PARAMS_DescribeFeatureType = Arrays.asList(new String[] {
-        REQUEST,
-        SERVICE,
-        VERSION,
-        WFS_PARAM_TYPENAMELIST
-    });
-    // Moet nog goed gecheckt worden of dit klopt
-    public static final List NON_REQUIRED_PARAMS_DescribeFeatureType = Arrays.asList(new String[] {
-        WFS_PARAM_OUTPUTFORMAT
-    });
-    // Moet nog goed gecheckt worden of dit klopt
-    public static final List PARAMS_GetFeature = Arrays.asList(new String[] {
-        REQUEST,
-        SERVICE,
-        VERSION,
-        WFS_PARAM_QUERYLIST
-    });
-    // Moet nog goed gecheckt worden of dit klopt
-    public static final List NON_REQUIRED_PARAMS_GetFeature_V100 = Arrays.asList(new String[] {
-        WFS_PARAM_HANDLE,
-        WFS_PARAM_OUTPUTFORMAT,
-        WFS_PARAM_MAXFEATURES,
-    });
-    // Moet nog goed gecheckt worden of dit klopt
-    public static final List NON_REQUIRED_PARAMS_GetFeature_V110 = Arrays.asList(new String[] {
-        WFS_PARAM_RESULTTYPE,
-        WFS_PARAM_HANDLE,
-        WFS_PARAM_OUTPUTFORMAT,
-        WFS_PARAM_MAXFEATURES,
-        WFS_PARAM_TRAVERSEXLINKDEPTH,
-        WFS_PARAM_TRAVERSEXLINKEXPIRY,
-    });
     
     // <editor-fold defaultstate="" desc="List with implemented requests.">
     /**

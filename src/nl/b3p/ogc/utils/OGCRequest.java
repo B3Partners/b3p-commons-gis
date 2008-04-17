@@ -8,6 +8,7 @@
  */
 package nl.b3p.ogc.utils;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -17,10 +18,14 @@ import java.util.Set;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * @author Roy Braam
@@ -55,10 +60,15 @@ public class OGCRequest implements OGCConstants {
      * Constructor
      * For HTTP POST 
      */
-    public OGCRequest(Element rootElement) throws ValidationException, Exception{ 
+    public OGCRequest(Element rootElement, String url) throws ValidationException, Exception{ 
+        nameSpaces = new HashMap();
+        findNameSpace(rootElement);
         parameters = new HashMap();
         Unmarshaller um;
         Object o;
+        String[] tokens = url.split("\\?|&");
+        httpHost = tokens[0];
+
             
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
             String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
@@ -108,6 +118,32 @@ public class OGCRequest implements OGCConstants {
         }
     }
     
+    public void findNameSpace(Node node){ 
+        NamedNodeMap map = node.getAttributes();
+        if(map != null){
+            for(int i = 0; map.getLength() > i; i++){          
+                String name = map.item(i).getNodeName();
+                String[] tokens = name.split(":");
+                if(tokens[0].equalsIgnoreCase("xmlns")){
+                    String value = map.item(i).getNodeValue();
+                    addOrReplaceNameSpace(tokens[1],value);
+                }
+                else if(tokens.length == 2){
+                    if(tokens[1].equalsIgnoreCase("SchemaLocation")){
+                        String value = map.item(i).getNodeValue();
+                        addOrReplaceSchemaLocation(tokens[1],value);
+                    }
+                }
+            }
+        }
+        if(node.hasChildNodes()){
+            NodeList lijst = node.getChildNodes();
+            for(int i = 0; i < lijst.getLength(); i++){
+                findNameSpace(lijst.item(i));
+            }
+        }
+    }
+    
     /**
      * Serie of methods to fill the HashMap parameters
      */
@@ -129,9 +165,12 @@ public class OGCRequest implements OGCConstants {
         String[] list = describeFeatureType.getTypeName();
         StringBuffer str = new StringBuffer();
         for (int i = 0; i < list.length; i++){
-            str.append(list[i] + ",");
+            if (i != 0) {
+                str.append(",");
+            }
+            str.append(list[i]);
         }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAMELIST, str.toString());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     public void setDescribeFeatureTypeV110(nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType){
         addOrReplaceParameter(OGCConstants.VERSION,describeFeatureType.getVersion());
@@ -141,11 +180,14 @@ public class OGCRequest implements OGCConstants {
         String[] list = describeFeatureType.getTypeName();
         StringBuffer str = new StringBuffer();
         for (int i = 0; i < list.length; i++){
-            str.append(list[i] + ",");
+            if (i != 0) {
+                str.append(",");
+            }
+            str.append(list[i]);
         }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAMELIST, str.toString());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
-    public void setGetFeatureV100(nl.b3p.xml.wfs.v100.GetFeature getFeature){
+    public void setGetFeatureV100(nl.b3p.xml.wfs.v100.GetFeature getFeature) throws Exception{
         addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE,getFeature.getService());
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
@@ -153,28 +195,76 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
         nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
+        if (qlist.length > 0){
+            for(int j = 0; j < qlist.length; j++){
+                if(qlist[j].getFilter() != null){
+                    StringWriter sw = new StringWriter();
+                    Marshaller m = new Marshaller(sw);
+                    m.marshal(qlist[j].getFilter());
+                    addOrReplaceParameter(OGCConstants.WFS_PARAM_FILTER, sw.toString());
+                    
+                    // It is doing nothing with te BBox yet.
+                    /*if(qlist[j].getFilter().getBBOX() != null){
+                        StringWriter s = new StringWriter();
+                        Marshaller ma = new Marshaller(s);
+                        ma.marshal(qlist[j].getFilter().getBBOX());
+                        addOrReplaceParameter(OGCConstants.WFS_PARAM_BBOX, s.toString());
+                    }*/
+                }
+            }
+        }
         StringBuffer str = new StringBuffer();
         for (int i = 0; i < qlist.length; i++){
-            str.append(qlist[i].toString() + ",");
+            if (i != 0) {
+                str.append(",");
+            }
+            str.append(qlist[i].getTypeName());
         }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_QUERYLIST, str.toString());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
-    public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature){
+    public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature) throws Exception{
         addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE,getFeature.getService());
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE,getFeature.getResultType().toString());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKDEPTH, getFeature.getTraverseXlinkDepth());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKEXPIRY, "" + getFeature.getTraverseXlinkExpiry());
+        StringWriter writ = new StringWriter();
+        Marshaller ma = new Marshaller(writ);
+        ma.marshal(getFeature.getResultType());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE, writ.toString());
         nl.b3p.xml.wfs.v110.Query[] qlist = getFeature.getQuery();
+        if (qlist.length > 0){
+            for(int j = 0; j < qlist.length; j++){
+                if(qlist[j].getFilter() != null){
+                    StringWriter sw = new StringWriter();
+                    Marshaller m = new Marshaller(sw);
+                    m.marshal(qlist[j].getFilter());
+                    addOrReplaceParameter(OGCConstants.WFS_PARAM_FILTER, sw.toString());
+                    
+                    // It is doing nothing with te BBox yet.
+                    /*if(qlist[j].getFilter().getBBOX() != null){
+                        StringWriter s = new StringWriter();
+                        Marshaller ms = new Marshaller(s);
+                        ms.marshal(qlist[j].getFilter().getBBOX());
+                        addOrReplaceParameter(OGCConstants.WFS_PARAM_BBOX, s.toString());
+                    }*/
+                }
+                if(qlist[j].getSrsName() != null){
+                    addOrReplaceParameter(OGCConstants.WFS_PARAM_SRSNAME, qlist[j].getSrsName());
+                }
+            }
+        }
         StringBuffer str = new StringBuffer();
         for (int i = 0; i < qlist.length; i++){
-            str.append(qlist[i].toString() + ",");
+            if (i != 0) {
+                str.append(",");
+            }
+            str.append(qlist[i].getTypeName());
         }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_QUERYLIST, str.toString());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     
     /** Main methode to fill the OGUrl object
@@ -746,8 +836,8 @@ public class OGCRequest implements OGCConstants {
             throw new UnsupportedOperationException("No parameters found in url!");
         
         if (containsParameter(REQUEST)) {
-            String request = (String) parameters.get(REQUEST);
-            String service = (String) parameters.get(SERVICE);
+            String request = getParameter(OGCConstants.REQUEST);
+            String service = getParameter(OGCConstants.SERVICE);
             if (request == null || request.equals("")) {
                 throw new UnsupportedOperationException("No request parameter found in url!");
             }
