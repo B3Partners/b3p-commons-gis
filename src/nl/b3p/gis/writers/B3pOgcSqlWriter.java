@@ -180,7 +180,7 @@ public class B3pOgcSqlWriter {
         PreparedStatement statement = connection.prepareStatement(sql.toString());
         ResultSet rs = statement.executeQuery();
         boolean found = rs.next();
-        statement.execute();
+        statement.execute(); //TODO klopt dit?
         statement.close();
         return found;
     }

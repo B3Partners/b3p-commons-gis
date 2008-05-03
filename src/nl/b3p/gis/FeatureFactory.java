@@ -5,25 +5,24 @@
  *
  * Autor: Roy Braam
  */
-
 package nl.b3p.gis;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jump.feature.BasicFeature;
-import com.vividsolutions.jump.feature.Feature;
 import com.vividsolutions.jump.feature.FeatureSchema;
 
 /**
  *
  * @author Roy Braam
  */
-public class FeatureFactory{
-    
+public class FeatureFactory {
+
     /** Creates a new instance of FeatureFactory */
-    public FeatureFactory() {        
+    public FeatureFactory() {
     }
+
     /** Creates a point feature from a array of objects. The Objects on index xIndex and yIndex are used to create a point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
@@ -35,28 +34,29 @@ public class FeatureFactory{
      * @param fs The feature schema that is needed to create a feature
      * @param xyAsAttribute If true the x and y coords are also stored as attribute.
      */
-    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, int xIndex, int yIndex, FeatureSchema fs, boolean xyAsAttribute){
-        if (xIndex >= attributes.length || yIndex >= attributes.length){
+    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, int xIndex, int yIndex, FeatureSchema fs, boolean xyAsAttribute) {
+        if (xIndex >= attributes.length || yIndex >= attributes.length) {
             throw new ArrayIndexOutOfBoundsException("xIndex and/or yIndex is greater then the attributes length");
-        }   
-        Double x= getDoubleFromObject(attributes[xIndex]);
-        Double y= getDoubleFromObject(attributes[yIndex]);                                
-        if (!xyAsAttribute){
-            Object[] newAttributes = new Object[attributes.length-2];        
-            for (int i=0,addedAttributes=0; i< attributes.length; i++){
-                if (!(xIndex==i || yIndex==i)){
-                    newAttributes[addedAttributes]=attributes[i];
+        }
+        Double x = getDoubleFromObject(attributes[xIndex]);
+        Double y = getDoubleFromObject(attributes[yIndex]);
+        if (!xyAsAttribute) {
+            Object[] newAttributes = new Object[attributes.length - 2];
+            for (int i = 0, addedAttributes = 0; i < attributes.length; i++) {
+                if (!(xIndex == i || yIndex == i)) {
+                    newAttributes[addedAttributes] = attributes[i];
                     addedAttributes++;
                 }
             }
-            attributes=newAttributes;
+            attributes = newAttributes;
         }
-        if (x!=null && y!=null){
-            return createPiontFeature(attributes,columnames,x.doubleValue(),y.doubleValue(),fs);
-        }else{
-            return createFeature(attributes,columnames,fs);
-        }        
+        if (x != null && y != null) {
+            return createPiontFeature(attributes, columnames, x.doubleValue(), y.doubleValue(), fs);
+        } else {
+            return createFeature(attributes, columnames, fs);
+        }
     }
+
     /** Creates a point feature from a array of objects. The x and y are used for creating the point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
@@ -67,43 +67,45 @@ public class FeatureFactory{
      * @param y the y coord used for creating the point
      * @param fs The feature schema that is needed to create a feature
      */
-    public static BasicFeature createPiontFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs){
-        BasicFeature f=createFeature(attributes,columnames,fs);        
-        GeometryFactory gf=new GeometryFactory();
-        Point p= gf.createPoint(new Coordinate(x,y));
-        f.setGeometry(p);
+    public static BasicFeature createPiontFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
+        BasicFeature f = createFeature(attributes, columnames, fs);
+        if (fs.getGeometryIndex()>=0) {
+            GeometryFactory gf = new GeometryFactory();
+            Point p = gf.createPoint(new Coordinate(x, y));
+            f.setGeometry(p);
+        }
         return f;
     }
+
     /** Creates a feature
      *
      */
-    public static BasicFeature createFeature(Object[] attributes, String[] columnames, FeatureSchema fs){
-        BasicFeature f= new BasicFeature(fs);
-        if (columnames==null)
+    public static BasicFeature createFeature(Object[] attributes, String[] columnames, FeatureSchema fs) {
+        BasicFeature f = new BasicFeature(fs);
+        if (columnames == null) {
             f.setAttributes(attributes);
-        else{
-            for (int i=0; i < columnames.length; i++){
-                int index=-1;
-                try{
-                    index=fs.getAttributeIndex(columnames[i]);
-                     f.setAttribute(index,attributes[i]);
-                }catch(java.lang.IllegalArgumentException iae){
-                    
+        } else {
+            for (int i = 0; i < columnames.length; i++) {
+                int index = -1;
+                try {
+                    index = fs.getAttributeIndex(columnames[i]);
+                    f.setAttribute(index, attributes[i]);
+                } catch (java.lang.IllegalArgumentException iae) {
                 }
             }
         }
         return f;
     }
-    
+
     private static Double getDoubleFromObject(Object object) {
-        Double x=null;
-        if (object!=null){
-            if (object instanceof Double)
-                x=(Double)object;
-            else if (object instanceof String)
-                x=new Double((String)object);
+        Double x = null;
+        if (object != null) {
+            if (object instanceof Double) {
+                x = (Double) object;
+            } else if (object instanceof String) {
+                x = new Double((String) object);
+            }
         }
         return x;
     }
-    
 }
