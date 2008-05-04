@@ -30,22 +30,26 @@ import nl.b3p.gis.writers.B3pOgcSqlWriter;
  */
 public class CsvReader {
 
+    public static final String DEFAULT_ignoredColumnName1 = "id";
+    public static final String DEFAULT_geomColumnName = "the_geom";
+    public static final String DEFAULT_srs = "28992";
+    public static final String DEFAULT_tsColumnName = "TS";
+    public static final String DEFAULT_rdxColumnName = "RDX";
+    public static final String DEFAULT_rdyColumnName = "RDY";
+
     // FC
     private String tableName;
-    private String[] ignoredColumnNames = new String[]{"id"};
-    private String geomColumnName = "the_geom";
-    private String srs = "28992";
-    private String tsColumnName = "TS";
+    private String[] ignoredColumnNames;
+    private String geomColumnName;
+    private String srs;
+    private String tsColumnName;
     private String timestamp;
-    private String statusColumnName = "STATUS";
-    private String statusNewValue = "nieuw";
-    private String statusDeletedValue = "verwijderd";
     private String spaceName;
     private String spaceValue;
     private String[] uidNames;
     // CSV
-    private String rdxColumnName = "RDX";
-    private String rdyColumnName = "RDY";
+    private String rdxColumnName;
+    private String rdyColumnName;
     // Locale
     private Locale csvLocale;
     private DecimalFormatSymbols dfs;
@@ -65,9 +69,20 @@ public class CsvReader {
         this.setUidNames(uidNames);
         this.setCsvLocale(loc);
         this.setCsvSeparator(csvSeparator);
+        this.fillDefaults();
+    }
+    
+    protected void fillDefaults() {
         SimpleDateFormat sdf = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
         sdf.applyPattern("yyyy-MM-dd HH:mm:sss");
         this.timestamp = sdf.format(new Date());
+
+        this.ignoredColumnNames = new String[]{DEFAULT_ignoredColumnName1};
+        this.geomColumnName = DEFAULT_geomColumnName;
+        this.srs = DEFAULT_srs;
+        this.tsColumnName = DEFAULT_tsColumnName;
+        this.rdxColumnName = DEFAULT_rdxColumnName;
+        this.rdyColumnName = DEFAULT_rdyColumnName;
     }
 
     public void csvOgcSqlETL(Connection conn, CsvInputStream cis) throws SQLException, NotSupportedException, IOException, CsvFormatException, Exception {
@@ -148,15 +163,6 @@ public class CsvReader {
                     newColumns.add(columns.get(i));
                 }
             }
-        } else {
-            for (int i = 0; i < columns.size(); i++) {
-                String newColumnName = (String) columns.get(i);
-                if (newColumnName != null && newColumnName.length() > 0) {
-                    newColumns.add(newColumnName.toLowerCase(csvLocale));
-                } else {
-                    newColumns.add(columns.get(i));
-                }
-            }
         }
         return newColumns;
     }
@@ -168,9 +174,6 @@ public class CsvReader {
         List newColumns = translateColumns(columns);
         if (getTsColumnName() != null && getTsColumnName().length() > 0) {
             newColumns.add(getTsColumnName());
-        }
-        if (getStatusColumnName() != null && getStatusColumnName().length() > 0) {
-            newColumns.add(getStatusColumnName());
         }
         if (getSpaceName() != null && getSpaceName().length() > 0) {
             newColumns.add(getSpaceName());
@@ -186,30 +189,10 @@ public class CsvReader {
             attributes.add(getTimestamp()); // TODO juiste format?
 
         }
-        if (getStatusColumnName() != null && getStatusColumnName().length() > 0) {
-            if (checkIfDeleted(attributes)) {
-                attributes.add(getStatusDeletedValue());
-            } else {
-                attributes.add(getStatusNewValue());
-            }
-        }
         if (getSpaceName() != null && getSpaceName().length() > 0) {
             attributes.add(getSpaceValue());
         }
         return attributes;
-    }
-
-    protected boolean checkIfDeleted(List attributes) {
-        int uindex = attributes.indexOf(getUidNames()[0]);
-        String uid = null;
-        if (uindex >= 0) {
-            uid = (String) attributes.get(uindex);
-        }
-        if (uid != null && uid.startsWith("_X_")) {
-            attributes.set(uindex, uid.substring(3));
-            return true;
-        }
-        return false;
     }
 
     public String getTableName() {
@@ -258,30 +241,6 @@ public class CsvReader {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
-    }
-
-    public String getStatusColumnName() {
-        return statusColumnName;
-    }
-
-    public void setStatusColumnName(String statusColumnName) {
-        this.statusColumnName = statusColumnName;
-    }
-
-    public String getStatusNewValue() {
-        return statusNewValue;
-    }
-
-    public void setStatusNewValue(String statusNewValue) {
-        this.statusNewValue = statusNewValue;
-    }
-
-    public String getStatusDeletedValue() {
-        return statusDeletedValue;
-    }
-
-    public void setStatusDeletedValue(String statusDeletedValue) {
-        this.statusDeletedValue = statusDeletedValue;
     }
 
     public String getSpaceName() {
