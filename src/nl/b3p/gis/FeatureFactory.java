@@ -9,7 +9,7 @@ package nl.b3p.gis;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jump.feature.BasicFeature;
 import com.vividsolutions.jump.feature.FeatureSchema;
 
@@ -51,7 +51,7 @@ public class FeatureFactory {
             attributes = newAttributes;
         }
         if (x != null && y != null) {
-            return createPiontFeature(attributes, columnames, x.doubleValue(), y.doubleValue(), fs);
+            return createPointFeature(attributes, columnames, x.doubleValue(), y.doubleValue(), fs);
         } else {
             return createFeature(attributes, columnames, fs);
         }
@@ -67,11 +67,12 @@ public class FeatureFactory {
      * @param y the y coord used for creating the point
      * @param fs The feature schema that is needed to create a feature
      */
-    public static BasicFeature createPiontFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
+    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
         BasicFeature f = createFeature(attributes, columnames, fs);
         if (fs.getGeometryIndex()>=0) {
             GeometryFactory gf = new GeometryFactory();
-            Point p = gf.createPoint(new Coordinate(x, y));
+            Coordinate[] ca = new Coordinate[] {new Coordinate(x,y)};
+            MultiPoint p = gf.createMultiPoint(ca);
             f.setGeometry(p);
         }
         return f;

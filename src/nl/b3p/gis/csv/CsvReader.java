@@ -123,7 +123,7 @@ public class CsvReader {
                 rdy = getDoubleFromString((String) attributeList.get(rdyindex));
             }
             String[] attributes = (String[]) attributeList.toArray(new String[]{});
-            Feature f = FeatureFactory.createPiontFeature((Object[]) attributes, columns, rdx, rdy, fs);
+            Feature f = FeatureFactory.createPointFeature((Object[]) attributes, columns, rdx, rdy, fs);
 
             fc.add(f);
         }
