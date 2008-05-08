@@ -25,6 +25,9 @@ public interface OGCConstants {
     public static final String REQUEST = "REQUEST";
     public static final String SERVICE = "SERVICE";
     
+    //public static final String URL_PATTERN = "WMS";
+    //public static final String URL_PATTERN = "SERVICES";
+    
     // Optional request keys for GetCapabilities:
     public static final String UPDATESEQUENCE = "UPDATESEQUENCE";
     
