@@ -242,17 +242,16 @@ public class OgcWfsClient {
     /**Get the GetCapabilities request object
      */
     public static GetCapabilities getGetCapabilitiesRequest(OGCRequest or) {
-        if(or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+        if(OGCConstants.WFS_VERSION_100.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))){
             nl.b3p.xml.wfs.v100.GetCapabilities gc = new nl.b3p.xml.wfs.v100.GetCapabilities();
             gc.setService(OGCConstants.WFS_SERVICE_WFS);
             gc.setVersion(or.getParameter(OGCConstants.VERSION));
             return gc;
-        } else if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
-           nl.b3p.xml.wfs.v110.GetCapabilities gc = new nl.b3p.xml.wfs.v110.GetCapabilities();
-           gc.setService(OGCConstants.WFS_SERVICE_WFS);
-           return gc;
         }
-        return null;
+        
+        nl.b3p.xml.wfs.v110.GetCapabilities gc = new nl.b3p.xml.wfs.v110.GetCapabilities();
+        gc.setService(OGCConstants.WFS_SERVICE_WFS);
+        return gc;
     }
     /**Get the GetFeature request object.
      *
@@ -307,7 +306,7 @@ public class OgcWfsClient {
                 }catch(Exception e){
                     log.error("Filter v100 (WFS version 1.0.0) not correct",e);
                 }
-            } 
+            }
             // It is doing nothing with te BBox yet. There always seems te be a filter when tere is a BBox.
             /*else if (or.getParameter(OGCConstants.WFS_PARAM_BBOX) != null) {
                 //todo: msGeometry is nog hard er ingezet omdat er vanuit wordt gegaan dat mapserver altijd 1.0.0 versie gebruikt en degree 1.1.0
@@ -347,8 +346,8 @@ public class OgcWfsClient {
                     log.error("Filter v110 (WFS version 1.1.0) not correct",e);
                     // without throwing exception it goes on but without aplying filter
                     throw new UnsupportedOperationException("Filter is not correct!");
-                } 
-            } 
+                }
+            }
             // It is doing nothing with te BBox yet. There always seems te be a filter when tere is a BBox.
             /*else if (or.getParameter(OGCConstants.WFS_PARAM_BBOX) != null) {
                 StringBuffer s = new StringBuffer();
@@ -445,7 +444,7 @@ public class OgcWfsClient {
 //                }catch(Exception e){
 //                    log.error("Filter v110 (WFS version 1.1.0) not correct",e);
 //                }
-//                
+//
 //            } else if (or.getParameter(OGCConstants.WMS_PARAM_BBOX) != null) {
 //                StringBuffer s = new StringBuffer();
 //                String[] tokens = or.getParameter(OGCConstants.WMS_PARAM_BBOX).split(",");
@@ -457,7 +456,7 @@ public class OgcWfsClient {
 //            }
 //            gfv110.addQuery(q);
 //        }
-//        
+//
 //        return gf;
 //    }
     /***
