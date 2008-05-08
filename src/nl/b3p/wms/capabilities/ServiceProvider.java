@@ -32,7 +32,6 @@ public class ServiceProvider implements XMLElement {
     private String givenName;
     private String url;
     private String wmsVersion;
-    private String service;
     private Date updatedDate;
     private ContactInformation contactInformation;
     private Set domainResource;
@@ -445,14 +444,6 @@ public class ServiceProvider implements XMLElement {
     
     public void setWmsVersion(String wmsVersion) {
         this.wmsVersion = wmsVersion;
-    }
-    
-    public String getService() {
-        return service;
-    }
-    
-    public void setService(String service) {
-        this.service = service;
     }
     
     private Set getLayers() {
