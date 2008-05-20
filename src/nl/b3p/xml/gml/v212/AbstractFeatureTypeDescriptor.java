@@ -5,14 +5,14 @@
  * $Id$
  */
 
-package nl.b3p.xml.gml.v311;
+package nl.b3p.xml.gml.v212;
 
 /**
- * Class AbstractFeatureCollectionTypeDescriptor.
+ * Class AbstractFeatureTypeDescriptor.
  * 
  * @version $Revision$ $Date$
  */
-public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor {
+public class AbstractFeatureTypeDescriptor extends org.exolab.castor.xml.util.XMLClassDescriptorImpl {
 
 
       //--------------------------/
@@ -49,12 +49,11 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      //- Constructors -/
     //----------------/
 
-    public AbstractFeatureCollectionTypeDescriptor() 
+    public AbstractFeatureTypeDescriptor() 
      {
         super();
-        setExtendsWithoutFlatten(new nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor());
         nsURI = "http://www.opengis.net/gml";
-        xmlName = "AbstractFeatureCollectionType";
+        xmlName = "AbstractFeatureType";
         elementDefinition = false;
         
         //-- set grouping compositor
@@ -64,58 +63,60 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
         org.exolab.castor.xml.FieldValidator               fieldValidator = null;
         //-- initialize attribute descriptors
         
-        //-- initialize element descriptors
-        
-        //-- _featureMemberList
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_featureMemberList", "featureMember", org.exolab.castor.xml.NodeType.Element);
+        //-- _fid
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_fid", "fid", org.exolab.castor.xml.NodeType.Attribute);
+        desc.setImmutable(true);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
             {
-                AbstractFeatureCollectionType target = (AbstractFeatureCollectionType) object;
-                return target.getFeatureMember();
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getFid();
             }
             public void setValue( java.lang.Object object, java.lang.Object value) 
                 throws IllegalStateException, IllegalArgumentException
             {
                 try {
-                    AbstractFeatureCollectionType target = (AbstractFeatureCollectionType) object;
-                    target.addFeatureMember( (java.lang.Object) value);
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setFid( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
                 }
             }
             public java.lang.Object newInstance( java.lang.Object parent ) {
-                return new java.lang.Object();
+                return null;
             }
         };
         desc.setHandler(handler);
-        desc.setNameSpaceURI("http://www.opengis.net/gml");
-        desc.setMultivalued(true);
+        desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _featureMemberList
+        //-- validation code for: _fid
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(0);
         { //-- local scope
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
+            fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
-        //-- _featureMembers
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_featureMembers", "featureMembers", org.exolab.castor.xml.NodeType.Element);
+        //-- initialize element descriptors
+        
+        //-- _description
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_description", "description", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
             {
-                AbstractFeatureCollectionType target = (AbstractFeatureCollectionType) object;
-                return target.getFeatureMembers();
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getDescription();
             }
             public void setValue( java.lang.Object object, java.lang.Object value) 
                 throws IllegalStateException, IllegalArgumentException
             {
                 try {
-                    AbstractFeatureCollectionType target = (AbstractFeatureCollectionType) object;
-                    target.setFeatureMembers( (java.lang.Object) value);
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setDescription( (java.lang.Object) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -130,12 +131,80 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _featureMembers
+        //-- validation code for: _description
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-    } //-- nl.b3p.xml.gml.v311.AbstractFeatureCollectionTypeDescriptor()
+        //-- _name
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_name", "name", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getName();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setName( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _name
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _boundedBy
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_boundedBy", "boundedBy", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getBoundedBy();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setBoundedBy( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _boundedBy
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+    } //-- nl.b3p.xml.gml.v212.AbstractFeatureTypeDescriptor()
 
 
       //-----------/
@@ -163,7 +232,7 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      */
     public org.exolab.castor.mapping.ClassDescriptor getExtends()
     {
-        return super.getExtends();
+        return null;
     } //-- org.exolab.castor.mapping.ClassDescriptor getExtends() 
 
     /**
@@ -175,8 +244,6 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      */
     public org.exolab.castor.mapping.FieldDescriptor getIdentity()
     {
-        if (identity == null)
-            return super.getIdentity();
         return identity;
     } //-- org.exolab.castor.mapping.FieldDescriptor getIdentity() 
 
@@ -189,7 +256,7 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      */
     public java.lang.Class getJavaClass()
     {
-        return nl.b3p.xml.gml.v311.AbstractFeatureCollectionType.class;
+        return nl.b3p.xml.gml.v212.AbstractFeatureType.class;
     } //-- java.lang.Class getJavaClass() 
 
     /**

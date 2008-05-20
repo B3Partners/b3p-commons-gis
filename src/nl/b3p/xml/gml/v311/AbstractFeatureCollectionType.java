@@ -7,6 +7,12 @@
 
 package nl.b3p.xml.gml.v311;
 
+  //---------------------------------/
+ //- Imported classes and packages -/
+//---------------------------------/
+
+import java.util.Collections;
+
 /**
  * Class AbstractFeatureCollectionType.
  * 
@@ -22,9 +28,9 @@ implements java.io.Serializable
     //--------------------------/
 
     /**
-     * Field _featureMember
+     * Field _featureMemberList
      */
-    private java.lang.Object _featureMember;
+    private java.util.ArrayList _featureMemberList;
 
     /**
      * Field _featureMembers
@@ -39,6 +45,7 @@ implements java.io.Serializable
     public AbstractFeatureCollectionType() 
      {
         super();
+        _featureMemberList = new java.util.ArrayList();
     } //-- nl.b3p.xml.gml.v311.AbstractFeatureCollectionType()
 
 
@@ -47,15 +54,100 @@ implements java.io.Serializable
     //-----------/
 
     /**
-     * Returns the value of field 'featureMember'.
+     * Method addFeatureMember
+     * 
+     * 
+     * 
+     * @param vFeatureMember
+     */
+    public void addFeatureMember(java.lang.Object vFeatureMember)
+        throws java.lang.IndexOutOfBoundsException
+    {
+        _featureMemberList.add(vFeatureMember);
+    } //-- void addFeatureMember(java.lang.Object) 
+
+    /**
+     * Method addFeatureMember
+     * 
+     * 
+     * 
+     * @param index
+     * @param vFeatureMember
+     */
+    public void addFeatureMember(int index, java.lang.Object vFeatureMember)
+        throws java.lang.IndexOutOfBoundsException
+    {
+        _featureMemberList.add(index, vFeatureMember);
+    } //-- void addFeatureMember(int, java.lang.Object) 
+
+    /**
+     * Method clearFeatureMember
+     * 
+     */
+    public void clearFeatureMember()
+    {
+        _featureMemberList.clear();
+    } //-- void clearFeatureMember() 
+
+    /**
+     * Method enumerateFeatureMember
+     * 
+     * 
+     * 
+     * @return Enumeration
+     */
+    public java.util.Enumeration enumerateFeatureMember()
+    {
+        return Collections.enumeration(_featureMemberList);
+    } //-- java.util.Enumeration enumerateFeatureMember() 
+
+    /**
+     * Method getFeatureMember
+     * 
+     * 
+     * 
+     * @param index
+     * @return Object
+     */
+    public java.lang.Object getFeatureMember(int index)
+        throws java.lang.IndexOutOfBoundsException
+    {
+        //-- check bounds for index
+        if ((index < 0) || (index >= _featureMemberList.size())) {
+            throw new IndexOutOfBoundsException();
+        }
+        
+        return (java.lang.Object) _featureMemberList.get(index);
+    } //-- java.lang.Object getFeatureMember(int) 
+
+    /**
+     * Method getFeatureMember
+     * 
+     * 
      * 
      * @return Object
-     * @return the value of field 'featureMember'.
      */
-    public java.lang.Object getFeatureMember()
+    public java.lang.Object[] getFeatureMember()
     {
-        return this._featureMember;
-    } //-- java.lang.Object getFeatureMember() 
+        int size = _featureMemberList.size();
+        java.lang.Object[] mArray = new java.lang.Object[size];
+        for (int index = 0; index < size; index++) {
+            mArray[index] = (java.lang.Object) _featureMemberList.get(index);
+        }
+        return mArray;
+    } //-- java.lang.Object[] getFeatureMember() 
+
+    /**
+     * Method getFeatureMemberCount
+     * 
+     * 
+     * 
+     * @return int
+     */
+    public int getFeatureMemberCount()
+    {
+        return _featureMemberList.size();
+    } //-- int getFeatureMemberCount() 
 
     /**
      * Returns the value of field 'featureMembers'.
@@ -87,13 +179,51 @@ implements java.io.Serializable
     } //-- boolean isValid() 
 
     /**
-     * Sets the value of field 'featureMember'.
+     * Method removeFeatureMember
      * 
-     * @param featureMember the value of field 'featureMember'.
+     * 
+     * 
+     * @param vFeatureMember
+     * @return boolean
      */
-    public void setFeatureMember(java.lang.Object featureMember)
+    public boolean removeFeatureMember(java.lang.Object vFeatureMember)
     {
-        this._featureMember = featureMember;
+        boolean removed = _featureMemberList.remove(vFeatureMember);
+        return removed;
+    } //-- boolean removeFeatureMember(java.lang.Object) 
+
+    /**
+     * Method setFeatureMember
+     * 
+     * 
+     * 
+     * @param index
+     * @param vFeatureMember
+     */
+    public void setFeatureMember(int index, java.lang.Object vFeatureMember)
+        throws java.lang.IndexOutOfBoundsException
+    {
+        //-- check bounds for index
+        if ((index < 0) || (index >= _featureMemberList.size())) {
+            throw new IndexOutOfBoundsException();
+        }
+        _featureMemberList.set(index, vFeatureMember);
+    } //-- void setFeatureMember(int, java.lang.Object) 
+
+    /**
+     * Method setFeatureMember
+     * 
+     * 
+     * 
+     * @param featureMemberArray
+     */
+    public void setFeatureMember(java.lang.Object[] featureMemberArray)
+    {
+        //-- copy array
+        _featureMemberList.clear();
+        for (int i = 0; i < featureMemberArray.length; i++) {
+            _featureMemberList.add(featureMemberArray[i]);
+        }
     } //-- void setFeatureMember(java.lang.Object) 
 
     /**

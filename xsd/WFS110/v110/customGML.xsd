@@ -50,7 +50,7 @@
 		<xs:complexContent>
 			<xs:extension base="AbstractFeatureType">
 				<xs:sequence>
-					<xs:element ref="featureMember" minOccurs="0"/>
+					<xs:element ref="featureMember" minOccurs="0" maxOccurs="unbounded"/>
 					<xs:element ref="featureMembers" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
