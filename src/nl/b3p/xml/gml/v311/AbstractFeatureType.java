@@ -8,11 +8,11 @@
 package nl.b3p.xml.gml.v311;
 
 /**
- * Class AbstractFeatureCollectionType.
+ * Class AbstractFeatureType.
  * 
  * @version $Revision$ $Date$
  */
-public abstract class AbstractFeatureCollectionType extends nl.b3p.xml.gml.v311.AbstractFeatureType 
+public abstract class AbstractFeatureType extends nl.b3p.xml.gml.v311.AbstractGMLType 
 implements java.io.Serializable
 {
 
@@ -21,10 +21,10 @@ implements java.io.Serializable
      //- Constructors -/
     //----------------/
 
-    public AbstractFeatureCollectionType() 
+    public AbstractFeatureType() 
      {
         super();
-    } //-- nl.b3p.xml.gml.v311.AbstractFeatureCollectionType()
+    } //-- nl.b3p.xml.gml.v311.AbstractFeatureType()
 
 
       //-----------/

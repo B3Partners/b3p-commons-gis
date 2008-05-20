@@ -8,11 +8,11 @@
 package nl.b3p.xml.gml.v311;
 
 /**
- * Class AbstractFeatureCollectionTypeDescriptor.
+ * Class AbstractFeatureTypeDescriptor.
  * 
  * @version $Revision$ $Date$
  */
-public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor {
+public class AbstractFeatureTypeDescriptor extends nl.b3p.xml.gml.v311.AbstractGMLTypeDescriptor {
 
 
       //--------------------------/
@@ -49,14 +49,14 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      //- Constructors -/
     //----------------/
 
-    public AbstractFeatureCollectionTypeDescriptor() 
+    public AbstractFeatureTypeDescriptor() 
      {
         super();
-        setExtendsWithoutFlatten(new nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor());
+        setExtendsWithoutFlatten(new nl.b3p.xml.gml.v311.AbstractGMLTypeDescriptor());
         nsURI = "http://www.opengis.net/gml";
-        xmlName = "AbstractFeatureCollectionType";
+        xmlName = "AbstractFeatureType";
         elementDefinition = false;
-    } //-- nl.b3p.xml.gml.v311.AbstractFeatureCollectionTypeDescriptor()
+    } //-- nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor()
 
 
       //-----------/
@@ -110,7 +110,7 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
      */
     public java.lang.Class getJavaClass()
     {
-        return nl.b3p.xml.gml.v311.AbstractFeatureCollectionType.class;
+        return nl.b3p.xml.gml.v311.AbstractFeatureType.class;
     } //-- java.lang.Class getJavaClass() 
 
     /**
