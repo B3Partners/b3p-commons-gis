@@ -40,8 +40,8 @@
 		<xs:complexContent>
 			<xs:extension base="AbstractGMLType">
 				<xs:sequence>
-					<xs:element ref="boundedBy"/>
-					<xs:element ref="location"/>
+					<xs:element ref="boundedBy" minOccurs="0"/>
+					<xs:element ref="location" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
@@ -50,8 +50,8 @@
 		<xs:complexContent>
 			<xs:extension base="AbstractFeatureType">
 				<xs:sequence>
-					<xs:element ref="featureMember"/>
-					<xs:element ref="featureMembers"/>
+					<xs:element ref="featureMember" minOccurs="0"/>
+					<xs:element ref="featureMembers" minOccurs="0"/>
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>

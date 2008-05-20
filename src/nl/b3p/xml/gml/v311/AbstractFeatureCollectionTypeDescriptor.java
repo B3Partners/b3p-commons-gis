@@ -92,13 +92,11 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
         };
         desc.setHandler(handler);
         desc.setNameSpaceURI("http://www.opengis.net/gml");
-        desc.setRequired(true);
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
         //-- validation code for: _featureMember
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
@@ -128,13 +126,11 @@ public class AbstractFeatureCollectionTypeDescriptor extends nl.b3p.xml.gml.v311
         };
         desc.setHandler(handler);
         desc.setNameSpaceURI("http://www.opengis.net/gml");
-        desc.setRequired(true);
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
         //-- validation code for: _featureMembers
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
