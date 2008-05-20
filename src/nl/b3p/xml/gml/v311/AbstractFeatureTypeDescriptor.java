@@ -56,6 +56,88 @@ public class AbstractFeatureTypeDescriptor extends nl.b3p.xml.gml.v311.AbstractG
         nsURI = "http://www.opengis.net/gml";
         xmlName = "AbstractFeatureType";
         elementDefinition = false;
+        
+        //-- set grouping compositor
+        setCompositorAsSequence();
+        org.exolab.castor.xml.util.XMLFieldDescriptorImpl  desc           = null;
+        org.exolab.castor.mapping.FieldHandler             handler        = null;
+        org.exolab.castor.xml.FieldValidator               fieldValidator = null;
+        //-- initialize attribute descriptors
+        
+        //-- initialize element descriptors
+        
+        //-- _boundedBy
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_boundedBy", "boundedBy", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getBoundedBy();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setBoundedBy( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _boundedBy
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _location
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_location", "location", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                AbstractFeatureType target = (AbstractFeatureType) object;
+                return target.getLocation();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    AbstractFeatureType target = (AbstractFeatureType) object;
+                    target.setLocation( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _location
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
     } //-- nl.b3p.xml.gml.v311.AbstractFeatureTypeDescriptor()
 
 

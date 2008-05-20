@@ -17,6 +17,21 @@ implements java.io.Serializable
 {
 
 
+      //--------------------------/
+     //- Class/Member Variables -/
+    //--------------------------/
+
+    /**
+     * Field _boundedBy
+     */
+    private java.lang.Object _boundedBy;
+
+    /**
+     * Field _location
+     */
+    private java.lang.Object _location;
+
+
       //----------------/
      //- Constructors -/
     //----------------/
@@ -30,6 +45,28 @@ implements java.io.Serializable
       //-----------/
      //- Methods -/
     //-----------/
+
+    /**
+     * Returns the value of field 'boundedBy'.
+     * 
+     * @return Object
+     * @return the value of field 'boundedBy'.
+     */
+    public java.lang.Object getBoundedBy()
+    {
+        return this._boundedBy;
+    } //-- java.lang.Object getBoundedBy() 
+
+    /**
+     * Returns the value of field 'location'.
+     * 
+     * @return Object
+     * @return the value of field 'location'.
+     */
+    public java.lang.Object getLocation()
+    {
+        return this._location;
+    } //-- java.lang.Object getLocation() 
 
     /**
      * Method isValid
@@ -48,6 +85,26 @@ implements java.io.Serializable
         }
         return true;
     } //-- boolean isValid() 
+
+    /**
+     * Sets the value of field 'boundedBy'.
+     * 
+     * @param boundedBy the value of field 'boundedBy'.
+     */
+    public void setBoundedBy(java.lang.Object boundedBy)
+    {
+        this._boundedBy = boundedBy;
+    } //-- void setBoundedBy(java.lang.Object) 
+
+    /**
+     * Sets the value of field 'location'.
+     * 
+     * @param location the value of field 'location'.
+     */
+    public void setLocation(java.lang.Object location)
+    {
+        this._location = location;
+    } //-- void setLocation(java.lang.Object) 
 
     /**
      * Method validate

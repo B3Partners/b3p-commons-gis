@@ -38,7 +38,12 @@
 	</xs:complexType>
 	<xs:complexType name="AbstractFeatureType" abstract="true">
 		<xs:complexContent>
-			<xs:extension base="AbstractGMLType"/>
+			<xs:extension base="AbstractGMLType">
+				<xs:sequence>
+					<xs:element ref="boundedBy"/>
+					<xs:element ref="location"/>
+				</xs:sequence>
+			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="AbstractFeatureCollectionType" abstract="true">
