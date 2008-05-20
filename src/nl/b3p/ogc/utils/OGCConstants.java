@@ -149,6 +149,9 @@ public interface OGCConstants {
     public static final String WFS_DESCRIBEFEATURETYPE="wfs:DescribeFeatureType";
     public static final String WFS_GETFEATURE="wfs:GetFeature";
     
+    public static final String WFS_CAPABILITIES="wfs:WFS_Capabilities";
+    public static final String WFS_FEATURECOLLECTION="wfs:FeatureCollection"; 
+    
     public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT="ServiceExceptionReport";
     public static final String WFS_OBJECT_GEOMETRYTYPE="gml:GeometryPropertyType";
     // </editor-fold>

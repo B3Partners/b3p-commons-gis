@@ -41,6 +41,7 @@ public class OGCRequest implements OGCConstants {
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
+    
     /*Default constr.*/
     
     public OGCRequest() {
@@ -71,7 +72,7 @@ public class OGCRequest implements OGCConstants {
 
             
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
-            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                                
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetCapabilities.class);
@@ -727,7 +728,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
     
-    private String[] getSchemaLocationsArray() {
+    public String[] getSchemaLocationsArray() {
         if (schemaLocations == null) {
             return null;
         }
@@ -736,7 +737,7 @@ public class OGCRequest implements OGCConstants {
         Iterator it = keys.iterator();
         for (int i = 0; it.hasNext(); i++) {
             String prefix = (String) it.next();
-            String location = (String) nameSpaces.get(prefix);
+            String location = (String) schemaLocations.get(prefix);
             returnvalue[i] = prefix + ":schemaLocation=\"" + location + "\"";
         }
         return returnvalue;
@@ -797,6 +798,10 @@ public class OGCRequest implements OGCConstants {
             returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
         }
         return returnv;
+    }
+    
+    public String getHost(){
+        return getHttpHost();
     }
     
     protected String getHttpHost() {
