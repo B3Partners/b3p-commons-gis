@@ -17,6 +17,21 @@ implements java.io.Serializable
 {
 
 
+      //--------------------------/
+     //- Class/Member Variables -/
+    //--------------------------/
+
+    /**
+     * Field _featureMember
+     */
+    private java.lang.Object _featureMember;
+
+    /**
+     * Field _featureMembers
+     */
+    private java.lang.Object _featureMembers;
+
+
       //----------------/
      //- Constructors -/
     //----------------/
@@ -30,6 +45,28 @@ implements java.io.Serializable
       //-----------/
      //- Methods -/
     //-----------/
+
+    /**
+     * Returns the value of field 'featureMember'.
+     * 
+     * @return Object
+     * @return the value of field 'featureMember'.
+     */
+    public java.lang.Object getFeatureMember()
+    {
+        return this._featureMember;
+    } //-- java.lang.Object getFeatureMember() 
+
+    /**
+     * Returns the value of field 'featureMembers'.
+     * 
+     * @return Object
+     * @return the value of field 'featureMembers'.
+     */
+    public java.lang.Object getFeatureMembers()
+    {
+        return this._featureMembers;
+    } //-- java.lang.Object getFeatureMembers() 
 
     /**
      * Method isValid
@@ -48,6 +85,26 @@ implements java.io.Serializable
         }
         return true;
     } //-- boolean isValid() 
+
+    /**
+     * Sets the value of field 'featureMember'.
+     * 
+     * @param featureMember the value of field 'featureMember'.
+     */
+    public void setFeatureMember(java.lang.Object featureMember)
+    {
+        this._featureMember = featureMember;
+    } //-- void setFeatureMember(java.lang.Object) 
+
+    /**
+     * Sets the value of field 'featureMembers'.
+     * 
+     * @param featureMembers the value of field 'featureMembers'.
+     */
+    public void setFeatureMembers(java.lang.Object featureMembers)
+    {
+        this._featureMembers = featureMembers;
+    } //-- void setFeatureMembers(java.lang.Object) 
 
     /**
      * Method validate
