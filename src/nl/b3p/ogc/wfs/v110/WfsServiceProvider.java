@@ -10,6 +10,7 @@
 package nl.b3p.ogc.wfs.v110;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -32,12 +33,18 @@ public class WfsServiceProvider {
     public WfsServiceProvider() {
     }
     
-    private Set getWfsLayers() {
+    public Set getWfsLayers() {
         return wfsLayers;
     }
     
     public void setWfsLayers(Set wfsLayers) {
         this.wfsLayers = wfsLayers;
+    }
+    
+    public void addWfsLayer(WfsLayer layer){
+        if(wfsLayers==null)
+            wfsLayers = new HashSet();
+        wfsLayers.add(layer);
     }
     
     public int getId(){
@@ -64,14 +71,14 @@ public class WfsServiceProvider {
     public String getTitle(){
         return title;
     }
-    public void setTitle(String Title){
+    public void setTitle(String title){
         this.title = title;
     }
     
     public String getGivenName(){
         return givenName;
     }
-    public void setGivenName(String GivenName){
+    public void setGivenName(String givenName){
         this.givenName = givenName;
     }
     
