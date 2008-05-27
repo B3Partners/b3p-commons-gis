@@ -59,4 +59,21 @@ public class WfsLayer {
     public WfsServiceProvider getWfsServiceProvider(){
         return wfsServiceProvider;
     }
+    
+    public String getSpAbbr() {
+        if (wfsServiceProvider==null)
+            return "0";
+        String abbr = wfsServiceProvider.getAbbr();
+        if (abbr==null)
+            return "0";
+        return abbr;
+    }
+    
+    public String getUniqueName(){
+        // Indien naam leeg is, dan mag de layer nooit getoond worden via GetMap
+        // dus wij mogen naam nooit vullen als hij oorspronkelijk leeg was!
+        if (this.getName()==null)
+            return null;
+        return getSpAbbr() + "_" + this.getName();
+    }
 }
