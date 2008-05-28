@@ -98,6 +98,7 @@ public class B3pGMLReader extends GMLReader{
             } 
             if (o==null){
                 log.error("Kan template niet vinden voor "+featureTypes[i]);
+                throw new Exception("Kan template niet vinden voor "+featureTypes[i]);
             }
             GMLInputTemplate git = (GMLInputTemplate)o;
             wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME,featureTypes[i]);
@@ -292,9 +293,11 @@ public class B3pGMLReader extends GMLReader{
             //Document doc=getDocumentByHTTPPost(wfsDFT.getUrlWithNonOGCparams(),body);        
             Element el=OgcWfsClient.getDescribeFeatureType(wfsDFT);
             if (el!=null){
-                templates =createGMLInputTemplates(el);                
-            }
-            
+                if(templates==null){
+                    templates=new HashMap();
+                }
+                templates.putAll(createGMLInputTemplates(el));                
+            }            
         }
         if (templates!=null && templates.size()>0){
             return templates;
