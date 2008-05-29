@@ -98,6 +98,8 @@ public class KBConfiguration {
         OGCConstants.WMS_REQUEST_GetFeatureInfo,
         OGCConstants.WMS_REQUEST_GetLegendGraphic};
     public static final String[] ACCOUNTING_WFS_REQUESTS = new String[] {
+        OGCConstants.WFS_REQUEST_GetFeature,
+        OGCConstants.WFS_REQUEST_DescribeFeatureType
     };
     
     /*
