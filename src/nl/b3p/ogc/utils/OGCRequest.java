@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import nl.b3p.xml.wfs.WFS_Capabilities;
+import nl.b3p.xml.wfs.v100.GetCapabilities;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +36,11 @@ import org.w3c.dom.NodeList;
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
 en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
-public class OGCRequest implements OGCConstants {
-    
+public class OGCRequest implements OGCConstants {   
+
     private static final Log log = LogFactory.getLog(OGCRequest.class);
     private String httpHost;
+    private WFS_Capabilities capabilities;
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
@@ -619,7 +622,16 @@ public class OGCRequest implements OGCConstants {
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i].contains("=")) {
                 String keyValuePair[] = tokens[i].split("=");
-                if (keyValuePair.length == 2) {
+                if (keyValuePair.length > 2){
+                    String value="";
+                    for (int b=1; b < keyValuePair.length; b++){
+                        if (b!=1)
+                            value+="=";
+                        value+=keyValuePair[b];                        
+                    }
+                    addOrReplaceParameter(keyValuePair[0], value);
+                }
+                else if (keyValuePair.length == 2) {
                     addOrReplaceParameter(keyValuePair[0], keyValuePair[1]);
                 } else {
                     addOrReplaceParameter(keyValuePair[0], null);
@@ -928,4 +940,12 @@ public class OGCRequest implements OGCConstants {
             log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
         }
     }
+
+    public WFS_Capabilities getCapabilities() {
+        return capabilities;
+    }
+
+    public void setCapabilities(WFS_Capabilities capabilities) {
+        this.capabilities = capabilities;
+    }    
 }

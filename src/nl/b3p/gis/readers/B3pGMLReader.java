@@ -121,9 +121,12 @@ public class B3pGMLReader extends GMLReader{
                     method2.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
                     client.executeMethod(method2);
                     String cause=method2.getResponseBodyAsString(1000);
-                    if(log.isDebugEnabled()){                            
-                        log.error("No features returned cause(first 1000 characters): "+cause);
-                    }                        
+                    if (cause.indexOf("<ServiceExceptionReport")>0){
+                        throw new Exception("Service returned exception: "+cause);
+                    }else{
+                        log.error("No features returned");
+                    }
+                        
                 }
                 features.put(featureTypes[i],fc);   
             }else{
@@ -190,7 +193,8 @@ public class B3pGMLReader extends GMLReader{
                     Element e = (Element)elements.get(i);
                     String names=e.getNamespaceURI();
                     String prefix=e.getPrefix();
-                    if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
+                    //if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
+                    if (e.getAttribute("type").startsWith("gml:")||e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
                         geom.append("<GeometryElement>");
                         if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
                             geom.append(defaultPrefix+":");

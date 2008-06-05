@@ -140,6 +140,10 @@ public interface OGCConstants {
     public static final String WFS_REQUEST_GetFeature="GetFeature";
     public static final String WFS_REQUEST_DescribeFeatureType="DescribeFeatureType";
     public static final String WFS_REQUEST_GetCapabilities="GetCapabilities";
+    public static final String WFS_REQUEST_Transaction="Transaction";
+    public static final String WFS_REQUEST_GetFeatureWithLock="GetFeatureWithLock";
+    public static final String WFS_REQUEST_LockFeature="LockFeature";
+    
     public static final String WFS_SERVICE_WFS="WFS";
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";
     

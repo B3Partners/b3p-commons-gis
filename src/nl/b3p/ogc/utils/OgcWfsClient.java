@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.xml.parsers.SAXParser;
@@ -34,7 +35,9 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
@@ -58,40 +61,46 @@ import org.xml.sax.XMLReader;
  */
 public class OgcWfsClient {
     private static final Log log = LogFactory.getLog(OgcWfsClient.class);
+
+    private static String GETMETHOD="GET";
+    private static String POSTMETHOD="POST";
     /**
      *Doe een getCapabilities request naar de host aangegeven in de OGCRequest die meegegeven wordt
      */
     public static WFS_Capabilities getCapabilities(OGCRequest original) throws Exception{
         WFS_Capabilities returnvalue;
         OGCRequest or=(OGCRequest) original.clone();
+        or.removeAllWFSParameters();
         or.addOrReplaceParameter(OGCConstants.WMS_SERVICE, OGCConstants.WFS_SERVICE_WFS);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         String host = or.getUrlWithNonOGCparams();
-        Element el=doRequest(getGetCapabilitiesRequest(or),host);
+        //Element el=doRequest(getGetCapabilitiesRequest(or),host);
+        Element el=doRequest(or.getUrl(),host);
         if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)){
             String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
-                original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);
-                return getCapabilitiesVersion100(el);
+                original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);                
+                returnvalue=getCapabilitiesVersion100(el);
             }else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
                 original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);
-                return getCapabilitiesVersion110(el);
+                returnvalue=getCapabilitiesVersion110(el);
             }else{
                 throw new UnsupportedOperationException("WFS GetCapabilities version: "+version+" not supported");
             }
-            
         }else{
             log.error("Unexpected element returned: "+el.getTagName());
             throw new Exception("Unexpected element returned: "+el.getTagName());
         }
-    }
+        original.setCapabilities(returnvalue);
+        return returnvalue;
+    }    
     /**
      *Doe een request naar de host die meegegeven is stuur het object als body
      *Kijkt tevens of het een serviceExceptionReport is en trowed dat dan als Exception.
      *@return het element dat terug gegeven wordt door de server
      */
-    public static Element doRequest(Object o, String host) throws Exception{
-        Element el=readXml2Element(new InputStreamReader(doRequestInputStreamReader(o,host)));
+    public static Element doRequest(Object o, String host) throws Exception{        
+        Element el=readXml2Element(new InputStreamReader(getInputStreamReader(o,host)));
         if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)){
             nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser= getServiceExceptionReport(el);
             StringBuffer sb=new StringBuffer();
@@ -108,43 +117,66 @@ public class OgcWfsClient {
         
     }
     /**
-     *Doet het request en returned het antwoord als iputstream. LetOp: checked niet of het een serviceExceptionReport is
+     *Doet het request en returned het antwoord als inputstream. LetOp: checked niet of het een serviceExceptionReport is
      *
      */
-    private static InputStream doRequestInputStreamReader(Object o, String host) throws Exception {
-        String body = null;
-        StringWriter sw = new StringWriter();
-        Marshaller m = new Marshaller(sw);
-        m.setMarshalAsDocument(false);
-        m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
-        m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
-        m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
-        m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
-        m.setNamespaceMapping("app", "http://www.deegree.org/app");
-        m.marshal(o);
-        body = sw.toString();
+    private static InputStream getInputStreamReader(Object o, String host) throws Exception {
         HttpClient client = new HttpClient();
-        PostMethod method = new PostMethod(host);
-        method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-        int status = client.executeMethod(method);
-        if (status == HttpStatus.SC_OK) {
-            return method.getResponseBodyAsStream();
+        int status;
+        HttpMethod httpmethod=null;
+        if (o instanceof String){            
+            httpmethod = new GetMethod((String)o);
         }else{
-            log.error("Url returned status: "+status + ": "+method.getResponseBodyAsString());
-            throw new Exception("Url returned status: "+status + ": "+method.getResponseBodyAsString());
+            String body = null;
+            StringWriter sw = new StringWriter();
+            Marshaller m = new Marshaller(sw);
+            m.setMarshalAsDocument(false);
+            m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
+            m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
+            m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
+            m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
+            m.setNamespaceMapping("app", "http://www.deegree.org/app");
+            m.marshal(o);
+            body = sw.toString();            
+            PostMethod postmethod = new PostMethod(host);
+            postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            httpmethod=postmethod;            
+        }        
+        status = client.executeMethod(httpmethod);
+        if (status == HttpStatus.SC_OK) {
+            /*DEBUG:
+            String s=method.getResponseBodyAsString();
+            return new StringBufferInputStream(s);
+             */
+            return httpmethod.getResponseBodyAsStream();
+        }else{
+            log.error("Url returned status: "+status + ": "+httpmethod.getResponseBodyAsString());
+            throw new Exception("Url returned status: "+status + ": "+httpmethod.getResponseBodyAsString());
         }
     }
     /**
      *Doe een getDescribeFeatureType request naar de host aangegeven in de OGCRequest die meegegeven wordt
      */
     public static Element getDescribeFeatureType(OGCRequest original) throws Exception{
+        WFS_Capabilities cap=null;
+        if (original.getCapabilities()==null){
+            cap=getCapabilities(original);
+        }else{
+            cap=original.getCapabilities();
+        }
+        List methodsAllowed = extractHttpMethodsAllowed(cap,OGCConstants.WFS_REQUEST_DescribeFeatureType);        
         Element returnvalue = null;
         OGCRequest or=(OGCRequest) original.clone();
         or.addOrReplaceParameter(OGCConstants.WMS_SERVICE, OGCConstants.WFS_SERVICE_WFS);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_DescribeFeatureType);
+                
         String host = or.getUrlWithNonOGCparams();
-        returnvalue=doRequest(getDescribeFeatureTypeRequest(or),host);
+        if (methodsAllowed.contains(POSTMETHOD)){
+            returnvalue=doRequest(getDescribeFeatureTypeRequest(or),host);
+        }else if (methodsAllowed.contains(GETMETHOD)){
+            returnvalue=doRequest(or.getUrl(),host);
+        }
         return returnvalue;
     }
     /** Haal de elementen uit de describefeaturetype request
@@ -674,4 +706,124 @@ public class OgcWfsClient {
         return anyNode;
         
     }
+
+    private static List extractHttpMethodsAllowed(WFS_Capabilities cap, String requestName) {
+        ArrayList methodsAllowed=new ArrayList();
+        if (cap instanceof nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities){
+            nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities cap100= (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities)cap;
+            for (int i=0; i < cap100.getCapability().getRequest().getRequestTypeItemCount(); i++){
+                nl.b3p.xml.wfs.v100.capabilities.RequestTypeItem rti=cap100.getCapability().getRequest().getRequestTypeItem(i);
+                if(OGCConstants.WFS_REQUEST_DescribeFeatureType.equalsIgnoreCase(requestName)){
+                    if (rti.getDescribeFeatureType()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType_DescribeFeatureTypeType[] requestDcpTypes=rti.getDescribeFeatureType().getDCPType_DescribeFeatureTypeType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);                                
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);                                
+                            }
+                            
+                        }
+                    }
+                }else if(OGCConstants.WFS_REQUEST_GetCapabilities.equalsIgnoreCase(requestName)){
+                    if (rti.getGetCapabilities()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType_GetCapabilitiesType[] requestDcpTypes=rti.getGetCapabilities().getDCPType_GetCapabilitiesType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);                               
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);                                
+                            }
+                            
+                        }
+                    }
+                }else if(OGCConstants.WFS_REQUEST_GetFeature.equalsIgnoreCase(requestName)){
+                    if (rti.getGetFeature()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType_FeatureTypeType[] requestDcpTypes=rti.getGetFeature().getDCPType_FeatureTypeType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);
+                            }
+                            
+                        }
+                    }
+                }else if(OGCConstants.WFS_REQUEST_Transaction.equalsIgnoreCase(requestName)){
+                    if (rti.getTransaction()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType_TransactionType[] requestDcpTypes=rti.getTransaction().getDCPType_TransactionType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);
+                            }
+                            
+                        }
+                    }
+                }else if(OGCConstants.WFS_REQUEST_GetFeatureWithLock.equalsIgnoreCase(requestName)){
+                    if (rti.getGetFeatureWithLock()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType_FeatureTypeType[] requestDcpTypes=rti.getGetFeatureWithLock().getDCPType_FeatureTypeType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);
+                            }
+                            
+                        }
+                    }
+                }else if(OGCConstants.WFS_REQUEST_LockFeature.equalsIgnoreCase(requestName)){
+                   if (rti.getLockFeature()!=null){
+                        nl.b3p.xml.wfs.v100.capabilities.DCPType[] requestDcpTypes=rti.getLockFeature().getDCPType();
+                        for (int i2=0; i2 < requestDcpTypes.length; i2++){
+                            nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
+                            for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
+                                if(http.getHTTPTypeItem(i3).getGet()!=null)
+                                    methodsAllowed.add(GETMETHOD);
+                                if(http.getHTTPTypeItem(i3).getPost()!=null)
+                                    methodsAllowed.add(POSTMETHOD);
+                            }
+                            
+                        }
+                    } 
+                }
+            }            
+        }else if (cap instanceof nl.b3p.xml.wfs.v110.WFS_Capabilities){
+            nl.b3p.xml.wfs.v110.WFS_Capabilities cap110= (nl.b3p.xml.wfs.v110.WFS_Capabilities)cap;
+            if(cap110.getOperationsMetadata()!=null){
+                nl.b3p.xml.ows.v100.OperationsMetadata metadata=cap110.getOperationsMetadata();
+                for (int i=0; i < metadata.getOperationCount();i++){
+                    if (requestName.equalsIgnoreCase(metadata.getOperation(i).getName())){
+                        for(int i2=0; i2 < metadata.getOperation(i).getDCPCount(); i2++){
+                            nl.b3p.xml.ows.v100.DCP dcp=metadata.getOperation(i).getDCP(i2);
+                            if(dcp.getHTTP()!=null){
+                                for (int i3=0; i3 < dcp.getHTTP().getHTTPItemCount(); i3++){
+                                    nl.b3p.xml.ows.v100.HTTPItem httpitem=dcp.getHTTP().getHTTPItem(i3);
+                                    if (httpitem.getPost()!=null)
+                                        methodsAllowed.add(POSTMETHOD);
+                                    if(httpitem.getGet()!=null)
+                                        methodsAllowed.add(GETMETHOD);
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
+        return methodsAllowed;
+    }
+
+    
 }
