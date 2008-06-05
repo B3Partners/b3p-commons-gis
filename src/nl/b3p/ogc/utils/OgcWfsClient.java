@@ -313,6 +313,8 @@ public class OgcWfsClient {
         }
         if (or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT) != null) {
             gf.setOutputFormat(or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT));
+        }else{
+            gf.setOutputFormat(null);
         }
         
         if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature){

@@ -307,7 +307,16 @@ public class OGCRequest implements OGCConstants {
                         }
                     }
                 } else {
-                    if (keyValuePair.length == 2) {
+                    if (keyValuePair.length > 2){
+                        String value="";
+                        for (int b=1; b < keyValuePair.length; b++){
+                            if (b!=1)
+                                value+="=";
+                            value+=keyValuePair[b];                        
+                        }
+                        addOrReplaceParameter(keyValuePair[0], value);
+                    }
+                    else if (keyValuePair.length == 2) {
                         addOrReplaceParameter(keyValuePair[0], keyValuePair[1]);
                     } else {
                         addOrReplaceParameter(keyValuePair[0], null);
@@ -428,101 +437,7 @@ public class OGCRequest implements OGCConstants {
     public String getXMLBody() throws Exception{
         return OgcWfsClient.getRequestBody(this);
     }
-    /**
-     * Get XMLBody creates the body string for a post message. For now only supports getFeature en DiscribeFeatureType
-     */
- /*   public String getXMLBody() throws MarshalException, ValidationException, IOException, ParserConfigurationException, SAXException {
-        Object brt = null;
-        String body = null;
-        if (getParameter(WMS_REQUEST) == null || getParameter(WMS_REQUEST).length() <= 0) {
-            return body;
-        }
-        if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_DiscribeFeatureType)) {
-            DescribeFeatureType dft = new DescribeFeatureType();
-            setBasicRequest(dft);
-            if (this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT) != null) {
-                dft.setOutputFormat(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT));
-            } else {
-                //temp oplossing. Default value wordt niet ondersteund....
-                dft.setOutputFormat(null);
-            }
-            if (this.getParameter(WFS_PARAM_TYPENAME) != null) {
-                String[] types = getParameter(WFS_PARAM_TYPENAME).split(",");
-                for (int i = 0; i < types.length; i++) {
-                    dft.addTypeName(types[i]);
-                }
-            }
-            brt = dft;
-        } else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetFeature)) {
-            GetFeature gf = new GetFeature();
-            setBasicRequest(gf);
-            if (this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT) != null) {
-                gf.setOutputFormat(this.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT));
-            }
-            Query q = new Query();
-            if (getParameter(WFS_PARAM_TYPENAME) != null) {
-                StringBuffer s = new StringBuffer();
-                String[] typenames = getParameter(WFS_PARAM_TYPENAME).split(",");
-                for (int i = 0; i < typenames.length; i++) {
-                    if (i != 0) {
-                        s.append(",");
-                    }
-                    s.append(typenames[i]);
-                }
-                q.setTypeName(0,s.toString());
-            }
-            if (getParameter(WMS_PARAM_SRS) != null) {
-                q.setSrsName(getParameter(WMS_PARAM_SRS));
-            }
-            if (getParameter(WFS_PARAM_FILTER) != null) {
-                try{
-                    Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(getParameter(WFS_PARAM_FILTER)));
-                    q.setFilter(f);
-                }catch(Exception e){
-  
-                }
-  
-  
-            } else if (getParameter(WMS_PARAM_BBOX) != null) {
-                StringBuffer s = new StringBuffer();
-                String[] tokens = getParameter(WMS_PARAM_BBOX).split(",");
-                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
-                s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
-                s.append("</coordinates></Box></BBOX></Filter>");
-                Filter f=(Filter)Unmarshaller.unmarshal(Filter.class, new StringReader(s.toString()));
-                q.setFilter(f);
-            }
-            gf.addQuery(q);
-            brt = gf;
-        } else if (getParameter(WMS_REQUEST).equalsIgnoreCase(WFS_REQUEST_GetCapabilities)) {
-            GetCapabilities gc = new GetCapabilities();
-            if (getParameter(WMS_SERVICE) != null) {
-  
-            }
-            brt=gc;
-        } else {
-            throw new UnsupportedOperationException("Request: " + getParameter(WMS_REQUEST) + " wordt (nog) niet ondersteund");
-        }
-        StringWriter sw = new StringWriter();
-        Marshaller m = new Marshaller(sw);
-        if (getNameSpaces() != null) {
-            Set mapEntries = getNameSpaces().entrySet();
-            Iterator it = mapEntries.iterator();
-            while (it.hasNext()) {
-                Map.Entry me = (Entry) it.next();
-                m.setNamespaceMapping((String) me.getKey(), (String) me.getValue());
-            }
-  
-        }
-        m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
-        if (brt != null) {
-            m.marshal(brt);
-            body = sw.toString();
-        }
-        return body;
-    }*/
-    
+        
     public String getUrlWithNonOGCparams() {
         OGCRequest ogcu = (OGCRequest) this.clone();
         ogcu.removeAllWMSParameters();
