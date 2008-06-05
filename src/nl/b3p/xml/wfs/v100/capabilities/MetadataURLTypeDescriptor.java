@@ -97,7 +97,8 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         //-- initialize attribute descriptors
         
         //-- _type
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType.class, "_type", "type", org.exolab.castor.xml.NodeType.Attribute);
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_type", "type", org.exolab.castor.xml.NodeType.Attribute);
+        desc.setImmutable(true);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -110,7 +111,7 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
             {
                 try {
                     MetadataURLType target = (MetadataURLType) object;
-                    target.setType( (nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType) value);
+                    target.setType( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -120,8 +121,6 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
                 return null;
             }
         };
-        handler = new org.exolab.castor.xml.handlers.EnumFieldHandler(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType.class, handler);
-        desc.setImmutable(true);
         desc.setHandler(handler);
         desc.setRequired(true);
         desc.setMultivalued(false);
@@ -131,10 +130,14 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
+            fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
         //-- _format
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType.class, "_format", "format", org.exolab.castor.xml.NodeType.Attribute);
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.String.class, "_format", "format", org.exolab.castor.xml.NodeType.Attribute);
+        desc.setImmutable(true);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -147,7 +150,7 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
             {
                 try {
                     MetadataURLType target = (MetadataURLType) object;
-                    target.setFormat( (nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType) value);
+                    target.setFormat( (java.lang.String) value);
                 }
                 catch (java.lang.Exception ex) {
                     throw new IllegalStateException(ex.toString());
@@ -157,8 +160,6 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
                 return null;
             }
         };
-        handler = new org.exolab.castor.xml.handlers.EnumFieldHandler(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType.class, handler);
-        desc.setImmutable(true);
         desc.setHandler(handler);
         desc.setRequired(true);
         desc.setMultivalued(false);
@@ -168,6 +169,9 @@ public class MetadataURLTypeDescriptor extends org.exolab.castor.xml.util.XMLCla
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
+            org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
+            typeValidator.setWhiteSpace("preserve");
+            fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
         //-- initialize element descriptors

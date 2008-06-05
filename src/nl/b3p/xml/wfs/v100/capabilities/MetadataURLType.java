@@ -34,12 +34,12 @@ public class MetadataURLType implements java.io.Serializable {
     /**
      * Field _type
      */
-    private nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType _type;
+    private java.lang.String _type;
 
     /**
      * Field _format
      */
-    private nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType _format;
+    private java.lang.String _format;
 
 
       //----------------/
@@ -72,24 +72,24 @@ public class MetadataURLType implements java.io.Serializable {
     /**
      * Returns the value of field 'format'.
      * 
-     * @return MetadataURLTypeFormatType
+     * @return String
      * @return the value of field 'format'.
      */
-    public nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType getFormat()
+    public java.lang.String getFormat()
     {
         return this._format;
-    } //-- nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType getFormat() 
+    } //-- java.lang.String getFormat() 
 
     /**
      * Returns the value of field 'type'.
      * 
-     * @return MetadataURLTypeTypeType
+     * @return String
      * @return the value of field 'type'.
      */
-    public nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType getType()
+    public java.lang.String getType()
     {
         return this._type;
-    } //-- nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType getType() 
+    } //-- java.lang.String getType() 
 
     /**
      * Method isValid
@@ -153,20 +153,20 @@ public class MetadataURLType implements java.io.Serializable {
      * 
      * @param format the value of field 'format'.
      */
-    public void setFormat(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType format)
+    public void setFormat(java.lang.String format)
     {
         this._format = format;
-    } //-- void setFormat(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeFormatType) 
+    } //-- void setFormat(java.lang.String) 
 
     /**
      * Sets the value of field 'type'.
      * 
      * @param type the value of field 'type'.
      */
-    public void setType(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType type)
+    public void setType(java.lang.String type)
     {
         this._type = type;
-    } //-- void setType(nl.b3p.xml.wfs.v100.capabilities.types.MetadataURLTypeTypeType) 
+    } //-- void setType(java.lang.String) 
 
     /**
      * Method unmarshal
