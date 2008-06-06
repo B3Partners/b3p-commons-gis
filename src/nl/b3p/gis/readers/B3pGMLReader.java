@@ -208,9 +208,12 @@ public class B3pGMLReader extends GMLReader{
                             //ARCIMS maakt hele lange namen met veel punten er tussen. Het laatste stukje is interessant
                             if (e.getAttribute("name").lastIndexOf(".")>maxColumnNameLength){
                                 int lastIndexOfPoint=e.getAttribute("name").lastIndexOf(".");
-                                newName=e.getAttribute("name").substring(lastIndexOfPoint+1,lastIndexOfPoint+1+maxColumnNameLength);
+                                newName=e.getAttribute("name").substring(lastIndexOfPoint+1);
                             }else{
-                                newName=e.getAttribute("name").substring(0,maxColumnNameLength);
+                                newName=e.getAttribute("name");
+                            }
+                            if  (newName.length()>maxColumnNameLength){
+                                newName=newName.substring(0,maxColumnNameLength);
                             }
                             if (usedColumnames.contains(newName)){
                                 newName=newName.substring(0,maxColumnNameLength-1);
