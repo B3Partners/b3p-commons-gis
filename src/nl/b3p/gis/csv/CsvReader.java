@@ -316,9 +316,11 @@ public class CsvReader {
     }
 
     private double getDoubleFromString(String d) {
+        if (d==null)
+            return 0.0d;
         DecimalFormat df = new DecimalFormat("#", getDfs());
         ParsePosition pos = new ParsePosition(0);
-        Number n = df.parse(d, pos);
+        Number n = df.parse(d.trim(), pos);
         if (n == null) {
             return 0.0d;
         }
