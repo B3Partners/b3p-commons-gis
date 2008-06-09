@@ -18,16 +18,16 @@ import com.vividsolutions.jump.feature.FeatureSchema;
  * @author Roy Braam
  */
 public class FeatureFactory {
-
+    
     /** Creates a new instance of FeatureFactory */
     public FeatureFactory() {
     }
-
+    
     /** Creates a point feature from a array of objects. The Objects on index xIndex and yIndex are used to create a point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
      * If columnames is null the attributes are added in that order. Not recommended
-     *example: the columname at index 0 is used to look up the index (n) of the attribute where attributename equals the columnname at index 0 then that index (n) is used to at the attribute to the feature. 
+     *example: the columname at index 0 is used to look up the index (n) of the attribute where attributename equals the columnname at index 0 then that index (n) is used to at the attribute to the feature.
      * So in this example the attribute at index 0 is added to the feature at index n.
      * @param xIndex The index in the object array that is used as x coord for creating the point
      * @param yIndex The index in the object array that is used as y coord for creating the point
@@ -56,12 +56,12 @@ public class FeatureFactory {
             return createFeature(attributes, columnames, fs);
         }
     }
-
+    
     /** Creates a point feature from a array of objects. The x and y are used for creating the point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
      * If columnames is null the attributes are added in that order. Not recommended
-     *example: the columname at index 0 is used to look up the index (n) of the attribute where attributename equals the columnname at index 0 then that index (n) is used to at the attribute to the feature. 
+     *example: the columname at index 0 is used to look up the index (n) of the attribute where attributename equals the columnname at index 0 then that index (n) is used to at the attribute to the feature.
      * So in this example the attribute at index 0 is added to the feature at index n.
      * @param x the x coord used for creating the point
      * @param y the y coord used for creating the point
@@ -77,7 +77,7 @@ public class FeatureFactory {
         }
         return f;
     }
-
+    
     /** Creates a feature
      *
      */
@@ -87,17 +87,20 @@ public class FeatureFactory {
             f.setAttributes(attributes);
         } else {
             for (int i = 0; i < columnames.length; i++) {
-                int index = -1;
-                try {
-                    index = fs.getAttributeIndex(columnames[i]);
-                    f.setAttribute(index, attributes[i]);
-                } catch (java.lang.IllegalArgumentException iae) {
+                for (int j=0; j<fs.getAttributeCount();j++) {
+                    String fsatt = fs.getAttributeName(j);
+                    if (fsatt==null)
+                        continue;
+                    if (fsatt.equalsIgnoreCase(columnames[i])) {
+                        f.setAttribute(j, attributes[i]);
+                        break;
+                    }
                 }
             }
         }
         return f;
     }
-
+    
     private static Double getDoubleFromObject(Object object) {
         Double x = null;
         if (object != null) {

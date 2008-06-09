@@ -114,7 +114,7 @@ public class CsvReader {
         List attributeList = null;
         while ((attributeList = cis.readRecordAsList()) != null) {
 
-            attributeList = processAttributes(attributeList);
+            attributeList = processAttributes(attributeList, columnList);
             double rdx = 0.0d, rdy = 0.0d;
             if (rdxindex >= 0) {
                 rdx = getDoubleFromString((String) attributeList.get(rdxindex));
@@ -181,7 +181,7 @@ public class CsvReader {
         return newColumns;
     }
 
-    protected List processAttributes(List attributes) {
+    protected List processAttributes(List attributes, List columns) {
         if (attributes == null) {
             return null;
         }
