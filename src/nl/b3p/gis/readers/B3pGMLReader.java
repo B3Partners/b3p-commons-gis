@@ -194,12 +194,16 @@ public class B3pGMLReader extends GMLReader{
                     String names=e.getNamespaceURI();
                     String prefix=e.getPrefix();
                     //if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
-                    if (e.getAttribute("type").startsWith("gml:")||e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
+                    if (e.getAttribute("type").startsWith("gml:")){
                         geom.append("<GeometryElement>");
                         if (defaultPrefix!=null && !e.getAttribute("name").contains(defaultPrefix+":"))
                             geom.append(defaultPrefix+":");
                         geom.append(e.getAttribute("name"));
                         geom.append("</GeometryElement>");                                
+                    }else if(e.getAttribute("ref").startsWith("gml:")){
+                        geom.append("<GeometryElement>");
+                        geom.append(e.getAttribute("ref"));
+                        geom.append("</GeometryElement>"); 
                     }                                            
                     if (e.getAttribute("type")!=null && allowedType(e.getAttribute("type")) && e.getAttribute("name")!=null){                        
                         cols.append("<column><name>");
@@ -292,12 +296,14 @@ public class B3pGMLReader extends GMLReader{
             return null;
         }
         OGCRequest wfsDFT= (OGCRequest)ogcrequest.clone();
-        wfsDFT.removeAllWFSParameters();
-        wfsDFT.addOrReplaceParameter(OGCConstants.WMS_VERSION,ogcrequest.getParameter(OGCConstants.WMS_VERSION));
+        //wfsDFT.removeAllWFSParameters();
+        //wfsDFT.addOrReplaceParameter(OGCConstants.WMS_VERSION,ogcrequest.getParameter(OGCConstants.WMS_VERSION));
         
         wfsDFT.addOrReplaceParameter(OGCConstants.WMS_SERVICE,OGCConstants.WFS_SERVICE_WFS);
         wfsDFT.addOrReplaceParameter(OGCConstants.WMS_REQUEST,OGCConstants.WFS_REQUEST_DescribeFeatureType);
-        
+       /* if (ogcrequest.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT)!=null){
+            wfsDFT.addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT,ogcrequest.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT));
+        }*/
         //TODO: Helaas is het bij degree niet mogelijk om meerdere typenames tegelijk op te vragen in een DescribeFeatureType
         //Als work around wordt voor elk type een apparte DescribeFeatureType gedaan.
         String[] types =ogcrequest.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");

@@ -79,10 +79,12 @@ public class OgcWfsClient {
         if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)){
             String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
-                original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);                
+                if (original.getParameter(OGCConstants.WMS_VERSION)==null)
+                    original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);                
                 returnvalue=getCapabilitiesVersion100(el);
             }else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
-                original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);
+                if (original.getParameter(OGCConstants.WMS_VERSION)==null)
+                    original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);
                 returnvalue=getCapabilitiesVersion110(el);
             }else{
                 throw new UnsupportedOperationException("WFS GetCapabilities version: "+version+" not supported");
@@ -124,8 +126,10 @@ public class OgcWfsClient {
         HttpClient client = new HttpClient();
         int status;
         HttpMethod httpmethod=null;
-        if (o instanceof String){            
-            httpmethod = new GetMethod((String)o);
+        if (o instanceof String){
+            String url=(String)o;
+            url=url.replaceAll(" ","%20");
+            httpmethod = new GetMethod(url);
         }else{
             String body = null;
             StringWriter sw = new StringWriter();
