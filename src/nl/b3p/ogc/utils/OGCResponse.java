@@ -50,6 +50,7 @@ public class OGCResponse {
     private nl.b3p.xml.wfs.v110.FeatureCollection newFeatureCollectionV110;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
+    private String srs = null;
     
     /** Creates a new instance of OGCResponse */
     public OGCResponse() {
@@ -163,6 +164,7 @@ public class OGCResponse {
                 }
             }
         }
+        setSrs(null);
         return wfsCapabilities;
     }
     public void replaceUrl(HTTPTypeItem httpItem){
@@ -193,6 +195,7 @@ public class OGCResponse {
             }
         }
         wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
+        setSrs(null);
         return wfsCapabilities;
     }
     
@@ -226,6 +229,8 @@ public class OGCResponse {
                 addOrReplaceSchemaLocation(prefix,newSchemalocations);
             }
         }
+        // kan er nu even niet achter komen hoe ik de srs uit het object kan halen.
+        setSrs(null);
         return featureCollection;
     }
     
@@ -259,6 +264,8 @@ public class OGCResponse {
                 addOrReplaceSchemaLocation(prefix,newSchemalocations);
             }
         }
+        // kan er nu even niet achter komen hoe ik de srs uit het object kan halen.
+        setSrs(null);
         return featureCollection;
     }
     
@@ -357,5 +364,12 @@ public class OGCResponse {
             }
             schemaLocations.put(prefix, location);
         }
+    }
+    
+    public void setSrs(String srs){
+        this.srs = srs;
+    }
+    public String getSrs(){
+        return srs;
     }
 }
