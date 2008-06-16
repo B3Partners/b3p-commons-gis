@@ -11,6 +11,7 @@ package nl.b3p.ogc.utils;
 
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
 import nl.b3p.xml.ows.v100.DCP;
@@ -21,6 +22,7 @@ import nl.b3p.xml.wfs.v100.capabilities.DCPType_DescribeFeatureTypeType;
 import nl.b3p.xml.wfs.v100.capabilities.DCPType_FeatureTypeType;
 import nl.b3p.xml.wfs.v100.capabilities.DCPType_GetCapabilitiesType;
 import nl.b3p.xml.wfs.v100.capabilities.DCPType_TransactionType;
+import nl.b3p.xml.wfs.v100.capabilities.FeatureType;
 import nl.b3p.xml.wfs.v100.capabilities.HTTPTypeItem;
 import nl.b3p.xml.wfs.v100.capabilities.RequestTypeItem;
 import org.exolab.castor.xml.Marshaller;
@@ -56,8 +58,17 @@ public class OGCResponse {
     public OGCResponse() {
     }
     
-    public void rebuildResponse(Element rootElement, String httpHost){
+    public void rebuildResponse(Element rootElement, String httpHost, String url, List spInfo){
         this.httpHost = httpHost;
+        String prefix = null;
+        Iterator iter = spInfo.iterator();
+        while(iter.hasNext()){
+            HashMap sp = (HashMap)iter.next();
+            String spUrl = sp.get("spUrl").toString();
+            if(spUrl.equalsIgnoreCase(url)){
+                prefix = sp.get("spAbbr").toString();
+            }
+        }
         nameSpaces = new HashMap();
         findNameSpace(rootElement);
         Unmarshaller um;
@@ -72,13 +83,13 @@ public class OGCResponse {
                     o = um.unmarshal(rootElement);              
                     nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities)o;
                     
-                    newWfsCapabilitiesV100 = replaceCapabilitiesV100Url(wfsCapabilities);
+                    newWfsCapabilitiesV100 = replaceCapabilitiesV100Url(wfsCapabilities, prefix);
                 }else{
                     um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
                     o = um.unmarshal(rootElement);              
                     nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities)o;
                     
-                    newWfsCapabilitiesV110 = replaceCapabilitiesV110Url(wfsCapabilities);
+                    newWfsCapabilitiesV110 = replaceCapabilitiesV110Url(wfsCapabilities, prefix);
                 }
             }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)){
                 response = OGCConstants.WFS_FEATURECOLLECTION;
@@ -103,8 +114,12 @@ public class OGCResponse {
         }
     }
     
-    public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities replaceCapabilitiesV100Url(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities){
+    public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities replaceCapabilitiesV100Url(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities, String prefix){
         wfsCapabilities.getService().setOnlineResource(httpHost);
+        nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
+        for(int b = 0; b < featureTypeList.length; b++){
+            featureTypeList[b].setName("app:" + prefix + featureTypeList[b].getName());
+        }
         int requestCount = wfsCapabilities.getCapability().getRequest().getRequestTypeItemCount();
         for(int i = 0; i < requestCount; i++){
             RequestTypeItem requestItem = wfsCapabilities.getCapability().getRequest().getRequestTypeItem(i);
@@ -175,7 +190,12 @@ public class OGCResponse {
         }
     }
     
-    public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url (nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities){
+    public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url (nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix){
+        nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
+        for(int b = 0; b < featureTypeList.length; b++){
+            String layer = featureTypeList[b].getName().split("}")[1];
+            featureTypeList[b].setName("app:" + prefix + "_" + layer);
+        }
         int operationCount = wfsCapabilities.getOperationsMetadata().getOperationCount();
         for(int i = 0; i < operationCount; i++){
             Operation operation = wfsCapabilities.getOperationsMetadata().getOperation(i);
