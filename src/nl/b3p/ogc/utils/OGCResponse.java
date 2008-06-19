@@ -293,9 +293,16 @@ public class OGCResponse {
         return featureCollection;
     }
     
-    public String getResponseBody(){
+    public String getResponseBody(List spInfo){
         String body = null;
         Object castorObject = null;
+        List layers = new ArrayList();
+        Iterator iter = spInfo.iterator();
+        while(iter.hasNext()){
+            HashMap sp = (HashMap)iter.next();
+            String layerName = "app:" + sp.get("spAbbr") + "_" + sp.get("lName");
+            layers.add(layerName);
+        }
         
         if(response == null || response.length() <= 0){
             return body;
@@ -308,11 +315,37 @@ public class OGCResponse {
                     if(i == 0){
                         newWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
                         i=+1;
+                        nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList typeList = newWfsCapabilitiesV100.getFeatureTypeList();
+                        for(int x = 0; x < typeList.getFeatureTypeCount(); x++){
+                            FeatureType feature = typeList.getFeatureType(x);
+                            boolean hasRights = false;
+                            Iterator il = layers.iterator();
+                            while(il.hasNext()){
+                                String lName = il.next().toString();
+                                if(lName.equalsIgnoreCase(feature.getName())){
+                                    hasRights = true;
+                                }
+                            }
+                            if(hasRights == false){
+                                newWfsCapabilitiesV100.getFeatureTypeList().removeFeatureType(feature);
+                            }
+                        }
                     }else{
                         nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities nextWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
                         nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypes = nextWfsCapabilitiesV100.getFeatureTypeList().getFeatureType();
                         for(int x = 0; x < featureTypes.length; x++){
-                            newWfsCapabilitiesV100.getFeatureTypeList().addFeatureType(featureTypes[x]);
+                            FeatureType feature = featureTypes[x];
+                            boolean hasRights = false;
+                            Iterator il = layers.iterator();
+                            while(il.hasNext()){
+                                String lName = il.next().toString();
+                                if(lName.equalsIgnoreCase(feature.getName())){
+                                    hasRights = true;
+                                }
+                            }
+                            if(hasRights == true){
+                                newWfsCapabilitiesV100.getFeatureTypeList().addFeatureType(feature);
+                            }
                         }
                     }
                 }
@@ -325,11 +358,39 @@ public class OGCResponse {
                     if(i == 0){
                         newWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
                         i=+1;
+                        nl.b3p.xml.wfs.v110.FeatureTypeList typeList = newWfsCapabilitiesV110.getFeatureTypeList();
+                        for(int x = 0; x < typeList.getFeatureTypeCount(); x++){
+                            nl.b3p.xml.wfs.v110.FeatureType feature = typeList.getFeatureType(x);
+                            boolean hasRights = false;
+                            Iterator il = layers.iterator();
+                            while(il.hasNext()){
+                                String lName = il.next().toString();
+                                String temp = feature.getName();
+                                //String test= "blaa";
+                                if(lName.equalsIgnoreCase(feature.getName())){
+                                    hasRights = true;
+                                }
+                            }
+                            if(hasRights == false){
+                                newWfsCapabilitiesV110.getFeatureTypeList().removeFeatureType(feature);
+                            }
+                        }
                     }else{
                         nl.b3p.xml.wfs.v110.WFS_Capabilities nextWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
                         nl.b3p.xml.wfs.v110.FeatureType[] featureTypes = nextWfsCapabilitiesV110.getFeatureTypeList().getFeatureType();
                         for(int x = 0; x < featureTypes.length; x++){
-                            newWfsCapabilitiesV110.getFeatureTypeList().addFeatureType(featureTypes[x]);
+                            nl.b3p.xml.wfs.v110.FeatureType feature = featureTypes[x];
+                            boolean hasRights = false;
+                            Iterator il = layers.iterator();
+                            while(il.hasNext()){
+                                String lName = il.next().toString();
+                                if(lName.equalsIgnoreCase(feature.getName())){
+                                    hasRights = true;
+                                }
+                            }
+                            if(hasRights == true){
+                                newWfsCapabilitiesV110.getFeatureTypeList().addFeatureType(feature);
+                            }
                         }
                     }
                 }
