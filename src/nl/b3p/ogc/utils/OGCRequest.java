@@ -44,6 +44,8 @@ public class OGCRequest implements OGCConstants {
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
+    // version that will be returned to client
+    private String finalVersion;
     
     /*Default constr.*/
     
@@ -72,10 +74,11 @@ public class OGCRequest implements OGCConstants {
         Object o;
         String[] tokens = url.split("\\?|&");
         httpHost = tokens[0];
-
+        setFinalVersion(rootElement.getAttribute(OGCConstants.VERSION.toLowerCase()));
             
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
-            String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            //String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            String version = finalVersion;
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                                
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetCapabilities.class);
@@ -863,4 +866,66 @@ public class OGCRequest implements OGCConstants {
     public void setCapabilities(WFS_Capabilities capabilities) {
         this.capabilities = capabilities;
     }    
+    
+    /*
+     * Get and set for final version. This is the version the server will use to give a response
+     * to the request of te client. It doesn't have to be the same version as the client requested.
+     * See paragraph 6.2 of the WFS 1.1.0 specification for more details.
+     */
+    public void setFinalVersion(String clientVersion){
+        if(clientVersion == null || clientVersion.equals("")){
+            finalVersion = OGCConstants.WFS_VERSION_UNSPECIFIED;
+        }else if(OGCConstants.SUPPORTED_WFS_VERSIONS.contains(clientVersion)){
+            finalVersion = clientVersion;
+        }else{
+            String[] versionArray = clientVersion.split(".");
+            String newVersion = "";
+            for(int i = 0; i < versionArray.length; i++){
+                newVersion = newVersion + versionArray[i];
+            }
+            int version = new Integer(newVersion);
+            
+            List suportedVersions = OGCConstants.SUPPORTED_WFS_VERSIONS;
+            int versionSize = suportedVersions.size();
+            int[] suportedVersionsInt = new int[versionSize];
+            for(int x = 0; x < versionSize; x++){
+                String[] suportedArray = suportedVersions.get(x).toString().split(".");
+                String tempversion = "";
+                for(int y = 0; y < suportedArray.length; y++){
+                    tempversion = tempversion + suportedArray[y];
+                }
+                suportedVersionsInt[x] = Integer.parseInt(tempversion);
+            }
+            
+            int lowestVersion = suportedVersionsInt[0];
+            for(int z = 0; z < suportedVersionsInt.length; z++){
+                if(lowestVersion > suportedVersionsInt[z]){
+                    lowestVersion = suportedVersionsInt[z];
+                }
+            }
+            if(version > lowestVersion){
+                for(int b = 0; b < suportedVersionsInt.length; b++){
+                    if(version > suportedVersionsInt[b]){
+                        if(lowestVersion < suportedVersionsInt[b]){
+                            lowestVersion = suportedVersionsInt[b];
+                        }
+                    }
+                }
+                if(lowestVersion == 110){
+                    finalVersion = OGCConstants.WFS_VERSION_110;
+                }else if(lowestVersion == 100){
+                    finalVersion = OGCConstants.WFS_VERSION_100;
+                }
+            }else if(version < lowestVersion){
+                if(lowestVersion == 110){
+                    finalVersion = OGCConstants.WFS_VERSION_110;
+                }else if(lowestVersion == 100){
+                    finalVersion = OGCConstants.WFS_VERSION_100;
+                }
+            }
+        }
+    }
+    public String getFinalVersion(){
+        return finalVersion;
+    }
 }

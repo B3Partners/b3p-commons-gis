@@ -25,9 +25,6 @@ public interface OGCConstants {
     public static final String REQUEST = "REQUEST";
     public static final String SERVICE = "SERVICE";
     
-    //public static final String URL_PATTERN = "WMS";
-    //public static final String URL_PATTERN = "SERVICES";
-    
     // Optional request keys for GetCapabilities:
     public static final String UPDATESEQUENCE = "UPDATESEQUENCE";
     
@@ -137,6 +134,7 @@ public interface OGCConstants {
     public static final String WFS_PARAM_GMLOBJECTID="GMLOBJECTID";
     public static final String WFS_VERSION_100="1.0.0";
     public static final String WFS_VERSION_110="1.1.0";
+    public static final String WFS_VERSION_UNSPECIFIED="unspecified";
     public static final String WFS_REQUEST_GetFeature="GetFeature";
     public static final String WFS_REQUEST_DescribeFeatureType="DescribeFeatureType";
     public static final String WFS_REQUEST_GetCapabilities="GetCapabilities";
@@ -158,6 +156,8 @@ public interface OGCConstants {
     
     public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT="ServiceExceptionReport";
     public static final String WFS_OBJECT_GEOMETRYTYPE="gml:GeometryPropertyType";
+    
+    public static final String WFS_SERVER_EXCEPTION="ServiceExceptionReport";
     // </editor-fold>
     
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
@@ -276,6 +276,13 @@ public interface OGCConstants {
         WMS_VERSION_111, WMS_VERSION_110
     });
     // </editor-fold>
+    
+    /**
+     * List with implemented versions for WFS.
+     */
+    public static final List SUPPORTED_WFS_VERSIONS = Arrays.asList(new String[] {
+        WFS_VERSION_100, WFS_VERSION_110
+    });
     
     // <editor-fold defaultstate="" desc="List with implemented exceptions.">
     /**
