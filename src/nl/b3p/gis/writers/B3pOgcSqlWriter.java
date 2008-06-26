@@ -55,13 +55,8 @@ public class B3pOgcSqlWriter {
         DriverManager.registerDriver(driver);
         setConnection(DriverManager.getConnection(url,user,password));
     }
-    
-    public void write(FeatureCollection fc, String tablename, String geomColumn, String srid, int dimension, boolean createTable, boolean attributeNamesToLowerCase)throws SQLException, Exception{
-        write(fc, tablename, geomColumn, srid, dimension, createTable, attributeNamesToLowerCase, null);
-    }
-    
-    
-    /* Write features to the given table.
+     /**
+     * Write features to the given table.
      * @param fc The collection of features.
      * @param tablename The tablename.
      * @param geomColumn The name of the geometry column. If null the attribute name of type geometry ikn the featureCollection is used.
@@ -70,7 +65,50 @@ public class B3pOgcSqlWriter {
      * @param createTabel If true the function will try to create a table if the given tablename doesn't exists. It only supports PostGres/Postgis for creating geometry columns!
      * @param attributeNamesToLowerCase If true all attribute names will be cast to a lower case (recommended)
      */
-    public void write(FeatureCollection fc, String tablename, String geomColumn, String srid, int dimension, boolean createTable, boolean attributeNamesToLowerCase, String [] columnNamesToCheck)throws SQLException, Exception{
+    public void write(FeatureCollection fc, String tablename, String geomColumn, int dimension, boolean createTable, boolean attributeNamesToLowerCase)throws SQLException, Exception{
+        write(fc, tablename, geomColumn, null, dimension, createTable, attributeNamesToLowerCase, null);
+    }
+     /**
+     * Write features to the given table.
+     * @param fc The collection of features.
+     * @param tablename The tablename.
+     * @param geomColumn The name of the geometry column. If null the attribute name of type geometry ikn the featureCollection is used.
+     * @param srid The srid of the features. If srid is null the srid of the geometry in the featurecollection is used. If that is also 0 or null -1 is used.
+     * @param dimension The dimension of the geometry in the feature. If 0 the dimension of the geometry is used. If still 0, 2 is used.
+     * @param createTabel If true the function will try to create a table if the given tablename doesn't exists. It only supports PostGres/Postgis for creating geometry columns!
+     * @param attributeNamesToLowerCase If true all attribute names will be cast to a lower case (recommended)
+     * @param columns to check on. If all attributes of a feature equals the columns of a record. The database record wil be updated with the feature (not inserted).
+     */
+    public void write(FeatureCollection fc, String tablename, String geomColumn, int dimension, boolean createTable, boolean attributeNamesToLowerCase, String [] columnNamesToCheck)throws SQLException, Exception{
+        write(fc, tablename, geomColumn, null, dimension, createTable, attributeNamesToLowerCase, columnNamesToCheck);
+    }
+    /**
+     * Write features to the given table.
+     * @param fc The collection of features.
+     * @param tablename The tablename.
+     * @param geomColumn The name of the geometry column. If null the attribute name of type geometry ikn the featureCollection is used.
+     * @param srid The srid of the features. If srid is null the srid of the geometry in the featurecollection is used. If that is also 0 or null -1 is used.
+     * @param dimension The dimension of the geometry in the feature. If 0 the dimension of the geometry is used. If still 0, 2 is used.
+     * @param createTabel If true the function will try to create a table if the given tablename doesn't exists. It only supports PostGres/Postgis for creating geometry columns!
+     * @param attributeNamesToLowerCase If true all attribute names will be cast to a lower case (recommended)
+     * @deprecated use function without SRID.
+     */
+    @Deprecated public void write(FeatureCollection fc, String tablename, String geomColumn, String srid, int dimension, boolean createTable, boolean attributeNamesToLowerCase)throws SQLException, Exception{
+        write(fc, tablename, geomColumn, srid, dimension, createTable, attributeNamesToLowerCase, null);
+    }
+    /**
+     * Write features to the given table.
+     * @param fc The collection of features.
+     * @param tablename The tablename.
+     * @param geomColumn The name of the geometry column. If null the attribute name of type geometry ikn the featureCollection is used.
+     * @param srid The srid of the features. If srid is null the srid of the geometry in the featurecollection is used. If that is also 0 or null -1 is used.
+     * @param dimension The dimension of the geometry in the feature. If 0 the dimension of the geometry is used. If still 0, 2 is used.
+     * @param createTabel If true the function will try to create a table if the given tablename doesn't exists. It only supports PostGres/Postgis for creating geometry columns!
+     * @param attributeNamesToLowerCase If true all attribute names will be cast to a lower case (recommended)
+     * @param columns to check on. If all attributes of a feature equals the columns of a record. The database record wil be updated with the feature (not inserted).
+     * @deprecated use function without SRID.
+     */
+    @Deprecated public void write(FeatureCollection fc, String tablename, String geomColumn, String srid, int dimension, boolean createTable, boolean attributeNamesToLowerCase, String [] columnNamesToCheck)throws SQLException, Exception{
         //check if al features are of the same geom type and get a geom
         Iterator fcit=fc.iterator();
         Geometry aGeom=null;
@@ -120,23 +158,7 @@ public class B3pOgcSqlWriter {
                 if (q == null)
                     q = new StringBuffer();
                 Feature f = (Feature)it.next();
-                
-                
-                //TODO:
-                /*
-                 * Als er een lijst met kolomnamen meegegeven wordt aan de methode
-                 * dan zal er een check uitgevoerd worden of deze items al in de
-                 * database bestaan. Indien een item al bestaat zal dan geprobeerd
-                 * worden een update uit te voeren in plaats van een insert.
-                 * Echter op dit moment werkt de update nog niet naar behoren omdat
-                 * de SQL code die gemaakt wordt nog niet volledig voldoet aan de SQL
-                 * standaard.
-                 * Er moet in de methode addUpdateValue(fs, f, columnNamesToCheck))
-                 * nog het een en ander aangepast worden, waar onder andere rekening
-                 * gehouden wordt met de '' en spaties.
-                 *
-                 */
-                
+                            
                 boolean update = false;
                 if (columnNamesToCheck != null) {
                     //ArrayList values = getPrimaryValues(fs, f, columnNamesToCheck);
@@ -145,7 +167,7 @@ public class B3pOgcSqlWriter {
                 
                 if(update) {
                     q.append(updatePart.toString());
-                    q.append(addUpdateValue(fs, f, columnNamesToCheck));
+                    q.append(addUpdateValue(fs, f, geomColumn, columnNamesToCheck));
                 } else {
                     q.append(insertPart.toString());
                     q.append("(");
@@ -174,7 +196,7 @@ public class B3pOgcSqlWriter {
             if (i!=0){
                 sql.append(" AND ");
             }
-            sql.append(columnNamesToCheck[i]);
+            sql.append("\""+columnNamesToCheck[i]+"\"");
             sql.append(" = ");
             sql.append(getSqlValue(f,f.getSchema(),columnNamesToCheck[i]));
         }
@@ -264,12 +286,7 @@ public class B3pOgcSqlWriter {
         }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){
             values.append(o);
         }else if (fs.getAttributeType(i).equals(AttributeType.INTEGER)){
-            if (o instanceof Integer)
-                values.append(o);
-            else{
-                values.append(o);
-                log.error("Geen integer");
-            }
+            values.append(o);
         }else if (fs.getAttributeType(i).equals(AttributeType.STRING)){
             if (o==null)
                 values.append(o);
@@ -309,12 +326,17 @@ public class B3pOgcSqlWriter {
         return values.toString();
     }
     
-    private String addUpdateValue(FeatureSchema fs, Feature f, String [] columnNamesToCheck) throws ParseException {
+    private String addUpdateValue(FeatureSchema fs, Feature f, String geomColumn, String [] columnNamesToCheck) throws ParseException {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < fs.getAttributeCount(); i++) {
+        for (int i = 0; i < fs.getAttributeCount(); i++) {            
             if (i!=0)
                 sb.append(", ");
-            sb.append(fs.getAttributeName(i));
+            if (fs.getGeometryIndex()==i){
+                sb.append("\""+geomColumn+"\"");
+            }else{
+                sb.append("\""+fs.getAttributeName(i)+"\"");
+            }
+            
             sb.append(" = ");
             sb.append(getSqlValue(f,fs,i));
             
@@ -323,7 +345,7 @@ public class B3pOgcSqlWriter {
         for (int i = 0; i < columnNamesToCheck.length; i++) {
             if (i!=0)
                 sb.append(" AND ");
-            sb.append(columnNamesToCheck[i]);
+            sb.append("\""+columnNamesToCheck[i]+"\"");
             sb.append(" = ");
             sb.append(getSqlValue(f,fs,columnNamesToCheck[i]));
             
