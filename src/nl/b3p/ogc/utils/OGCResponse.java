@@ -59,6 +59,7 @@ public class OGCResponse {
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     private String srs = null;
+    private List supportedOperations = new ArrayList();
     
     /** Creates a new instance of OGCResponse */
     public OGCResponse() {
@@ -90,6 +91,7 @@ public class OGCResponse {
 
                     getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
                 }
+                checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
             }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)){
                 response = OGCConstants.WFS_FEATURECOLLECTION;
                 version = request.getFinalVersion();
@@ -99,13 +101,13 @@ public class OGCResponse {
                     o = um.unmarshal(rootElement);              
                     nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection)o;
                     
-                    newFeatureCollectionV100 = replaceFeatureCollectionV100Url(featureCollection);
+                    newFeatureCollectionV100 = replaceFeatureCollectionV100Url(featureCollection, prefix);
                 }else{
                     um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
                     o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection)o;
                     
-                    newFeatureCollectionV110 = replaceFeatureCollectionV110Url(featureCollection);
+                    newFeatureCollectionV110 = replaceFeatureCollectionV110Url(featureCollection, prefix);
                 }
             }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)){
                 response = OGCConstants.WFS_SERVER_EXCEPTION;
@@ -128,10 +130,12 @@ public class OGCResponse {
         for(int b = 0; b < featureTypeList.length; b++){
             featureTypeList[b].setName("app:" + prefix + featureTypeList[b].getName());
         }
+        List newSupportedOperations = new ArrayList();
         int requestCount = wfsCapabilities.getCapability().getRequest().getRequestTypeItemCount();
         for(int i = 0; i < requestCount; i++){
             RequestTypeItem requestItem = wfsCapabilities.getCapability().getRequest().getRequestTypeItem(i);
             if(requestItem.getDescribeFeatureType() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_DescribeFeatureType);
                 int dcpCount = requestItem.getDescribeFeatureType().getDCPType_DescribeFeatureTypeTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType_DescribeFeatureTypeType dcp = requestItem.getDescribeFeatureType().getDCPType_DescribeFeatureTypeType(x);
@@ -141,6 +145,7 @@ public class OGCResponse {
                     }
                 }
             }else if(requestItem.getGetCapabilities() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetCapabilities);
                 int dcpCount = requestItem.getGetCapabilities().getDCPType_GetCapabilitiesTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType_GetCapabilitiesType dcp = requestItem.getGetCapabilities().getDCPType_GetCapabilitiesType(x);
@@ -150,6 +155,7 @@ public class OGCResponse {
                     }
                 }
             }else if(requestItem.getGetFeature() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetFeature);
                 int dcpCount = requestItem.getGetFeature().getDCPType_FeatureTypeTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType_FeatureTypeType dcp = requestItem.getGetFeature().getDCPType_FeatureTypeType(x);
@@ -159,6 +165,7 @@ public class OGCResponse {
                     }
                 }
             }else if(requestItem.getGetFeatureWithLock() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetFeatureWithLock);
                 int dcpCount = requestItem.getGetFeatureWithLock().getDCPType_FeatureTypeTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType_FeatureTypeType dcp = requestItem.getGetFeatureWithLock().getDCPType_FeatureTypeType(x);
@@ -168,6 +175,7 @@ public class OGCResponse {
                     }
                 }
             }else if(requestItem.getLockFeature() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_LockFeature);
                 int dcpCount = requestItem.getLockFeature().getDCPTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType dcp = requestItem.getLockFeature().getDCPType(x);
@@ -177,6 +185,7 @@ public class OGCResponse {
                     }
                 }
             }else if(requestItem.getTransaction() != null){
+                newSupportedOperations.add(OGCConstants.WFS_REQUEST_Transaction);
                 int dcpCount = requestItem.getTransaction().getDCPType_TransactionTypeCount();
                 for(int x = 0; x < dcpCount; x++){
                     DCPType_TransactionType dcp = requestItem.getTransaction().getDCPType_TransactionType(x);
@@ -187,6 +196,7 @@ public class OGCResponse {
                 }
             }
         }
+        checkSupportedOperations(newSupportedOperations);
         setSrs(null);
         return wfsCapabilities;
     }
@@ -204,9 +214,13 @@ public class OGCResponse {
             String layer = featureTypeList[b].getName().split("}")[1];
             featureTypeList[b].setName("app:" + prefix + "_" + layer);
         }
+        List newSupportedOperations = new ArrayList();
         int operationCount = wfsCapabilities.getOperationsMetadata().getOperationCount();
         for(int i = 0; i < operationCount; i++){
             Operation operation = wfsCapabilities.getOperationsMetadata().getOperation(i);
+            if(!newSupportedOperations.contains(operation.getName())){
+                newSupportedOperations.add(operation.getName());
+            }
             int dcpCount = operation.getDCPCount();
             for(int n = 0; n < dcpCount; n++){
                 DCP dcp = operation.getDCP(n);
@@ -222,12 +236,13 @@ public class OGCResponse {
                 }
             }
         }
+        checkSupportedOperations(newSupportedOperations);
         wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
         setSrs(null);
         return wfsCapabilities;
     }
     
-    public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection){
+    public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix){
         String newSchemalocations = "";
         if(schemaLocations != null){
             Set keys = schemaLocations.keySet();
@@ -235,25 +250,7 @@ public class OGCResponse {
             for (int i = 0; it.hasNext(); i++) {
                 String prefix = (String) it.next();
                 String location = (String) schemaLocations.get(prefix);
-                String[] tokens = location.split(" ");
-                for(int x = 0; x < tokens.length; x++){
-                    String[] token = tokens[x].split("\\?", 2);
-                    if(token.length == 2){
-                        String test1 = token[0];
-                        String test2 = token[1];
-                        if(x != 0){
-                            newSchemalocations = newSchemalocations + " " + httpHost + "?" + token[1];
-                        }else{
-                            newSchemalocations = newSchemalocations + httpHost + "?" + token[1];
-                        }
-                    }else{
-                        if(x != 0){
-                            newSchemalocations = newSchemalocations + " " + token[0];
-                        }else{
-                            newSchemalocations = newSchemalocations + token[0];
-                        }
-                    }
-                }
+                newSchemalocations = changeLocation(location, serverPrefix);
                 addOrReplaceSchemaLocation(prefix,newSchemalocations);
             }
         }
@@ -262,7 +259,7 @@ public class OGCResponse {
         return featureCollection;
     }
     
-    public nl.b3p.xml.wfs.v110.FeatureCollection replaceFeatureCollectionV110Url(nl.b3p.xml.wfs.v110.FeatureCollection featureCollection){
+    public nl.b3p.xml.wfs.v110.FeatureCollection replaceFeatureCollectionV110Url(nl.b3p.xml.wfs.v110.FeatureCollection featureCollection, String serverPrefix){
         String newSchemalocations = "";
         if(schemaLocations != null){
             Set keys = schemaLocations.keySet();
@@ -270,31 +267,48 @@ public class OGCResponse {
             for (int i = 0; it.hasNext(); i++) {
                 String prefix = (String) it.next();
                 String location = (String) schemaLocations.get(prefix);
-                String[] tokens = location.split(" ");
-                for(int x = 0; x < tokens.length; x++){
-                    String[] token = tokens[x].split("\\?", 2);
-                    if(token.length == 2){
-                        String test1 = token[0];
-                        String test2 = token[1];
-                        if(x != 0){
-                            newSchemalocations = newSchemalocations + " " + httpHost + "?" + token[1];
-                        }else{
-                            newSchemalocations = newSchemalocations + httpHost + "?" + token[1];
-                        }
-                    }else{
-                        if(x != 0){
-                            newSchemalocations = newSchemalocations + " " + token[0];
-                        }else{
-                            newSchemalocations = newSchemalocations + token[0];
-                        }
-                    }
-                }
+                newSchemalocations = changeLocation(location, serverPrefix);
                 addOrReplaceSchemaLocation(prefix,newSchemalocations);
             }
         }
         // kan er nu even niet achter komen hoe ik de srs uit het object kan halen.
         setSrs(null);
         return featureCollection;
+    }
+    
+    public String changeLocation(String location, String serverPrefix){
+        String newSchemalocations = "";
+        String[] tokens = location.split(" ");
+        for(int x = 0; x < tokens.length; x++){
+            String[] token = tokens[x].split("\\?", 2);
+            if(token.length == 2){
+                String kvp = token[1];
+                String newToken = "";
+                String[] kvpSplit = kvp.split("\\&");
+                for(int z = 0; z < kvpSplit.length; z++){
+                    String[] newKvp = kvpSplit[z].split("=");
+                    if(newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)){
+                        String[] layer = newKvp[1].split(":");
+                        String changedlayer = layer[0] + ":" + serverPrefix + "_" + layer[1];
+                        newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;;
+                    }else{
+                        newToken = newToken + "&" + kvpSplit[z];
+                    }
+                }
+                if(x != 0){
+                    newSchemalocations = newSchemalocations + " " + httpHost + "?" + newToken;
+                }else{
+                    newSchemalocations = newSchemalocations + httpHost + "?" + newToken;
+                }
+            }else{
+                if(x != 0){
+                    newSchemalocations = newSchemalocations + " " + token[0];
+                }else{
+                    newSchemalocations = newSchemalocations + token[0];
+                }
+            }
+        }
+        return newSchemalocations;
     }
     
     public String getResponseBody(List spInfo){
@@ -480,6 +494,19 @@ public class OGCResponse {
                 }
             }
         }
+        
+        Operation[] operations = newWfsCapabilitiesV110.getOperationsMetadata().getOperation();
+        String[] names = new String[operations.length];
+        for(int x = 0; x < operations.length; x++){
+            names[x] = operations[x].getName();
+        }
+        for(int y = 0; y < names.length; y++){    
+            if(!supportedOperations.contains(names[y])){
+                Operation remove = operations[y];
+                newWfsCapabilitiesV110.getOperationsMetadata().removeOperation(remove);
+            }
+        }
+        
         clearGetCapabilitiesV110();
         this.clearVersions();
         return newWfsCapabilitiesV110;
@@ -526,8 +553,64 @@ public class OGCResponse {
                 }
             }
         }
+        
+        RequestTypeItem[] operations = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem();
+        String[] names = new String[operations.length];
+        for(int x = 0; x < operations.length; x++){
+            if(operations[x].getDescribeFeatureType() != null)
+                names[x] = OGCConstants.WFS_REQUEST_DescribeFeatureType;
+            else if (operations[x].getGetCapabilities() != null)
+                names[x] = OGCConstants.WFS_REQUEST_GetCapabilities;
+            else if (operations[x].getGetFeature() != null)
+                names[x] = OGCConstants.WFS_REQUEST_GetFeature;
+            else if (operations[x].getGetFeatureWithLock() != null)
+                names[x] = OGCConstants.WFS_REQUEST_GetFeatureWithLock;
+            else if (operations[x].getLockFeature() != null)
+                names[x] = OGCConstants.WFS_REQUEST_LockFeature;
+            else if (operations[x].getTransaction() != null)
+                names[x] = OGCConstants.WFS_REQUEST_Transaction;
+        }
+        for(int y = 0; y < names.length; y++){    
+            if(!supportedOperations.contains(names[y])){
+                RequestTypeItem requestItem = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem(y);
+                newWfsCapabilitiesV100.getCapability().getRequest().removeRequestTypeItem(requestItem);
+            }
+        }
+        
         clearGetCapabilitiesV100();
         this.clearVersions();
         return newWfsCapabilitiesV100;
+    }
+
+    private void checkSupportedOperations(List newSupportedOperations) {   
+        if(supportedOperations.size() < 1){
+            supportedOperations = newSupportedOperations;
+        }else{
+            boolean equals = true;
+            if(supportedOperations.size() == newSupportedOperations.size()){
+                Iterator it = newSupportedOperations.iterator();
+                while(it.hasNext()){
+                    if(!supportedOperations.contains(it.next())){
+                        equals = false;
+                    }
+                }
+            }else{
+                equals = false;
+            }
+            if(equals == false){
+                List remove = new ArrayList();
+                Iterator it = supportedOperations.iterator();
+                while(it.hasNext()){
+                    Object o = it.next();
+                    if(!newSupportedOperations.contains(o)){
+                        remove.add(o);
+                    }
+                }
+                Iterator itremove = remove.iterator();
+                while(itremove.hasNext()){
+                    supportedOperations.remove(itremove.next());
+                }
+            }
+        }
     }
 }

@@ -248,6 +248,9 @@ public class OgcWfsClient {
             getCapabilities(or);
             original.addOrReplaceParameter(OGCConstants.VERSION,or.getParameter(OGCConstants.VERSION));
         }
+        if(!or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion())){
+            or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
+        }
         if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
             dft=new nl.b3p.xml.wfs.v100.DescribeFeatureType();
         }else if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
@@ -278,6 +281,9 @@ public class OgcWfsClient {
     /**Get the GetCapabilities request object
      */
     public static GetCapabilities getGetCapabilitiesRequest(OGCRequest or) {
+        if(!or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion()) && !or.getFinalVersion().equalsIgnoreCase(OGCConstants.WFS_VERSION_UNSPECIFIED)){
+            or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
+        }
         if(OGCConstants.WFS_VERSION_100.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))){
             nl.b3p.xml.wfs.v100.GetCapabilities gc = new nl.b3p.xml.wfs.v100.GetCapabilities();
             gc.setService(OGCConstants.WFS_SERVICE_WFS);
@@ -300,6 +306,9 @@ public class OgcWfsClient {
         if(or.getParameter(OGCConstants.VERSION)== null){
             getCapabilities(or);
             original.addOrReplaceParameter(OGCConstants.VERSION,or.getParameter(OGCConstants.VERSION));
+        }
+        if(!or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion())){
+            or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
         }
         if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
             gf = new nl.b3p.xml.wfs.v100.GetFeature();

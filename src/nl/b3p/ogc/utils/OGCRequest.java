@@ -77,7 +77,6 @@ public class OGCRequest implements OGCConstants {
         setFinalVersion(rootElement.getAttribute(OGCConstants.VERSION.toLowerCase()));
             
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
-            //String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
             String version = finalVersion;
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                                
@@ -92,7 +91,7 @@ public class OGCRequest implements OGCConstants {
                 setGetCapabilitiesV110(getCapabilities);
             }
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)){
-            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            String version = finalVersion;
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.DescribeFeatureType.class);
@@ -106,7 +105,7 @@ public class OGCRequest implements OGCConstants {
                 setDescribeFeatureTypeV110(describeFeatureType);;
             }
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)){
-            String version=rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            String version = finalVersion;
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetFeature.class);
@@ -119,6 +118,23 @@ public class OGCRequest implements OGCConstants {
                 nl.b3p.xml.wfs.v110.GetFeature getFeature = (nl.b3p.xml.wfs.v110.GetFeature)o; 
                 setGetFeatureV110(getFeature);
             }
+        }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_TRANSACTION)){
+            String version = finalVersion;
+            
+            /*if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                
+            }else{
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.Transaction.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.Transaction transaction = (nl.b3p.xml.wfs.v110.Transaction)o;
+                setTransactionV110(transaction);
+            }*/
+            
+            throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_TRANSACTION+ " yet!");
+        }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_LOCKFEATURE)){
+            throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_LOCKFEATURE+ " yet!");
+        }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATUREWITHLOCK)){
+            throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_GETFEATUREWITHLOCK+ " yet!");
         }
         else{
             throw new UnsupportedOperationException("No WFS service found in request!");
@@ -274,6 +290,12 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     
+    public void setTransactionV110(nl.b3p.xml.wfs.v110.Transaction transaction){
+        addOrReplaceParameter(OGCConstants.VERSION, transaction.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE, transaction.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_Transaction);
+    }
+    
     /** Main methode to fill the OGUrl object
      *
      * @param url The url that fills the OGCUrl object
@@ -326,6 +348,9 @@ public class OGCRequest implements OGCConstants {
                     }
                 }
             }
+        }
+        if(getParameter(OGCConstants.SERVICE).equals(OGCConstants.WFS_SERVICE_WFS)){
+            finalVersion = getParameter(OGCConstants.VERSION);
         }
     }
     
@@ -718,6 +743,7 @@ public class OGCRequest implements OGCConstants {
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
+        returnv.setFinalVersion(new String(this.getFinalVersion()));
         if (this.getParameters() != null) {
             returnv.setParameters((HashMap) this.getParameters().clone());
         }
@@ -780,7 +806,6 @@ public class OGCRequest implements OGCConstants {
             List requiredParams = null;
             
             if (SUPPORTED_REQUESTS.contains(request)) {
-                //String service = (String) parameters.get(SERVICE);
                 if (service == null || service.equals("")) {
                     throw new UnsupportedOperationException("No service parameter for request found in url!");
                 } else if(service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS)){
@@ -796,6 +821,7 @@ public class OGCRequest implements OGCConstants {
                     checkRequestURL(requiredParams, request);
                 } else if(service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)){
                     // validation has been done when unmarshalled with castor
+                    // must be done for kvp requests
                 } else{
                     throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                 }
@@ -878,18 +904,21 @@ public class OGCRequest implements OGCConstants {
         }else if(OGCConstants.SUPPORTED_WFS_VERSIONS.contains(clientVersion)){
             finalVersion = clientVersion;
         }else{
-            String[] versionArray = clientVersion.split(".");
+            String[] versionArray = clientVersion.split("\\.");
             String newVersion = "";
             for(int i = 0; i < versionArray.length; i++){
                 newVersion = newVersion + versionArray[i];
             }
-            int version = new Integer(newVersion);
+            if(newVersion == null || newVersion.equals("")){
+                throw new UnsupportedOperationException("The version number was incorrect!");
+            }
+            int version = Integer.parseInt(newVersion);
             
             List suportedVersions = OGCConstants.SUPPORTED_WFS_VERSIONS;
             int versionSize = suportedVersions.size();
             int[] suportedVersionsInt = new int[versionSize];
             for(int x = 0; x < versionSize; x++){
-                String[] suportedArray = suportedVersions.get(x).toString().split(".");
+                String[] suportedArray = suportedVersions.get(x).toString().split("\\.");
                 String tempversion = "";
                 for(int y = 0; y < suportedArray.length; y++){
                     tempversion = tempversion + suportedArray[y];

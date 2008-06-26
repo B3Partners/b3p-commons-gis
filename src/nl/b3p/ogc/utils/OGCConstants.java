@@ -150,6 +150,9 @@ public interface OGCConstants {
     public static final String WFS_GETCAPABILITIES="wfs:GetCapabilities";
     public static final String WFS_DESCRIBEFEATURETYPE="wfs:DescribeFeatureType";
     public static final String WFS_GETFEATURE="wfs:GetFeature";
+    public static final String WFS_TRANSACTION="wfs:Transaction";
+    public static final String WFS_LOCKFEATURE="wfs:LockFeature";
+    public static final String WFS_GETFEATUREWITHLOCK="wfs:GetFeatureWithLock";
     
     public static final String WFS_CAPABILITIES="wfs:WFS_Capabilities";
     public static final String WFS_FEATURECOLLECTION="wfs:FeatureCollection"; 
@@ -258,6 +261,15 @@ public interface OGCConstants {
         WFS_REQUEST_GetCapabilities
     });
     // </editor-fold>
+    
+    public static final List SUPPORT_WFS_REQUESTS = Arrays.asList(new String[] {
+        WFS_REQUEST_DescribeFeatureType,
+        WFS_REQUEST_GetCapabilities,
+        WFS_REQUEST_GetFeature
+        //WFS_REQUEST_GetFeatureWithLock,
+        //WFS_REQUEST_LockFeature,
+        //WFS_REQUEST_Transaction
+    });
     
     // <editor-fold defaultstate="" desc="List with implemented services.">
     /**
