@@ -173,6 +173,30 @@ public interface OGCConstants {
         VERSION
     });
     
+    public static final List WFS_REQUIRED_PARAMS_GetCapabilities = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION
+    });
+    
+    public static final List WFS_REQUIRED_PARAMS_GetFeature = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION,
+        WFS_PARAM_HANDLE,
+        WFS_PARAM_OUTPUTFORMAT,
+        WFS_PARAM_MAXFEATURES,
+        WFS_PARAM_TYPENAME
+    });
+    
+    public static final List WFS_REQUIRED_PARAMS_DescribeFeatureType = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION,
+        WFS_PARAM_OUTPUTFORMAT,
+        WFS_PARAM_TYPENAME
+    });
+    
     public static final List NON_REQUIRED_PARAMS_GetCapabilities = Arrays.asList(new String[] {
         UPDATESEQUENCE
     });

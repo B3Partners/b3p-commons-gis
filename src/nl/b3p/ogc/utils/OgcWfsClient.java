@@ -335,16 +335,6 @@ public class OgcWfsClient {
             nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
             if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
                 q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
-                // lijkt zinloos om een komma gescheiden string eerst de , er uit te halen en ze er vervolgens weer tussen te plaatsen.
-                /*StringBuffer s = new StringBuffer();
-                String[] typenames = or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
-                for (int i = 0; i < typenames.length; i++) {
-                    if (i != 0) {
-                        s.append(",");
-                    }
-                    s.append(typenames[i]);
-                }
-                q.setTypeName(s.toString());*/
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
                 try{
@@ -370,17 +360,7 @@ public class OgcWfsClient {
             nl.b3p.xml.wfs.v110.GetFeature gfv110 = (nl.b3p.xml.wfs.v110.GetFeature)gf;
             nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
             if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
-                // lijkt zinloos om een komma gescheiden string eerst de , er uit te halen en ze er vervolgens weer tussen te plaatsen.
                 q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
-                /*String[] typenames = or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
-                StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < typenames.length; i++) {
-                    if (i!=0){
-                        sb.append(",");
-                    }
-                    sb.append(typenames[i]);
-                }
-                q.setTypeName(sb.toString());*/
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
                 q.setSrsName(or.getParameter(OGCConstants.WFS_PARAM_SRSNAME));

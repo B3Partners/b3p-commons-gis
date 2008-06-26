@@ -820,8 +820,22 @@ public class OGCRequest implements OGCConstants {
                     }
                     checkRequestURL(requiredParams, request);
                 } else if(service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)){
+                    if (request.equals(WFS_REQUEST_GetCapabilities)){
+                        requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
+                    }else if(request.equals(WFS_REQUEST_GetFeature)){
+                        requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
+                    }else if(request.equals(WFS_REQUEST_DescribeFeatureType)){
+                        requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
+                    }else if(request.equals(WFS_REQUEST_Transaction)){
+                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                    }else if(request.equals(WFS_REQUEST_GetFeatureWithLock)){
+                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                    }else if(request.equals(WFS_REQUEST_LockFeature)){
+                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                    }
                     // validation has been done when unmarshalled with castor
-                    // must be done for kvp requests
+                    // but has to be done for kvp requests
+                    checkRequestURL(requiredParams, request);
                 } else{
                     throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                 }
