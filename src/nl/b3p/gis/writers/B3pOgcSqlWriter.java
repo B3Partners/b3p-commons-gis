@@ -22,7 +22,9 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import nl.b3p.ogc.utils.SqlMetaDataUtils;
@@ -76,7 +78,7 @@ public class B3pOgcSqlWriter {
         while (fcit.hasNext() && sameGeomType){
             Feature f= (Feature)fcit.next();
             FeatureSchema fs = f.getSchema();
-            if (fs.getGeometryIndex() > 0 && f.getGeometry()!=null){
+            if (fs.getGeometryIndex() >= 0 && f.getGeometry()!=null){
                 if (aGeom==null){
                     aGeom=f.getGeometry();
                 }else{
@@ -163,7 +165,7 @@ public class B3pOgcSqlWriter {
         }
     }
     
-    private boolean checkExinstenceInDB(String[] columnNamesToCheck, Feature f, String tablename) throws SQLException {
+    private boolean checkExinstenceInDB(String[] columnNamesToCheck, Feature f, String tablename) throws SQLException, ParseException {
         StringBuffer sql = new StringBuffer();
         sql.append("SELECT * FROM ");
         sql.append(tablename);
@@ -180,7 +182,7 @@ public class B3pOgcSqlWriter {
         PreparedStatement statement = connection.prepareStatement(sql.toString());
         ResultSet rs = statement.executeQuery();
         boolean found = rs.next();
-        statement.execute(); //TODO klopt dit?
+        statement.execute();
         statement.close();
         return found;
     }
@@ -231,7 +233,7 @@ public class B3pOgcSqlWriter {
         }
     }
     
-    private StringBuffer addInsertValue(FeatureSchema fs, Feature f) {
+    private StringBuffer addInsertValue(FeatureSchema fs, Feature f) throws ParseException{
         StringBuffer values = new StringBuffer();
         for (int i=0; i < fs.getAttributeCount(); i++) {
             if (i!=0)
@@ -240,25 +242,34 @@ public class B3pOgcSqlWriter {
         }
         return values;
     }
-    private String getSqlValue(Feature f, FeatureSchema fs,String attributeName){
+    private String getSqlValue(Feature f, FeatureSchema fs,String attributeName) throws ParseException{
         return getSqlValue(f,fs.getAttributeIndex(attributeName));
     }
-    private String getSqlValue(Feature f,int i){
+    private String getSqlValue(Feature f,int i) throws ParseException{
         return getSqlValue(f,f.getSchema(),i);
     }
-    private String getSqlValue(Feature f,FeatureSchema fs,int i){
+    private String getSqlValue(Feature f,FeatureSchema fs,int i) throws ParseException{
         Object o=f.getAttribute(fs.getAttributeName(i));
         StringBuffer values= new StringBuffer();
         if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
             values.append("GeomFromText(\'");
             values.append(f.getGeometry().toText());
             //Todo: Srid opzoeken
-            values.append("\', 28992");
+            if (f.getGeometry().getSRID()>=0){
+                values.append("\', "+f.getGeometry().getSRID());
+            }else{
+                values.append("\', 28992");
+            }   
             values.append(")");
         }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){
             values.append(o);
         }else if (fs.getAttributeType(i).equals(AttributeType.INTEGER)){
-            values.append(o);
+            if (o instanceof Integer)
+                values.append(o);
+            else{
+                values.append(o);
+                log.error("Geen integer");
+            }
         }else if (fs.getAttributeType(i).equals(AttributeType.STRING)){
             if (o==null)
                 values.append(o);
@@ -272,10 +283,19 @@ public class B3pOgcSqlWriter {
         }else if (fs.getAttributeType(i).equals(AttributeType.DATE)){
             if (o==null)
                 values.append(o);
-            else{
+            else if (o instanceof Date){
+                Date d = (Date)o;                
+                GregorianCalendar cal = new GregorianCalendar();
+                cal.setTime(d);                
+                values.append("\'");
+                values.append(cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH));
+                values.append("\'");
+            }else if (o instanceof String){
                 values.append("\'");
                 values.append(formatDate("dd-MM-yyyy", "yyyy-MM-dd", (String) o));
                 values.append("\'");
+            }else{
+                values.append("\'\'");
             }
         }else if (fs.getAttributeType(i).equals(AttributeType.OBJECT)){
             if (o==null)
@@ -289,7 +309,7 @@ public class B3pOgcSqlWriter {
         return values.toString();
     }
     
-    private String addUpdateValue(FeatureSchema fs, Feature f, String [] columnNamesToCheck) {
+    private String addUpdateValue(FeatureSchema fs, Feature f, String [] columnNamesToCheck) throws ParseException {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < fs.getAttributeCount(); i++) {
             if (i!=0)
@@ -312,12 +332,12 @@ public class B3pOgcSqlWriter {
         return sb.toString();
     }
     
-    private String formatDate(String oldstyle, String newstyle, String parse_date) {
+    private String formatDate(String oldstyle, String newstyle, String parse_date) throws ParseException {
         SimpleDateFormat dateFormat = new SimpleDateFormat(oldstyle);
         Date date = null;
-        try {
+        //try {
             date = dateFormat.parse(parse_date);
-        } catch (ParseException e) {}
+        //} catch (ParseException e) {}
         dateFormat = new SimpleDateFormat(newstyle);
         return dateFormat.format(date);
     }
@@ -359,9 +379,9 @@ public class B3pOgcSqlWriter {
                     if (at.equals(AttributeType.DATE)){
                         sb.append("date");
                     }else if (at.equals(AttributeType.DOUBLE)){
-                        sb.append("double");
+                        sb.append("double precision");
                     }else if (at.equals(AttributeType.INTEGER)){
-                        sb.append("integer");
+                        sb.append("bigint");
                     }else{
                         sb.append("varchar(255)");
                     }
@@ -389,12 +409,12 @@ public class B3pOgcSqlWriter {
                     //if the srid is given as param use it. Otherwise try to get the srid out of the geometry or use -1 as srid
                     if (srid!=null){
                         sbg.append(srid);
-                    }else{
-                        if (aGeom.getSRID()>0){
-                            sbg.append(fs.getCoordinateSystem().getEPSGCode());
-                        }else{
-                            sbg.append(-1);
+                    }else if (aGeom!=null){
+                        if (aGeom.getSRID()>=0){
+                            sbg.append(aGeom.getSRID());
                         }
+                    }else{
+                        sbg.append(-1);
                     }
                     sbg.append(", \'");
                     //if not all geometries are of the same type create a global geometry column
@@ -445,12 +465,12 @@ public class B3pOgcSqlWriter {
                 insertPart.append(", ");
             if (i!=fs.getGeometryIndex() || geomColumn==null){
                 if (attributeNamesToLowerCase){
-                    insertPart.append(fs.getAttributeName(i).toLowerCase());
+                    insertPart.append("\""+fs.getAttributeName(i).toLowerCase()+"\"");
                 }else{
-                    insertPart.append(fs.getAttributeName(i));
+                    insertPart.append("\""+fs.getAttributeName(i)+"\"");
                 }
             }else{
-                insertPart.append(geomColumn);
+                insertPart.append("\""+geomColumn+"\"");
             }
         }
         insertPart.append(") VALUES ");

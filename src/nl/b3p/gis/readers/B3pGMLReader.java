@@ -77,7 +77,8 @@ public class B3pGMLReader extends GMLReader{
      */
     public HashMap readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception{
         //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
-        HashMap templates=createGMLInputTemplateFromWFS(wfsgf);        
+        HashMap templates=createGMLInputTemplateFromWFS(wfsgf);
+        wfsgf.addOrReplaceParameter(OGCConstants.WMS_REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
         if (templates==null){
             log.error("No Templates founed/created.");
             return null;
@@ -88,7 +89,7 @@ public class B3pGMLReader extends GMLReader{
         if (wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME)!=null)
             featureTypes= wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
         for (int i=0; i < featureTypes.length; i++){            
-            Object o=null;
+            Object o=null;            
             o=templates.get(featureTypes[i]);
             if(o==null){
                 String[] tokens=featureTypes[i].split(":");
@@ -97,11 +98,17 @@ public class B3pGMLReader extends GMLReader{
 
             } 
             if (o==null){
+                if (featureTypes[i].indexOf("}")>=0){
+                    o=templates.get(featureTypes[i].split("}")[1]);
+                }
+            }
+                
+            if (o==null){
                 log.error("Kan template niet vinden voor "+featureTypes[i]);
                 throw new Exception("Kan template niet vinden voor "+featureTypes[i]);
             }
             GMLInputTemplate git = (GMLInputTemplate)o;
-            wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME,featureTypes[i]);
+            wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME,featureTypes[i]);            
             HttpClient client = new HttpClient();        
             String host=wfsgf.getUrlWithNonOGCparams();
             method = new PostMethod(host); 
