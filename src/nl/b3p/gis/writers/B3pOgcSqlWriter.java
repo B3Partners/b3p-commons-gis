@@ -160,6 +160,7 @@ public class B3pOgcSqlWriter {
                 Feature f = (Feature)it.next();
                             
                 boolean update = false;
+                
                 if (columnNamesToCheck != null) {
                     //ArrayList values = getPrimaryValues(fs, f, columnNamesToCheck);
                     update = checkExinstenceInDB(columnNamesToCheck,f, tablename);
@@ -587,5 +588,9 @@ public class B3pOgcSqlWriter {
      */
     public void setBatchValue(int batchValue) {
         this.batchValue = batchValue;
+    }
+    public void close() throws SQLException{
+        if (connection!=null)
+            connection.close();
     }
 }
