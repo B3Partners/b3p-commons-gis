@@ -349,7 +349,7 @@ public class OGCRequest implements OGCConstants {
                 }
             }
         }
-        if(getParameter(OGCConstants.SERVICE).equals(OGCConstants.WFS_SERVICE_WFS)){
+        if(OGCConstants.WFS_SERVICE_WFS.equals(getParameter(OGCConstants.SERVICE))){
             finalVersion = getParameter(OGCConstants.VERSION);
         }
     }
@@ -743,7 +743,8 @@ public class OGCRequest implements OGCConstants {
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
-        returnv.setFinalVersion(new String(this.getFinalVersion()));
+        if (this.getFinalVersion()!=null)
+            returnv.setFinalVersion(new String(this.getFinalVersion()));        
         if (this.getParameters() != null) {
             returnv.setParameters((HashMap) this.getParameters().clone());
         }
