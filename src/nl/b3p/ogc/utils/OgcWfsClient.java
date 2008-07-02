@@ -75,7 +75,7 @@ public class OgcWfsClient {
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         String host = or.getUrlWithNonOGCparams();
         //Element el=doRequest(getGetCapabilitiesRequest(or),host);
-        Element el=doRequest(or.getUrl(),host);
+        Element el=doRequest(or.getUrl(),host,or.getNameSpaces());
         if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)){
             String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
@@ -102,7 +102,11 @@ public class OgcWfsClient {
      *@return het element dat terug gegeven wordt door de server
      */
     public static Element doRequest(Object o, String host) throws Exception{        
-        Element el=readXml2Element(new InputStreamReader(getInputStreamReader(o,host)));
+         return doRequest(o,host,null);
+        
+    }
+    public static Element doRequest(Object o, String host, HashMap namespaces) throws Exception{        
+        Element el=readXml2Element(new InputStreamReader(getInputStreamReader(o,host,namespaces)));
         if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)){
             nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser= getServiceExceptionReport(el);
             StringBuffer sb=new StringBuffer();
@@ -122,7 +126,7 @@ public class OgcWfsClient {
      *Doet het request en returned het antwoord als inputstream. LetOp: checked niet of het een serviceExceptionReport is
      *
      */
-    private static InputStream getInputStreamReader(Object o, String host) throws Exception {
+    private static InputStream getInputStreamReader(Object o, String host, HashMap namespaces) throws Exception {
         HttpClient client = new HttpClient();
         int status;
         HttpMethod httpmethod=null;
@@ -140,7 +144,16 @@ public class OgcWfsClient {
             m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
             m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
             m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
-            m.setNamespaceMapping("app", "http://www.deegree.org/app");
+            if (namespaces!=null){
+                Iterator it=namespaces.keySet().iterator();
+                while (it.hasNext()){
+                    String key=(String)it.next();
+                    String value=(String) namespaces.get(key);
+                    if (key!=null && value!=null)
+                        m.setNamespaceMapping(key,value);
+                }
+            }
+            //m.setNamespaceMapping("app", "http://www.deegree.org/app");
             m.marshal(o);
             body = sw.toString();            
             PostMethod postmethod = new PostMethod(host);
@@ -177,7 +190,7 @@ public class OgcWfsClient {
                 
         String host = or.getUrlWithNonOGCparams();
         if (methodsAllowed.contains(POSTMETHOD)){
-            returnvalue=doRequest(getDescribeFeatureTypeRequest(or),host);
+            returnvalue=doRequest(getDescribeFeatureTypeRequest(or),host,or.getNameSpaces());
         }else if (methodsAllowed.contains(GETMETHOD)){
             returnvalue=doRequest(or.getUrl(),host);
         }
@@ -644,7 +657,7 @@ public class OgcWfsClient {
     
     public static ArrayList getFeatureElements(GetFeature gf, OGCRequest or) throws Exception{
         ArrayList returnList= new ArrayList();
-        Element e=doRequest(gf,or.getUrlWithNonOGCparams());
+        Element e=doRequest(gf,or.getUrlWithNonOGCparams(),or.getNameSpaces());
         B3pGMLReader bgr = new B3pGMLReader();
         HashMap hm=bgr.createGMLInputTemplates(getDescribeFeatureType(or));
         Iterator it = hm.values().iterator();

@@ -972,4 +972,15 @@ public class OGCRequest implements OGCConstants {
     public String getFinalVersion(){
         return finalVersion;
     }
+
+    public String getNameSpace(String param) {        
+        if (param == null) {
+            return null;
+        }        
+        Object o = parameters.get(param);
+        if (o == null) {
+            return null;
+        }
+        return (String) o;    
+    }
 }
