@@ -55,7 +55,7 @@ public class B3pOgcSqlWriter {
         DriverManager.registerDriver(driver);
         setConnection(DriverManager.getConnection(url,user,password));
     }
-     /**
+    /**
      * Write features to the given table.
      * @param fc The collection of features.
      * @param tablename The tablename.
@@ -68,7 +68,7 @@ public class B3pOgcSqlWriter {
     public int[] write(FeatureCollection fc, String tablename, String geomColumn, int dimension, boolean createTable, boolean attributeNamesToLowerCase)throws SQLException, Exception{
         return write(fc, tablename, geomColumn, null, dimension, createTable, attributeNamesToLowerCase, null);
     }
-     /**
+    /**
      * Write features to the given table.
      * @param fc The collection of features.
      * @param tablename The tablename.
@@ -160,7 +160,7 @@ public class B3pOgcSqlWriter {
                 if (q == null)
                     q = new StringBuffer();
                 Feature f = (Feature)it.next();
-                            
+                
                 boolean update = false;
                 
                 if (columnNamesToCheck != null) {
@@ -282,12 +282,19 @@ public class B3pOgcSqlWriter {
         if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)){
             values.append("GeomFromText(\'");
             values.append(f.getGeometry().toText());
-            //Todo: Srid opzoeken
-            if (f.getGeometry().getSRID()>=0){
-                values.append("\', "+f.getGeometry().getSRID());
-            }else{
+            
+            int geomSRID = f.getGeometry().getSRID();
+            int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
+            if (geomSRID>=0 && schemaSRID>=0 && geomSRID!=schemaSRID)
+                throw new ParseException("SRID of geometry differs from EPSG code of feature schema!", i);
+            
+            if (geomSRID>=0){
+                values.append("\', "+geomSRID);
+            } else if (schemaSRID>=0){
+                values.append("\', "+geomSRID);
+            } else {
                 values.append("\', 28992");
-            }   
+            }
             values.append(")");
         }else if (fs.getAttributeType(i).equals(AttributeType.DOUBLE)){
             values.append(o);
@@ -307,9 +314,9 @@ public class B3pOgcSqlWriter {
             if (o==null)
                 values.append(o);
             else if (o instanceof Date){
-                Date d = (Date)o;                
+                Date d = (Date)o;
                 GregorianCalendar cal = new GregorianCalendar();
-                cal.setTime(d);                
+                cal.setTime(d);
                 values.append("\'");
                 values.append(cal.get(Calendar.YEAR)+"-"+(cal.get(Calendar.MONTH)+1)+"-"+cal.get(Calendar.DAY_OF_MONTH));
                 values.append("\'");
@@ -334,7 +341,7 @@ public class B3pOgcSqlWriter {
     
     private String addUpdateValue(FeatureSchema fs, Feature f, String geomColumn, String [] columnNamesToCheck) throws ParseException {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < fs.getAttributeCount(); i++) {            
+        for (int i = 0; i < fs.getAttributeCount(); i++) {
             if (i!=0)
                 sb.append(", ");
             if (fs.getGeometryIndex()==i){
@@ -364,7 +371,7 @@ public class B3pOgcSqlWriter {
         SimpleDateFormat dateFormat = new SimpleDateFormat(oldstyle);
         Date date = null;
         //try {
-            date = dateFormat.parse(parse_date);
+        date = dateFormat.parse(parse_date);
         //} catch (ParseException e) {}
         dateFormat = new SimpleDateFormat(newstyle);
         return dateFormat.format(date);

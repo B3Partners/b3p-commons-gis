@@ -10,6 +10,7 @@ package nl.b3p.gis;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jump.feature.BasicFeature;
 import com.vividsolutions.jump.feature.FeatureSchema;
 
@@ -70,7 +71,9 @@ public class FeatureFactory {
     public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
         BasicFeature f = createFeature(attributes, columnames, fs);
         if (fs.getGeometryIndex()>=0) {
-            GeometryFactory gf = new GeometryFactory();
+            PrecisionModel precisionModel =  new PrecisionModel(PrecisionModel.FLOATING);
+            int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
+            GeometryFactory gf = new GeometryFactory(precisionModel, schemaSRID);
             Coordinate[] ca = new Coordinate[] {new Coordinate(x,y)};
             MultiPoint p = gf.createMultiPoint(ca);
             f.setGeometry(p);
