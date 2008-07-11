@@ -9,21 +9,29 @@
 package nl.b3p.ogc.utils;
 
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import nl.b3p.xml.wfs.WFS_Capabilities;
-import nl.b3p.xml.wfs.v100.GetCapabilities;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
+import nl.b3p.xml.wfs.v110.Delete;
+import nl.b3p.xml.wfs.v110.Insert;
+import nl.b3p.xml.wfs.v110.Native;
+import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
+import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
+import nl.b3p.xml.wfs.v110.Update;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -36,14 +44,17 @@ import org.w3c.dom.NodeList;
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
 en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
-public class OGCRequest implements OGCConstants {   
-
+public class OGCRequest implements OGCConstants {
+    
     private static final Log log = LogFactory.getLog(OGCRequest.class);
     private String httpHost;
     private WFS_Capabilities capabilities;
     private HashMap parameters;
     private HashMap nameSpaces;
     private HashMap schemaLocations;
+    private HashMap transactionList = new HashMap();
+    private String abbr;
+    private List layers = new ArrayList();
     // version that will be returned to client
     private String finalVersion;
     
@@ -56,7 +67,7 @@ public class OGCRequest implements OGCConstants {
      *
      * @param url The url that fills the OGCUrl object
      *
-     *  For HTTP GET 
+     *  For HTTP GET
      */
     public OGCRequest(String url) {
         setUrl(url);
@@ -64,9 +75,9 @@ public class OGCRequest implements OGCConstants {
     
     /**
      * Constructor
-     * For HTTP POST 
+     * For HTTP POST
      */
-    public OGCRequest(Element rootElement, String url) throws ValidationException, Exception{ 
+    public OGCRequest(Element rootElement, String url) throws ValidationException, Exception{
         nameSpaces = new HashMap();
         findNameSpace(rootElement);
         parameters = new HashMap();
@@ -75,19 +86,19 @@ public class OGCRequest implements OGCConstants {
         String[] tokens = url.split("\\?|&");
         httpHost = tokens[0];
         setFinalVersion(rootElement.getAttribute(OGCConstants.VERSION.toLowerCase()));
-            
+        
         if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)){
             String version = finalVersion;
             
-            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){                                
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetCapabilities.class);
-                o = um.unmarshal(rootElement);              
+                o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v100.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v100.GetCapabilities)o;
                 setGetCapabilitiesV100(getCapabilities);
             }else{
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.GetCapabilities.class);
-                o = um.unmarshal(rootElement);                
-                nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v110.GetCapabilities)o;                
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v110.GetCapabilities)o;
                 setGetCapabilitiesV110(getCapabilities);
             }
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)){
@@ -95,12 +106,12 @@ public class OGCRequest implements OGCConstants {
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.DescribeFeatureType.class);
-                o = um.unmarshal(rootElement);                
+                o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v100.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v100.DescribeFeatureType)o;
                 setDescribeFeatureTypeV100(describeFeatureType);
             }else{
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.DescribeFeatureType.class);
-                o = um.unmarshal(rootElement);                
+                o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v110.DescribeFeatureType)o;
                 setDescribeFeatureTypeV110(describeFeatureType);;
             }
@@ -109,49 +120,52 @@ public class OGCRequest implements OGCConstants {
             
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetFeature.class);
-                o = um.unmarshal(rootElement);                
+                o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v100.GetFeature getFeature = (nl.b3p.xml.wfs.v100.GetFeature)o;
                 setGetFeatureV100(getFeature);
             }else{
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.GetFeature.class);
-                o = um.unmarshal(rootElement);                
-                nl.b3p.xml.wfs.v110.GetFeature getFeature = (nl.b3p.xml.wfs.v110.GetFeature)o; 
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.GetFeature getFeature = (nl.b3p.xml.wfs.v110.GetFeature)o;
                 setGetFeatureV110(getFeature);
             }
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_TRANSACTION)){
             String version = finalVersion;
             
-            /*if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
-                
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.Transaction.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v100.transaction.Transaction transaction = (nl.b3p.xml.wfs.v100.transaction.Transaction)o;
+                setTransactionV100(transaction);
             }else{
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.Transaction.class);
                 o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v110.Transaction transaction = (nl.b3p.xml.wfs.v110.Transaction)o;
                 setTransactionV110(transaction);
-            }*/
-            
-            throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_TRANSACTION+ " yet!");
+            }
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_LOCKFEATURE)){
             throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_LOCKFEATURE+ " yet!");
         }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATUREWITHLOCK)){
             throw new UnsupportedOperationException("kaartenbalie doesn't suport " +OGCConstants.WFS_GETFEATUREWITHLOCK+ " yet!");
-        }
-        else{
-            throw new UnsupportedOperationException("No WFS service found in request!");
+        } else{
+            throw new UnsupportedOperationException("No supported WFS service found in request!");
         }
     }
     
-    public void findNameSpace(Node node){ 
+    public void findNameSpace(Node node){
         NamedNodeMap map = node.getAttributes();
         if(map != null){
-            for(int i = 0; map.getLength() > i; i++){          
+            for(int i = 0; map.getLength() > i; i++){
                 String name = map.item(i).getNodeName();
                 String[] tokens = name.split(":");
                 if(tokens[0].equalsIgnoreCase("xmlns")){
                     String value = map.item(i).getNodeValue();
-                    addOrReplaceNameSpace(tokens[1],value);
-                }
-                else if(tokens.length == 2){
+                    if(tokens.length > 1){
+                        addOrReplaceNameSpace(tokens[1],value);
+                    }else{
+                        addOrReplaceNameSpace(tokens[0],value);
+                    }
+                } else if(tokens.length == 2){
                     if(tokens[1].equalsIgnoreCase("SchemaLocation")){
                         String value = map.item(i).getNodeValue();
                         addOrReplaceSchemaLocation(tokens[1],value);
@@ -290,10 +304,171 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     
-    public void setTransactionV110(nl.b3p.xml.wfs.v110.Transaction transaction){
+    public void setTransactionV100(nl.b3p.xml.wfs.v100.transaction.Transaction transaction) throws Exception{
         addOrReplaceParameter(OGCConstants.VERSION, transaction.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, transaction.getService());
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_Transaction);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, transaction.getHandle());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_LOCKID, transaction.getLockId());
+        if(transaction.getReleaseAction() != null){
+            StringWriter sw = new StringWriter();
+            Marshaller m = new Marshaller(sw);
+            m.marshal(transaction.getReleaseAction());
+            addOrReplaceParameter(OGCConstants.WFS_PARAM_RELEASEACTION, sw.toString());
+        }
+        
+        nl.b3p.xml.wfs.v100.transaction.TransactionTypeChoice[] transactionTypeChoiceList = transaction.getTransactionTypeChoice();
+        int size = transactionTypeChoiceList.length;
+        for(int i = 0; i < size; i++){
+            nl.b3p.xml.wfs.v100.transaction.TransactionTypeChoice transactionTypeChoice = transactionTypeChoiceList[i];
+            int count = transactionTypeChoice.getTransactionTypeChoiceItemCount();
+            for(int x = 0; x < count; x++){
+                nl.b3p.xml.wfs.v100.transaction.TransactionTypeChoiceItem transactionTypeChoiceItem = transactionTypeChoice.getTransactionTypeChoiceItem(x);
+                if(transactionTypeChoiceItem.getDelete() != null){
+                    nl.b3p.xml.wfs.v100.transaction.Delete delete = transactionTypeChoiceItem.getDelete();
+                    String layer = delete.getTypeName();
+                    layers.add(layer);
+                    String[] temp = layer.split("}");
+                    if(temp.length > 1){
+                        layer = temp[1];
+                    }
+                    String[] spLayer = layer.split("_");
+                    addElementToTransactionList(delete, spLayer[0]);
+                }else if(transactionTypeChoiceItem.getInsert() != null){
+                    nl.b3p.xml.wfs.v100.transaction.Insert insert = transactionTypeChoiceItem.getInsert();
+                    
+                    /* Nog niet duidelijk of dit gaat werken. Moet nog getest worden. */
+                    StringWriter sw = new StringWriter();
+                    Marshaller m = new Marshaller(sw);
+                    m.marshal(insert);
+                    String insertString = sw.toString();
+                    String[] layer = insertString.split("<");
+                    layers.add(layer[0]);
+                    String[] spLayer = layer[0].split("_");
+                    addElementToTransactionList(insert, spLayer[0]);
+                    
+                }else if(transactionTypeChoiceItem.getUpdate() != null){
+                    nl.b3p.xml.wfs.v100.transaction.Update update = transactionTypeChoiceItem.getUpdate();
+                    String layer = update.getTypeName();
+                    layers.add(layer);
+                    String[] temp = layer.split("}");
+                    if(temp.length > 1){
+                        layer = temp[1];
+                    }
+                    String[] spLayer = layer.split("_");
+                    addElementToTransactionList(update, spLayer[0]);
+                }else if(transactionTypeChoiceItem.getNative() != null){
+                    nl.b3p.xml.wfs.v100.transaction.Native nativetransaction = transactionTypeChoiceItem.getNative();
+                }
+            }
+        }
+    }
+    public void setTransactionV110(nl.b3p.xml.wfs.v110.Transaction transaction) throws Exception{
+        addOrReplaceParameter(OGCConstants.VERSION, transaction.getVersion());
+        addOrReplaceParameter(OGCConstants.SERVICE, transaction.getService());
+        addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_Transaction);
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, transaction.getHandle());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_LOCKID, transaction.getLockId());
+        if(transaction.getReleaseAction() != null){
+            StringWriter sw = new StringWriter();
+            Marshaller m = new Marshaller(sw);
+            m.marshal(transaction.getReleaseAction());
+            addOrReplaceParameter(OGCConstants.WFS_PARAM_RELEASEACTION, sw.toString());
+        }
+        
+        TransactionTypeChoice[] transactionTypeChoiceList = transaction.getTransactionTypeChoice();
+        int size = transactionTypeChoiceList.length;
+        for(int i = 0; i < size; i++){
+            TransactionTypeChoice transactionTypeChoice = transactionTypeChoiceList[i];
+            int count = transactionTypeChoice.getTransactionTypeChoiceItemCount();
+            for(int x = 0; x < count; x++){
+                TransactionTypeChoiceItem transactionTypeChoiceItem = transactionTypeChoice.getTransactionTypeChoiceItem(x);
+                if(transactionTypeChoiceItem.getDelete() != null){
+                    Delete delete = transactionTypeChoiceItem.getDelete();
+                    String layer = delete.getTypeName();
+                    layers.add(layer);
+                    String[] temp = layer.split("}");
+                    if(temp.length > 1){
+                        layer = temp[1];
+                    }
+                    String[] spLayer = layer.split("_");
+                    addElementToTransactionList(delete, spLayer[0]);
+                }else if(transactionTypeChoiceItem.getInsert() != null){
+                    Insert insert = transactionTypeChoiceItem.getInsert();
+                    
+                    /* Nog niet duidelijk of dit gaat werken. Moet nog getest worden. */
+                    StringWriter sw = new StringWriter();
+                    Marshaller m = new Marshaller(sw);
+                    m.marshal(insert);
+                    String insertString = sw.toString();
+                    String[] layer = insertString.split("<");
+                    layers.add(layer[0]);
+                    String[] spLayer = layer[0].split("_");
+                    addElementToTransactionList(insert, spLayer[0]);
+                    
+                }else if(transactionTypeChoiceItem.getUpdate() != null){
+                    Update update = transactionTypeChoiceItem.getUpdate();
+                    String layer = update.getTypeName();
+                    layers.add(layer);
+                    String[] temp = layer.split("}");
+                    if(temp.length > 1){
+                        layer = temp[1];
+                    }
+                    String[] spLayer = layer.split("_");
+                    addElementToTransactionList(update, spLayer[0]);
+                }else if(transactionTypeChoiceItem.getNative() != null){
+                    Native nativetransaction = transactionTypeChoiceItem.getNative();
+                }
+            }
+        }
+    }
+    
+    /*
+     * Methode that helps you fill the transactionList hashmap with a list of <insert>, <delete> or <update> elements.
+     * One list for each serviceprovider. The hashmap contains a key (serviceprovider abbr) and value (list with elements)
+     */
+    public void addElementToTransactionList(Object element, String spAbbr){
+        if(!transactionList.containsKey(spAbbr)){
+            List temp = new ArrayList();
+            temp.add(element);
+            transactionList.put(spAbbr, temp);
+        }else{
+            List temp = (List)transactionList.get(spAbbr);
+            temp.add(element);
+        }
+    }
+    public HashMap getTransactionMap(){
+        return transactionList;
+    }
+    public void setTransactionMap(HashMap transactionList){
+        this.transactionList = transactionList;
+    }
+    public List getTransactionElementList(String spAbbr){
+        return (List)transactionList.get(spAbbr);
+    }
+    public void setTransactionElementList(List elements, String spAbbr){
+        transactionList.put(spAbbr, elements);
+    }
+    public String[] getTransactionSpList(){
+        Set spSet = transactionList.keySet();
+        int size = spSet.size();
+        String[] spArray = new String[size];
+        Iterator it = spSet.iterator();
+        for(int i = 0; i < size; i++){
+            spArray[i] = it.next().toString();
+        }
+        return spArray;
+    }
+    
+    public void setAbbr(String abbr){
+        this.abbr = abbr;
+    }
+    public String getAbbr(){
+        return abbr;
+    }
+    
+    public List getLayers(){
+        return layers;
     }
     
     /** Main methode to fill the OGUrl object
@@ -337,11 +512,10 @@ public class OGCRequest implements OGCConstants {
                         for (int b=1; b < keyValuePair.length; b++){
                             if (b!=1)
                                 value+="=";
-                            value+=keyValuePair[b];                        
+                            value+=keyValuePair[b];
                         }
                         addOrReplaceParameter(keyValuePair[0], value);
-                    }
-                    else if (keyValuePair.length == 2) {
+                    } else if (keyValuePair.length == 2) {
                         addOrReplaceParameter(keyValuePair[0], keyValuePair[1]);
                     } else {
                         addOrReplaceParameter(keyValuePair[0], null);
@@ -413,7 +587,7 @@ public class OGCRequest implements OGCConstants {
     }
     /**Deze methode berekent de schaal waarbij de diagonaal van de viewport
      * in pixels wordt omgerekend naar kaarteenheden.
-     * 
+     *
      * @param scaleCalibration omrekenfactor van pixels naar kaarteenheden.
      * @return schaal van de kaart
      */
@@ -465,7 +639,7 @@ public class OGCRequest implements OGCConstants {
     public String getXMLBody() throws Exception{
         return OgcWfsClient.getRequestBody(this);
     }
-        
+    
     public String getUrlWithNonOGCparams() {
         OGCRequest ogcu = (OGCRequest) this.clone();
         ogcu.removeAllWMSParameters();
@@ -570,11 +744,10 @@ public class OGCRequest implements OGCConstants {
                     for (int b=1; b < keyValuePair.length; b++){
                         if (b!=1)
                             value+="=";
-                        value+=keyValuePair[b];                        
+                        value+=keyValuePair[b];
                     }
                     addOrReplaceParameter(keyValuePair[0], value);
-                }
-                else if (keyValuePair.length == 2) {
+                } else if (keyValuePair.length == 2) {
                     addOrReplaceParameter(keyValuePair[0], keyValuePair[1]);
                 } else {
                     addOrReplaceParameter(keyValuePair[0], null);
@@ -635,6 +808,11 @@ public class OGCRequest implements OGCConstants {
         removeParameter(WFS_PARAM_PROPTRAVXLINKDEPTH);
         removeParameter(WFS_PARAM_GMLOBJECTID);
         removeParameter(WFS_PARAM_RESULTTYPE);
+        removeParameter(WFS_PARAM_BBOX);
+        removeParameter(WFS_PARAM_INPUTFORMAT);
+        removeParameter(WFS_PARAM_HANDLE);
+        removeParameter(WFS_PARAM_LOCKID);
+        removeParameter(WFS_PARAM_RELEASEACTION);
     }
     
     public String toString() {
@@ -744,7 +922,7 @@ public class OGCRequest implements OGCConstants {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
         if (this.getFinalVersion()!=null)
-            returnv.setFinalVersion(new String(this.getFinalVersion()));        
+            returnv.setFinalVersion(new String(this.getFinalVersion()));
         if (this.getParameters() != null) {
             returnv.setParameters((HashMap) this.getParameters().clone());
         }
@@ -753,6 +931,12 @@ public class OGCRequest implements OGCConstants {
         }
         if (this.getSchemaLocations() != null) {
             returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
+        }
+        if (this.getTransactionMap() != null) {
+            returnv.setTransactionMap((HashMap) this.getTransactionMap().clone());
+        }
+        if (this.getAbbr() != null) {
+            returnv.setAbbr(new String(this.getAbbr()));
         }
         return returnv;
     }
@@ -828,7 +1012,7 @@ public class OGCRequest implements OGCConstants {
                     }else if(request.equals(WFS_REQUEST_DescribeFeatureType)){
                         requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
                     }else if(request.equals(WFS_REQUEST_Transaction)){
-                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                        requiredParams = WFS_REQUIRED_PARAMS_Transaction;
                     }else if(request.equals(WFS_REQUEST_GetFeatureWithLock)){
                         throw new UnsupportedOperationException("Request '" + request + "' not supported!");
                     }else if(request.equals(WFS_REQUEST_LockFeature)){
@@ -845,8 +1029,7 @@ public class OGCRequest implements OGCConstants {
                         "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
                         "VERSION=1.1.1&SERVICE=WMS");
             }
-        }
-        else{
+        } else{
             throw new UnsupportedOperationException("No request parameter found!");
         }
     }
@@ -899,14 +1082,14 @@ public class OGCRequest implements OGCConstants {
             log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
         }
     }
-
+    
     public WFS_Capabilities getCapabilities() {
         return capabilities;
     }
-
+    
     public void setCapabilities(WFS_Capabilities capabilities) {
         this.capabilities = capabilities;
-    }    
+    }
     
     /*
      * Get and set for final version. This is the version the server will use to give a response
@@ -972,15 +1155,15 @@ public class OGCRequest implements OGCConstants {
     public String getFinalVersion(){
         return finalVersion;
     }
-
-    public String getNameSpace(String param) {        
+    
+    public String getNameSpace(String param) {
         if (param == null) {
             return null;
-        }        
+        }
         Object o = parameters.get(param);
         if (o == null) {
             return null;
         }
-        return (String) o;    
+        return (String) o;
     }
 }

@@ -116,6 +116,7 @@ public interface OGCConstants {
      */
     public static final String WFS_PARAM_BBOX = "BBOX";
     public static final String WFS_PARAM_OUTPUTFORMAT= "OUTPUTFORMAT";
+    public static final String WFS_PARAM_INPUTFORMAT= "INPUTFORMAT";
     public static final String WFS_PARAM_TYPENAME= "TYPENAME";
     public static final String WFS_PARAM_HANDLE= "HANDLE";
     public static final String WFS_PARAM_RESULTTYPE="RESULTTYPE";
@@ -132,9 +133,19 @@ public interface OGCConstants {
     public static final String WFS_PARAM_PROPTRAVXLINKEXPIRY="PROPTRAVXLINKEXPIRY";
     public static final String WFS_PARAM_PROPTRAVXLINKDEPTH="PROPTRAVXLINKDEPTH";
     public static final String WFS_PARAM_GMLOBJECTID="GMLOBJECTID";
+    public static final String WFS_PARAM_LOCKID="LOCKID";
+    public static final String WFS_PARAM_RELEASEACTION="RELEASEACTION";
+    public static final String WFS_PARAM_OPERATION="OPERATION";
+    
+    public static final String WFS_TRANSACTION_DELETE="delete";
+    public static final String WFS_TRANSACTION_UPDATE="update";
+    public static final String WFS_TRANSACTION_INSERT="insert";
+    public static final String WFS_TRANSACTION_NATIVE="native";
+    
     public static final String WFS_VERSION_100="1.0.0";
     public static final String WFS_VERSION_110="1.1.0";
     public static final String WFS_VERSION_UNSPECIFIED="unspecified";
+    
     public static final String WFS_REQUEST_GetFeature="GetFeature";
     public static final String WFS_REQUEST_DescribeFeatureType="DescribeFeatureType";
     public static final String WFS_REQUEST_GetCapabilities="GetCapabilities";
@@ -161,6 +172,7 @@ public interface OGCConstants {
     public static final String WFS_OBJECT_GEOMETRYTYPE="gml:GeometryPropertyType";
     
     public static final String WFS_SERVER_EXCEPTION="ServiceExceptionReport";
+    public static final String WFS_TRANSACTIONRESPONSE="TransactionResponse";
     // </editor-fold>
     
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
@@ -183,9 +195,6 @@ public interface OGCConstants {
         REQUEST,
         SERVICE,
         VERSION,
-        WFS_PARAM_HANDLE,
-        WFS_PARAM_OUTPUTFORMAT,
-        WFS_PARAM_MAXFEATURES,
         WFS_PARAM_TYPENAME
     });
     
@@ -196,6 +205,13 @@ public interface OGCConstants {
         WFS_PARAM_OUTPUTFORMAT,
         WFS_PARAM_TYPENAME
     });
+    
+    public static final List WFS_REQUIRED_PARAMS_Transaction = Arrays.asList(new String[] {
+        REQUEST,
+        SERVICE,
+        VERSION
+    });
+    
     
     public static final List NON_REQUIRED_PARAMS_GetCapabilities = Arrays.asList(new String[] {
         UPDATESEQUENCE
@@ -282,17 +298,18 @@ public interface OGCConstants {
         WMS_REQUEST_GetLegendGraphic,
         WFS_REQUEST_GetFeature,
         WFS_REQUEST_DescribeFeatureType,
-        WFS_REQUEST_GetCapabilities
+        WFS_REQUEST_GetCapabilities,
+        WFS_REQUEST_Transaction
     });
     // </editor-fold>
     
     public static final List SUPPORT_WFS_REQUESTS = Arrays.asList(new String[] {
         WFS_REQUEST_DescribeFeatureType,
         WFS_REQUEST_GetCapabilities,
-        WFS_REQUEST_GetFeature
+        WFS_REQUEST_GetFeature,
         //WFS_REQUEST_GetFeatureWithLock,
         //WFS_REQUEST_LockFeature,
-        //WFS_REQUEST_Transaction
+        WFS_REQUEST_Transaction
     });
     
     // <editor-fold defaultstate="" desc="List with implemented services.">

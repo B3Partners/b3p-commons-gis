@@ -26,15 +26,8 @@ import nl.b3p.xml.wfs.v100.capabilities.DCPType_TransactionType;
 import nl.b3p.xml.wfs.v100.capabilities.FeatureType;
 import nl.b3p.xml.wfs.v100.capabilities.HTTPTypeItem;
 import nl.b3p.xml.wfs.v100.capabilities.RequestTypeItem;
-import nl.b3p.xml.wfs.v110.WFS_Capabilities;
 import org.exolab.castor.xml.Marshaller;
-import org.exolab.castor.xml.UnmarshalHandler;
 import org.exolab.castor.xml.Unmarshaller;
-import org.exolab.castor.xml.ValidationException;
-import org.w3c.dom.CDATASection;
-import org.w3c.dom.DOMImplementation;
-import org.w3c.dom.Document;
-import org.w3c.dom.DocumentType;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -54,6 +47,8 @@ public class OGCResponse {
     private nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollectionV100;
     private nl.b3p.xml.wfs.v110.FeatureCollection newFeatureCollectionV110;
     private nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport newExceptionReport;
+    private nl.b3p.xml.wfs.v100.transaction.TransactionResult newTransactionResponseV100;
+    private nl.b3p.xml.wfs.v110.TransactionResponse newTransactionResponseV110;
     private List getCapabilitiesV100 = new ArrayList();
     private List getCapabilitiesV110 = new ArrayList();
     private HashMap nameSpaces;
@@ -118,10 +113,36 @@ public class OGCResponse {
                 nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport)o;
                 
                 newExceptionReport = exceptionReport;
+            }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)){
+                response = OGCConstants.WFS_TRANSACTIONRESPONSE;
+                version = request.getFinalVersion();
+                
+                if(version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+                    um = new Unmarshaller(nl.b3p.xml.wfs.v100.transaction.TransactionResult.class);
+                    o = um.unmarshal(rootElement);              
+                    nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse = (nl.b3p.xml.wfs.v100.transaction.TransactionResult)o;
+                    
+                    newTransactionResponseV100 = replaceTransactionResponseV100Url(transactionResponse, prefix);
+                }else{
+                    um = new Unmarshaller(nl.b3p.xml.wfs.v110.TransactionResponse.class);
+                    o = um.unmarshal(rootElement);
+                    nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse = (nl.b3p.xml.wfs.v110.TransactionResponse)o;
+                    
+                    newTransactionResponseV110 = replaceTransactionResponseV110Url(transactionResponse, prefix);
+                }
             }
         }catch (Exception e){
             throw new UnsupportedOperationException("Failed to rebuild response! Exception: " + e);
         }
+    }
+    
+    public nl.b3p.xml.wfs.v100.transaction.TransactionResult replaceTransactionResponseV100Url(nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse, String prefix){
+        /* Niet helemaal duidelijk of er aan de respons xml nog wat moet gebeuren */
+        return transactionResponse;
+    }
+    public nl.b3p.xml.wfs.v110.TransactionResponse replaceTransactionResponseV110Url(nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse, String prefix){
+        /* Niet helemaal duidelijk of er aan de respons xml nog wat moet gebeuren */
+        return transactionResponse;
     }
     
     public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities replaceCapabilitiesV100Url(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities, String prefix){
@@ -318,7 +339,7 @@ public class OGCResponse {
         Iterator iter = spInfo.iterator();
         while(iter.hasNext()){
             HashMap sp = (HashMap)iter.next();
-            String layerName = "app:" + sp.get("spAbbr") + "_" + sp.get("lName");
+            String layerName = "app:" + sp.get("spAbbr") + "_" + sp.get("layer");
             layers.add(layerName);
         }
         
@@ -334,6 +355,12 @@ public class OGCResponse {
                 castorObject = newFeatureCollectionV100;
             }else{
                 castorObject = newFeatureCollectionV110;
+            }
+        }else if(response.equals(OGCConstants.WFS_TRANSACTIONRESPONSE)){
+            if(version.equals(OGCConstants.WFS_VERSION_100)){
+                castorObject = newTransactionResponseV100;
+            }else{
+                castorObject = newTransactionResponseV110;
             }
         }
         
@@ -365,7 +392,7 @@ public class OGCResponse {
                 body = sw.toString();
             }
         }catch(Exception e){
-            throw new UnsupportedOperationException("Failed to get body of XML!");
+            throw new UnsupportedOperationException("Failed to get body of XML! Exception: " + e);
         }
         
         return body;

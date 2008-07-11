@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.OutputKeys;
@@ -31,9 +32,11 @@ import nl.b3p.xml.wfs.Filter;
 import nl.b3p.xml.wfs.GetCapabilities;
 import nl.b3p.xml.wfs.GetFeature;
 import nl.b3p.xml.wfs.WFS_Capabilities;
+import nl.b3p.xml.wfs.Transaction;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
+import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -61,7 +64,7 @@ import org.xml.sax.XMLReader;
  */
 public class OgcWfsClient {
     private static final Log log = LogFactory.getLog(OgcWfsClient.class);
-
+    
     private static String GETMETHOD="GET";
     private static String POSTMETHOD="POST";
     /**
@@ -80,7 +83,7 @@ public class OgcWfsClient {
             String version=el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                 if (original.getParameter(OGCConstants.WMS_VERSION)==null)
-                    original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);                
+                    original.addOrReplaceParameter(OGCConstants.WMS_VERSION,version);
                 returnvalue=getCapabilitiesVersion100(el);
             }else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
                 if (original.getParameter(OGCConstants.WMS_VERSION)==null)
@@ -95,17 +98,17 @@ public class OgcWfsClient {
         }
         original.setCapabilities(returnvalue);
         return returnvalue;
-    }    
+    }
     /**
      *Doe een request naar de host die meegegeven is stuur het object als body
      *Kijkt tevens of het een serviceExceptionReport is en trowed dat dan als Exception.
      *@return het element dat terug gegeven wordt door de server
      */
-    public static Element doRequest(Object o, String host) throws Exception{        
-         return doRequest(o,host,null);
+    public static Element doRequest(Object o, String host) throws Exception{
+        return doRequest(o,host,null);
         
     }
-    public static Element doRequest(Object o, String host, HashMap namespaces) throws Exception{        
+    public static Element doRequest(Object o, String host, HashMap namespaces) throws Exception{
         Element el=readXml2Element(new InputStreamReader(getInputStreamReader(o,host,namespaces)));
         if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)){
             nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser= getServiceExceptionReport(el);
@@ -155,11 +158,11 @@ public class OgcWfsClient {
             }
             //m.setNamespaceMapping("app", "http://www.deegree.org/app");
             m.marshal(o);
-            body = sw.toString();            
+            body = sw.toString();
             PostMethod postmethod = new PostMethod(host);
             postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-            httpmethod=postmethod;            
-        }        
+            httpmethod=postmethod;
+        }
         status = client.executeMethod(httpmethod);
         if (status == HttpStatus.SC_OK) {
             /*DEBUG:
@@ -182,12 +185,12 @@ public class OgcWfsClient {
         }else{
             cap=original.getCapabilities();
         }
-        List methodsAllowed = extractHttpMethodsAllowed(cap,OGCConstants.WFS_REQUEST_DescribeFeatureType);        
+        List methodsAllowed = extractHttpMethodsAllowed(cap,OGCConstants.WFS_REQUEST_DescribeFeatureType);
         Element returnvalue = null;
         OGCRequest or=(OGCRequest) original.clone();
         or.addOrReplaceParameter(OGCConstants.WMS_SERVICE, OGCConstants.WFS_SERVICE_WFS);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_DescribeFeatureType);
-                
+        
         String host = or.getUrlWithNonOGCparams();
         if (methodsAllowed.contains(POSTMETHOD)){
             returnvalue=doRequest(getDescribeFeatureTypeRequest(or),host,or.getNameSpaces());
@@ -404,101 +407,66 @@ public class OgcWfsClient {
         return gf;
     }
     
-//        public static GetFeature getGetFeatureRequest(OGCRequest original) throws MarshalException, ValidationException, Exception{
-//        OGCRequest or = (OGCRequest) original.clone();
-//        or.addOrReplaceParameter(OGCConstants.WMS_REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
-//        GetFeature gf = null;
-//        if(or.getParameter(OGCConstants.WMS_VERSION)==null){
-//            getCapabilities(or);
-//            original.addOrReplaceParameter(OGCConstants.WMS_VERSION,or.getParameter(OGCConstants.WMS_VERSION));
-//        }
-//        if (or.getParameter(OGCConstants.WMS_VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
-//            gf=new nl.b3p.xml.wfs.v100.GetFeature();
-//        }else if (or.getParameter(OGCConstants.WMS_VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_110)){
-//            gf=new nl.b3p.xml.wfs.v110.GetFeature();
-//        }else{
-//            throw new UnsupportedOperationException("WFS DescribeFeatureTypeRequest version: "+or.getParameter(OGCConstants.WMS_VERSION)+" not supported");
-//        }
-//        if (or.getParameter(OGCConstants.WMS_VERSION) != null) {
-//            gf.setVersion(or.getParameter(OGCConstants.WMS_VERSION));
-//        }
-//        if (or.getParameter(OGCConstants.WMS_SERVICE) != null) {
-//            gf.setService(or.getParameter(OGCConstants.WMS_SERVICE));
-//        }
-//        if (or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT) != null) {
-//            gf.setOutputFormat(or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT));
-//        }
-//        if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature){
-//            nl.b3p.xml.wfs.v100.GetFeature gfv100=(nl.b3p.xml.wfs.v100.GetFeature)gf;
-//            nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
-//            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
-//                StringBuffer s = new StringBuffer();
-//                String[] typenames = or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
-//                for (int i = 0; i < typenames.length; i++) {
-//                    if (i != 0) {
-//                        s.append(",");
-//                    }
-//                    s.append(typenames[i]);
-//                }
-//                q.setTypeName(s.toString());
-//            }
-//            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
-//                try{
-//                    nl.b3p.xml.ogc.v100.Filter f=(nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
-//                    q.setFilter(f);
-//                }catch(Exception e){
-//                    log.error("Filter v100 (WFS version 1.0.0) not correct",e);
-//                }
-//            } else if (or.getParameter(OGCConstants.WMS_PARAM_BBOX) != null) {
-//                //todo: msGeometry is nog hard er ingezet omdat er vanuit wordt gegaan dat mapserver altijd 1.0.0 versie gebruikt en degree 1.1.0
-//                StringBuffer s = new StringBuffer();
-//                String[] tokens = or.getParameter(OGCConstants.WMS_PARAM_BBOX).split(",");
-//                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
-//                s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
-//                s.append("</coordinates></Box></BBOX></Filter>");
-//                nl.b3p.xml.ogc.v100.Filter f=(nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(s.toString()));
-//                q.setFilter(f);
-//            }
-//            gfv100.addQuery(q);
-//        }else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature){
-//            nl.b3p.xml.wfs.v110.GetFeature gfv110=(nl.b3p.xml.wfs.v110.GetFeature)gf;
-//            nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
-//            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
-//                String[] typenames = or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
-//                StringBuffer sb = new StringBuffer();
-//                for (int i = 0; i < typenames.length; i++) {
-//                    if (i!=0){
-//                        sb.append(",");
-//                    }
-//                    sb.append(typenames[i]);
-//                }
-//                q.setTypeName(sb.toString());
-//            }
-//            if (or.getParameter(OGCConstants.WMS_PARAM_SRS) != null) {
-//                q.setSrsName(or.getParameter(OGCConstants.WMS_PARAM_SRS));
-//            }
-//            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
-//                try{
-//                    nl.b3p.xml.ogc.v110.Filter f=(nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
-//                    q.setFilter(f);
-//                }catch(Exception e){
-//                    log.error("Filter v110 (WFS version 1.1.0) not correct",e);
-//                }
-//
-//            } else if (or.getParameter(OGCConstants.WMS_PARAM_BBOX) != null) {
-//                StringBuffer s = new StringBuffer();
-//                String[] tokens = or.getParameter(OGCConstants.WMS_PARAM_BBOX).split(",");
-//                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
-//                s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
-//                s.append("</coordinates></Box></BBOX></Filter>");
-//                nl.b3p.xml.ogc.v110.Filter f=(nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(s.toString()));
-//                q.setFilter(f);
-//            }
-//            gfv110.addQuery(q);
-//        }
-//
-//        return gf;
-//    }
+    public static Transaction getTransactionRequest(OGCRequest original)throws MarshalException, ValidationException, Exception{
+        OGCRequest or = (OGCRequest) original.clone();
+        or.addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_Transaction);
+        
+        Transaction tr = null;
+        if(or.getParameter(OGCConstants.VERSION)==null){
+            getCapabilities(or);
+            original.addOrReplaceParameter(OGCConstants.VERSION,or.getParameter(OGCConstants.VERSION));
+        }
+        if(or.getFinalVersion()!=null && !or.getFinalVersion().equalsIgnoreCase(OGCConstants.WFS_VERSION_UNSPECIFIED) && !or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion())){
+            or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
+        }
+        if (OGCConstants.WFS_VERSION_100.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))){
+            tr=new nl.b3p.xml.wfs.v100.transaction.Transaction();
+        }else if (OGCConstants.WFS_VERSION_110.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))){
+            tr=new nl.b3p.xml.wfs.v110.Transaction();
+        }else{
+            throw new UnsupportedOperationException("WFS TransactionRequest version: "+or.getParameter(OGCConstants.VERSION)+" not supported!");
+        }
+        if (or.getParameter(OGCConstants.VERSION) != null) {
+            tr.setVersion(or.getParameter(OGCConstants.VERSION));
+        }
+        if (or.getParameter(OGCConstants.SERVICE) != null) {
+            tr.setService(or.getParameter(OGCConstants.SERVICE));
+        }
+        if (or.getParameter(OGCConstants.WFS_PARAM_HANDLE) != null) {
+            tr.setHandle(or.getParameter(OGCConstants.WFS_PARAM_HANDLE));
+        }
+        if (or.getParameter(OGCConstants.WFS_PARAM_LOCKID) != null) {
+            tr.setLockId(or.getParameter(OGCConstants.WFS_PARAM_LOCKID));
+        }
+        if (or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION) != null) {
+            String release = or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION);
+            nl.b3p.xml.wfs.v110.types.AllSomeType releaseAction=(nl.b3p.xml.wfs.v110.types.AllSomeType)Unmarshaller.unmarshal(nl.b3p.xml.wfs.v110.types.AllSomeType.class, new StringReader(release));
+            tr.setReleaseAction(releaseAction);
+        }
+        // add all elements
+        List TransactionList = or.getTransactionElementList(or.getAbbr());
+        TransactionTypeChoice ttc = new TransactionTypeChoice();
+        Iterator it = TransactionList.iterator();
+        while(it.hasNext()){
+            TransactionTypeChoiceItem ttci = new TransactionTypeChoiceItem();
+            Object o = it.next();
+            if(o instanceof nl.b3p.xml.wfs.v110.Delete){
+                nl.b3p.xml.wfs.v110.Delete delete = (nl.b3p.xml.wfs.v110.Delete)o;
+                ttci.setDelete(delete);
+            }else if(o instanceof nl.b3p.xml.wfs.v110.Insert){
+                nl.b3p.xml.wfs.v110.Insert insert = (nl.b3p.xml.wfs.v110.Insert)o;
+                ttci.setInsert(insert);
+            }else if(o instanceof nl.b3p.xml.wfs.v110.Update){
+                nl.b3p.xml.wfs.v110.Update update = (nl.b3p.xml.wfs.v110.Update)o;
+                ttci.setUpdate(update);
+            }
+            ttc.addTransactionTypeChoiceItem(ttci);
+        }
+        tr.addTransactionTypeChoice(ttc);
+        
+        return tr;
+    }
+    
     /***
      * The request parameter of the OGCRequest must be filled because it is used to choose the body returned.
      */
@@ -514,6 +482,8 @@ public class OgcWfsClient {
             castorObject = getGetFeatureRequest(or);
         } else if (or.getParameter(OGCConstants.REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_GetCapabilities)) {
             castorObject = getGetCapabilitiesRequest(or);
+        } else if(or.getParameter(OGCConstants.REQUEST).equalsIgnoreCase(OGCConstants.WFS_REQUEST_Transaction)){
+            castorObject = getTransactionRequest(or);
         } else {
             throw new UnsupportedOperationException("Request: " + or.getParameter(OGCConstants.REQUEST) + " wordt (nog) niet ondersteund");
         }
@@ -714,7 +684,7 @@ public class OgcWfsClient {
         return anyNode;
         
     }
-
+    
     private static List extractHttpMethodsAllowed(WFS_Capabilities cap, String requestName) {
         ArrayList methodsAllowed=new ArrayList();
         if (cap instanceof nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities){
@@ -728,9 +698,9 @@ public class OgcWfsClient {
                             nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
                             for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
                                 if(http.getHTTPTypeItem(i3).getGet()!=null)
-                                    methodsAllowed.add(GETMETHOD);                                
+                                    methodsAllowed.add(GETMETHOD);
                                 if(http.getHTTPTypeItem(i3).getPost()!=null)
-                                    methodsAllowed.add(POSTMETHOD);                                
+                                    methodsAllowed.add(POSTMETHOD);
                             }
                             
                         }
@@ -742,9 +712,9 @@ public class OgcWfsClient {
                             nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
                             for (int i3=0; i3 < http.getHTTPTypeItemCount(); i3++){
                                 if(http.getHTTPTypeItem(i3).getGet()!=null)
-                                    methodsAllowed.add(GETMETHOD);                               
+                                    methodsAllowed.add(GETMETHOD);
                                 if(http.getHTTPTypeItem(i3).getPost()!=null)
-                                    methodsAllowed.add(POSTMETHOD);                                
+                                    methodsAllowed.add(POSTMETHOD);
                             }
                             
                         }
@@ -792,7 +762,7 @@ public class OgcWfsClient {
                         }
                     }
                 }else if(OGCConstants.WFS_REQUEST_LockFeature.equalsIgnoreCase(requestName)){
-                   if (rti.getLockFeature()!=null){
+                    if (rti.getLockFeature()!=null){
                         nl.b3p.xml.wfs.v100.capabilities.DCPType[] requestDcpTypes=rti.getLockFeature().getDCPType();
                         for (int i2=0; i2 < requestDcpTypes.length; i2++){
                             nl.b3p.xml.wfs.v100.capabilities.HTTP http=requestDcpTypes[i2].getHTTP();
@@ -804,9 +774,9 @@ public class OgcWfsClient {
                             }
                             
                         }
-                    } 
+                    }
                 }
-            }            
+            }
         }else if (cap instanceof nl.b3p.xml.wfs.v110.WFS_Capabilities){
             nl.b3p.xml.wfs.v110.WFS_Capabilities cap110= (nl.b3p.xml.wfs.v110.WFS_Capabilities)cap;
             if(cap110.getOperationsMetadata()!=null){
@@ -832,6 +802,6 @@ public class OgcWfsClient {
         }
         return methodsAllowed;
     }
-
+    
     
 }
