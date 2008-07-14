@@ -37,6 +37,7 @@ import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
+import nl.b3p.xml.wfs.v110.types.ResultTypeType;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
@@ -380,6 +381,10 @@ public class OgcWfsClient {
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
                 q.setSrsName(or.getParameter(OGCConstants.WFS_PARAM_SRSNAME));
+            }
+            if(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE) != null){
+                ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
+                gfv110.setResultType(resultType);
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
                 try{

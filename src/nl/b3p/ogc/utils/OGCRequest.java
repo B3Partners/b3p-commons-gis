@@ -262,16 +262,13 @@ public class OGCRequest implements OGCConstants {
     public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature) throws Exception{
         addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE,getFeature.getService());
+        addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE,getFeature.getResultType().toString());
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetFeature);
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKDEPTH, getFeature.getTraverseXlinkDepth());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKEXPIRY, "" + getFeature.getTraverseXlinkExpiry());
-        StringWriter writ = new StringWriter();
-        Marshaller ma = new Marshaller(writ);
-        ma.marshal(getFeature.getResultType());
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE, writ.toString());
         nl.b3p.xml.wfs.v110.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0){
             for(int j = 0; j < qlist.length; j++){
