@@ -194,8 +194,7 @@ public interface OGCConstants {
     public static final List WFS_REQUIRED_PARAMS_GetFeature = Arrays.asList(new String[] {
         REQUEST,
         SERVICE,
-        VERSION,
-        WFS_PARAM_TYPENAME
+        VERSION
     });
     
     public static final List WFS_REQUIRED_PARAMS_DescribeFeatureType = Arrays.asList(new String[] {

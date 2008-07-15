@@ -53,6 +53,7 @@ public class OGCRequest implements OGCConstants {
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     private HashMap transactionList = new HashMap();
+    private HashMap getFeatureMap = new HashMap();
     private String abbr;
     private List layers = new ArrayList();
     // version that will be returned to client
@@ -234,30 +235,17 @@ public class OGCRequest implements OGCConstants {
         nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0){
             for(int j = 0; j < qlist.length; j++){
+                String typename = qlist[j].getTypeName();
+                String filter = null;
                 if(qlist[j].getFilter() != null){
                     StringWriter sw = new StringWriter();
                     Marshaller m = new Marshaller(sw);
                     m.marshal(qlist[j].getFilter());
-                    addOrReplaceParameter(OGCConstants.WFS_PARAM_FILTER, sw.toString());
-                    
-                    // It is doing nothing with te BBox yet.
-                    /*if(qlist[j].getFilter().getBBOX() != null){
-                        StringWriter s = new StringWriter();
-                        Marshaller ma = new Marshaller(s);
-                        ma.marshal(qlist[j].getFilter().getBBOX());
-                        addOrReplaceParameter(OGCConstants.WFS_PARAM_BBOX, s.toString());
-                    }*/
+                    filter = sw.toString();
                 }
+                addGetFeatureMap(typename, filter);
             }
         }
-        StringBuffer str = new StringBuffer();
-        for (int i = 0; i < qlist.length; i++){
-            if (i != 0) {
-                str.append(",");
-            }
-            str.append(qlist[i].getTypeName());
-        }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature) throws Exception{
         addOrReplaceParameter(OGCConstants.VERSION,getFeature.getVersion());
@@ -272,33 +260,17 @@ public class OGCRequest implements OGCConstants {
         nl.b3p.xml.wfs.v110.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0){
             for(int j = 0; j < qlist.length; j++){
+                String typename = qlist[j].getTypeName();
+                String filter = null;
                 if(qlist[j].getFilter() != null){
                     StringWriter sw = new StringWriter();
                     Marshaller m = new Marshaller(sw);
                     m.marshal(qlist[j].getFilter());
-                    addOrReplaceParameter(OGCConstants.WFS_PARAM_FILTER, sw.toString());
-                    
-                    // It is doing nothing with te BBox yet.
-                    /*if(qlist[j].getFilter().getBBOX() != null){
-                        StringWriter s = new StringWriter();
-                        Marshaller ms = new Marshaller(s);
-                        ms.marshal(qlist[j].getFilter().getBBOX());
-                        addOrReplaceParameter(OGCConstants.WFS_PARAM_BBOX, s.toString());
-                    }*/
+                    filter = sw.toString();
                 }
-                if(qlist[j].getSrsName() != null){
-                    addOrReplaceParameter(OGCConstants.WFS_PARAM_SRSNAME, qlist[j].getSrsName());
-                }
+                addGetFeatureMap(typename, filter);
             }
         }
-        StringBuffer str = new StringBuffer();
-        for (int i = 0; i < qlist.length; i++){
-            if (i != 0) {
-                str.append(",");
-            }
-            str.append(qlist[i].getTypeName());
-        }
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
     
     public void setTransactionV100(nl.b3p.xml.wfs.v100.transaction.Transaction transaction) throws Exception{
@@ -466,6 +438,24 @@ public class OGCRequest implements OGCConstants {
     
     public List getLayers(){
         return layers;
+    }
+    
+    public HashMap getGetFeatureMap(){
+        return getFeatureMap;
+    }
+    public void setGetFeatureMap(HashMap getFeatureMap){
+        this.getFeatureMap = getFeatureMap;
+    }
+    public void addGetFeatureMap(String key, Object value){
+        getFeatureMap.put(key, value);
+    }
+    public String getGetFeatureFilter(String key){
+        Object o = getFeatureMap.get(key);
+        if(o == null){
+            return null;
+        }else{
+            return o.toString();
+        }
     }
     
     /** Main methode to fill the OGUrl object

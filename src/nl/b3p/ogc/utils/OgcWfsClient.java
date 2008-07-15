@@ -361,22 +361,11 @@ public class OgcWfsClient {
                     log.error("Filter v100 (WFS version 1.0.0) not correct",e);
                 }
             }
-            // It is doing nothing with te BBox yet. There always seems te be a filter when tere is a BBox.
-            /*else if (or.getParameter(OGCConstants.WFS_PARAM_BBOX) != null) {
-                //todo: msGeometry is nog hard er ingezet omdat er vanuit wordt gegaan dat mapserver altijd 1.0.0 versie gebruikt en degree 1.1.0
-                StringBuffer s = new StringBuffer();
-                String[] tokens = or.getParameter(OGCConstants.WMS_PARAM_BBOX).split(",");
-                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
-                s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
-                s.append("</coordinates></Box></BBOX></Filter>");
-                nl.b3p.xml.ogc.v100.Filter f=(nl.b3p.xml.ogc.v100.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(s.toString()));
-                q.setFilter(f);
-            }*/
             gfv100.addQuery(q);
         }else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature){
             nl.b3p.xml.wfs.v110.GetFeature gfv110 = (nl.b3p.xml.wfs.v110.GetFeature)gf;
             nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
-            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
+            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) { 
                 q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
@@ -386,7 +375,7 @@ public class OgcWfsClient {
                 ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
                 gfv110.setResultType(resultType);
             }
-            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
+            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) { 
                 try{
                     nl.b3p.xml.ogc.v110.Filter f = (nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
                     q.setFilter(f);
@@ -396,16 +385,6 @@ public class OgcWfsClient {
                     throw new UnsupportedOperationException("Filter is not correct!");
                 }
             }
-            // It is doing nothing with te BBox yet. There always seems te be a filter when tere is a BBox.
-            /*else if (or.getParameter(OGCConstants.WFS_PARAM_BBOX) != null) {
-                StringBuffer s = new StringBuffer();
-                String[] tokens = or.getParameter(OGCConstants.WMS_PARAM_BBOX).split(",");
-                s.append("<Filter><BBOX><PropertyName>msGeometry</PropertyName><Box><coordinates>");
-                s.append(tokens[0] + "," + tokens[1] + " " + tokens[2] + "," + tokens[3]);
-                s.append("</coordinates></Box></BBOX></Filter>");
-                nl.b3p.xml.ogc.v110.Filter f=(nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(s.toString()));
-                q.setFilter(f);
-            }*/
             gfv110.addQuery(q);
         }
         

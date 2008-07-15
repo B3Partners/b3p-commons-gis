@@ -3,7 +3,7 @@
  *
  * Created on May 16, 2008, 9:32 AM
  *
- * Vergelijkbare klasse als OGCRequest.java maar dan om de response mee te verwerken die 
+ * Vergelijkbare klasse als OGCRequest.java maar dan om de response mee te verwerken die
  * de serviceprviders stuurt na een request.
  */
 
@@ -44,13 +44,13 @@ public class OGCResponse {
     private List versions = new ArrayList();
     private nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities newWfsCapabilitiesV100;
     private nl.b3p.xml.wfs.v110.WFS_Capabilities newWfsCapabilitiesV110;
-    private nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollectionV100;
-    private nl.b3p.xml.wfs.v110.FeatureCollection newFeatureCollectionV110;
     private nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport newExceptionReport;
     private nl.b3p.xml.wfs.v100.transaction.TransactionResult newTransactionResponseV100;
     private nl.b3p.xml.wfs.v110.TransactionResponse newTransactionResponseV110;
     private List getCapabilitiesV100 = new ArrayList();
     private List getCapabilitiesV110 = new ArrayList();
+    private List featureCollectionV100 = new ArrayList();
+    private List featureCollectionV110 = new ArrayList();
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     private String srs = null;
@@ -75,15 +75,15 @@ public class OGCResponse {
                 
                 if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                     um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
-                    o = um.unmarshal(rootElement);              
+                    o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities)o;
                     
                     getCapabilitiesV100.add(replaceCapabilitiesV100Url(wfsCapabilities, prefix));
                 }else{
                     um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
-                    o = um.unmarshal(rootElement);              
+                    o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities)o;
-
+                    
                     getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
                 }
                 checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
@@ -93,16 +93,16 @@ public class OGCResponse {
                 
                 if(version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                     um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
-                    o = um.unmarshal(rootElement);              
+                    o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection)o;
                     
-                    newFeatureCollectionV100 = replaceFeatureCollectionV100Url(featureCollection, prefix);
+                    featureCollectionV100.add(replaceFeatureCollectionV100Url(featureCollection, prefix));
                 }else{
                     um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
                     o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection)o;
                     
-                    newFeatureCollectionV110 = replaceFeatureCollectionV110Url(featureCollection, prefix);
+                    featureCollectionV110.add(replaceFeatureCollectionV110Url(featureCollection, prefix));
                 }
             }else if(rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)){
                 response = OGCConstants.WFS_SERVER_EXCEPTION;
@@ -119,7 +119,7 @@ public class OGCResponse {
                 
                 if(version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
                     um = new Unmarshaller(nl.b3p.xml.wfs.v100.transaction.TransactionResult.class);
-                    o = um.unmarshal(rootElement);              
+                    o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse = (nl.b3p.xml.wfs.v100.transaction.TransactionResult)o;
                     
                     newTransactionResponseV100 = replaceTransactionResponseV100Url(transactionResponse, prefix);
@@ -229,7 +229,7 @@ public class OGCResponse {
         }
     }
     
-    public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url (nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix){
+    public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url(nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix){
         nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for(int b = 0; b < featureTypeList.length; b++){
             String layer = featureTypeList[b].getName().split("}")[1];
@@ -250,8 +250,7 @@ public class OGCResponse {
                 for(int x = 0; x < httpCount; x++){
                     if(http.getHTTPItem(x).getGet() != null){
                         http.getHTTPItem(x).getGet().setHref(httpHost + "?");
-                    }
-                    else if(http.getHTTPItem(x).getPost() != null){
+                    } else if(http.getHTTPItem(x).getPost() != null){
                         http.getHTTPItem(x).getPost().setHref(httpHost);
                     }
                 }
@@ -351,10 +350,11 @@ public class OGCResponse {
         }else if(response.equals(OGCConstants.WFS_SERVER_EXCEPTION)){
             castorObject = newExceptionReport;
         }else if(response.equals(OGCConstants.WFS_FEATURECOLLECTION)){
+            Object o = mergeFeatureCollection();
             if(version.equals(OGCConstants.WFS_VERSION_100)){
-                castorObject = newFeatureCollectionV100;
+                castorObject = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
             }else{
-                castorObject = newFeatureCollectionV110;
+                castorObject = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
             }
         }else if(response.equals(OGCConstants.WFS_TRANSACTIONRESPONSE)){
             if(version.equals(OGCConstants.WFS_VERSION_100)){
@@ -386,7 +386,7 @@ public class OGCResponse {
                     m.setSchemaLocation(location);
                 }
             }
-
+            
             if(castorObject != null){
                 m.marshal(castorObject);
                 body = sw.toString();
@@ -398,17 +398,16 @@ public class OGCResponse {
         return body;
     }
     
-    public void findNameSpace(Node node){ 
+    public void findNameSpace(Node node){
         NamedNodeMap map = node.getAttributes();
         if(map != null){
-            for(int i = 0; map.getLength() > i; i++){          
+            for(int i = 0; map.getLength() > i; i++){
                 String name = map.item(i).getNodeName();
                 String[] tokens = name.split(":");
                 if(tokens[0].equalsIgnoreCase("xmlns")){
                     String value = map.item(i).getNodeValue();
                     addOrReplaceNameSpace(tokens[1],value);
-                }
-                else if(tokens.length == 2){
+                } else if(tokens.length == 2){
                     if(tokens[1].equalsIgnoreCase("SchemaLocation")){
                         String value = map.item(i).getNodeValue();
                         addOrReplaceSchemaLocation(tokens[1],value);
@@ -466,7 +465,56 @@ public class OGCResponse {
             throw new UnsupportedOperationException("WFS Version the serviceProvider returned is not supported by Kaartenbalie!");
         }
     }
-    
+    public Object mergeFeatureCollection(){
+        if(version.equals(OGCConstants.WFS_VERSION_110)){
+            nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = null;
+            
+            Iterator it = featureCollectionV110.iterator();
+            int i = 0;
+            int featureCount = 0;
+            while(it.hasNext()){
+                nl.b3p.xml.wfs.v110.FeatureCollection newFeatureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection)it.next();
+                if(i == 0){
+                    featureCollection = newFeatureCollection;
+                    featureCount = newFeatureCollection.getNumberOfFeatures();
+                    i++;
+                }else{
+                    featureCount += newFeatureCollection.getNumberOfFeatures();
+                    Object[] o = newFeatureCollection.getFeatureMember();
+                    for(int x = 0; x < o.length; x++){
+                        Object featureMember = o[x];
+                        featureCollection.addFeatureMember(featureMember);
+                    }
+                    i++;
+                }
+            }
+            featureCollection.setNumberOfFeatures(featureCount);
+            return featureCollection;
+        }else{
+            //private nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollectionV100;
+            nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = null;
+            
+            Iterator it = featureCollectionV100.iterator();
+            int i = 0;
+            int featureCount = 0;
+            while(it.hasNext()){
+                nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection)it.next();
+                if(i == 0){
+                    featureCollection = newFeatureCollection;
+                    i++;
+                }else{
+                    Object[] o = newFeatureCollection.getFeatureMember();
+                    for(int x = 0; x < o.length; x++){
+                        Object featureMember = o[x];
+                        featureCollection.addFeatureMember(featureMember);
+                    }
+                    i++;
+                }
+            }
+            return featureCollection;
+        }
+        
+    }
     public Object mergeCapabilities(List layers){
         Object capabilities = new Object();
         if(versions.size() > 1){
@@ -527,7 +575,7 @@ public class OGCResponse {
         for(int x = 0; x < operations.length; x++){
             names[x] = operations[x].getName();
         }
-        for(int y = 0; y < names.length; y++){    
+        for(int y = 0; y < names.length; y++){
             if(!supportedOperations.contains(names[y])){
                 Operation remove = operations[y];
                 newWfsCapabilitiesV110.getOperationsMetadata().removeOperation(remove);
@@ -597,7 +645,7 @@ public class OGCResponse {
             else if (operations[x].getTransaction() != null)
                 names[x] = OGCConstants.WFS_REQUEST_Transaction;
         }
-        for(int y = 0; y < names.length; y++){    
+        for(int y = 0; y < names.length; y++){
             if(!supportedOperations.contains(names[y])){
                 RequestTypeItem requestItem = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem(y);
                 newWfsCapabilitiesV100.getCapability().getRequest().removeRequestTypeItem(requestItem);
@@ -608,8 +656,8 @@ public class OGCResponse {
         this.clearVersions();
         return newWfsCapabilitiesV100;
     }
-
-    private void checkSupportedOperations(List newSupportedOperations) {   
+    
+    private void checkSupportedOperations(List newSupportedOperations) {
         if(supportedOperations.size() < 1){
             supportedOperations = newSupportedOperations;
         }else{
