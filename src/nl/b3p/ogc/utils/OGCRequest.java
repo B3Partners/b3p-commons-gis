@@ -447,7 +447,14 @@ public class OGCRequest implements OGCConstants {
         this.getFeatureMap = getFeatureMap;
     }
     public void addGetFeatureMap(String key, Object value){
-        getFeatureMap.put(key, value);
+        String newKey = "";
+        String[] temp = key.split("}");
+        if(temp.length == 2){
+            newKey = temp[1];
+        }else{
+            newKey = key;
+        }
+        getFeatureMap.put(newKey, value);
     }
     public String getGetFeatureFilter(String key){
         Object o = getFeatureMap.get(key);
