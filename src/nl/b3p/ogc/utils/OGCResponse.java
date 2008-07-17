@@ -566,6 +566,7 @@ public class OGCResponse {
                         newWfsCapabilitiesV110.getFeatureTypeList().addFeatureType(feature);
                     }
                 }
+                checkFilterCapabilities(newWfsCapabilitiesV110.getFilter_Capabilities(), nextWfsCapabilitiesV110.getFilter_Capabilities());
             }
         }
         
@@ -625,6 +626,7 @@ public class OGCResponse {
                         newWfsCapabilitiesV100.getFeatureTypeList().addFeatureType(feature);
                     }
                 }
+                checkFilterCapabilities(newWfsCapabilitiesV100.getFilter_Capabilities(), nextWfsCapabilitiesV100.getFilter_Capabilities());
             }
         }
         
@@ -662,11 +664,13 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.Filter_Capabilities newFilter = (nl.b3p.xml.ogc.v110.Filter_Capabilities)newFilterCapabilities;
             
             nl.b3p.xml.ogc.v110.types.GeometryOperandType[] geometryOperand = filter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().getGeometryOperand();
-            nl.b3p.xml.ogc.v110.types.GeometryOperandType[] newGeometryOperand = newFilter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().getGeometryOperand();          
+            nl.b3p.xml.ogc.v110.types.GeometryOperandType[] newGeometryOperand = newFilter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().getGeometryOperand();
             for(int i = 0; i < geometryOperand.length; i++){
                 boolean isValid = false;
+                String value = geometryOperand[i].toString();
                 for(int j = 0; j < newGeometryOperand.length; j++){
-                    if(geometryOperand[i].equals(newGeometryOperand[j])){
+                    String newValue = newGeometryOperand[j].toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -679,8 +683,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.SpatialOperator[] newSpatialOperator = newFilter.getSpatial_Capabilities().getSpatialOperators().getSpatialOperator();
             for(int x = 0; x < spatialOperator.length; x++){
                 boolean isValid = false;
+                String value = spatialOperator[x].getName().toString();
                 for(int y = 0; y < newSpatialOperator.length; y++){
-                    if(spatialOperator[x].equals(newSpatialOperator[y])){
+                    String newValue = newSpatialOperator[y].getName().toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -691,7 +697,7 @@ public class OGCResponse {
             
             nl.b3p.xml.ogc.v110.LogicalOperators logicalOperators = filter.getScalar_Capabilities().getLogicalOperators();
             nl.b3p.xml.ogc.v110.LogicalOperators newLogicalOperators = newFilter.getScalar_Capabilities().getLogicalOperators();
-            if(!logicalOperators.equals(newLogicalOperators)){
+            if(!logicalOperators.toString().equals(newLogicalOperators.toString())){
                 if(logicalOperators != null && newLogicalOperators == null){
                     filter.getScalar_Capabilities().setLogicalOperators(null);
                 }
@@ -701,8 +707,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] newComparisonOperators = newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
             for(int o = 0; o < comparisonOperators.length; o++){
                 boolean isValid = false;
+                String value = comparisonOperators[o].getComparisonOperator().toString();
                 for(int p = 0; p < newComparisonOperators.length; p++){
-                    if(comparisonOperators[o].equals(newComparisonOperators[p])){
+                    String newValue = newComparisonOperators[p].getComparisonOperator().toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -715,8 +723,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] newArithmeticOperators = newFilter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
             for(int f = 0; f < arithmeticOperators.length; f++){
                 boolean isValid = false;
+                String value = arithmeticOperators[f].getSimpleArithmetic().toString();
                 for(int h = 0; h < newArithmeticOperators.length; h++){
-                    if(arithmeticOperators[f].equals(newArithmeticOperators[h])){
+                    String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -729,8 +739,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.Id_CapabilitiesTypeItem[] newIdCapabilities = newFilter.getId_Capabilities().getId_CapabilitiesTypeItem();
             for(int a = 0; a < idCapabilities.length; a++){
                 boolean isValid = false;
+                String value = idCapabilities[a].getChoiceValue().toString();
                 for(int b = 0; b < newIdCapabilities.length; b++){
-                    if(idCapabilities[a].equals(newIdCapabilities[b])){
+                    String newValue = newIdCapabilities[b].getChoiceValue().toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -747,8 +759,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v100.capabilities.Spatial_OperatorsTypeItem[] newSpatialOperators = newFilter.getSpatial_Capabilities().getSpatial_Operators().getSpatial_OperatorsTypeItem();
             for(int i = 0; i < spatialOperators.length; i++){
                 boolean isValid = false;
+                String value = spatialOperators[i].toString();
                 for(int j = 0; j < newSpatialOperators.length; j++){
-                    if(spatialOperators[i].equals(newSpatialOperators[j])){
+                    String newValue = newSpatialOperators[j].toString();
+                    if(value.equals(newValue)){
                         isValid = true;
                     }
                 }
@@ -760,14 +774,60 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] scalarCapabilities = filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
             nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] newScalarCapabilities = newFilter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
             for(int x = 0; x < scalarCapabilities.length; x++){
-                boolean isValid = false;
-                for(int y = 0; y < newScalarCapabilities.length; y++){
-                    if(scalarCapabilities[x].equals(newScalarCapabilities[y])){
-                        isValid = true;
+                if(scalarCapabilities[x].getArithmetic_Operators() != null){
+                    nl.b3p.xml.ogc.v100.capabilities.Arithmetic_OperatorsTypeItem[] arithmeticOperators = scalarCapabilities[x].getArithmetic_Operators().getArithmetic_OperatorsTypeItem();
+                    for(int y = 0; y < newScalarCapabilities.length; y++){
+                        if(newScalarCapabilities[y].getArithmetic_Operators() != null){
+                            nl.b3p.xml.ogc.v100.capabilities.Arithmetic_OperatorsTypeItem[] newArithmeticOperators = newScalarCapabilities[y].getArithmetic_Operators().getArithmetic_OperatorsTypeItem();
+                            
+                            for(int k = 0; k < arithmeticOperators.length; k++){
+                                boolean isValid = false;
+                                String value = arithmeticOperators[k].toString();
+                                for(int l = 0; l < newArithmeticOperators.length; l++){
+                                    String newValue = newArithmeticOperators[l].toString();
+                                    if(value.equals(newValue)){
+                                        isValid = true;
+                                    }
+                                }
+                                if(isValid == false){
+                                    filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getArithmetic_Operators().removeArithmetic_OperatorsTypeItem(arithmeticOperators[k]);
+                                }
+                            }
+                        }
                     }
-                }
-                if(isValid == false){
-                    filter.getScalar_Capabilities().removeScalar_CapabilitiesTypeItem(scalarCapabilities[x]);
+                }else if(scalarCapabilities[x].getComparison_Operators() != null){
+                    nl.b3p.xml.ogc.v100.capabilities.Comparison_OperatorsTypeItem[] comparisonOperators = scalarCapabilities[x].getComparison_Operators().getComparison_OperatorsTypeItem();
+                    for(int y = 0; y < newScalarCapabilities.length; y++){
+                        if(newScalarCapabilities[y].getComparison_Operators() != null){
+                            nl.b3p.xml.ogc.v100.capabilities.Comparison_OperatorsTypeItem[] newComparisonOperators = newScalarCapabilities[y].getComparison_Operators().getComparison_OperatorsTypeItem();
+                            
+                            for(int k = 0; k < comparisonOperators.length; k++){
+                                boolean isValid = false;
+                                String value = comparisonOperators[k].toString();
+                                for(int l = 0; l < newComparisonOperators.length; l++){
+                                    String newValue = newComparisonOperators[l].toString();
+                                    if(value.equals(newValue)){
+                                        isValid = true;
+                                    }
+                                }
+                                if(isValid == false){
+                                    filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getComparison_Operators().removeComparison_OperatorsTypeItem(comparisonOperators[k]);
+                                }
+                            }
+                        }
+                    }
+                }else if(scalarCapabilities[x].getLogical_Operators() != null){
+                    boolean isValid = false;
+                    String value = scalarCapabilities[x].getLogical_Operators().toString();
+                    for(int y = 0; y < newScalarCapabilities.length; y++){
+                        String newValue = newScalarCapabilities[y].getLogical_Operators().toString();
+                        if(value.equals(newValue)){
+                            isValid = true;
+                        }
+                    }
+                    if(isValid == false){
+                        filter.getScalar_Capabilities().removeScalar_CapabilitiesTypeItem(scalarCapabilities[x]);
+                    }
                 }
             }
         }
