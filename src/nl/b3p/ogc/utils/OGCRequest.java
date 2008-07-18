@@ -191,7 +191,7 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetCapabilities);
     }
     public void setGetCapabilitiesV110(nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities){
-        addOrReplaceParameter(OGCConstants.VERSION, OGCConstants.WFS_VERSION_110);
+        addOrReplaceParameter(OGCConstants.VERSION, finalVersion);//OGCConstants.WFS_VERSION_110);
         addOrReplaceParameter(OGCConstants.SERVICE,getCapabilities.getService());
         addOrReplaceParameter(OGCConstants.REQUEST,OGCConstants.WFS_REQUEST_GetCapabilities);
     }
