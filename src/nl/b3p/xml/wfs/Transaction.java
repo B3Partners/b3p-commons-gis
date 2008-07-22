@@ -23,6 +23,4 @@ public interface Transaction {
     void setVersion(java.lang.String version);
     void setHandle(String string);
     void setLockId(String string);
-    void setReleaseAction(AllSomeType releaseAction);
-    void addTransactionTypeChoice(TransactionTypeChoice ttc);
 }

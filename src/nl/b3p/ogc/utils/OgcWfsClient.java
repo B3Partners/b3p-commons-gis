@@ -365,7 +365,7 @@ public class OgcWfsClient {
         }else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature){
             nl.b3p.xml.wfs.v110.GetFeature gfv110 = (nl.b3p.xml.wfs.v110.GetFeature)gf;
             nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
-            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) { 
+            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
                 q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
             }
             if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
@@ -375,7 +375,7 @@ public class OgcWfsClient {
                 ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
                 gfv110.setResultType(resultType);
             }
-            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) { 
+            if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
                 try{
                     nl.b3p.xml.ogc.v110.Filter f = (nl.b3p.xml.ogc.v110.Filter)Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
                     q.setFilter(f);
@@ -422,31 +422,34 @@ public class OgcWfsClient {
         if (or.getParameter(OGCConstants.WFS_PARAM_LOCKID) != null) {
             tr.setLockId(or.getParameter(OGCConstants.WFS_PARAM_LOCKID));
         }
-        if (or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION) != null) {
-            String release = or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION);
-            nl.b3p.xml.wfs.v110.types.AllSomeType releaseAction=(nl.b3p.xml.wfs.v110.types.AllSomeType)Unmarshaller.unmarshal(nl.b3p.xml.wfs.v110.types.AllSomeType.class, new StringReader(release));
-            tr.setReleaseAction(releaseAction);
-        }
-        // add all elements
-        List TransactionList = or.getTransactionElementList(or.getAbbr());
-        TransactionTypeChoice ttc = new TransactionTypeChoice();
-        Iterator it = TransactionList.iterator();
-        while(it.hasNext()){
-            TransactionTypeChoiceItem ttci = new TransactionTypeChoiceItem();
-            Object o = it.next();
-            if(o instanceof nl.b3p.xml.wfs.v110.Delete){
-                nl.b3p.xml.wfs.v110.Delete delete = (nl.b3p.xml.wfs.v110.Delete)o;
-                ttci.setDelete(delete);
-            }else if(o instanceof nl.b3p.xml.wfs.v110.Insert){
-                nl.b3p.xml.wfs.v110.Insert insert = (nl.b3p.xml.wfs.v110.Insert)o;
-                ttci.setInsert(insert);
-            }else if(o instanceof nl.b3p.xml.wfs.v110.Update){
-                nl.b3p.xml.wfs.v110.Update update = (nl.b3p.xml.wfs.v110.Update)o;
-                ttci.setUpdate(update);
+        if(tr instanceof nl.b3p.xml.wfs.v110.Transaction){
+            nl.b3p.xml.wfs.v110.Transaction trV110 = (nl.b3p.xml.wfs.v110.Transaction)tr; 
+            if (or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION) != null) {
+                String release = or.getParameter(OGCConstants.WFS_PARAM_RELEASEACTION);
+                nl.b3p.xml.wfs.v110.types.AllSomeType releaseAction=(nl.b3p.xml.wfs.v110.types.AllSomeType)Unmarshaller.unmarshal(nl.b3p.xml.wfs.v110.types.AllSomeType.class, new StringReader(release));
+                trV110.setReleaseAction(releaseAction);
             }
-            ttc.addTransactionTypeChoiceItem(ttci);
+            // add all elements
+            List TransactionList = or.getTransactionElementList(or.getAbbr());
+            TransactionTypeChoice ttc = new TransactionTypeChoice();
+            Iterator it = TransactionList.iterator();
+            while(it.hasNext()){
+                TransactionTypeChoiceItem ttci = new TransactionTypeChoiceItem();
+                Object o = it.next();
+                if(o instanceof nl.b3p.xml.wfs.v110.Delete){
+                    nl.b3p.xml.wfs.v110.Delete delete = (nl.b3p.xml.wfs.v110.Delete)o;
+                    ttci.setDelete(delete);
+                }else if(o instanceof nl.b3p.xml.wfs.v110.Insert){
+                    nl.b3p.xml.wfs.v110.Insert insert = (nl.b3p.xml.wfs.v110.Insert)o;
+                    ttci.setInsert(insert);
+                }else if(o instanceof nl.b3p.xml.wfs.v110.Update){
+                    nl.b3p.xml.wfs.v110.Update update = (nl.b3p.xml.wfs.v110.Update)o;
+                    ttci.setUpdate(update);
+                }
+                ttc.addTransactionTypeChoiceItem(ttci);
+            }
+            trV110.addTransactionTypeChoice(ttc);
         }
-        tr.addTransactionTypeChoice(ttc);
         
         return tr;
     }
