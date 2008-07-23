@@ -269,7 +269,16 @@ public class B3pGMLReader extends GMLReader{
                     sb.append("<?xml version='1.0' encoding='UTF-8'?>");
                     sb.append("<JCSGMLInputTemplate>");
                     sb.append("<CollectionElement>wfs:FeatureCollection</CollectionElement>");
-                    sb.append("<FeatureElement>gml:featureMember</FeatureElement>");
+                    sb.append("<FeatureElement>");
+                    if (name!=null && name.length()>0){
+                        if (defaultPrefix!=null && defaultPrefix.length()>0){
+                            sb.append(defaultPrefix+":");
+                        }
+                        sb.append(name);
+                    }else{
+                        sb.append("gml:featureMember");
+                    }
+                    sb.append("</FeatureElement>");
                     sb.append(geom.toString());
                     if (cols.length()>0){
                         sb.append("<ColumnDefinitions>");
