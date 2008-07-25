@@ -284,15 +284,16 @@ public class B3pOgcSqlWriter {
             values.append(f.getGeometry().toText());
             
             int geomSRID = f.getGeometry().getSRID();
-            int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
-            if (geomSRID>=0 && schemaSRID>=0 && geomSRID!=schemaSRID)
+            //int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
+            /*if (geomSRID>=0 && schemaSRID>=0 && geomSRID!=schemaSRID)
                 throw new ParseException("SRID of geometry differs from EPSG code of feature schema!", i);
-            
+            */
             if (geomSRID>=0){
                 values.append("\', "+geomSRID);
-            } else if (schemaSRID>=0){
+            }
+            /*else if (schemaSRID>=0){
                 values.append("\', "+geomSRID);
-            } else {
+            } */else {
                 values.append("\', 28992");
             }
             values.append(")");
@@ -422,7 +423,7 @@ public class B3pOgcSqlWriter {
                     }
                 }
             }
-            sb.append(")");
+            sb.append(")WITH OIDS");
             StringBuffer sbg=null;
             //if there is a geomColum needed create the create script.
             if(geomColumnFound){
