@@ -1,4 +1,24 @@
 /*
+ * B3P Commons GIS is a library with commonly used classes for OGC
+ * reading and writing. Included are wms, wfs, gml, csv and other
+ * general helper classes and extensions.
+ *
+ * Copyright 2005 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons GIS.
+ * 
+ * B3P Commons GIS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons GIS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
  */
 package nl.b3p.gis.csv;
 
@@ -29,15 +49,13 @@ import nl.b3p.gis.writers.B3pOgcSqlWriter;
  * @author Chris
  */
 public class CsvReader {
-    
+
     public static final String DEFAULT_ignoredColumnName1 = "id";
     public static final String DEFAULT_geomColumnName = "the_geom";
     public static final String DEFAULT_srs = "28992";
     public static final String DEFAULT_tsColumnName = "TS";
     public static final String DEFAULT_rdxColumnName = "RDX";
-    public static final String DEFAULT_rdyColumnName = "RDY";
-    
-    // FC
+    public static final String DEFAULT_rdyColumnName = "RDY";    // FC
     private String tableName;
     private String[] ignoredColumnNames;
     private String geomColumnName;
@@ -53,15 +71,13 @@ public class CsvReader {
     // Locale
     private Locale csvLocale;
     private DecimalFormatSymbols dfs;
-    private char csvSeparator;
-    
-    // Translation
+    private char csvSeparator;    // Translation
     private HashMap translatorMap = null;
-    
+
     public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames) {
         this(tableName, spaceName, spaceValue, uidNames, null, ',');
     }
-    
+
     public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames, Locale loc, char csvSeparator) {
         this.setTableName(tableName);
         this.setSpaceName(spaceName);
@@ -71,12 +87,12 @@ public class CsvReader {
         this.setCsvSeparator(csvSeparator);
         this.fillDefaults();
     }
-    
+
     protected void fillDefaults() {
         SimpleDateFormat sdf = (SimpleDateFormat) SimpleDateFormat.getDateInstance();
         sdf.applyPattern("yyyy-MM-dd HH:mm:sss");
         this.timestamp = sdf.format(new Date());
-        
+
         this.ignoredColumnNames = new String[]{DEFAULT_ignoredColumnName1};
         this.geomColumnName = DEFAULT_geomColumnName;
         this.srs = DEFAULT_srs;
@@ -84,30 +100,31 @@ public class CsvReader {
         this.rdxColumnName = DEFAULT_rdxColumnName;
         this.rdyColumnName = DEFAULT_rdyColumnName;
     }
-    
+
     public void csvOgcSqlETL(Connection conn, CsvInputStream cis) throws SQLException, NotSupportedException, IOException, CsvFormatException, Exception {
         FeatureSchema fs = getFeatureSchema(conn);
         FeatureDataset fc = readFeatureDataset(fs, cis);
         writeFeatureDataset(conn, fc);
     }
-    
+
     public FeatureSchema getFeatureSchema(Connection conn) throws SQLException, NotSupportedException, Exception {
         return FeatureSchemaFactory.createFeatureSchemaFromDbTable(conn, getTableName(), getIgnoredColumnNames());
     }
-    
+
     public FeatureDataset readFeatureDataset(FeatureSchema fs, CsvInputStream cis) throws IOException, CsvFormatException {
         cis.setSeparator(getCsvSeparator());
         FeatureDataset fc = new FeatureDataset(fs);
-        
+
         int columnCount = fs.getAttributeCount();
         List columnList = cis.readRecordAsList();
-        if (columnList==null || columnList.isEmpty())
+        if (columnList == null || columnList.isEmpty()) {
             throw new CsvFormatException("No file found");
-        if ((columnCount>1) && (columnList.size()<=1)) {
+        }
+        if ((columnCount > 1) && (columnList.size() <= 1)) {
             // simpele test of juiste separator is gebruikt
             throw new CsvFormatException("More columns expected (separator used: '" + getCsvSeparator() + "')");
         }
-        
+
         cis.setCheckColumnCount(true);
         int rdxindex = -1, rdyindex = -1;
         if (columnList != null) {
@@ -121,7 +138,7 @@ public class CsvReader {
         }
         List attributeList = null;
         while ((attributeList = cis.readRecordAsList()) != null) {
-            
+
             attributeList = processAttributes(attributeList, columnList);
             double rdx = 0.0d, rdy = 0.0d;
             if (rdxindex >= 0) {
@@ -132,12 +149,12 @@ public class CsvReader {
             }
             String[] attributes = (String[]) attributeList.toArray(new String[]{});
             Feature f = FeatureFactory.createPointFeature((Object[]) attributes, columns, rdx, rdy, fs);
-            
+
             fc.add(f);
         }
         return fc;
     }
-    
+
     public void writeFeatureDataset(Connection conn, FeatureDataset fc) throws SQLException, Exception {
         B3pOgcSqlWriter bow = new B3pOgcSqlWriter(conn);
         bow.setBatchValue(0);
@@ -156,7 +173,7 @@ public class CsvReader {
         }
         bow.write(fc, getTableName(), getGeomColumnName(), getSrs(), 2, false, true, columnsToCheck);
     }
-    
+
     protected List translateColumns(List columns) {
         if (columns == null) {
             return null;
@@ -174,7 +191,7 @@ public class CsvReader {
         }
         return newColumns;
     }
-    
+
     protected List processColumns(List columns) {
         if (columns == null) {
             return null;
@@ -188,125 +205,125 @@ public class CsvReader {
         }
         return newColumns;
     }
-    
+
     protected List processAttributes(List attributes, List columns) {
         if (attributes == null) {
             return null;
         }
         if (getTsColumnName() != null && getTsColumnName().length() > 0) {
             attributes.add(getTimestamp()); // TODO juiste format?
-            
+
         }
         if (getSpaceName() != null && getSpaceName().length() > 0) {
             attributes.add(getSpaceValue());
         }
         return attributes;
     }
-    
+
     public String getTableName() {
         return tableName;
     }
-    
+
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-    
+
     public String[] getIgnoredColumnNames() {
         return ignoredColumnNames;
     }
-    
+
     public void setIgnoredColumnNames(String[] ignoredColumnNames) {
         this.ignoredColumnNames = ignoredColumnNames;
     }
-    
+
     public String getGeomColumnName() {
         return geomColumnName;
     }
-    
+
     public void setGeomColumnName(String geomColumnName) {
         this.geomColumnName = geomColumnName;
     }
-    
+
     public String getSrs() {
         return srs;
     }
-    
+
     public void setSrs(String srs) {
         this.srs = srs;
     }
-    
+
     public String getTsColumnName() {
         return tsColumnName;
     }
-    
+
     public void setTsColumnName(String tsColumnName) {
         this.tsColumnName = tsColumnName;
     }
-    
+
     public String getTimestamp() {
         return timestamp;
     }
-    
+
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
-    
+
     public String getSpaceName() {
         return spaceName;
     }
-    
+
     public void setSpaceName(String spaceName) {
         this.spaceName = spaceName;
     }
-    
+
     public String getSpaceValue() {
         return spaceValue;
     }
-    
+
     public void setSpaceValue(String spaceValue) {
         this.spaceValue = spaceValue;
     }
-    
+
     public String[] getUidNames() {
         return uidNames;
     }
-    
+
     public void setUidNames(String[] uidNames) {
         this.uidNames = uidNames;
     }
-    
+
     public String getRdxColumnName() {
         return rdxColumnName;
     }
-    
+
     public void setRdxColumnName(String rdxColumnName) {
         this.rdxColumnName = rdxColumnName;
     }
-    
+
     public String getRdyColumnName() {
         return rdyColumnName;
     }
-    
+
     public void setRdyColumnName(String rdyColumnName) {
         this.rdyColumnName = rdyColumnName;
     }
-    
+
     public HashMap getTranslatorMap() {
         return translatorMap;
     }
-    
+
     public void setTranslatorMap(HashMap translatorMap) {
         this.translatorMap = translatorMap;
     }
-    
+
     public Locale getCsvLocale() {
         return csvLocale;
     }
-    
+
     public void setCsvLocale(Locale csvLocale) {
         this.csvLocale = csvLocale;
     }
-    
+
     public DecimalFormatSymbols getDfs() {
         if (csvLocale == null) {
             csvLocale = Locale.getDefault();
@@ -314,18 +331,19 @@ public class CsvReader {
         dfs = new DecimalFormatSymbols(this.csvLocale);
         return dfs;
     }
-    
+
     public char getCsvSeparator() {
         return csvSeparator;
     }
-    
+
     public void setCsvSeparator(char csvSeparator) {
         this.csvSeparator = csvSeparator;
     }
-    
+
     private double getDoubleFromString(String d) {
-        if (d==null)
+        if (d == null) {
             return 0.0d;
+        }
         DecimalFormat df = new DecimalFormat("#", getDfs());
         ParsePosition pos = new ParsePosition(0);
         Number n = df.parse(d.trim(), pos);

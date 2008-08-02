@@ -1,4 +1,27 @@
 /*
+ * B3P Commons GIS is a library with commonly used classes for OGC
+ * reading and writing. Included are wms, wfs, gml, csv and other
+ * general helper classes and extensions.
+ *
+ * Copyright 2005 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons GIS.
+ * 
+ * B3P Commons GIS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons GIS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
  * FeatureFactory.java
  *
  * Created on 13 november 2007, 9:54
@@ -19,11 +42,11 @@ import com.vividsolutions.jump.feature.FeatureSchema;
  * @author Roy Braam
  */
 public class FeatureFactory {
-    
+
     /** Creates a new instance of FeatureFactory */
     public FeatureFactory() {
     }
-    
+
     /** Creates a point feature from a array of objects. The Objects on index xIndex and yIndex are used to create a point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
@@ -57,7 +80,7 @@ public class FeatureFactory {
             return createFeature(attributes, columnames, fs);
         }
     }
-    
+
     /** Creates a point feature from a array of objects. The x and y are used for creating the point.
      * @param attributes The attributes of the Feature.
      * @param columnames The columnames corresponding the attribute names in the FeatureSchema. It gives the order of adding attributes to the Feature.
@@ -70,17 +93,17 @@ public class FeatureFactory {
      */
     public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
         BasicFeature f = createFeature(attributes, columnames, fs);
-        if (fs.getGeometryIndex()>=0) {
-            PrecisionModel precisionModel =  new PrecisionModel(PrecisionModel.FLOATING);
+        if (fs.getGeometryIndex() >= 0) {
+            PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
             int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
             GeometryFactory gf = new GeometryFactory(precisionModel, schemaSRID);
-            Coordinate[] ca = new Coordinate[] {new Coordinate(x,y)};
+            Coordinate[] ca = new Coordinate[]{new Coordinate(x, y)};
             MultiPoint p = gf.createMultiPoint(ca);
             f.setGeometry(p);
         }
         return f;
     }
-    
+
     /** Creates a feature
      *
      */
@@ -90,10 +113,11 @@ public class FeatureFactory {
             f.setAttributes(attributes);
         } else {
             for (int i = 0; i < columnames.length; i++) {
-                for (int j=0; j<fs.getAttributeCount();j++) {
+                for (int j = 0; j < fs.getAttributeCount(); j++) {
                     String fsatt = fs.getAttributeName(j);
-                    if (fsatt==null)
+                    if (fsatt == null) {
                         continue;
+                    }
                     if (fsatt.equalsIgnoreCase(columnames[i])) {
                         f.setAttribute(j, attributes[i]);
                         break;
@@ -103,7 +127,7 @@ public class FeatureFactory {
         }
         return f;
     }
-    
+
     private static Double getDoubleFromObject(Object object) {
         Double x = null;
         if (object != null) {

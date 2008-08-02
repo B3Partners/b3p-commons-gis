@@ -1,12 +1,25 @@
 /*
- * KBCrypter.java
+ * B3P Commons GIS is a library with commonly used classes for OGC
+ * reading and writing. Included are wms, wfs, gml, csv and other
+ * general helper classes and extensions.
  *
- * Created on 7 maart 2008, 10:07
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
+ * Copyright 2005 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons GIS.
+ * 
+ * B3P Commons GIS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons GIS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package nl.b3p.ogc.utils;
 
 import java.net.URLDecoder;
@@ -24,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
  * @author Chris
  */
 public class KBCrypter {
-    
+
     private static final Log log = LogFactory.getLog(KBCrypter.class);
     /**
      * Key waarmee de url wordt encrypt/decrypt.
@@ -35,6 +48,8 @@ public class KBCrypter {
     protected final static String encryptionPadding = "PKCS5Padding";
     protected static SecretKey secretKey;
     protected static String cipherParameters;
+    
+
     static {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(encryptionAlgorithm);
@@ -45,7 +60,7 @@ public class KBCrypter {
         }
         cipherParameters = encryptionAlgorithm + "/" + encryptionMode + "/" + encryptionPadding;
     }
-    
+
     /**
      * Encrypt a string.
      *
@@ -53,7 +68,7 @@ public class KBCrypter {
      * @return clearText, encrypted
      */
     public static String encryptText(String clearText) throws Exception {
-        if (clearText==null) {
+        if (clearText == null) {
             log.error("text to encrypt may not be null!");
             throw new Exception("text to encrypt may not be null!");
         }
@@ -66,7 +81,7 @@ public class KBCrypter {
         String encryptedEncodedText = new String(encoder.encode(encryptedText), CHARSET);
         return URLEncoder.encode(encryptedEncodedText, "utf-8");
     }
-    
+
     /**
      * Decrypt a string.
      *
@@ -74,8 +89,9 @@ public class KBCrypter {
      * @return encryptedText, decrypted
      */
     public static String decryptText(String encryptedText) throws Exception {
-        if (encryptedText==null)
+        if (encryptedText == null) {
             return null;
+        }
         String et = URLDecoder.decode(encryptedText, "utf-8");
         Base64 decoder = new Base64();
         byte decodedEncryptedText[] = decoder.decode(et.getBytes(CHARSET));

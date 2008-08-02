@@ -1,4 +1,27 @@
 /*
+ * B3P Commons GIS is a library with commonly used classes for OGC
+ * reading and writing. Included are wms, wfs, gml, csv and other
+ * general helper classes and extensions.
+ *
+ * Copyright 2005 - 2008 B3Partners BV
+ * 
+ * This file is part of B3P Commons GIS.
+ * 
+ * B3P Commons GIS is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * B3P Commons GIS is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
  * FeatureSchemaFactory.java
  *
  * Created on 13 november 2007, 10:08
@@ -27,13 +50,13 @@ import org.apache.commons.logging.LogFactory;
  * @author Roy Braam
  */
 public class FeatureSchemaFactory {
-    
+
     private static final Log log = LogFactory.getLog(FeatureSchemaFactory.class);
-    
+
     /** Creates a new instance of FeatureSchemaFactory */
     public FeatureSchemaFactory() {
     }
-    
+
     /**Creates a FeatureSchema from a table.
      * @param url The url to the database
      * @param user The user to connect to the database
@@ -46,7 +69,7 @@ public class FeatureSchemaFactory {
         DriverManager.registerDriver(driver);
         return createFeatureSchemaFromDbTable(DriverManager.getConnection(url, user, password), table, dontAddColumns);
     }
-    
+
     /**Creates a FeatureSchema from a table.
      * @param conn The connection to the database.
      * @param table The name of the table in the given database. From this table a FeatureSchema is created
@@ -83,9 +106,9 @@ public class FeatureSchemaFactory {
                                 int epsgCode = rsgeom.getInt("srid");
                                 CoordinateSystem cs = new CoordinateSystem("EPSG:" + epsgCode, epsgCode, null);
                                 fs.setCoordinateSystem(cs);
-                                
+
                                 String type = rsgeom.getString("type");
-                                
+
                                 fs.addAttribute(columnName, AttributeType.GEOMETRY);
                             }
                             statement.close();
@@ -97,8 +120,8 @@ public class FeatureSchemaFactory {
                     }
                 }
             }
-            //set the coordinateSystem without the projection. Don't need it (yet)
-            
+        //set the coordinateSystem without the projection. Don't need it (yet)
+
         } else {
             log.error("Table " + table + " not found");
             throw new Exception("Table " + table + " not found");
