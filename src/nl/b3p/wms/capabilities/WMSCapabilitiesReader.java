@@ -48,6 +48,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import nl.b3p.commons.xml.IgnoreEntityResolver;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -150,6 +151,10 @@ public class WMSCapabilitiesReader {
             XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
             reader.setFeature(VALIDATION_FEATURE, true);
             reader.setFeature(SCHEMA_FEATURE, true);
+            
+            IgnoreEntityResolver r = new IgnoreEntityResolver();
+            reader.setEntityResolver(r);
+            
             reader.setContentHandler(s);
             InputSource is = new InputSource(method.getResponseBodyAsStream());
             is.setEncoding(KBConfiguration.CHARSET);
@@ -166,6 +171,8 @@ public class WMSCapabilitiesReader {
         return serviceProvider;
     }
     // </editor-fold>
+    
+    
     /** Private method which validates a XML document at a given location.
      *
      * @param location String representing the location where the document can be found.

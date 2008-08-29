@@ -53,6 +53,7 @@ import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.Transaction;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
+import nl.b3p.commons.xml.IgnoreEntityResolver;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
@@ -698,7 +699,10 @@ public class OgcWfsClient {
             XMLReader reader = saxParser.getXMLReader();
 
             org.exolab.castor.xml.util.SAX2ANY handler = new org.exolab.castor.xml.util.SAX2ANY();
-
+            
+            IgnoreEntityResolver r = new IgnoreEntityResolver();
+            reader.setEntityResolver(r);
+            
             reader.setContentHandler(handler);
             reader.setErrorHandler(handler);
             InputSource source = new InputSource(new StringReader(xml));
