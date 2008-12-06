@@ -63,6 +63,7 @@ public class Layer implements XMLElement {
     private Set layers;
     private String metaData;
     // <editor-fold defaultstate="" desc="getter and setter methods.">
+
     public Integer getId() {
         return id;
     }
@@ -380,6 +381,7 @@ public class Layer implements XMLElement {
         this.metaData = metaData;
     }
     // </editor-fold>
+
     public Set getAuthSubLayersClone(Set authLayerIds) {
         if (authLayerIds == null || authLayerIds.isEmpty()) {
             return null;
@@ -452,6 +454,7 @@ public class Layer implements XMLElement {
         }
     }
     // </editor-fold>
+
     /** Method that will create a deep copy of this object.
      *
      * @return an object of type Object
@@ -575,6 +578,7 @@ public class Layer implements XMLElement {
         return cloneLayer;
     }
     // </editor-fold>
+
     /** Method that will create piece of the XML tree to create a proper XML docuement.
      *
      * @param doc Document object which is being used to create new Elements
@@ -785,6 +789,7 @@ public class Layer implements XMLElement {
         return rootElement;
     }
     // </editor-fold>
+
     public Layer getTopLayer() {
         Layer parent = this.getParent();
         if (parent != null) {
@@ -798,8 +803,9 @@ public class Layer implements XMLElement {
      * Public method to check wether the given layer as parameter equals this layer.
      */
     public boolean equals(Layer layer) {
-        return new EqualsBuilder().append(this.getTitle(), layer.getTitle()).
-                append(this.getName(), layer.getName()).
+        return new EqualsBuilder().
+                append(this.getServiceProvider().getAbbr(), layer.getServiceProvider().getAbbr()).
+                append(this.getTitle(), layer.getTitle()).
                 append(this.getCascaded(), layer.getCascaded()).
                 isEquals();
     }
@@ -816,8 +822,9 @@ public class Layer implements XMLElement {
     }
 
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(this.getName()).
+        return new HashCodeBuilder(17, 37).append(this.getServiceProvider().getAbbr()).
                 append(this.getTitle()).
+                append(this.getCascaded()).
                 toHashCode();
     }
 
