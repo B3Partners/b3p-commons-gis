@@ -803,11 +803,13 @@ public class Layer implements XMLElement {
      * Public method to check wether the given layer as parameter equals this layer.
      */
     public boolean equals(Layer layer) {
-        return new EqualsBuilder().
-                append(this.getServiceProvider().getAbbr(), layer.getServiceProvider().getAbbr()).
-                append(this.getTitle(), layer.getTitle()).
-                append(this.getCascaded(), layer.getCascaded()).
-                isEquals();
+        EqualsBuilder eb = new EqualsBuilder();
+        if (this.getServiceProvider()!=null)
+            eb.append(this.getServiceProvider().getAbbr(), layer.getServiceProvider().getAbbr());
+        eb.append(this.getName(), layer.getName());
+        eb.append(this.getTitle(), layer.getTitle());
+        eb.append(this.getCascaded(), layer.getCascaded());
+        return eb.isEquals();
     }
 
     public boolean equals(Object o) {
@@ -822,10 +824,13 @@ public class Layer implements XMLElement {
     }
 
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(this.getServiceProvider().getAbbr()).
-                append(this.getTitle()).
-                append(this.getCascaded()).
-                toHashCode();
+        HashCodeBuilder hcb =new HashCodeBuilder(17, 37);
+        if (this.getServiceProvider()!=null)
+            hcb.append(this.getServiceProvider().getAbbr());
+        hcb.append(this.getName());
+        hcb.append(this.getTitle());
+        hcb.append(this.getCascaded());
+        return hcb.toHashCode();
     }
 
     /**
