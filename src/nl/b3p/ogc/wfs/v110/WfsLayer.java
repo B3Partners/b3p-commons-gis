@@ -31,7 +31,7 @@ public class WfsLayer {
     private int id;
     private String name;
     private String title;
-    private String metaData;
+    private String metadata;
     private WfsServiceProvider wfsServiceProvider;
 
     /** Creates a new instance of WfsLayer */
@@ -62,12 +62,12 @@ public class WfsLayer {
         return title;
     }
 
-    public void setMetaData(String metaData) {
-        this.metaData = metaData;
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 
-    public String getMetaData() {
-        return metaData;
+    public String getMetadata() {
+        return metadata;
     }
 
     public void setWfsServiceProvider(WfsServiceProvider wfsServiceProvider) {

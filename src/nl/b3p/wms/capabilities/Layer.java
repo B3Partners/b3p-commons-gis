@@ -42,28 +42,27 @@ public class Layer implements XMLElement {
     private String name;
     private String title;
     private String abstracts;
-    private String queryable;
-    private String cascaded;
-    private String opaque;
-    private String nosubsets;
-    private String fixedWidth;
-    private String fixedHeight;
-    private String scaleHintMin;
-    private String scaleHintMax;
+    private String queryable = "0";
+    private String cascaded = "0";
+    private String opaque = "0";
+    private String nosubsets = "0";
+    private String fixedWidth = "0";
+    private String fixedHeight = "0";
+    private String scaleHintMin = "0";
+    private String scaleHintMax = "0";
     private Attribution attribution;
     private Layer parent;
     private ServiceProvider serviceProvider;
     private Set dimensions;
-    private Set layerKeywordList;
+    private Set keywordList;
     private Set styles;
     private Set domainResource;
     private Set identifiers;
     private Set organizationLayers;
     private Set srsbb;
     private Set layers;
-    private String metaData;
+    private String metadata;
     // <editor-fold defaultstate="" desc="getter and setter methods.">
-
     public Integer getId() {
         return id;
     }
@@ -211,19 +210,19 @@ public class Layer implements XMLElement {
         dimension.setLayer(this);
     }
 
-    public Set getLayerKeywordList() {
-        return layerKeywordList;
+    public Set getKeywordList() {
+        return keywordList;
     }
 
-    public void setLayerKeywordList(Set layerKeywordList) {
-        this.layerKeywordList = layerKeywordList;
+    public void setKeywordList(Set keywordList) {
+        this.keywordList = keywordList;
     }
 
     public void addKeyword(String keyword) {
-        if (layerKeywordList == null) {
-            layerKeywordList = new HashSet();
+        if (keywordList == null) {
+            keywordList = new HashSet();
         }
-        layerKeywordList.add(keyword);
+        keywordList.add(keyword);
     }
 
     public Set getStyles() {
@@ -373,15 +372,14 @@ public class Layer implements XMLElement {
         return getSpAbbr() + "_" + this.getName();
     }
 
-    public String getMetaData() {
-        return metaData;
+    public String getMetadata() {
+        return metadata;
     }
 
-    public void setMetaData(String metaData) {
-        this.metaData = metaData;
+    public void setMetadata(String metaData) {
+        this.metadata = metaData;
     }
     // </editor-fold>
-
     public Set getAuthSubLayersClone(Set authLayerIds) {
         if (authLayerIds == null || authLayerIds.isEmpty()) {
             return null;
@@ -454,7 +452,6 @@ public class Layer implements XMLElement {
         }
     }
     // </editor-fold>
-
     /** Method that will create a deep copy of this object.
      *
      * @return an object of type Object
@@ -520,8 +517,8 @@ public class Layer implements XMLElement {
                 cloneLayer.dimensions.add(dim);
             }
         }
-        if (null != this.layerKeywordList) {
-            cloneLayer.layerKeywordList = new HashSet(this.layerKeywordList);
+        if (null != this.keywordList) {
+            cloneLayer.keywordList = new HashSet(this.keywordList);
         }
         if (null != this.styles) {
             cloneLayer.styles = new HashSet();
@@ -572,13 +569,12 @@ public class Layer implements XMLElement {
             }
         }
 
-        if (this.metaData != null) {
-            cloneLayer.metaData = new String(this.metaData);
+        if (this.metadata != null) {
+            cloneLayer.metadata = new String(this.metadata);
         }
         return cloneLayer;
     }
     // </editor-fold>
-
     /** Method that will create piece of the XML tree to create a proper XML docuement.
      *
      * @param doc Document object which is being used to create new Elements
@@ -631,9 +627,9 @@ public class Layer implements XMLElement {
             layerElement.appendChild(abstractElement);
         }
 
-        if (null != this.getLayerKeywordList() && this.getLayerKeywordList().size() != 0) {
+        if (null != this.getKeywordList() && this.getKeywordList().size() != 0) {
             Element keywordListElement = doc.createElement("KeywordList");
-            Iterator it = this.getLayerKeywordList().iterator();
+            Iterator it = this.getKeywordList().iterator();
             while (it.hasNext()) {
                 String keyword = (String) it.next();
                 Element keywordElement = doc.createElement("Keyword");
@@ -789,7 +785,6 @@ public class Layer implements XMLElement {
         return rootElement;
     }
     // </editor-fold>
-
     public Layer getTopLayer() {
         Layer parent = this.getParent();
         if (parent != null) {
