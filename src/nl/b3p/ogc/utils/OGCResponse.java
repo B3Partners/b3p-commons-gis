@@ -429,10 +429,10 @@ public class OGCResponse {
         if (map != null) {
             for (int i = 0; map.getLength() > i; i++) {
                 String name = map.item(i).getNodeName();
-                String[] tokens = name.split(":");
+                String[] tokens = name.split(":",2);
                 if (tokens[0].equalsIgnoreCase("xmlns")) {
                     String value = map.item(i).getNodeValue();
-                    addOrReplaceNameSpace(tokens[1], value);
+                    addOrReplaceNameSpace(tokens.length == 1 ? "" : tokens[1], value);
                 } else if (tokens.length == 2) {
                     if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
                         String value = map.item(i).getNodeValue();
