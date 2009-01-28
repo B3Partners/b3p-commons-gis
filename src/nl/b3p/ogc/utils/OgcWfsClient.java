@@ -357,12 +357,12 @@ public class OgcWfsClient {
             getCapabilities(or);
             original.addOrReplaceParameter(OGCConstants.VERSION, or.getParameter(OGCConstants.VERSION));
         }
-        if (!or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion())) {
+        if (or.getFinalVersion()!=null && !or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion())) {
             or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
         }
-        if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+        if (OGCConstants.WFS_VERSION_100.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))) {
             gf = new nl.b3p.xml.wfs.v100.GetFeature();
-        } else if (or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(OGCConstants.WFS_VERSION_110)) {
+        } else if (OGCConstants.WFS_VERSION_110.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))) {
             gf = new nl.b3p.xml.wfs.v110.GetFeature();
         } else {
             throw new UnsupportedOperationException("WFS GetFeatureRequest version: " + or.getParameter(OGCConstants.VERSION) + " not supported");
