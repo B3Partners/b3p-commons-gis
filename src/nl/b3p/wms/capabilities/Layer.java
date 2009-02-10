@@ -142,7 +142,7 @@ public class Layer implements XMLElement {
     public void setFixedHeight(String fixedHeight) {
         this.fixedHeight = fixedHeight;
     }
-
+   //TODO: Waarom is dit geen double??
     public String getScaleHintMin() {
         return scaleHintMin;
     }
@@ -150,7 +150,7 @@ public class Layer implements XMLElement {
     public void setScaleHintMin(String scaleHintMin) {
         this.scaleHintMin = scaleHintMin;
     }
-
+//TODO: Waarom is dit geen double??
     public String getScaleHintMax() {
         return scaleHintMax;
     }
@@ -767,10 +767,16 @@ public class Layer implements XMLElement {
         }
 
         if (null != this.getScaleHintMin() && null != this.getScaleHintMax()) {
-            Element scaleHintElement = doc.createElement("ScaleHint");
-            scaleHintElement.setAttribute("min", this.getScaleHintMin());
-            scaleHintElement.setAttribute("max", this.getScaleHintMax());
-            layerElement.appendChild(scaleHintElement);
+            try{
+                if (Double.parseDouble(this.getScaleHintMin())>0 || Double.parseDouble(this.getScaleHintMax())>0){
+                    Element scaleHintElement = doc.createElement("ScaleHint");
+                    scaleHintElement.setAttribute("min", this.getScaleHintMin());
+                    scaleHintElement.setAttribute("max", this.getScaleHintMax());
+                    layerElement.appendChild(scaleHintElement);
+                }
+            }catch(NumberFormatException nfe){
+                log.error("Stored scalehint is not a number:  "+this.getScaleHintMax()+ " min "+this.getScaleHintMin() );
+            }
         }
 
         if (null != this.getLayers() && this.getLayers().size() != 0) {
