@@ -305,15 +305,19 @@ public class Layer implements XMLElement {
         this.layers = layers;
     }
 
-    public void addLayer(Layer layer) {
+    public void addLayer(Layer layer) throws Exception {
         if (layers == null) {
             layers = new HashSet();
+        }
+        if (layers.contains(layer)) {
+            String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
+            throw new Exception(msg);
         }
         layers.add(layer);
         layer.setParent(this);
     }
 
-    public Layer buildLayerTree(Set layerset) {
+    public Layer buildLayerTree(Set layerset) throws Exception {
         if (layerset == null) {
             return this;
         }
