@@ -305,19 +305,20 @@ public class Layer implements XMLElement {
         this.layers = layers;
     }
 
-    public void addLayer(Layer layer) throws Exception {
+    public void addLayer(Layer layer) {
         if (layers == null) {
             layers = new HashSet();
         }
         if (layers.contains(layer)) {
             String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
-            throw new Exception(msg);
+            // TODO: Geen gewone exceptie want deze kan niet door de saxparser, betere oplossing??
+            throw new RuntimeException(msg);
         }
         layers.add(layer);
         layer.setParent(this);
     }
 
-    public Layer buildLayerTree(Set layerset) throws Exception {
+    public Layer buildLayerTree(Set layerset) {
         if (layerset == null) {
             return this;
         }
