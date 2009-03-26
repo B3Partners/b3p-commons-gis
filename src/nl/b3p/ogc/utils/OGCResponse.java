@@ -179,7 +179,12 @@ public class OGCResponse {
         wfsCapabilities.getService().setOnlineResource(httpHost);
         nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
-            featureTypeList[b].setName("app:" + prefix + featureTypeList[b].getName());
+        	String layer = featureTypeList[b].getName();
+        	int index = layer.indexOf("}");
+        	if (index > -1) {
+        		layer = layer.substring(index+1);
+        	}
+            featureTypeList[b].setName("app:" + prefix + "_" + layer);
         }
         List newSupportedOperations = new ArrayList();
         int requestCount = wfsCapabilities.getCapability().getRequest().getRequestTypeItemCount();
@@ -263,7 +268,11 @@ public class OGCResponse {
     public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url(nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix) {
         nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
-            String layer = featureTypeList[b].getName().split("}")[1];
+        	String layer = featureTypeList[b].getName();
+        	int index = layer.indexOf("}");
+        	if (index > -1) {
+        		layer = layer.substring(index+1);
+        	}
             featureTypeList[b].setName("app:" + prefix + "_" + layer);
         }
         List newSupportedOperations = new ArrayList();
