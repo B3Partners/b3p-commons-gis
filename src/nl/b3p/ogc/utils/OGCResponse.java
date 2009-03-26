@@ -90,8 +90,14 @@ public class OGCResponse {
         Unmarshaller um;
         Object o;
 
+        // if no prefix is given (wfs is default namespave), prefix it with wfs:
+        String tagName = rootElement.getTagName();
+        if (!tagName.startsWith(OGCConstants.WFS_NAMESPACE_PREFIX)) {
+        	tagName = OGCConstants.WFS_NAMESPACE_PREFIX + tagName;
+        }
+        
         try {
-            if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
+            if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
                 response = OGCConstants.WFS_CAPABILITIES;
                 version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
                 isSupportedVersion(version);
@@ -110,7 +116,7 @@ public class OGCResponse {
                     getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
                 }
                 checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
-            } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
+            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
                 response = OGCConstants.WFS_FEATURECOLLECTION;
                 version = request.getFinalVersion();
 
@@ -127,7 +133,7 @@ public class OGCResponse {
 
                     featureCollectionV110.add(replaceFeatureCollectionV110Url(featureCollection, prefix));
                 }
-            } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
+            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
                 response = OGCConstants.WFS_SERVER_EXCEPTION;
                 version = request.getFinalVersion();
 
@@ -136,7 +142,7 @@ public class OGCResponse {
                 nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport) o;
 
                 newExceptionReport = exceptionReport;
-            } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
+            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
                 response = OGCConstants.WFS_TRANSACTIONRESPONSE;
                 version = request.getFinalVersion();
 

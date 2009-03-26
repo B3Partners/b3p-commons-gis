@@ -145,6 +145,7 @@ public interface OGCConstants {
     public static final String WFS_OBJECT_GEOMETRYTYPE = "gml:GeometryPropertyType";
     public static final String WFS_SERVER_EXCEPTION = "ServiceExceptionReport";
     public static final String WFS_TRANSACTIONRESPONSE = "TransactionResponse";
+    public static final String WFS_NAMESPACE_PREFIX = "wfs:";
     // </editor-fold>
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
     /**
