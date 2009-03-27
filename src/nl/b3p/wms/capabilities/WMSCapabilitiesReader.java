@@ -34,6 +34,8 @@ WMT_MS wmt = wms.getWMT_MS("http://viz.globe.gov/viz-bin/wmt.cgi?SERVICE=WMS&VER
  */
 package nl.b3p.wms.capabilities;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.b3p.ogc.utils.KBConfiguration;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -83,6 +85,7 @@ public class WMSCapabilitiesReader {
         this.setElementHandlers();
     }
     // </editor-fold>
+
     private void checkObject(Object obj) throws SAXException {
         if (obj != null) {
             return;
@@ -151,10 +154,10 @@ public class WMSCapabilitiesReader {
             XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
             reader.setFeature(VALIDATION_FEATURE, true);
             reader.setFeature(SCHEMA_FEATURE, true);
-            
+
             IgnoreEntityResolver r = new IgnoreEntityResolver();
             reader.setEntityResolver(r);
-            
+
             reader.setContentHandler(s);
             InputSource is = new InputSource(method.getResponseBodyAsStream());
             is.setEncoding(KBConfiguration.CHARSET);
@@ -171,8 +174,7 @@ public class WMSCapabilitiesReader {
         return serviceProvider;
     }
     // </editor-fold>
-    
-    
+
     /** Private method which validates a XML document at a given location.
      *
      * @param location String representing the location where the document can be found.
@@ -191,6 +193,7 @@ public class WMSCapabilitiesReader {
         validator.validate(source);
     }
     // </editor-fold>
+
     /** Private method which initializes all the elementhandlers.
      * Each element in the xml document has to be treated in its own way therefore each element has its
      * own handler which controls the actions to be taken if an element of a certain kind is found.
@@ -265,6 +268,7 @@ public class WMSCapabilitiesReader {
     //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
     }
     // </editor-fold>
+
     /**
      * Below are all Handlers defined.
      * Each element is passed to it's own handler which takes action on its own and
@@ -539,7 +543,11 @@ public class WMSCapabilitiesReader {
             if (obj instanceof Layer) {
                 Layer layerAtStack = (Layer) obj;
                 checkObject(layerAtStack);
-                layerAtStack.addLayer(layer);
+                try {
+                    layerAtStack.addLayer(layer);
+                } catch (Exception ex) {
+                    throw new SAXException(ex);
+                }
             } else if (obj instanceof ServiceProvider) {
                 ServiceProvider serviceProvider = (ServiceProvider) obj;
                 checkObject(serviceProvider);
@@ -636,8 +644,10 @@ public class WMSCapabilitiesReader {
         }
     }
     //Begin part of layer
+
     private class BoundingBoxHandler extends ElementHandler {
         //instance of Layer
+
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             Object object = stack.peek();
             if (object instanceof Layer) {
@@ -662,6 +672,7 @@ public class WMSCapabilitiesReader {
 
     private class LatLonBoundingBoxHandler extends ElementHandler {
         //instance of Layer
+
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
             Object object = stack.peek();
             if (object instanceof Layer) {
@@ -855,6 +866,7 @@ public class WMSCapabilitiesReader {
     }
     //End part of layer
     //Part of attribution
+
     private class AttributionHandler extends ElementHandler {
 
         public void startElement(String uri, String localName, String qName, Attributes atts) {
@@ -895,6 +907,7 @@ public class WMSCapabilitiesReader {
     }
     //End part of attribution
     //Part of style
+
     private class StyleURLHandler extends ElementHandler {
 
         public void startElement(String uri, String localName, String qName, Attributes atts) {
@@ -954,6 +967,7 @@ public class WMSCapabilitiesReader {
         }
     }
     //End part of style
+
     private class NameHandler extends ElementHandler {
 
         StringBuffer sb;
@@ -1193,6 +1207,7 @@ public class WMSCapabilitiesReader {
         }
     }
     //Below the handlers which handle all information about contact
+
     private class ContactInformationHandler extends ElementHandler {
 
         public void startElement(String uri, String localName, String qName, Attributes atts) {
@@ -1493,6 +1508,7 @@ public class WMSCapabilitiesReader {
         }
     }
     //These two Handlers are not being used, since it's not clear yet how to make advantage of them
+
     private class VendorSpecificCapabilitiesHandler extends ElementHandler {
 
         public void startElement(String uri, String localName, String qName, Attributes attributes) {

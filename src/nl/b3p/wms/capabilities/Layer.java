@@ -175,11 +175,16 @@ public class Layer implements XMLElement {
         this.serviceProvider = serviceProvider;
     }
 
-    public Set buildLayerSet(Set layerset, ServiceProvider serviceProvider) {
+    public Set buildLayerSet(Set layerset, ServiceProvider serviceProvider) throws Exception {
         if (layerset == null) {
             layerset = new HashSet();
         }
         this.serviceProvider = serviceProvider;
+        if (layerset.contains(this)) {
+            String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
+            log.error(msg);
+            throw new Exception(msg);
+        }
         layerset.add(this);
 
         Set layers = getLayers();
@@ -305,24 +310,23 @@ public class Layer implements XMLElement {
         this.layers = layers;
     }
 
-    public void addLayer(Layer layer) {
+    public void addLayer(Layer layer) throws Exception {
         if (layers == null) {
             layers = new HashSet();
         }
         if (layers.contains(layer)) {
-            /*TODO: Hoe kan dit fout gaan bij verwijderen van een service provider. Waarom komt ie dan hier??
-             *Sowieso lijkt het me geen goed idee om een exception te throwen maar een log regel te schrijven
-             *Maar het is dus al raar dat ie hier komt met het verwijderen? Wat gaat hier fout?
-             */
             String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
             log.error(msg);
+            throw new Exception(msg);
         }else{
             layers.add(layer);
             layer.setParent(this);
         }
     }
 
-    public Layer buildLayerTree(Set layerset) {
+    public Layer buildLayerTree(Set layerset) throws Exception {
+        // eerst layers verwijderen voor het opnieuw toevoegen
+        layers.clear();
         if (layerset == null) {
             return this;
         }

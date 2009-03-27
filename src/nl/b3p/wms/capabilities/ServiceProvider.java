@@ -234,7 +234,7 @@ public class ServiceProvider implements XMLElement {
     //-er is een boom aanwezig --> nog geen setstructuur
     //-er is een boom aanwezig --> oude setstructuur
     //bij deze laatste geldt eigenlijk dat de set aangepast wordt aan de nieuwe boomstructuur.....
-    public Layer getTopLayer() {
+    public Layer getTopLayer() throws Exception {
         if (!isIsSynchronized() && topLayer == null) {
             topLayer = defineTopLayer();
             if (topLayer != null) {
@@ -273,7 +273,7 @@ public class ServiceProvider implements XMLElement {
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
     // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    public void overwriteURL(String newUrl) {
+    public void overwriteURL(String newUrl) throws Exception {
         this.url = newUrl;
 
         if (domainResource != null) {
