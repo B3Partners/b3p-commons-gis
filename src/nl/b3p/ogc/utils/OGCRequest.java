@@ -32,6 +32,8 @@
 package nl.b3p.ogc.utils;
 
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -39,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
 import nl.b3p.xml.wfs.v110.Delete;
@@ -744,7 +748,18 @@ public class OGCRequest implements OGCConstants {
      *
      * @return previous value associated with specified param, or null  if there was no mapping for param
      */
-    public String addOrReplaceParameter(String param, String value) {
+    public String addOrReplaceParameter(String param, String v) {        
+        String value;
+        try {
+            if (v!=null){
+                value = URLDecoder.decode(v, "UTF-8");
+            }else{
+                value=v;
+            }
+        } catch (UnsupportedEncodingException ex) {
+            value=v;
+            log.error("Error deconding value. Try with the original value",ex);
+        }
         if (param == null) {
             return null;
         }
