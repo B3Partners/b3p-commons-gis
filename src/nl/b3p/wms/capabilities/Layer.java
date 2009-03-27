@@ -310,12 +310,16 @@ public class Layer implements XMLElement {
             layers = new HashSet();
         }
         if (layers.contains(layer)) {
+            /*TODO: Hoe kan dit fout gaan bij verwijderen van een service provider. Waarom komt ie dan hier??
+             *Sowieso lijkt het me geen goed idee om een exception te throwen maar een log regel te schrijven
+             *Maar het is dus al raar dat ie hier komt met het verwijderen? Wat gaat hier fout?
+             */
             String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
-            // TODO: Geen gewone exceptie want deze kan niet door de saxparser, betere oplossing??
-            throw new RuntimeException(msg);
+            log.error(msg);
+        }else{
+            layers.add(layer);
+            layer.setParent(this);
         }
-        layers.add(layer);
-        layer.setParent(this);
     }
 
     public Layer buildLayerTree(Set layerset) {
