@@ -64,8 +64,11 @@ public class KBConfiguration {
     public static String KB_PROXY = "proxy";
     public static String KB_ENCRYPT_KEY = "proxy007"; // minimaal 8 bytes voor encrypting
     public static String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
-    public static String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
-    public static String GETMAP_QUERYABLE_EXCEPTION = "Kaartenbalie GetMap fout: Gevraagde kaartlaag is niet queryable.";
+    public static String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie";
+    public static String REQUEST_NORIGHTS_EXCEPTION="Kaartenbalie request fout: Ongeldige kaartlaag in de LAYERS parameter, u heeft geen rechten op de kaart";
+    public static String REQUEST_DUPLICATE_EXCEPTION="Kaartenbalie request fout: De gevraagde kaartlaag komt meerdere keren voor";
+    public static String REQUEST_QUERYABLE_EXCEPTION = "Kaartenbalie request fout: Gevraagde kaartlaag is niet queryable.";
+    public static String REQUEST_LAYERNAME_EXCEPTION = "Kaartenbalie request fout: De naam van de kaartlaag is onjuist opgebouwd";
     public static String FEATUREINFO_EXCEPTION = "Kaartenbalie GetFeatureInfo fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
     public static String FEATUREINFO_QUERYABLE_EXCEPTION = "Kaartenbalie GetFeatureInfo fout: Gevraagde kaartlaag is niet queryable.";
     public static String LEGENDGRAPHIC_EXCEPTION = "Kaartenbalie GetLegendGraphic fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie.";
@@ -154,7 +157,7 @@ public class KBConfiguration {
         FEATUREINFO_EXCEPTION = prop.getProperty("FEATUREINFO_EXCEPTION", FEATUREINFO_EXCEPTION);
         FEATUREINFO_QUERYABLE_EXCEPTION = prop.getProperty("FEATUREINFO_QUERYABLE_EXCEPTION", FEATUREINFO_QUERYABLE_EXCEPTION);
         GETMAP_EXCEPTION = prop.getProperty("GETMAP_EXCEPTION", GETMAP_EXCEPTION);
-        GETMAP_QUERYABLE_EXCEPTION = prop.getProperty("GETMAP_QUERYABLE_EXCEPTION", GETMAP_QUERYABLE_EXCEPTION);
+        REQUEST_QUERYABLE_EXCEPTION = prop.getProperty("REQUEST_QUERYABLE_EXCEPTION", REQUEST_QUERYABLE_EXCEPTION);
         IMAGE_SIZE_EXCEPTION = prop.getProperty("IMAGE_SIZE_EXCEPTION", IMAGE_SIZE_EXCEPTION);
         KB_DEFAULT_ROLE = prop.getProperty("KB_DEFAULT_ROLE", KB_DEFAULT_ROLE);
 
