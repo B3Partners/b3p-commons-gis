@@ -35,6 +35,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 import nl.b3p.xml.ows.v100.DCP;
@@ -75,6 +76,7 @@ public class OGCResponse {
     private List featureCollectionV100 = new ArrayList();
     private List featureCollectionV110 = new ArrayList();
     private HashMap nameSpaces;
+    private String featureTypeNamespacePrefix;
     private HashMap schemaLocations;
     private String srs = null;
     private List supportedOperations = new ArrayList();
@@ -180,11 +182,8 @@ public class OGCResponse {
         nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
         	String layer = featureTypeList[b].getName();
-        	int index = layer.indexOf("}");
-        	if (index > -1) {
-        		layer = layer.substring(index+1);
-        	}
-            featureTypeList[b].setName("app:" + prefix + "_" + layer);
+        	String featureTypeName = this.determineFeatureTypeName(prefix, layer);
+            featureTypeList[b].setName(featureTypeName);
         }
         List newSupportedOperations = new ArrayList();
         int requestCount = wfsCapabilities.getCapability().getRequest().getRequestTypeItemCount();
@@ -269,11 +268,8 @@ public class OGCResponse {
         nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
         	String layer = featureTypeList[b].getName();
-        	int index = layer.indexOf("}");
-        	if (index > -1) {
-        		layer = layer.substring(index+1);
-        	}
-            featureTypeList[b].setName("app:" + prefix + "_" + layer);
+        	String featureTypeName = this.determineFeatureTypeName(prefix, layer);
+            featureTypeList[b].setName(featureTypeName);
         }
         List newSupportedOperations = new ArrayList();
         int operationCount = wfsCapabilities.getOperationsMetadata().getOperationCount();
@@ -301,6 +297,38 @@ public class OGCResponse {
         setSrs(null);
         return wfsCapabilities;
     }
+
+    /**
+     * This method determines the featureTypeName based on the given layer and prefix.
+     * Since the layer contains a {namespaceUrl} in the layer, it first needs to
+     * determine the namespace prefix. This value is saved in the featureTypeNamespacePrefix
+     * instance variable, for later use. 
+     * 
+     * @param prefix
+     * @param layer
+     * @return
+     */
+	private String determineFeatureTypeName(String prefix, String layer) {
+		int index = layer.indexOf("}");
+		if (index > -1) {
+			String namespace = layer.substring(1, index);
+			// iterate through namespaces to find prefix
+			for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator
+					.hasNext();) {
+				Map.Entry entry = (Map.Entry) iterator.next();
+				if (entry.getValue().equals(namespace)) {
+					featureTypeNamespacePrefix = (String) entry.getKey();
+					if (!"".equals(featureTypeNamespacePrefix)) {
+						featureTypeNamespacePrefix += ":";
+					}
+					break;
+				}
+			}
+			layer = layer.substring(index+1);//rename layer by removing namepace url
+		}
+		
+		return featureTypeNamespacePrefix + prefix + "_" + layer;
+	}
 
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
         String newSchemalocations = "";
@@ -379,7 +407,7 @@ public class OGCResponse {
         Iterator iter = spInfo.iterator();
         while (iter.hasNext()) {
             HashMap sp = (HashMap) iter.next();
-            String layerName = "app:" + sp.get("spAbbr") + "_" + sp.get("layer");
+            String layerName = featureTypeNamespacePrefix + sp.get("spAbbr") + "_" + sp.get("layer");
             layers.add(layerName);
         }
 
