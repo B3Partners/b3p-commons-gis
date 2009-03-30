@@ -92,9 +92,9 @@ public class KBCrypter {
         if (encryptedText == null) {
             return null;
         }
-        String et = URLDecoder.decode(encryptedText, "utf-8");
+       // String et = URLDecoder.decode(encryptedText, "utf-8");
         Base64 decoder = new Base64();
-        byte decodedEncryptedText[] = decoder.decode(et.getBytes(CHARSET));
+        byte decodedEncryptedText[] = decoder.decode(encryptedText.getBytes(CHARSET));
         Cipher c1 = Cipher.getInstance(cipherParameters);
         c1.init(c1.DECRYPT_MODE, secretKey);
         byte[] decryptedText = c1.doFinal(decodedEncryptedText);
