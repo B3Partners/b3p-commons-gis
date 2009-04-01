@@ -57,9 +57,12 @@ import nl.b3p.commons.xml.IgnoreEntityResolver;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
+import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -99,7 +102,7 @@ public class OgcWfsClient {
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         String host = or.getUrlWithNonOGCparams();
         //Element el=doRequest(getGetCapabilitiesRequest(or),host);
-        Element el = doRequest(or.getUrl(), host, or.getNameSpaces());
+        Element el = doRequest(or.getUrl(), host, or.getNameSpaces(),or.getUsername(),or.getPassword());
         if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)) {
             String version = el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
@@ -128,13 +131,13 @@ public class OgcWfsClient {
      *Kijkt tevens of het een serviceExceptionReport is en trowed dat dan als Exception.
      *@return het element dat terug gegeven wordt door de server
      */
-    public static Element doRequest(Object o, String host) throws Exception {
-        return doRequest(o, host, null);
+    public static Element doRequest(Object o, String host, String username, String password) throws Exception {
+        return doRequest(o, host, null,username,password);
 
     }
 
-    public static Element doRequest(Object o, String host, HashMap namespaces) throws Exception {
-        Element el = readXml2Element(new InputStreamReader(getInputStreamReader(o, host, namespaces)));
+    public static Element doRequest(Object o, String host, HashMap namespaces, String username, String password) throws Exception {
+        Element el = readXml2Element(new InputStreamReader(getInputStreamReader(o, host, namespaces,username,password)));
         if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)) {
             nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser = getServiceExceptionReport(el);
             StringBuffer sb = new StringBuffer();
@@ -144,8 +147,8 @@ public class OgcWfsClient {
                     sb.append(" and ");
                 }
                 se = ser.getServiceException(i);
+                sb.append(se.getCode()+":");
                 sb.append(se.getContent());
-
             }
             throw new Exception(sb.toString());
         }
@@ -157,7 +160,7 @@ public class OgcWfsClient {
      *Doet het request en returned het antwoord als inputstream. LetOp: checked niet of het een serviceExceptionReport is
      *
      */
-    private static InputStream getInputStreamReader(Object o, String host, HashMap namespaces) throws Exception {
+    private static InputStream getInputStreamReader(Object o, String host, HashMap namespaces, String username, String password) throws Exception {
         HttpClient client = new HttpClient();
         int status;
         HttpMethod httpmethod = null;
@@ -192,6 +195,12 @@ public class OgcWfsClient {
             postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
             httpmethod = postmethod;
         }
+        if (username != null && password != null) {
+            client.getParams().setAuthenticationPreemptive(true);
+            Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
+            AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
+            client.getState().setCredentials(authScope, defaultcreds);
+        }
         status = client.executeMethod(httpmethod);
         if (status == HttpStatus.SC_OK) {
             /*DEBUG:
@@ -223,9 +232,9 @@ public class OgcWfsClient {
 
         String host = or.getUrlWithNonOGCparams();
         if (methodsAllowed.contains(POSTMETHOD)) {
-            returnvalue = doRequest(getDescribeFeatureTypeRequest(or), host, or.getNameSpaces());
+            returnvalue = doRequest(getDescribeFeatureTypeRequest(or), host, or.getNameSpaces(),or.getUsername(),or.getPassword());
         } else if (methodsAllowed.contains(GETMETHOD)) {
-            returnvalue = doRequest(or.getUrl(), host);
+            returnvalue = doRequest(or.getUrl(), host,or.getUsername(),or.getPassword());
         }
         return returnvalue;
     }
@@ -330,7 +339,7 @@ public class OgcWfsClient {
     /**Get the GetCapabilities request object
      */
     public static GetCapabilities getGetCapabilitiesRequest(OGCRequest or) {
-        if (!or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion()) && !or.getFinalVersion().equalsIgnoreCase(OGCConstants.WFS_VERSION_UNSPECIFIED)) {
+        if (or.getParameter(OGCConstants.VERSION)!=null && or.getFinalVersion()!=null && !or.getParameter(OGCConstants.VERSION).equalsIgnoreCase(or.getFinalVersion()) && !or.getFinalVersion().equalsIgnoreCase(OGCConstants.WFS_VERSION_UNSPECIFIED)) {
             or.addOrReplaceParameter(OGCConstants.VERSION, or.getFinalVersion());
         }
         if (OGCConstants.WFS_VERSION_100.equalsIgnoreCase(or.getParameter(OGCConstants.VERSION))) {
@@ -653,7 +662,7 @@ public class OgcWfsClient {
 
     public static ArrayList getFeatureElements(GetFeature gf, OGCRequest or) throws Exception {
         ArrayList returnList = new ArrayList();
-        Element e = doRequest(gf, or.getUrlWithNonOGCparams(), or.getNameSpaces());
+        Element e = doRequest(gf, or.getUrlWithNonOGCparams(), or.getNameSpaces(),or.getUsername(),or.getPassword());
         B3pGMLReader bgr = new B3pGMLReader();
         HashMap hm = bgr.createGMLInputTemplates(getDescribeFeatureType(or));
         Iterator it = hm.values().iterator();

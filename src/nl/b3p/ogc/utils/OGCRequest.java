@@ -41,8 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.BaseRequestType;
 import nl.b3p.xml.wfs.v110.Delete;
@@ -80,6 +78,9 @@ public class OGCRequest implements OGCConstants {
     private HashMap getFeatureMap = new HashMap();
     private String abbr;
     private List layers = new ArrayList();
+
+    private String username;
+    private String password;
     // version that will be returned to client
     private String finalVersion;
 
@@ -137,8 +138,7 @@ public class OGCRequest implements OGCConstants {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.DescribeFeatureType.class);
                 o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v110.DescribeFeatureType) o;
-                setDescribeFeatureTypeV110(describeFeatureType);
-                ;
+                setDescribeFeatureTypeV110(describeFeatureType);                
             }
         } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
             String version = finalVersion;
@@ -973,6 +973,11 @@ public class OGCRequest implements OGCConstants {
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
+        if (getPassword()!=null)
+            returnv.setPassword(new String(this.getPassword()));
+        if (getUsername()!=null){
+            returnv.setUsername(new String(this.getUsername()));
+        }
         if (this.getFinalVersion() != null) {
             returnv.setFinalVersion(new String(this.getFinalVersion()));
         }
@@ -1219,5 +1224,33 @@ public class OGCRequest implements OGCConstants {
             return null;
         }
         return (String) o;
+    }
+
+    /**
+     * @return the username
+     */
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * @param username the username to set
+     */
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    /**
+     * @return the password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * @param password the password to set
+     */
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

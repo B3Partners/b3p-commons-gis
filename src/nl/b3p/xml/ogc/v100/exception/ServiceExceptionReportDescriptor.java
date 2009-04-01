@@ -97,7 +97,7 @@ public class ServiceExceptionReportDescriptor extends org.exolab.castor.xml.util
         { //-- local scope
             org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
             typeValidator.setWhiteSpace("preserve");
-            typeValidator.setFixed("1.2.0");
+            //typeValidator.setFixed("1.2.0");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);

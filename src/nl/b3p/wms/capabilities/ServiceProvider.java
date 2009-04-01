@@ -28,12 +28,14 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import nl.b3p.ogc.utils.KBConfiguration;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
 public class ServiceProvider implements XMLElement {
-
+    private static final Log log = LogFactory.getLog(ServiceProvider.class);
     private Integer id;
     private String abbr;
     private String name;
@@ -206,7 +208,11 @@ public class ServiceProvider implements XMLElement {
 
     public Set getAllLayers() {
         if (!isIsSynchronized() && topLayer != null) {
-            layers = topLayer.buildLayerSet(null, this);
+            try{
+                layers = topLayer.buildLayerSet(null, this);
+            }catch (Exception e){
+                log.error("Can not build layer set.",e);
+            }
             setIsSynchronized(true);
         }
         return layers;
