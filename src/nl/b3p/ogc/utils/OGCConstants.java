@@ -206,7 +206,6 @@ public interface OGCConstants {
                 WMS_PARAM_X,
                 WMS_PARAM_Y,
                 WMS_PARAM_LAYERS,
-                WMS_PARAM_STYLES,
                 WMS_PARAM_SRS,
                 WMS_PARAM_BBOX,
                 WMS_PARAM_WIDTH,
