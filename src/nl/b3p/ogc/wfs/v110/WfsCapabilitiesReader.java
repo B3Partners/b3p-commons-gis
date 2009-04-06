@@ -41,12 +41,16 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import nl.b3p.ogc.utils.OGCConstants;
-import nl.b3p.xml.wfs.v100.capabilities.FeatureType;
+import nl.b3p.ogc.utils.OGCRequest;
 //import nl.b3p.xml.wfs.v110.FeatureType;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.w3c.dom.Document;
@@ -57,6 +61,7 @@ import org.w3c.dom.Element;
  * @author Jytte
  */
 public class WfsCapabilitiesReader {
+    private static final Log log = LogFactory.getLog(WfsCapabilitiesReader.class);
     private HashMap nameSpaces;
     private String schemaLocation;
     
@@ -67,15 +72,24 @@ public class WfsCapabilitiesReader {
     
     public WfsServiceProvider getProvider(String url)throws IOException, Exception {
         WfsServiceProvider provider = new WfsServiceProvider();
-        
-        PostMethod method = null;
+        HttpMethod method=null;
+        //PostMethod postMethod = null;
         HttpClient client = new HttpClient();        
         String host = url;
-        method = new PostMethod(host); 
-        String body = getGetCapabilitieBody();
-        method.setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-        int status = client.executeMethod(method);
-        if (status == HttpStatus.SC_OK){
+        OGCRequest or = new OGCRequest(url);
+        or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
+        or.addOrReplaceParameter(OGCConstants.SERVICE, OGCConstants.WMS_PARAM_WFS);
+        method= new GetMethod(or.getUrl());
+        int status=client.executeMethod(method);
+        if (status != HttpStatus.SC_OK){
+            log.error("Error doing Get getCapabilities: "+status+": "+method.getResponseBodyAsString());
+            log.info("try doing a Post getCapabilities");
+            method = new PostMethod(host);
+            String body = getGetCapabilitieBody();
+            ((PostMethod)method).setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+            status = client.executeMethod(method);
+        }
+        if(status == HttpStatus.SC_OK){
             InputStream is = method.getResponseBodyAsStream();
             
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -146,8 +160,9 @@ public class WfsCapabilitiesReader {
                     provider.addWfsLayer(layer);
                 }
             }
+        }else{
+            log.error("Error doing Post getCapabilities: "+status+": "+method.getResponseBodyAsString());
         }
-        
         provider.setUrl(url);
         return provider;
     }
