@@ -85,7 +85,7 @@ public class OGCResponse {
     public OGCResponse() {
     }
 
-    public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) {
+    public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
         this.httpHost = request.getHost();
         nameSpaces = new HashMap();
         findNameSpace(rootElement);
@@ -163,7 +163,7 @@ public class OGCResponse {
                 }
             }
         } catch (Exception e) {
-            throw new UnsupportedOperationException("Failed to rebuild response! Exception: " + e);
+            throw (e);
         }
     }
 
@@ -293,7 +293,12 @@ public class OGCResponse {
             }
         }
         checkSupportedOperations(newSupportedOperations);
-        wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
+        //Check for null. Only check the values that can be null according the specs.
+        if (wfsCapabilities.getServiceProvider()!=null &&
+                wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo()!=null &&
+                wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource()!=null){
+            wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
+        }
         setSrs(null);
         return wfsCapabilities;
     }
@@ -781,35 +786,54 @@ public class OGCResponse {
                 }
             }
 
-            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] comparisonOperators = filter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
-            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] newComparisonOperators = newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
-            for (int o = 0; o < comparisonOperators.length; o++) {
-                boolean isValid = false;
-                String value = comparisonOperators[o].getComparisonOperator().toString();
-                for (int p = 0; p < newComparisonOperators.length; p++) {
-                    String newValue = newComparisonOperators[p].getComparisonOperator().toString();
-                    if (value.equals(newValue)) {
-                        isValid = true;
+            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] comparisonOperators = null;
+            if (filter.getScalar_Capabilities().getComparisonOperators()!=null){
+                comparisonOperators = filter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
+            }
+            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] newComparisonOperators = null;
+            if (newFilter.getScalar_Capabilities().getComparisonOperators()!=null){
+                newComparisonOperators=newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
+            }
+            if (comparisonOperators!=null){
+                for (int o = 0; o < comparisonOperators.length; o++) {
+                    boolean isValid = false;
+                    String value = comparisonOperators[o].getComparisonOperator().toString();
+                    if (newComparisonOperators!=null){
+                        for (int p = 0; p < newComparisonOperators.length; p++) {
+                            String newValue = newComparisonOperators[p].getComparisonOperator().toString();
+                            if (value.equals(newValue)) {
+                                isValid = true;
+                            }
+                        }
                     }
-                }
-                if (isValid == false) {
-                    filter.getScalar_Capabilities().getComparisonOperators().removeComparisonOperatorsTypeItem(comparisonOperators[o]);
+                    if (isValid == false) {
+                        filter.getScalar_Capabilities().getComparisonOperators().removeComparisonOperatorsTypeItem(comparisonOperators[o]);
+                    }
                 }
             }
-
-            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] arithmeticOperators = filter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
-            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] newArithmeticOperators = newFilter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
-            for (int f = 0; f < arithmeticOperators.length; f++) {
-                boolean isValid = false;
-                String value = arithmeticOperators[f].getSimpleArithmetic().toString();
-                for (int h = 0; h < newArithmeticOperators.length; h++) {
-                    String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
-                    if (value.equals(newValue)) {
-                        isValid = true;
+            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] arithmeticOperators = null;
+            if (filter.getScalar_Capabilities().getArithmeticOperators()!=null){
+                arithmeticOperators=filter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
+            }
+            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] newArithmeticOperators = null;
+            if (newFilter.getScalar_Capabilities().getArithmeticOperators()!=null){
+                newFilter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
+            }
+            if(arithmeticOperators!=null){
+                for (int f = 0; f < arithmeticOperators.length; f++) {
+                    boolean isValid = false;
+                    String value = arithmeticOperators[f].getSimpleArithmetic().toString();
+                    if(newArithmeticOperators!=null){
+                        for (int h = 0; h < newArithmeticOperators.length; h++) {
+                            String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
+                            if (value.equals(newValue)) {
+                                isValid = true;
+                            }
+                        }
                     }
-                }
-                if (isValid == false) {
-                    filter.getScalar_Capabilities().getArithmeticOperators().removeArithmeticOperatorsTypeItem(arithmeticOperators[f]);
+                    if (isValid == false) {
+                        filter.getScalar_Capabilities().getArithmeticOperators().removeArithmeticOperatorsTypeItem(arithmeticOperators[f]);
+                    }
                 }
             }
 
