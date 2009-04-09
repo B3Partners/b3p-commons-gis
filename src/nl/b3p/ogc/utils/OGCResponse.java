@@ -75,7 +75,7 @@ public class OGCResponse {
     private List getCapabilitiesV110 = new ArrayList();
     private List featureCollectionV100 = new ArrayList();
     private List featureCollectionV110 = new ArrayList();
-    private HashMap nameSpaces;
+    private HashMap nameSpaces=null;
     private String featureTypeNamespacePrefix;
     private HashMap schemaLocations;
     private String srs = null;
@@ -87,7 +87,8 @@ public class OGCResponse {
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
         this.httpHost = request.getHost();
-        nameSpaces = new HashMap();
+        if (nameSpaces==null)
+            nameSpaces = new HashMap();
         findNameSpace(rootElement);
         Unmarshaller um;
         Object o;
@@ -163,7 +164,7 @@ public class OGCResponse {
                 }
             }
         } catch (Exception e) {
-            throw (e);
+            throw e;
         }
     }
 
@@ -823,7 +824,7 @@ public class OGCResponse {
                 for (int f = 0; f < arithmeticOperators.length; f++) {
                     boolean isValid = false;
                     String value = arithmeticOperators[f].getSimpleArithmetic().toString();
-                    if(newArithmeticOperators!=null){
+                    if (newArithmeticOperators!=null){
                         for (int h = 0; h < newArithmeticOperators.length; h++) {
                             String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
                             if (value.equals(newValue)) {
