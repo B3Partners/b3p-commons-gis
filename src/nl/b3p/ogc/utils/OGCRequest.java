@@ -34,7 +34,9 @@ package nl.b3p.ogc.utils;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -83,6 +85,13 @@ public class OGCRequest implements OGCConstants {
     private String password;
     // version that will be returned to client
     private String finalVersion;
+
+    public static final List NAMESPACES_NOT_IN_URL = Arrays.asList(new String[]{
+        "http://www.opengis.net/wfs",
+        "http://www.w3.org/2001/xmlschema-instance",
+        "http://www.opengis.net/gml",
+        "http://www.opengis.net/ogc"
+            });
 
     /*Default constr.*/
     public OGCRequest() {
@@ -569,7 +578,8 @@ public class OGCRequest implements OGCConstants {
     public String getUrl() {
         StringBuffer sb = new StringBuffer();
         sb.append(httpHost);
-        sb.append("?");
+        if (sb.indexOf("?")<0)
+            sb.append("?");
         Set keys = parameters.keySet();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
@@ -578,22 +588,32 @@ public class OGCRequest implements OGCConstants {
                 sb.append(o);
                 sb.append("=");
                 if (parameters.get(o) != null) {
-                    sb.append(parameters.get(o));
+                    try{
+                    String s=(String) parameters.get(o);
+                    s=URLEncoder.encode(s,"utf-8");
+                    sb.append(s);
+                    }catch(UnsupportedEncodingException nee){
+                        log.error("Fout bij encoding voor het opbouwen van url.",nee);
+                    }
                 }
                 sb.append("&");
             }
         }
         if (getNameSpaces() != null && getNameSpaces().size() > 0) {
-            sb.append("namespace=xmlns(");
+            sb.append("namespace=");
             Set mapEntries = getNameSpaces().entrySet();
             it = mapEntries.iterator();
             while (it.hasNext()) {
                 Map.Entry me = (Entry) it.next();
-                sb.append(me.getKey());
-                sb.append("=");
-                sb.append(me.getValue());
+                if (!NAMESPACES_NOT_IN_URL.contains(me.getValue().toString().toLowerCase())){
+                    sb.append("xmlns(");
+                    sb.append(me.getKey());
+                    sb.append("=");
+                    sb.append(me.getValue());
+                    sb.append(")");
+                }
             }
-            sb.append(")&");
+            sb.append("&");
         }
         if (sb.length() > 0) {
             return sb.toString();
@@ -1007,7 +1027,7 @@ public class OGCRequest implements OGCConstants {
         return httpHost;
     }
 
-    protected void setHttpHost(String httpHost) {
+    public void setHttpHost(String httpHost) {
         this.httpHost = httpHost;
     }
 
@@ -1226,6 +1246,19 @@ public class OGCRequest implements OGCConstants {
         return (String) o;
     }
 
+    public String getPrefix(String namespaceUrl) {
+        if (nameSpaces==null || nameSpaces.size()==0){
+            return null;
+        }
+        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator
+					.hasNext();) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            if (entry.getValue().equals(namespaceUrl)) {
+                return (String) entry.getKey();
+            }
+        }
+        return null;
+    }
     /**
      * @return the username
      */

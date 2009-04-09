@@ -241,8 +241,9 @@ public class OgcWfsClient {
 
     /** Haal de elementen uit de describefeaturetype request
      */
-    public static NodeList getDescribeFeatureElements(Element el) throws Exception {
+    public static ArrayList getDescribeFeatureElements(Element el) throws Exception {
         //Haal eerst de complexTypes type elementen op en de prefix.
+        String namespaceUri=el.getNamespaceURI();
         NodeList childs = el.getChildNodes();
         String prefix = "";
         for (int i = 0; i < childs.getLength() && prefix.length() == 0; i++) {
@@ -260,25 +261,30 @@ public class OgcWfsClient {
         if (el == null) {
             return null;
         }
-        NodeList nlist = el.getElementsByTagName("complexType");
-        if (!(nlist.getLength() > 0)) {
-            nlist = el.getElementsByTagName("xsd:complexType");
-        }
+        NodeList nlist = el.getElementsByTagNameNS(namespaceUri,"complexType");
         if (!(nlist.getLength() > 0)) {
             log.error("no complexType element found");
             return null;
         }
-        NodeList nl = ((Element) nlist.item(0)).getElementsByTagName("element");
+        ArrayList returnValue=new ArrayList();
+        for (int i=0; i < nlist.getLength(); i++){
+            Element e=(Element)nlist.item(i);
+            NodeList nl= e.getElementsByTagNameNS(namespaceUri, "element");
+            for (int b=0; b < nl.getLength(); b++){
+                returnValue.add(nl.item(b));
+            }
+        }
+        /*NodeList nl = ((Element) nlist.item(0)).getElementsByTagName("element");
         if (nl == null || !(nl.getLength() > 0)) {
             nl = ((Element) nlist.item(0)).getElementsByTagName("xsd:element");
-        }
-        if (prefix.length() > 0) {
-            for (int i = 0; i < nl.getLength(); i++) {
-                Element e = (Element) nl.item(i);
+        }*/
+        if (returnValue.size() > 0) {
+            for (int i = 0; i < returnValue.size(); i++) {
+                Element e = (Element) returnValue.get(i);
                 e.setAttribute("name", prefix + ":" + e.getAttribute("name"));
             }
         }
-        return nl;
+        return returnValue;
     }
 
     /**Get the feature in the capabilities with given name.
