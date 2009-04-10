@@ -23,10 +23,12 @@
 package nl.b3p.wms.capabilities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Map;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
@@ -314,11 +316,21 @@ public class Layer implements XMLElement {
         if (layers == null) {
             layers = new HashSet();
         }
+        /* name, title en cascaded moeten uniek zijn binnen siblings */
         if (layers.contains(layer)) {
-            String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
-            log.error(msg);
+            String thisLayerDesc = "sp_abbr="
+                        + (getServiceProvider() == null ? "(null)" : getServiceProvider().getAbbr())
+                        + ", name=" + getName()
+                        + ", title=" + getTitle()
+                        + ", cascaded=" + getCascaded();
+            String layerDesc = "sp_abbr="
+                        + (layer.getServiceProvider() == null ? "(null)" : layer.getServiceProvider().getAbbr())
+                        + ", name=" + layer.getName()
+                        + ", title=" + layer.getTitle()
+                        + ", cascaded=" + layer.getCascaded();
+            String msg = "Duplicate sibling layer added to parent [" + thisLayerDesc + "]: duplicate [" + layerDesc + "]";
             throw new Exception(msg);
-        }else{
+        } else {
             layers.add(layer);
             layer.setParent(this);
         }
@@ -813,6 +825,27 @@ public class Layer implements XMLElement {
         }
     }
 
+    /**
+     * Get a map of tuples containing the identity of this layer, for purposes
+     * of comparing the identity maps of different layers. The
+     * includeServiceProviderAbbr can be used to create identity maps which
+     * do or do not include the service provider abbreviation. The properties
+     * which are always added to the map are getName(), getTitle() and getCascaded()
+     *
+     * @param includeServiceProviderAbbr if getServiceProvider().getAbbr() should be included in the map.
+     * @return A Map containing tuples of identifier properties
+     */
+    public Map getIdentityMap(boolean includeServiceProviderAbbr) {
+        Map tuples = new HashMap();
+        tuples.put("name", getName());
+        tuples.put("title", getTitle());
+        tuples.put("cascaded", getCascaded());
+        if(includeServiceProviderAbbr) {
+            tuples.put("sp_abbr", getServiceProvider() == null ? "(null)" : getServiceProvider().getAbbr());
+        }
+        return tuples;
+    }
+    
     /**
      * Public method to check wether the given layer as parameter equals this layer.
      */
