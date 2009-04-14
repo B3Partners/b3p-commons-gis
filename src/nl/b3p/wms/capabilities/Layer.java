@@ -37,7 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class Layer implements XMLElement {
+public class Layer implements XMLElement,Comparable{
 
     private static final Log log = LogFactory.getLog(Layer.class);
     private Integer id;
@@ -895,5 +895,23 @@ public class Layer implements XMLElement {
             }
         }
         return false;
+    }
+    public String toString(){
+        String returnValue="";
+        if (this.getName()!=null){
+            returnValue+=this.getName();
+        }
+        if (this.getTitle()!=null){
+            returnValue+=" ("+this.getTitle()+")";
+        }
+        return returnValue;
+    }
+
+    public int compareTo(Object o) {
+        if (o==null){
+            return 1;
+        }
+        Layer l = (Layer)o;
+        return this.toString().compareTo(l.toString());
     }
 }

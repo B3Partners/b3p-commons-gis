@@ -86,7 +86,9 @@ public class WfsCapabilitiesReader {
             log.info("try doing a Post getCapabilities");
             method = new PostMethod(host);
             String body = getGetCapabilitieBody();
-            ((PostMethod)method).setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+            //work around voor Esri Post request. Contenttype mag geen text/xml zijn.
+            //((PostMethod)method).setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
+            ((PostMethod)method).setRequestEntity(new StringRequestEntity(body,null,null));
             status = client.executeMethod(method);
         }
         if(status == HttpStatus.SC_OK){

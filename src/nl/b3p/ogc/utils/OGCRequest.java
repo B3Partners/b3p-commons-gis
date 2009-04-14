@@ -842,6 +842,27 @@ public class OGCRequest implements OGCConstants {
         if (value != null) {
             value = value.trim();
         }
+        if (WFS_PARAM_TYPENAME.equals(param)){
+            int index1=param.indexOf("{");
+            int index2=param.indexOf("}");
+            if (index1>=0 && index2>=0 ){
+                String nameSpaceUri=param.substring(index1+1,index2);
+                String prefix= getPrefix(nameSpaceUri);
+                //als namespace nog niet is toegevoegd
+                if (prefix==null){
+                    int nsTeller=1;
+                    //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
+                    String ns = getNameSpace("ns"+nsTeller);
+                    while(ns!=null){
+                        nsTeller++;
+                        ns=getNameSpace("ns"+nsTeller);
+                    }
+                    prefix="ns"+nsTeller;
+                    addOrReplaceNameSpace(prefix, nameSpaceUri);
+                }
+                param=prefix+":"+param.substring(index2+1);
+            }
+        }
         parameters.put(param, value);
         if (o == null) {
             return null;
@@ -1293,7 +1314,7 @@ public class OGCRequest implements OGCConstants {
         if (param == null) {
             return null;
         }
-        Object o = parameters.get(param);
+        Object o = nameSpaces.get(param);
         if (o == null) {
             return null;
         }

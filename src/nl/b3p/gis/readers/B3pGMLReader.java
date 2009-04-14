@@ -133,7 +133,9 @@ public class B3pGMLReader extends GMLReader {
             String host = wfsgf.getUrlWithNonOGCparams();
             method = new PostMethod(host);
             String body = wfsgf.getXMLBody();
-            method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            //work around voor ESRI post request. Contenttype mag geen text/xml zijn.
+            //method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            method.setRequestEntity(new StringRequestEntity(body, null, null));
             int status = client.executeMethod(method);
             if (status == HttpStatus.SC_OK) {
                 log.debug("Response ok, trying to create FeatureCollection....");
@@ -145,7 +147,9 @@ public class B3pGMLReader extends GMLReader {
                 if (fc.size() == 0) {
                     //There are no Features loaded. So redo the post method and show the response to user.
                     PostMethod method2 = new PostMethod(host);
-                    method2.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+                    //work around voor ESRI post request. Contenttype mag geen text/xml zijn.
+                    //method2.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+                    method2.setRequestEntity(new StringRequestEntity(body, null,null));
                     client.executeMethod(method2);
                     String cause = method2.getResponseBodyAsString(1000);
                     if (cause.indexOf("<ServiceExceptionReport") > 0) {
@@ -410,7 +414,9 @@ public class B3pGMLReader extends GMLReader {
         PostMethod method = null;
         HttpClient client = new HttpClient();
         method = new PostMethod(host);
-        method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+        //work around voor Esri Post request. Content type mag geen text/xml zijn.
+        //method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+        method.setRequestEntity(new StringRequestEntity(body, null, null));
         int status = client.executeMethod(method);
         if (status == HttpStatus.SC_OK) {
             DOMParser dp = new DOMParser();

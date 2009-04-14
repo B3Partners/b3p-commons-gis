@@ -194,7 +194,9 @@ public class OgcWfsClient {
             m.marshal(o);
             body = sw.toString();
             PostMethod postmethod = new PostMethod(host);
-            postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            //work around voor esri post request. Contenttype mag geen text/xml zijn.
+            //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            postmethod.setRequestEntity(new StringRequestEntity(body, null, null));
             httpmethod = postmethod;
         }
         if (username != null && password != null) {
@@ -246,7 +248,7 @@ public class OgcWfsClient {
     public static ArrayList getDescribeFeatureElements(Element el) throws Exception {
         //Haal eerst de complexTypes type elementen op en de prefix.
         String namespaceUri=el.getNamespaceURI();
-        NodeList childs = el.getChildNodes();
+        NodeList childs = el.getChildNodes();        
         String prefix = "";
         for (int i = 0; i < childs.getLength() && prefix.length() == 0; i++) {
             Node n = childs.item(i);
@@ -258,6 +260,10 @@ public class OgcWfsClient {
                     }
                 }
             }
+        }
+        String featureNameSpace=null;
+        if (prefix.length()>0){
+           featureNameSpace=el.getAttribute("xmlns:"+prefix);
         }
         String s = elementToString(el);
         if (el == null) {
@@ -273,17 +279,11 @@ public class OgcWfsClient {
             Element e=(Element)nlist.item(i);
             NodeList nl= e.getElementsByTagNameNS(namespaceUri, "element");
             for (int b=0; b < nl.getLength(); b++){
-                returnValue.add(nl.item(b));
-            }
-        }
-        /*NodeList nl = ((Element) nlist.item(0)).getElementsByTagName("element");
-        if (nl == null || !(nl.getLength() > 0)) {
-            nl = ((Element) nlist.item(0)).getElementsByTagName("xsd:element");
-        }*/
-        if (returnValue.size() > 0) {
-            for (int i = 0; i < returnValue.size(); i++) {
-                Element e = (Element) returnValue.get(i);
-                e.setAttribute("name", prefix + ":" + e.getAttribute("name"));
+                Element element=(Element) nl.item(b);
+                if (featureNameSpace!=null && featureNameSpace.length() >0){
+                    element.setAttribute("name", "{"+featureNameSpace+"}"+element.getAttribute("name"));
+                }
+                returnValue.add(element);
             }
         }
         return returnValue;
@@ -596,8 +596,8 @@ public class OgcWfsClient {
     /**
      *Voegt een bbox toe aan het GetFeature object.
      */
-    public static void addBboxFilter(GetFeature gf, String attributeName, double[] bbox, FeatureType ft) throws Exception {
-        Filter filter = OgcWfsClient.createBboxFilter(attributeName, bbox, ft);
+    public static void addBboxFilter(GetFeature gf, String attributeName, double[] bbox, String srsName, FeatureType ft) throws Exception {
+        Filter filter = OgcWfsClient.createBboxFilter(attributeName, bbox, srsName, ft);
         if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature) {
             ((nl.b3p.xml.wfs.v100.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v100.Filter) filter);
         } else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature) {
@@ -608,17 +608,20 @@ public class OgcWfsClient {
     /**
      *Creates a bbox filter
      */
-    public static nl.b3p.xml.wfs.Filter createBboxFilter(String attributeName, double[] bbox, nl.b3p.xml.wfs.FeatureType feature) throws Exception {
+    public static nl.b3p.xml.wfs.Filter createBboxFilter(String attributeName, double[] bbox, String srsName, nl.b3p.xml.wfs.FeatureType feature) throws Exception {
+        //als er een namespaceuri voor staat die verwijderen.
+        if (attributeName.indexOf("{")>=0 && attributeName.indexOf("}")>=0){
+            attributeName=attributeName.substring(attributeName.indexOf("}")+1);
+        }
         if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
             StringBuffer sb = new StringBuffer();
             sb.append("<Filter><BBOX><PropertyName>");
             sb.append(attributeName);
             sb.append("</PropertyName>");
-            sb.append("<gml:Box srsName=\"");
-            if (((nl.b3p.xml.wfs.v100.capabilities.FeatureType) feature).getSRS() != null) {
-                sb.append(((nl.b3p.xml.wfs.v100.capabilities.FeatureType) feature).getSRS());
-            } else {
-                sb.append(28992);
+            sb.append("<gml:Box");
+            if (srsName!=null){
+                sb.append(" srsName=\"");
+                sb.append(srsName);
             }
             sb.append("\"><gml:coordinates>");
             sb.append(bbox[0]).append(",").append(bbox[1]);
@@ -633,11 +636,10 @@ public class OgcWfsClient {
             sb.append(attributeName);
             //sb.append("app:geom");
             sb.append("</PropertyName>");
-            sb.append("<gml:Envelope srsName=\"");
-            if (((nl.b3p.xml.wfs.v110.FeatureType) feature).getFeatureTypeTypeChoice().getFeatureTypeTypeChoiceSequence().getDefaultSRS() != null) {
-                sb.append(((nl.b3p.xml.wfs.v110.FeatureType) feature).getFeatureTypeTypeChoice().getFeatureTypeTypeChoiceSequence().getDefaultSRS());
-            } else {
-                sb.append(28992);
+            sb.append("<gml:Envelope");
+            if (srsName!=null){
+                sb.append(" srsName=\"");
+                sb.append(srsName);
             }
             sb.append("\"><gml:lowerCorner>");
             sb.append(bbox[0]).append(" ").append(bbox[1]);
