@@ -409,18 +409,18 @@ public class OGCResponse {
     public String getResponseBody(List spInfo) {
         String body = null;
         Object castorObject = null;
-        List layers = new ArrayList();
-        Iterator iter = spInfo.iterator();
-        while (iter.hasNext()) {
-            HashMap sp = (HashMap) iter.next();
-            String layerName = featureTypeNamespacePrefix + sp.get("spAbbr") + "_" + sp.get("layer");
-            layers.add(layerName);
-        }
 
         if (response == null || response.length() <= 0) {
             return body;
         }
         if (response.equals(OGCConstants.WFS_CAPABILITIES)) {
+            List layers = new ArrayList();
+            Iterator iter = spInfo.iterator();
+            while (iter.hasNext()) {
+                HashMap sp = (HashMap) iter.next();
+                String layerName = featureTypeNamespacePrefix + sp.get("spAbbr") + "_" + sp.get("layer");
+                layers.add(layerName);
+            }
             castorObject = mergeCapabilities(layers);
         } else if (response.equals(OGCConstants.WFS_SERVER_EXCEPTION)) {
             castorObject = newExceptionReport;

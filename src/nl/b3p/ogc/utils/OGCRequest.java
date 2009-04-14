@@ -77,7 +77,8 @@ public class OGCRequest implements OGCConstants {
     private HashMap nameSpaces;
     private HashMap schemaLocations;
     private HashMap transactionList = new HashMap();
-    private HashMap getFeatureMap = new HashMap();
+    private HashMap getFeatureFilterMap = new HashMap();
+    private Map getFeaturePropertyNameListMap = new HashMap();
     private String abbr;
     private List layers = new ArrayList();
 
@@ -268,19 +269,29 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetFeature);
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        if (getFeature.getMaxFeatures() > 0) {
+        	addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        }
         nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0) {
-            for (int j = 0; j < qlist.length; j++) {
-                String typename = qlist[j].getTypeName();
+            for (int i = 0; i < qlist.length; i++) {
+                String typename = qlist[i].getTypeName();
                 String filter = null;
-                if (qlist[j].getFilter() != null) {
+                if (qlist[i].getFilter() != null) {
                     StringWriter sw = new StringWriter();
                     Marshaller m = new Marshaller(sw);
-                    m.marshal(qlist[j].getFilter());
+                    m.marshal(qlist[i].getFilter());
                     filter = sw.toString();
                 }
-                addGetFeatureMap(typename, filter);
+                addGetFeatureFilterMap(typename, filter);
+                StringBuffer propertyNameList = new StringBuffer();
+                for (int j = 0; j < qlist[i].getPropertyNameCount(); j++) {
+                    propertyNameList.append(qlist[i].getPropertyName(j).getContent());
+                    if (j+1 < qlist[i].getPropertyNameCount()) {
+                    	propertyNameList.append(',');
+                    }
+				}
+                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString(): null);
             }
         }
     }
@@ -292,21 +303,36 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetFeature);
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
-        addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        if (getFeature.getMaxFeatures() > 0) {
+        	addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+        }
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKDEPTH, getFeature.getTraverseXlinkDepth());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKEXPIRY, "" + getFeature.getTraverseXlinkExpiry());
         nl.b3p.xml.wfs.v110.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0) {
-            for (int j = 0; j < qlist.length; j++) {
-                String typename = qlist[j].getTypeName();
+            for (int i = 0; i < qlist.length; i++) {
+                String typename = qlist[i].getTypeName();
                 String filter = null;
-                if (qlist[j].getFilter() != null) {
+                if (qlist[i].getFilter() != null) {
                     StringWriter sw = new StringWriter();
                     Marshaller m = new Marshaller(sw);
-                    m.marshal(qlist[j].getFilter());
+                    m.marshal(qlist[i].getFilter());
                     filter = sw.toString();
                 }
-                addGetFeatureMap(typename, filter);
+                addGetFeatureFilterMap(typename, filter);
+                StringBuffer propertyNameList = new StringBuffer();
+                for (int j = 0; j < qlist[i].getQueryTypeChoiceCount(); j++) {
+                    for (int k = 0; k < qlist[i].getQueryTypeChoice(j).getQueryTypeChoiceItemCount(); k++) {
+                    	String propertyName = qlist[i].getQueryTypeChoice(j).getQueryTypeChoiceItem(k).getPropertyName();
+                    	if (propertyNameList.length() > 0) {
+                    		propertyNameList.append(',');
+                    	}
+                    	if (propertyName != null) {
+                    		propertyNameList.append(propertyName);
+                    	}
+					}
+				}
+                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString(): null);
             }
         }
     }
@@ -485,15 +511,15 @@ public class OGCRequest implements OGCConstants {
         return layers;
     }
 
-    public HashMap getGetFeatureMap() {
-        return getFeatureMap;
+    public Map getGetFeatureFilterMap() {
+        return getFeatureFilterMap;
     }
 
-    public void setGetFeatureMap(HashMap getFeatureMap) {
-        this.getFeatureMap = getFeatureMap;
+    public void setGetFeatureFilterMap(HashMap getFeatureFilterMap) {
+        this.getFeatureFilterMap = getFeatureFilterMap;
     }
 
-    public void addGetFeatureMap(String key, Object value) {
+    public void addGetFeatureFilterMap(String key, Object value) {
         String newKey = "";
         String[] temp = key.split("}");
         if (temp.length == 2) {
@@ -501,11 +527,39 @@ public class OGCRequest implements OGCConstants {
         } else {
             newKey = key;
         }
-        getFeatureMap.put(newKey, value);
+        getFeatureFilterMap.put(newKey, value);
     }
 
     public String getGetFeatureFilter(String key) {
-        Object o = getFeatureMap.get(key);
+        Object o = getFeatureFilterMap.get(key);
+        if (o == null) {
+            return null;
+        } else {
+            return o.toString();
+        }
+    }
+
+    public Map getGetFeaturePropertyNameListMap() {
+        return getFeaturePropertyNameListMap;
+    }
+
+    public void setGetFeaturePropertyNameListMap(Map getFeaturePropertyNameListMap) {
+        this.getFeaturePropertyNameListMap = getFeaturePropertyNameListMap;
+    }
+
+    public void addGetFeaturePropertyNameListMap(String key, Object value) {
+        String newKey = "";
+        String[] temp = key.split("}");
+        if (temp.length == 2) {
+            newKey = temp[1];
+        } else {
+            newKey = key;
+        }
+        getFeaturePropertyNameListMap.put(newKey, value);
+    }
+
+    public String getGetFeaturePropertyNameList(String key) {
+        Object o = getFeaturePropertyNameListMap.get(key);
         if (o == null) {
             return null;
         } else {

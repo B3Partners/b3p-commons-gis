@@ -43,6 +43,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import nl.b3p.gis.readers.B3pGMLReader;
+import nl.b3p.xml.ogc.v100.PropertyName;
 import nl.b3p.xml.wfs.DescribeFeatureType;
 import nl.b3p.xml.wfs.FeatureType;
 import nl.b3p.xml.wfs.FeatureTypeList;
@@ -54,6 +55,7 @@ import nl.b3p.xml.wfs.Transaction;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
+import nl.b3p.xml.wfs.v110.QueryTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
@@ -409,6 +411,19 @@ public class OgcWfsClient {
                     log.error("Filter v100 (WFS version 1.0.0) not correct", e);
                 }
             }
+            if (or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME) != null) {
+                try {
+                	String[] propertyNames = or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME).split(",");
+                	nl.b3p.xml.ogc.v100.PropertyName[] p = new nl.b3p.xml.ogc.v100.PropertyName[propertyNames.length];
+                	for (int i = 0; i < propertyNames.length; i++) {
+                    	p[i] = new nl.b3p.xml.ogc.v100.PropertyName();
+                    	p[i].setContent(propertyNames[i]);
+					}
+                    q.setPropertyName(p);
+                } catch (Exception e) {
+                    log.error("PropertyName v100 (WFS version 1.0.0) not correct", e);
+                }
+            }
             gfv100.addQuery(q);
         } else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature) {
             nl.b3p.xml.wfs.v110.GetFeature gfv110 = (nl.b3p.xml.wfs.v110.GetFeature) gf;
@@ -431,6 +446,21 @@ public class OgcWfsClient {
                     log.error("Filter v110 (WFS version 1.1.0) not correct", e);
                     // without throwing exception it goes on but without aplying filter
                     throw new UnsupportedOperationException("Filter is not correct!");
+                }
+            }
+            if (or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME) != null) {
+                try {
+                	String[] propertyNames = or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME).split(",");
+                	nl.b3p.xml.wfs.v110.QueryTypeChoice[] queryTypeChoice = new nl.b3p.xml.wfs.v110.QueryTypeChoice[1];
+                	queryTypeChoice[0] = new nl.b3p.xml.wfs.v110.QueryTypeChoice();
+                	for (int i = 0; i < propertyNames.length; i++) {
+                    	nl.b3p.xml.wfs.v110.QueryTypeChoiceItem queryTypeChoiceItem = new nl.b3p.xml.wfs.v110.QueryTypeChoiceItem();
+                    	queryTypeChoiceItem.setPropertyName(propertyNames[i]);
+                    	queryTypeChoice[0].addQueryTypeChoiceItem(queryTypeChoiceItem);
+					}
+                    q.setQueryTypeChoice(queryTypeChoice);
+                } catch (Exception e) {
+                    log.error("PropertyName v100 (WFS version 1.0.0) not correct", e);
                 }
             }
             gfv110.addQuery(q);
