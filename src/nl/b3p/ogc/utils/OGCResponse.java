@@ -914,7 +914,9 @@ public class OGCResponse {
                                     }
                                 }
                                 if (isValid == false) {
-                                    filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getComparison_Operators().removeComparison_OperatorsTypeItem(comparisonOperators[k]);
+                                    if (x< filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItemCount()){
+                                        filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getComparison_Operators().removeComparison_OperatorsTypeItem(comparisonOperators[k]);
+                                    }
                                 }
                             }
                         }
@@ -923,7 +925,10 @@ public class OGCResponse {
                     boolean isValid = false;
                     String value = scalarCapabilities[x].getLogical_Operators().toString();
                     for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        String newValue = newScalarCapabilities[y].getLogical_Operators().toString();
+                        String newValue =null;
+                        if (newScalarCapabilities!=null && newScalarCapabilities[y].getLogical_Operators()!=null){
+                            newValue= newScalarCapabilities[y].getLogical_Operators().toString();
+                        }
                         if (value.equals(newValue)) {
                             isValid = true;
                         }

@@ -102,9 +102,12 @@ public class OgcWfsClient {
         or.removeAllWFSParameters();
         or.addOrReplaceParameter(OGCConstants.WMS_SERVICE, OGCConstants.WFS_SERVICE_WFS);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
+        if (original.getParameter(OGCConstants.WMS_VERSION)!=null)
+            or.addOrReplaceParameter(OGCConstants.WMS_VERSION, original.getParameter(OGCConstants.WMS_VERSION));
         String host = or.getUrlWithNonOGCparams();
         //Element el=doRequest(getGetCapabilitiesRequest(or),host);
-        Element el = doRequest(or.getUrl(), host, or.getNameSpaces(),or.getUsername(),or.getPassword());
+        String url=or.getUrl();
+        Element el = doRequest(url, host, or.getNameSpaces(),or.getUsername(),or.getPassword());
         if (el.getTagName().contains(OGCConstants.WFS_OBJECT_CAPABILITIES)) {
             String version = el.getAttribute(OGCConstants.WMS_VERSION.toLowerCase());
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
