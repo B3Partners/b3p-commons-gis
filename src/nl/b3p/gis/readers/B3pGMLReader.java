@@ -227,7 +227,8 @@ public class B3pGMLReader extends GMLReader {
                     String names = e.getNamespaceURI();
                     String prefix = e.getPrefix();
                     //if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
-                    if (e.getAttribute("type").startsWith("gml:")) {
+                    String elType=e.getAttribute("type");
+                    if (elType.startsWith("gml:")) {
                         geom.append("<GeometryElement>");
                         if (defaultPrefix != null && !e.getAttribute("name").contains(defaultPrefix + ":")) {
                             geom.append(defaultPrefix + ":");
@@ -239,7 +240,8 @@ public class B3pGMLReader extends GMLReader {
                         geom.append(e.getAttribute("ref"));
                         geom.append("</GeometryElement>");
                     }
-                    if (e.getAttribute("type") != null && allowedType(e.getAttribute("type")) && e.getAttribute("name") != null) {
+                    elType=allowedType(elType);
+                    if (elType != null && e.getAttribute("name") != null) {
                         cols.append("<column><name>");
                         if (maxColumnNameLength > 0 && e.getAttribute("name").length() > maxColumnNameLength) {
                             String newName = "";
@@ -395,7 +397,7 @@ public class B3pGMLReader extends GMLReader {
         return al;
     }
 
-    private boolean allowedType(String type) {
+    private String allowedType(String type) {
         if (type.contains(":")) {
             String tokens[] = type.split(":");
             if (tokens.length > 1) {
@@ -403,9 +405,11 @@ public class B3pGMLReader extends GMLReader {
             }
         }
         if (type.equalsIgnoreCase("STRING") || type.equalsIgnoreCase("INTEGER") || type.equalsIgnoreCase("DOUBLE")) {
-            return true;
-        } else {
-            return false;
+            return type;
+        } else if (type.equalsIgnoreCase("int")){
+            return "INTEGER";
+        } else{
+            return "STRING";
         }
     }
 
