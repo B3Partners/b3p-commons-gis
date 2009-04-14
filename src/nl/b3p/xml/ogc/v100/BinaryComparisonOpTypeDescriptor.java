@@ -66,6 +66,40 @@ public class BinaryComparisonOpTypeDescriptor extends nl.b3p.xml.ogc.v100.Compar
         
         //-- initialize element descriptors
         
+        //-- _propertyName
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyName.class, "_propertyName", "PropertyName", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                BinaryComparisonOpType target = (BinaryComparisonOpType) object;
+                return target.getPropertyName();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    BinaryComparisonOpType target = (BinaryComparisonOpType) object;
+                    target.setPropertyName( (nl.b3p.xml.ogc.v100.PropertyName) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v100.PropertyName();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _propertyName
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
         //-- _div
         desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.Div.class, "_div", "Div", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
@@ -198,40 +232,6 @@ public class BinaryComparisonOpTypeDescriptor extends nl.b3p.xml.ogc.v100.Compar
         addFieldDescriptor(desc);
         
         //-- validation code for: _mul
-        fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        { //-- local scope
-        }
-        desc.setValidator(fieldValidator);
-        //-- _propertyName
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v100.PropertyName.class, "_propertyName", "PropertyName", org.exolab.castor.xml.NodeType.Element);
-        handler = new org.exolab.castor.xml.XMLFieldHandler() {
-            public java.lang.Object getValue( java.lang.Object object ) 
-                throws IllegalStateException
-            {
-                BinaryComparisonOpType target = (BinaryComparisonOpType) object;
-                return target.getPropertyName();
-            }
-            public void setValue( java.lang.Object object, java.lang.Object value) 
-                throws IllegalStateException, IllegalArgumentException
-            {
-                try {
-                    BinaryComparisonOpType target = (BinaryComparisonOpType) object;
-                    target.setPropertyName( (nl.b3p.xml.ogc.v100.PropertyName) value);
-                }
-                catch (java.lang.Exception ex) {
-                    throw new IllegalStateException(ex.toString());
-                }
-            }
-            public java.lang.Object newInstance( java.lang.Object parent ) {
-                return new nl.b3p.xml.ogc.v100.PropertyName();
-            }
-        };
-        desc.setHandler(handler);
-        desc.setNameSpaceURI("http://www.opengis.net/ogc");
-        desc.setMultivalued(false);
-        addFieldDescriptor(desc);
-        
-        //-- validation code for: _propertyName
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         { //-- local scope
         }
