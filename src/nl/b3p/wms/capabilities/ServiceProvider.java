@@ -268,7 +268,12 @@ public class ServiceProvider implements XMLElement {
         if (null == serviceProviderKeywordList) {
             serviceProviderKeywordList = new HashSet();
         }
-        serviceProviderKeywordList.add(keyword);
+        /* Voeg geen leeg keyword toe, in de mapping staat de inhoud van
+         * de set namelijk op not-null
+         */
+        if(keyword != null && keyword.trim().length() != 0) {
+            serviceProviderKeywordList.add(keyword);
+        }
     }
     // </editor-fold>
     /** Method that will overwrite the URL's stored in the database with the URL specified for Kaartenbalie.
