@@ -911,6 +911,9 @@ public class Layer implements XMLElement,Comparable{
         if (o==null){
             return 1;
         }
+        if (! (o instanceof Layer)){
+            return 1;
+        }
         Layer l = (Layer)o;
         return this.toString().compareTo(l.toString());
     }
