@@ -164,6 +164,7 @@ public class WfsCapabilitiesReader {
             }
         }else{
             log.error("Error doing Post getCapabilities: "+status+": "+method.getResponseBodyAsString());
+            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: "+status+" request: "+or.getUrl());
         }
         provider.setUrl(url);
         return provider;
