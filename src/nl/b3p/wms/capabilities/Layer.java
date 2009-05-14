@@ -182,7 +182,7 @@ public class Layer implements XMLElement,Comparable{
             layerset = new HashSet();
         }
         this.serviceProvider = serviceProvider;
-        if (layerset.contains(this)) {
+        if (layerset.contains(this) && this.getName()!=null) {
             String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
             log.error(msg);
             throw new Exception(msg);
@@ -395,6 +395,17 @@ public class Layer implements XMLElement,Comparable{
             return null;
         }
         return getSpAbbr() + "_" + this.getName();
+    }
+    public String getCompleteTitle(){
+        if (getTitle()==null){
+            return null;
+        }
+        String t="";
+        if (getSpAbbr()!=null)
+             t+=getSpAbbr();
+        if (getTitle()!=null)
+            t+="_"+getTitle().replace(" ", "");
+        return title;
     }
 
     public String getMetadata() {
