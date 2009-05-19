@@ -131,6 +131,10 @@ public class KBConfiguration {
     public static int OHD_lineSpacing = 6;    // Properties override
     private static final String SUFFIX = ".properties";
     private static final String KBCONFIG = "kbconfig";
+    /*
+     * Save messages received and sent
+     */
+    public static boolean SAVE_MESSAGES = false;
 
     public static void configure() {
         configure(KBCONFIG);
@@ -225,6 +229,7 @@ public class KBConfiguration {
         UNSUPPORTED_SERVICE = prop.getProperty("UNSUPPORTED_SERVICE", UNSUPPORTED_SERVICE);
         UNSUPPORTED_VERSION = prop.getProperty("UNSUPPORTED_VERSION", UNSUPPORTED_VERSION);
 
+        SAVE_MESSAGES = "true".equalsIgnoreCase(prop.getProperty("SAVE_MESSAGES", String.valueOf(SAVE_MESSAGES)));
     }
 
     protected static Color getColorFromProperties(Properties prop, String name, Color defval) {
