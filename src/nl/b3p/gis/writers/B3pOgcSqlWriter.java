@@ -353,11 +353,11 @@ public class B3pOgcSqlWriter {
                 GregorianCalendar cal = new GregorianCalendar();
                 cal.setTime(d);
                 values.append("\'");
-                values.append(cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-" + cal.get(Calendar.DAY_OF_MONTH));
+                values.append(new SimpleDateFormat("yyyy-MM-dd").format(d));
                 values.append("\'");
             } else if (o instanceof String) {
                 values.append("\'");
-                values.append(formatDate("dd-MM-yyyy", "yyyy-MM-dd", (String) o));
+                values.append(formatDate("dd-MM-yyyy", "HH:mm:ss", "yyyy-MM-dd", "HH:mm:ss", (String) o));
                 values.append("\'");
             } else {
                 values.append("\'\'");
@@ -404,13 +404,26 @@ public class B3pOgcSqlWriter {
         return sb.toString();
     }
 
-    private String formatDate(String oldstyle, String newstyle, String parse_date) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat(oldstyle);
+    private String formatDate(String olddate, String oldtime, String newdate, String newtime, String parse_date) throws ParseException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat(olddate + " " + oldtime);
         Date date = null;
-        //try {
-        date = dateFormat.parse(parse_date);
-        //} catch (ParseException e) {}
-        dateFormat = new SimpleDateFormat(newstyle);
+        // first try date + time
+        try {
+        	date = dateFormat.parse(parse_date);
+            dateFormat = new SimpleDateFormat(newdate + " " + newtime);
+        } catch (ParseException e) {
+        	// second try date
+            try {
+            	dateFormat.applyPattern(olddate);
+            	date = dateFormat.parse(parse_date);
+                dateFormat = new SimpleDateFormat(newdate);
+            } catch (ParseException e2) {
+            	// third try time
+	        	dateFormat.applyPattern(oldtime);
+	        	date = dateFormat.parse(parse_date);
+	            dateFormat = new SimpleDateFormat(newtime);
+            }
+        }
         return dateFormat.format(date);
     }
 
