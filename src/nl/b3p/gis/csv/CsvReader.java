@@ -73,12 +73,13 @@ public class CsvReader {
     private DecimalFormatSymbols dfs;
     private char csvSeparator;    // Translation
     private HashMap translatorMap = null;
+    private boolean useMultiPoint = false;
 
     public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames) {
-        this(tableName, spaceName, spaceValue, uidNames, null, ',');
+        this(tableName, spaceName, spaceValue, uidNames, null, ',', false);
     }
 
-    public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames, Locale loc, char csvSeparator) {
+    public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames, Locale loc, char csvSeparator, boolean useMultiPoint) {
         this.setTableName(tableName);
         this.setSpaceName(spaceName);
         this.setSpaceValue(spaceValue);
@@ -86,6 +87,7 @@ public class CsvReader {
         this.setCsvLocale(loc);
         this.setCsvSeparator(csvSeparator);
         this.fillDefaults();
+        this.useMultiPoint = useMultiPoint;
     }
 
     protected void fillDefaults() {
@@ -147,8 +149,8 @@ public class CsvReader {
             if (rdyindex >= 0) {
                 rdy = getDoubleFromString((String) attributeList.get(rdyindex));
             }
-            String[] attributes = (String[]) attributeList.toArray(new String[]{});
-            Feature f = FeatureFactory.createPointFeature((Object[]) attributes, columns, rdx, rdy, fs);
+            Object[] attributes = (Object[]) attributeList.toArray(new Object[]{});
+            Feature f = FeatureFactory.createPointFeature(attributes, columns, rdx, rdy, fs, useMultiPoint);
 
             fc.add(f);
         }

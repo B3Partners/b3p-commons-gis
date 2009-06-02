@@ -33,6 +33,7 @@ package nl.b3p.gis;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jump.feature.BasicFeature;
 import com.vividsolutions.jump.feature.FeatureSchema;
@@ -57,8 +58,9 @@ public class FeatureFactory {
      * @param yIndex The index in the object array that is used as y coord for creating the point
      * @param fs The feature schema that is needed to create a feature
      * @param xyAsAttribute If true the x and y coords are also stored as attribute.
+     * @param useMultiPoint If true create a MultiPoint for the coordinates
      */
-    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, int xIndex, int yIndex, FeatureSchema fs, boolean xyAsAttribute) {
+    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, int xIndex, int yIndex, FeatureSchema fs, boolean xyAsAttribute, boolean useMultiPoint) {
         if (xIndex >= attributes.length || yIndex >= attributes.length) {
             throw new ArrayIndexOutOfBoundsException("xIndex and/or yIndex is greater then the attributes length");
         }
@@ -75,7 +77,7 @@ public class FeatureFactory {
             attributes = newAttributes;
         }
         if (x != null && y != null) {
-            return createPointFeature(attributes, columnames, x.doubleValue(), y.doubleValue(), fs);
+            return createPointFeature(attributes, columnames, x.doubleValue(), y.doubleValue(), fs, useMultiPoint);
         } else {
             return createFeature(attributes, columnames, fs);
         }
@@ -90,16 +92,23 @@ public class FeatureFactory {
      * @param x the x coord used for creating the point
      * @param y the y coord used for creating the point
      * @param fs The feature schema that is needed to create a feature
+     * @param useMultiPoint If true create a MultiPoint for the coordinates
      */
-    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs) {
+    public static BasicFeature createPointFeature(Object[] attributes, String[] columnames, double x, double y, FeatureSchema fs, boolean useMultiPoint) {
         BasicFeature f = createFeature(attributes, columnames, fs);
         if (fs.getGeometryIndex() >= 0) {
             PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
             int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
             GeometryFactory gf = new GeometryFactory(precisionModel, schemaSRID);
-            Coordinate[] ca = new Coordinate[]{new Coordinate(x, y)};
-            MultiPoint p = gf.createMultiPoint(ca);
-            f.setGeometry(p);
+            Coordinate c = new Coordinate(x, y);
+            Coordinate[] ca = new Coordinate[]{c};
+            if (useMultiPoint) {
+                MultiPoint p = gf.createMultiPoint(ca);
+                f.setGeometry(p);
+            } else {
+                Point p = gf.createPoint(c);
+                f.setGeometry(p);
+            }
         }
         return f;
     }
