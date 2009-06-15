@@ -979,7 +979,12 @@ public class OGCRequest implements OGCConstants {
             if (value == null) {
                 value = "";
             }
-            returnvalue[i] = key + "=" + value;
+           	try {
+           		//FIX so get requests will be valid when containing invalid values
+				returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				returnvalue[i] = key + "=" + value;
+			}
         }
         return returnvalue;
     }
