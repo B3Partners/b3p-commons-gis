@@ -41,8 +41,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 import java.util.Stack;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+
 import org.xml.sax.Attributes;
 
 import javax.xml.transform.Source;
@@ -100,22 +104,12 @@ public class WMSCapabilitiesReader {
         }
         throw new SAXException(message.toString());
     }
-
-    /** Private method which validates a XML document at a given location.
-     *
-     * @param location String representing the location where the document can be found.
-     *
-     * @return a filled ServiceProvider with the information read from the XML document.
-     *
-     * @throws IOException
-     * @throws SAXException
-     */
-    // <editor-fold defaultstate="" desc="getProvider(String location) method.">
-    public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
-        return getProvider(location, null, null);
+    
+    public String getCapabilities(String location) throws Exception {
+    	return getCapabilities(location, null, null);
     }
-
-    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
+    
+    public String getCapabilities(String location, String username, String password) throws Exception {
         HttpClient client = new HttpClient();
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
@@ -129,7 +123,7 @@ public class WMSCapabilitiesReader {
 
         // Create a method instance.
         GetMethod method = new GetMethod(location);
-
+        String result =null;
         try {
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
@@ -149,23 +143,57 @@ public class WMSCapabilitiesReader {
                 throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
             }
 
-            //Nu kan het service provider object gemaakt en gevuld worden
-            serviceProvider = new ServiceProvider();
-            XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-            reader.setFeature(VALIDATION_FEATURE, true);
-            reader.setFeature(SCHEMA_FEATURE, true);
-
-            IgnoreEntityResolver r = new IgnoreEntityResolver();
-            reader.setEntityResolver(r);
-
-            reader.setContentHandler(s);
-            InputSource is = new InputSource(method.getResponseBodyAsStream());
-            is.setEncoding(KBConfiguration.CHARSET);
-            reader.parse(is);
+            InputStream is = method.getResponseBodyAsStream();
+			int len = 0;
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] buf = new byte[1024];
+			while ((len = is.read(buf)) > -1) {
+				out.write(buf, 0, len);
+			}
+			result = new String(out.toByteArray(), KBConfiguration.CHARSET);
         } finally {
             // Release the connection.
             method.releaseConnection();
         }
+
+        if (result == null) {
+            log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
+            throw new Exception("Host: " + location + " error: No service provider object could be created, unkown reason!");
+        }
+        return result;
+    }
+
+    /** Private method which validates a XML document at a given location.
+     *
+     * @param location String representing the location where the document can be found.
+     *
+     * @return a filled ServiceProvider with the information read from the XML document.
+     *
+     * @throws IOException
+     * @throws SAXException
+     */
+    // <editor-fold defaultstate="" desc="getProvider(String location) method.">
+    public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
+        return getProvider(location, null, null);
+    }
+
+    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
+		String xml = getCapabilities(location, username, password);
+		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes(KBConfiguration.CHARSET));
+
+        //Nu kan het service provider object gemaakt en gevuld worden
+        serviceProvider = new ServiceProvider();
+        XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+        reader.setFeature(VALIDATION_FEATURE, true);
+        reader.setFeature(SCHEMA_FEATURE, true);
+
+        IgnoreEntityResolver r = new IgnoreEntityResolver();
+        reader.setEntityResolver(r);
+
+        reader.setContentHandler(s);
+        InputSource is = new InputSource(in);
+        is.setEncoding(KBConfiguration.CHARSET);
+        reader.parse(is);
 
         if (serviceProvider == null) {
             log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
