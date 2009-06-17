@@ -279,6 +279,9 @@ public class B3pOgcSqlWriter {
     }
 
     private void executeStatement(String statementToExecute) throws SQLException {
+    	if (log.isDebugEnabled()) {
+    		log.debug("executeStatement: " + statementToExecute);
+    	}
         PreparedStatement statement = null;
         try {
             statement = connection.prepareStatement(statementToExecute);
