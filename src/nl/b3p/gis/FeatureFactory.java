@@ -101,8 +101,8 @@ public class FeatureFactory {
             int schemaSRID = fs.getCoordinateSystem().getEPSGCode();
             GeometryFactory gf = new GeometryFactory(precisionModel, schemaSRID);
             Coordinate c = new Coordinate(x, y);
-            Coordinate[] ca = new Coordinate[]{c};
             if (useMultiPoint) {
+                Coordinate[] ca = new Coordinate[]{c};
                 MultiPoint p = gf.createMultiPoint(ca);
                 f.setGeometry(p);
             } else {
