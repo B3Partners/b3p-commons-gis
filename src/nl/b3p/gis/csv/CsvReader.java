@@ -74,6 +74,7 @@ public class CsvReader {
     private char csvSeparator;    // Translation
     private HashMap translatorMap = null;
     private boolean useMultiPoint = false;
+    private String ignoreValue;
 
     public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames) {
         this(tableName, spaceName, spaceValue, uidNames, null, ',', false);
@@ -173,7 +174,7 @@ public class CsvReader {
         } else {
             columnsToCheck = getUidNames();
         }
-        bow.write(fc, getTableName(), getGeomColumnName(), getSrs(), 2, false, true, columnsToCheck);
+        bow.write(fc, getTableName(), getGeomColumnName(), getSrs(), 2, false, true, columnsToCheck, getIgnoreValue());
     }
 
     protected List translateColumns(List columns) {
@@ -341,6 +342,14 @@ public class CsvReader {
     public void setCsvSeparator(char csvSeparator) {
         this.csvSeparator = csvSeparator;
     }
+
+    public String getIgnoreValue() {
+		return ignoreValue;
+	}
+
+	public void setIgnoreValue(String ignoreValue) {
+		this.ignoreValue = ignoreValue;
+	}
 
     private double getDoubleFromString(String d) {
         if (d == null) {
