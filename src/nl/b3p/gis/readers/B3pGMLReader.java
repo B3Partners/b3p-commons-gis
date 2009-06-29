@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.geotools.gml2.GMLConfiguration;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
@@ -96,12 +97,12 @@ public class B3pGMLReader extends GMLReader {
      */
     public HashMap readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception {
         //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
-        HashMap templates = createGMLInputTemplateFromWFS(wfsgf);
+        //HashMap templates = createGMLInputTemplateFromWFS(wfsgf);
         wfsgf.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetFeature);
-        if (templates == null) {
+        /*if (templates == null) {
             log.error("No Templates founed/created.");
             return null;
-        }
+        }*/
         HashMap features = new HashMap();
         PostMethod method = null;
         String[] featureTypes = null;
@@ -109,7 +110,7 @@ public class B3pGMLReader extends GMLReader {
             featureTypes = wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
         }
         for (int i = 0; i < featureTypes.length; i++) {
-            Object o = null;
+            /*Object o = null;
             o = templates.get(featureTypes[i]);
             if (o == null) {
                 String[] tokens = featureTypes[i].split(":");
@@ -127,7 +128,7 @@ public class B3pGMLReader extends GMLReader {
                 log.error("Kan template niet vinden voor " + featureTypes[i]);
                 throw new Exception("Kan template niet vinden voor " + featureTypes[i]);
             }
-            GMLInputTemplate git = (GMLInputTemplate) o;
+            GMLInputTemplate git = (GMLInputTemplate) o;*/
             wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, featureTypes[i]);
             HttpClient client = new HttpClient();
             String host = wfsgf.getUrlWithNonOGCparams();
@@ -139,11 +140,14 @@ public class B3pGMLReader extends GMLReader {
             int status = client.executeMethod(method);
             if (status == HttpStatus.SC_OK) {
                 log.debug("Response ok, trying to create FeatureCollection....");
-                Reader r = null;
-                r = new InputStreamReader(method.getResponseBodyAsStream());
-                GMLReader gr = new GMLReader();
-                gr.setInputTemplate(git);
-                FeatureCollection fc = gr.read(r);
+                /*Reader r = null;
+                r = new InputStreamReader();*/
+                /*GMLReader gr = new GMLReader();
+                gr.setInputTemplate(git);*/
+                GMLConfiguration configuration = new GMLConfiguration();
+                org.geotools.xml.Parser parser = new org.geotools.xml.Parser(configuration);
+
+                FeatureCollection fc = (FeatureCollection) parser.parse( method.getResponseBodyAsStream() );
                 if (fc.size() == 0) {
                     //There are no Features loaded. So redo the post method and show the response to user.
                     PostMethod method2 = new PostMethod(host);
@@ -299,7 +303,7 @@ public class B3pGMLReader extends GMLReader {
                     StringBuffer sb = new StringBuffer();
                     sb.append("<?xml version='1.0' encoding='UTF-8'?>");
                     sb.append("<JCSGMLInputTemplate>");
-                    sb.append("<CollectionElement>wfs:FeatureCollection</CollectionElement>");
+                    sb.append("<CollectionElement>FeatureCollection</CollectionElement>");
                     sb.append("<FeatureElement>");
                     if (name != null && name.length() > 0) {
                         if (defaultPrefix != null && defaultPrefix.length() > 0) {

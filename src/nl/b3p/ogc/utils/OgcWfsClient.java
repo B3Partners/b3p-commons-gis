@@ -23,7 +23,6 @@
 package nl.b3p.ogc.utils;
 
 import com.vividsolutions.jump.feature.FeatureCollection;
-import com.vividsolutions.jump.io.GMLInputTemplate;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -42,8 +41,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import nl.b3p.gis.readers.B3pGMLReader;
-import nl.b3p.xml.ogc.v100.PropertyName;
 import nl.b3p.xml.wfs.DescribeFeatureType;
 import nl.b3p.xml.wfs.FeatureType;
 import nl.b3p.xml.wfs.FeatureTypeList;
@@ -55,7 +52,6 @@ import nl.b3p.xml.wfs.Transaction;
 import java.io.StringReader;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
-import nl.b3p.xml.wfs.v110.QueryTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
@@ -76,6 +72,8 @@ import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
+import org.geotools.gml2.GMLConfiguration;
+import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -704,15 +702,30 @@ public class OgcWfsClient {
     public static ArrayList getFeatureElements(GetFeature gf, OGCRequest or) throws Exception {
         ArrayList returnList = new ArrayList();
         Element e = doRequest(gf, or.getUrlWithNonOGCparams(), or.getNameSpaces(),or.getUsername(),or.getPassword());
-        B3pGMLReader bgr = new B3pGMLReader();
-        HashMap hm = bgr.createGMLInputTemplates(getDescribeFeatureType(or));
-        Iterator it = hm.values().iterator();
-        while (it.hasNext()) {
+        //B3pGMLReader bgr = new B3pGMLReader();
+        //HashMap hm = bgr.createGMLInputTemplates(getDescribeFeatureType(or));
+        //Iterator it = hm.values().iterator();
+        /*while (it.hasNext()) {
             GMLInputTemplate template = (GMLInputTemplate) it.next();
             bgr.setInputTemplate(template);
             FeatureCollection fc = bgr.read(new StringReader(elementToString(e)));
             returnList.addAll(fc.getFeatures());
-        }
+        }*/
+        GMLConfiguration configuration = new GMLConfiguration();
+        org.geotools.xml.Parser parser = new org.geotools.xml.Parser(configuration);
+        Object o=parser.parse(new StringReader(elementToString(e)));
+        FeatureCollection fc = null;
+        if (o instanceof FeatureCollection){
+            fc = (FeatureCollection)o;
+            returnList.addAll(fc.getFeatures());
+        }if (o instanceof HashMap){
+            Object l = ((HashMap)o).get("featureMember");
+            if (l instanceof List){
+                returnList.addAll((List)l);
+            }else if (l instanceof Feature){
+                returnList.add(l);
+            }
+        }        
         return returnList;
     }
 
