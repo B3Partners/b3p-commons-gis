@@ -3,9 +3,9 @@
 <xs:schema xmlns="http://www.opengis.net/gml" xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opengis.net/gml" elementFormDefault="qualified" version="1.1.0">
 	<xs:element name="_FeatureCollection" type="xs:anyType"/>
 	<xs:element name="_Geometry" type="xs:anyType"/>
-	<xs:element name="_Polygon" type="xs:anyType"/>
-	<xs:element name="_Point" type="xs:anyType"/>
-	<xs:element name="_LineString" type="xs:anyType"/>
+	<xs:element name="Polygon" type="xs:anyType"/>
+	<xs:element name="Point" type="xs:anyType"/>
+	<xs:element name="LineString" type="xs:anyType"/>
 	<xs:element name="Envelope" type="xs:anyType"/>
 	<xs:group name="StandardObjectProperties">
 		<xs:annotation>

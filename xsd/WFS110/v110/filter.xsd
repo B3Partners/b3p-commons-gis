@@ -149,9 +149,9 @@
 					<xsd:choice>
 						<xsd:element ref="gml:_Geometry"/>
 						<xsd:element ref="gml:Envelope"/>
-						<xsd:element ref="gml:_LineString"/>
-						<xsd:element ref="gml:_Point"/>
-						<xsd:element ref="gml:_Polygon"/>
+						<xsd:element ref="gml:LineString"/>
+						<xsd:element ref="gml:Point"/>
+						<xsd:element ref="gml:Polygon"/>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
