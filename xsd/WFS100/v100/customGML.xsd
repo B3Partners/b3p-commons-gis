@@ -40,9 +40,9 @@
 	</xs:complexType>
 	<xs:element name="Box" type="xs:anyType"/>
 	<xs:element name="_Geometry" type="xs:anyType"/>
-	<xs:element name="_Polygon" type="xs:anyType"/>
-	<xs:element name="_Point" type="xs:anyType"/>
-	<xs:element name="_LineString" type="xs:anyType"/>
+	<xs:element name="Polygon" type="xs:anyType"/>
+	<xs:element name="Point" type="xs:anyType"/>
+	<xs:element name="LineString" type="xs:anyType"/>
 	<xs:element name="_Feature" type="xs:anyType"/>
 	<xs:element name="_FeatureCollection"/>
 </xs:schema>

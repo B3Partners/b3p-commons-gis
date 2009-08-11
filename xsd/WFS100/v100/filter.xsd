@@ -148,9 +148,9 @@
 					<xsd:element ref="ogc:PropertyName"/>
 					<xsd:choice>
 						<xsd:element ref="gml:_Geometry"/>
-						<xsd:element ref="gml:_Point"/>
-						<xsd:element ref="gml:_Polygon"/>
-						<xsd:element ref="gml:_LineString"/>
+						<xsd:element ref="gml:Point"/>
+						<xsd:element ref="gml:Polygon"/>
+						<xsd:element ref="gml:LineString"/>
 						<xsd:element ref="gml:Box"/>
 					</xsd:choice>
 				</xsd:sequence>
