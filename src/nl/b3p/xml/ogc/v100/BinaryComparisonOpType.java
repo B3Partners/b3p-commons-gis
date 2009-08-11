@@ -29,6 +29,11 @@ implements java.io.Serializable
     //--------------------------/
 
     /**
+     * Field _propertyName
+     */
+    private nl.b3p.xml.ogc.v100.PropertyName _propertyName;
+
+    /**
      * Field _div
      */
     private nl.b3p.xml.ogc.v100.Div _div;
@@ -47,11 +52,6 @@ implements java.io.Serializable
      * Field _mul
      */
     private nl.b3p.xml.ogc.v100.Mul _mul;
-
-    /**
-     * Field _propertyName
-     */
-    private nl.b3p.xml.ogc.v100.PropertyName _propertyName;
 
     /**
      * Field _sub
