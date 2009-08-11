@@ -32,19 +32,19 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
     private java.lang.Object _Geometry;
 
     /**
-     * Field _Point
+     * Field _point
      */
-    private java.lang.Object _Point;
+    private java.lang.Object _point;
 
     /**
-     * Field _Polygon
+     * Field _polygon
      */
-    private java.lang.Object _Polygon;
+    private java.lang.Object _polygon;
 
     /**
-     * Field _LineString
+     * Field _lineString
      */
-    private java.lang.Object _LineString;
+    private java.lang.Object _lineString;
 
     /**
      * Field _box
@@ -89,36 +89,36 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
     } //-- java.lang.Object getGeometry() 
 
     /**
-     * Returns the value of field 'LineString'.
+     * Returns the value of field 'lineString'.
      * 
      * @return Object
-     * @return the value of field 'LineString'.
+     * @return the value of field 'lineString'.
      */
     public java.lang.Object getLineString()
     {
-        return this._LineString;
+        return this._lineString;
     } //-- java.lang.Object getLineString() 
 
     /**
-     * Returns the value of field 'Point'.
+     * Returns the value of field 'point'.
      * 
      * @return Object
-     * @return the value of field 'Point'.
+     * @return the value of field 'point'.
      */
     public java.lang.Object getPoint()
     {
-        return this._Point;
+        return this._point;
     } //-- java.lang.Object getPoint() 
 
     /**
-     * Returns the value of field 'Polygon'.
+     * Returns the value of field 'polygon'.
      * 
      * @return Object
-     * @return the value of field 'Polygon'.
+     * @return the value of field 'polygon'.
      */
     public java.lang.Object getPolygon()
     {
-        return this._Polygon;
+        return this._polygon;
     } //-- java.lang.Object getPolygon() 
 
     /**
@@ -188,33 +188,33 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
     } //-- void setGeometry(java.lang.Object) 
 
     /**
-     * Sets the value of field 'LineString'.
+     * Sets the value of field 'lineString'.
      * 
-     * @param LineString the value of field 'LineString'.
+     * @param lineString the value of field 'lineString'.
      */
-    public void setLineString(java.lang.Object LineString)
+    public void setLineString(java.lang.Object lineString)
     {
-        this._LineString = LineString;
+        this._lineString = lineString;
     } //-- void setLineString(java.lang.Object) 
 
     /**
-     * Sets the value of field 'Point'.
+     * Sets the value of field 'point'.
      * 
-     * @param Point the value of field 'Point'.
+     * @param point the value of field 'point'.
      */
-    public void setPoint(java.lang.Object Point)
+    public void setPoint(java.lang.Object point)
     {
-        this._Point = Point;
+        this._point = point;
     } //-- void setPoint(java.lang.Object) 
 
     /**
-     * Sets the value of field 'Polygon'.
+     * Sets the value of field 'polygon'.
      * 
-     * @param Polygon the value of field 'Polygon'.
+     * @param polygon the value of field 'polygon'.
      */
-    public void setPolygon(java.lang.Object Polygon)
+    public void setPolygon(java.lang.Object polygon)
     {
-        this._Polygon = Polygon;
+        this._polygon = polygon;
     } //-- void setPolygon(java.lang.Object) 
 
     /**

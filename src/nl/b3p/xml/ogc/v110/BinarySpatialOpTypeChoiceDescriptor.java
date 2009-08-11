@@ -136,8 +136,8 @@ public class BinarySpatialOpTypeChoiceDescriptor extends org.exolab.castor.xml.u
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-        //-- _LineString
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_LineString", "_LineString", org.exolab.castor.xml.NodeType.Element);
+        //-- _lineString
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_lineString", "LineString", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -166,14 +166,14 @@ public class BinarySpatialOpTypeChoiceDescriptor extends org.exolab.castor.xml.u
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _LineString
+        //-- validation code for: _lineString
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-        //-- _Point
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_Point", "_Point", org.exolab.castor.xml.NodeType.Element);
+        //-- _point
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_point", "Point", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -202,14 +202,14 @@ public class BinarySpatialOpTypeChoiceDescriptor extends org.exolab.castor.xml.u
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _Point
+        //-- validation code for: _point
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
-        //-- _Polygon
-        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_Polygon", "_Polygon", org.exolab.castor.xml.NodeType.Element);
+        //-- _polygon
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_polygon", "Polygon", org.exolab.castor.xml.NodeType.Element);
         handler = new org.exolab.castor.xml.XMLFieldHandler() {
             public java.lang.Object getValue( java.lang.Object object ) 
                 throws IllegalStateException
@@ -238,7 +238,7 @@ public class BinarySpatialOpTypeChoiceDescriptor extends org.exolab.castor.xml.u
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
-        //-- validation code for: _Polygon
+        //-- validation code for: _polygon
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         fieldValidator.setMinOccurs(1);
         { //-- local scope
