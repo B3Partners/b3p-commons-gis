@@ -136,6 +136,114 @@ public class BinarySpatialOpTypeChoiceDescriptor extends org.exolab.castor.xml.u
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
+        //-- _LineString
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_LineString", "_LineString", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                return target.getLineString();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                    target.setLineString( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _LineString
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _Point
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_Point", "_Point", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                return target.getPoint();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                    target.setPoint( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _Point
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _Polygon
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_Polygon", "_Polygon", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                return target.getPolygon();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    BinarySpatialOpTypeChoice target = (BinarySpatialOpTypeChoice) object;
+                    target.setPolygon( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/gml");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _Polygon
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
     } //-- nl.b3p.xml.ogc.v110.BinarySpatialOpTypeChoiceDescriptor()
 
 

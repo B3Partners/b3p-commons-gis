@@ -36,6 +36,21 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
      */
     private java.lang.Object _envelope;
 
+    /**
+     * Field _LineString
+     */
+    private java.lang.Object _LineString;
+
+    /**
+     * Field _Point
+     */
+    private java.lang.Object _Point;
+
+    /**
+     * Field _Polygon
+     */
+    private java.lang.Object _Polygon;
+
 
       //----------------/
      //- Constructors -/
@@ -72,6 +87,39 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
     {
         return this._Geometry;
     } //-- java.lang.Object getGeometry() 
+
+    /**
+     * Returns the value of field 'LineString'.
+     * 
+     * @return Object
+     * @return the value of field 'LineString'.
+     */
+    public java.lang.Object getLineString()
+    {
+        return this._LineString;
+    } //-- java.lang.Object getLineString() 
+
+    /**
+     * Returns the value of field 'Point'.
+     * 
+     * @return Object
+     * @return the value of field 'Point'.
+     */
+    public java.lang.Object getPoint()
+    {
+        return this._Point;
+    } //-- java.lang.Object getPoint() 
+
+    /**
+     * Returns the value of field 'Polygon'.
+     * 
+     * @return Object
+     * @return the value of field 'Polygon'.
+     */
+    public java.lang.Object getPolygon()
+    {
+        return this._Polygon;
+    } //-- java.lang.Object getPolygon() 
 
     /**
      * Method isValid
@@ -138,6 +186,36 @@ public class BinarySpatialOpTypeChoice implements java.io.Serializable {
     {
         this._Geometry = Geometry;
     } //-- void setGeometry(java.lang.Object) 
+
+    /**
+     * Sets the value of field 'LineString'.
+     * 
+     * @param LineString the value of field 'LineString'.
+     */
+    public void setLineString(java.lang.Object LineString)
+    {
+        this._LineString = LineString;
+    } //-- void setLineString(java.lang.Object) 
+
+    /**
+     * Sets the value of field 'Point'.
+     * 
+     * @param Point the value of field 'Point'.
+     */
+    public void setPoint(java.lang.Object Point)
+    {
+        this._Point = Point;
+    } //-- void setPoint(java.lang.Object) 
+
+    /**
+     * Sets the value of field 'Polygon'.
+     * 
+     * @param Polygon the value of field 'Polygon'.
+     */
+    public void setPolygon(java.lang.Object Polygon)
+    {
+        this._Polygon = Polygon;
+    } //-- void setPolygon(java.lang.Object) 
 
     /**
      * Method unmarshal
