@@ -72,7 +72,8 @@ import org.exolab.castor.xml.MarshalException;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
-import org.geotools.gml2.GMLConfiguration;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.gml3.GMLConfiguration;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -606,6 +607,15 @@ public class OgcWfsClient {
         }
     }
 
+    public static void addPolygonFilter(GetFeature gf, String attributeName, String polygon, String srsName, FeatureType ft) throws Exception {
+        Filter filter = OgcWfsClient.createPolygonFilter(attributeName, polygon, srsName, ft);
+        if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature) {
+            ((nl.b3p.xml.wfs.v100.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v100.Filter) filter);
+        } else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature) {
+            ((nl.b3p.xml.wfs.v110.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v110.Filter) filter);
+        }
+    }
+
     /**
      *Creates a bbox filter
      */
@@ -647,6 +657,60 @@ public class OgcWfsClient {
             sb.append("</gml:lowerCorner><gml:upperCorner>");
             sb.append(bbox[2]).append(" ").append(bbox[3]);
             sb.append("</gml:upperCorner></gml:Envelope>");
+            sb.append("</Intersects></Filter>");
+            return (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
+        } else {
+            throw new UnsupportedOperationException("Given Feature not supported");
+        }
+    }
+
+    /*
+     * Creates a polygon filter
+     */
+    public static nl.b3p.xml.wfs.Filter createPolygonFilter(String attributeName, String polygon, String srsName, nl.b3p.xml.wfs.FeatureType feature) throws Exception {
+        //als er een namespaceuri voor staat die verwijderen.
+        if (attributeName.indexOf("{")>=0 && attributeName.indexOf("}")>=0){
+            attributeName=attributeName.substring(attributeName.indexOf("}")+1);
+        }
+
+        if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<Filter><Within><PropertyName>");
+            sb.append(attributeName);
+            sb.append("</PropertyName>");
+            sb.append("<gml:Polygon");
+            if (srsName!=null){
+                sb.append(" srsName=\"");
+                sb.append(srsName);
+            }
+            sb.append("\"><gml:outerBoundaryIs>");
+            sb.append("<gml:LinearRing>");
+            sb.append("<gml:coordinates cs=\" \" decimal=\".\" ts=\",\">");
+            sb.append(polygon);
+            sb.append("</gml:coordinates>");
+            sb.append("</gml:LinearRing>");
+            sb.append("</gml:outerBoundaryIs>");
+            sb.append("</gml:Polygon>");
+            sb.append("</Within></Filter>");
+            return (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
+        } else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType) {
+            StringBuffer sb = new StringBuffer();
+            sb.append("<Filter><Intersects><PropertyName>");
+            sb.append(attributeName);
+            sb.append("</PropertyName>");
+            sb.append("<gml:Polygon");
+            if (srsName!=null){
+                sb.append(" srsName=\"");
+                sb.append(srsName);
+            }
+            sb.append("\"><gml:outerBoundaryIs>");
+            sb.append("<gml:LinearRing>");
+            sb.append("<gml:posList>");
+            sb.append(polygon);
+            sb.append("</gml:posList>");
+            sb.append("</gml:LinearRing>");
+            sb.append("</gml:outerBoundaryIs>");
+            sb.append("</gml:Polygon>");
             sb.append("</Intersects></Filter>");
             return (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
         } else {
@@ -718,14 +782,22 @@ public class OgcWfsClient {
         if (o instanceof FeatureCollection){
             fc = (FeatureCollection)o;
             returnList.addAll(fc.getFeatures());
-        }if (o instanceof HashMap){
+        }else if (o instanceof HashMap){
             Object l = ((HashMap)o).get("featureMember");
             if (l instanceof List){
                 returnList.addAll((List)l);
             }else if (l instanceof Feature){
                 returnList.add(l);
             }
-        }        
+        }else if (o instanceof DefaultFeatureCollection){
+            DefaultFeatureCollection dfc = (DefaultFeatureCollection)o;
+            Object[] featureArray = dfc.toArray();
+            for(int i = 0; i < featureArray.length; i++){
+                returnList.add(featureArray[i]);
+            }
+        }else{
+            throw new UnsupportedOperationException("Can not make returnList from " + o.getClass());
+        }
         return returnList;
     }
 
