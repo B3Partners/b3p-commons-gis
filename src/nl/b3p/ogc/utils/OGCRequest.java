@@ -1316,7 +1316,7 @@ public class OGCRequest implements OGCConstants {
     }
 
     public String getNameSpace(String param) {
-        if (param == null) {
+        if (param == null || nameSpaces==null) {
             return null;
         }
         Object o = nameSpaces.get(param);
