@@ -73,7 +73,7 @@ import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.gml3.GMLConfiguration;
+import org.geotools.gml2.GMLConfiguration;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -775,9 +775,44 @@ public class OgcWfsClient {
             FeatureCollection fc = bgr.read(new StringReader(elementToString(e)));
             returnList.addAll(fc.getFeatures());
         }*/
-        GMLConfiguration configuration = new GMLConfiguration();
-        org.geotools.xml.Parser parser = new org.geotools.xml.Parser(configuration);
-        Object o=parser.parse(new StringReader(elementToString(e)));
+        //String output = or.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT);
+        String outputFormat = gf.getOutputFormat();
+        String version = "";
+        if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature) {
+            version = "1.0.0";
+        }else if(gf instanceof nl.b3p.xml.wfs.v110.GetFeature){
+            version = "1.1.0";
+        }
+        org.geotools.xml.Parser parser = null;
+        int gmlVersion = 2;
+
+        if("1.0.0".equals(version)){
+            parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
+            gmlVersion = 2;
+        }else if("1.1.0".equals(version)){
+            if("GML2".equalsIgnoreCase(outputFormat)){
+                parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
+                gmlVersion = 2;
+            }else if(outputFormat != null && outputFormat.indexOf("gml/2") >= 0){
+                parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
+                gmlVersion = 2;
+            }else{
+                parser = new org.geotools.xml.Parser(new org.geotools.gml3.GMLConfiguration());
+                gmlVersion = 3;
+            }
+        }
+        Object o = null;
+        try{
+            o=parser.parse(new StringReader(elementToString(e)));
+        }catch(Exception ex){
+            log.warn("GML version "+gmlVersion+" not corect. Trying other version");
+            if(gmlVersion == 2){
+                parser = new org.geotools.xml.Parser(new org.geotools.gml3.GMLConfiguration());
+            }else if(gmlVersion == 3){
+                parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
+            }
+            o=parser.parse(new StringReader(elementToString(e)));
+        }
         FeatureCollection fc = null;
         if (o instanceof FeatureCollection){
             fc = (FeatureCollection)o;
