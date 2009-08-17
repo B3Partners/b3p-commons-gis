@@ -29,9 +29,39 @@ implements java.io.Serializable
     //--------------------------/
 
     /**
-     * Field _expression
+     * Field _sub
      */
-    private nl.b3p.xml.ogc.v100.Expression _expression;
+    private nl.b3p.xml.ogc.v100.Sub _sub;
+
+    /**
+     * Field _propertyName
+     */
+    private nl.b3p.xml.ogc.v100.PropertyName _propertyName;
+
+    /**
+     * Field _mul
+     */
+    private nl.b3p.xml.ogc.v100.Mul _mul;
+
+    /**
+     * Field _literal
+     */
+    private nl.b3p.xml.ogc.v100.Literal _literal;
+
+    /**
+     * Field _function
+     */
+    private nl.b3p.xml.ogc.v100.Function _function;
+
+    /**
+     * Field _div
+     */
+    private nl.b3p.xml.ogc.v100.Div _div;
+
+    /**
+     * Field _add
+     */
+    private nl.b3p.xml.ogc.v100.Add _add;
 
     /**
      * Field _lowerBoundary
@@ -59,15 +89,48 @@ implements java.io.Serializable
     //-----------/
 
     /**
-     * Returns the value of field 'expression'.
+     * Returns the value of field 'add'.
      * 
-     * @return Expression
-     * @return the value of field 'expression'.
+     * @return Add
+     * @return the value of field 'add'.
      */
-    public nl.b3p.xml.ogc.v100.Expression getExpression()
+    public nl.b3p.xml.ogc.v100.Add getAdd()
     {
-        return this._expression;
-    } //-- nl.b3p.xml.ogc.v100.Expression getExpression() 
+        return this._add;
+    } //-- nl.b3p.xml.ogc.v100.Add getAdd() 
+
+    /**
+     * Returns the value of field 'div'.
+     * 
+     * @return Div
+     * @return the value of field 'div'.
+     */
+    public nl.b3p.xml.ogc.v100.Div getDiv()
+    {
+        return this._div;
+    } //-- nl.b3p.xml.ogc.v100.Div getDiv() 
+
+    /**
+     * Returns the value of field 'function'.
+     * 
+     * @return Function
+     * @return the value of field 'function'.
+     */
+    public nl.b3p.xml.ogc.v100.Function getFunction()
+    {
+        return this._function;
+    } //-- nl.b3p.xml.ogc.v100.Function getFunction() 
+
+    /**
+     * Returns the value of field 'literal'.
+     * 
+     * @return Literal
+     * @return the value of field 'literal'.
+     */
+    public nl.b3p.xml.ogc.v100.Literal getLiteral()
+    {
+        return this._literal;
+    } //-- nl.b3p.xml.ogc.v100.Literal getLiteral() 
 
     /**
      * Returns the value of field 'lowerBoundary'.
@@ -79,6 +142,39 @@ implements java.io.Serializable
     {
         return this._lowerBoundary;
     } //-- nl.b3p.xml.ogc.v100.LowerBoundary getLowerBoundary() 
+
+    /**
+     * Returns the value of field 'mul'.
+     * 
+     * @return Mul
+     * @return the value of field 'mul'.
+     */
+    public nl.b3p.xml.ogc.v100.Mul getMul()
+    {
+        return this._mul;
+    } //-- nl.b3p.xml.ogc.v100.Mul getMul() 
+
+    /**
+     * Returns the value of field 'propertyName'.
+     * 
+     * @return PropertyName
+     * @return the value of field 'propertyName'.
+     */
+    public nl.b3p.xml.ogc.v100.PropertyName getPropertyName()
+    {
+        return this._propertyName;
+    } //-- nl.b3p.xml.ogc.v100.PropertyName getPropertyName() 
+
+    /**
+     * Returns the value of field 'sub'.
+     * 
+     * @return Sub
+     * @return the value of field 'sub'.
+     */
+    public nl.b3p.xml.ogc.v100.Sub getSub()
+    {
+        return this._sub;
+    } //-- nl.b3p.xml.ogc.v100.Sub getSub() 
 
     /**
      * Returns the value of field 'upperBoundary'.
@@ -138,14 +234,44 @@ implements java.io.Serializable
     } //-- void marshal(org.xml.sax.ContentHandler) 
 
     /**
-     * Sets the value of field 'expression'.
+     * Sets the value of field 'add'.
      * 
-     * @param expression the value of field 'expression'.
+     * @param add the value of field 'add'.
      */
-    public void setExpression(nl.b3p.xml.ogc.v100.Expression expression)
+    public void setAdd(nl.b3p.xml.ogc.v100.Add add)
     {
-        this._expression = expression;
-    } //-- void setExpression(nl.b3p.xml.ogc.v100.Expression) 
+        this._add = add;
+    } //-- void setAdd(nl.b3p.xml.ogc.v100.Add) 
+
+    /**
+     * Sets the value of field 'div'.
+     * 
+     * @param div the value of field 'div'.
+     */
+    public void setDiv(nl.b3p.xml.ogc.v100.Div div)
+    {
+        this._div = div;
+    } //-- void setDiv(nl.b3p.xml.ogc.v100.Div) 
+
+    /**
+     * Sets the value of field 'function'.
+     * 
+     * @param function the value of field 'function'.
+     */
+    public void setFunction(nl.b3p.xml.ogc.v100.Function function)
+    {
+        this._function = function;
+    } //-- void setFunction(nl.b3p.xml.ogc.v100.Function) 
+
+    /**
+     * Sets the value of field 'literal'.
+     * 
+     * @param literal the value of field 'literal'.
+     */
+    public void setLiteral(nl.b3p.xml.ogc.v100.Literal literal)
+    {
+        this._literal = literal;
+    } //-- void setLiteral(nl.b3p.xml.ogc.v100.Literal) 
 
     /**
      * Sets the value of field 'lowerBoundary'.
@@ -156,6 +282,36 @@ implements java.io.Serializable
     {
         this._lowerBoundary = lowerBoundary;
     } //-- void setLowerBoundary(nl.b3p.xml.ogc.v100.LowerBoundary) 
+
+    /**
+     * Sets the value of field 'mul'.
+     * 
+     * @param mul the value of field 'mul'.
+     */
+    public void setMul(nl.b3p.xml.ogc.v100.Mul mul)
+    {
+        this._mul = mul;
+    } //-- void setMul(nl.b3p.xml.ogc.v100.Mul) 
+
+    /**
+     * Sets the value of field 'propertyName'.
+     * 
+     * @param propertyName the value of field 'propertyName'.
+     */
+    public void setPropertyName(nl.b3p.xml.ogc.v100.PropertyName propertyName)
+    {
+        this._propertyName = propertyName;
+    } //-- void setPropertyName(nl.b3p.xml.ogc.v100.PropertyName) 
+
+    /**
+     * Sets the value of field 'sub'.
+     * 
+     * @param sub the value of field 'sub'.
+     */
+    public void setSub(nl.b3p.xml.ogc.v100.Sub sub)
+    {
+        this._sub = sub;
+    } //-- void setSub(nl.b3p.xml.ogc.v100.Sub) 
 
     /**
      * Sets the value of field 'upperBoundary'.

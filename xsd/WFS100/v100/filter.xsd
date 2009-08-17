@@ -124,7 +124,13 @@
 		<xsd:complexContent>
 			<xsd:extension base="ogc:ComparisonOpsType">
 				<xsd:sequence>
-					<xsd:element ref="ogc:expression"/>
+					<xsd:element ref="ogc:Sub" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyName" minOccurs="0"/>
+					<xsd:element ref="ogc:Mul" minOccurs="0"/>
+					<xsd:element ref="ogc:Literal" minOccurs="0"/>
+					<xsd:element ref="ogc:Function" minOccurs="0"/>
+					<xsd:element ref="ogc:Div" minOccurs="0"/>
+					<xsd:element ref="ogc:Add" minOccurs="0"/>
 					<xsd:element name="LowerBoundary" type="ogc:LowerBoundaryType"/>
 					<xsd:element name="UpperBoundary" type="ogc:UpperBoundaryType"/>
 				</xsd:sequence>
@@ -185,9 +191,29 @@
 		<xsd:complexContent>
 			<xsd:extension base="ogc:LogicOpsType">
 				<xsd:choice minOccurs="2" maxOccurs="unbounded">
-					<xsd:element ref="ogc:comparisonOps"/>
-					<xsd:element ref="ogc:spatialOps"/>
-					<xsd:element ref="ogc:logicOps"/>
+					<xsd:element ref="ogc:PropertyIsNull" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsNotEqualTo" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsLike" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsLessThanOrEqualTo" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsLessThan" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsGreaterThanOrEqualTo" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsGreaterThan" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsEqualTo" minOccurs="0"/>
+					<xsd:element ref="ogc:PropertyIsBetween" minOccurs="0"/>
+					<xsd:element ref="ogc:Within" minOccurs="0"/>
+					<xsd:element ref="ogc:Touches" minOccurs="0"/>
+					<xsd:element ref="ogc:Overlaps" minOccurs="0"/>
+					<xsd:element ref="ogc:Intersects" minOccurs="0"/>
+					<xsd:element ref="ogc:Equals" minOccurs="0"/>
+					<xsd:element ref="ogc:Disjoint" minOccurs="0"/>
+					<xsd:element ref="ogc:DWithin" minOccurs="0"/>
+					<xsd:element ref="ogc:Crosses" minOccurs="0"/>
+					<xsd:element ref="ogc:Contains" minOccurs="0"/>
+					<xsd:element ref="ogc:Beyond" minOccurs="0"/>
+					<xsd:element ref="ogc:BBOX" minOccurs="0"/>
+					<xsd:element ref="ogc:Or" minOccurs="0"/>
+					<xsd:element ref="ogc:Not" minOccurs="0"/>
+					<xsd:element ref="ogc:And" minOccurs="0"/>
 				</xsd:choice>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -197,9 +223,29 @@
 			<xsd:extension base="ogc:LogicOpsType">
 				<xsd:sequence>
 					<xsd:choice>
-						<xsd:element ref="ogc:comparisonOps"/>
-						<xsd:element ref="ogc:spatialOps"/>
-						<xsd:element ref="ogc:logicOps"/>
+						<xsd:element ref="ogc:PropertyIsNull" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsNotEqualTo" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsLike" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsLessThanOrEqualTo" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsLessThan" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsGreaterThanOrEqualTo" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsGreaterThan" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsEqualTo" minOccurs="0"/>
+						<xsd:element ref="ogc:PropertyIsBetween" minOccurs="0"/>
+						<xsd:element ref="ogc:Within" minOccurs="0"/>
+						<xsd:element ref="ogc:Touches" minOccurs="0"/>
+						<xsd:element ref="ogc:Overlaps" minOccurs="0"/>
+						<xsd:element ref="ogc:Intersects" minOccurs="0"/>
+						<xsd:element ref="ogc:Equals" minOccurs="0"/>
+						<xsd:element ref="ogc:Disjoint" minOccurs="0"/>
+						<xsd:element ref="ogc:DWithin" minOccurs="0"/>
+						<xsd:element ref="ogc:Crosses" minOccurs="0"/>
+						<xsd:element ref="ogc:Contains" minOccurs="0"/>
+						<xsd:element ref="ogc:Beyond" minOccurs="0"/>
+						<xsd:element ref="ogc:BBOX" minOccurs="0"/>
+						<xsd:element ref="ogc:Or" minOccurs="0"/>
+						<xsd:element ref="ogc:Not" minOccurs="0"/>
+						<xsd:element ref="ogc:And" minOccurs="0"/>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
