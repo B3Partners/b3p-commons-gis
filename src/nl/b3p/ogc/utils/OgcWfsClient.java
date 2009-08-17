@@ -22,7 +22,9 @@
  */
 package nl.b3p.ogc.utils;
 
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jump.feature.FeatureCollection;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -50,6 +52,7 @@ import nl.b3p.xml.wfs.GetFeature;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.Transaction;
 import java.io.StringReader;
+import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
@@ -73,7 +76,9 @@ import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.geotools.feature.DefaultFeatureCollection;
-import org.geotools.gml2.GMLConfiguration;
+import org.geotools.filter.text.cql2.CQL;
+import org.geotools.filter.v1_0.OGCConfiguration;
+import org.geotools.xml.Encoder;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -616,6 +621,16 @@ public class OgcWfsClient {
         }
     }
 
+    public static void addQueryFilter(GetFeature gf, String adminQuery, String srsName, FeatureType ft) throws Exception {
+        Filter filter = OgcWfsClient.createQueryFilter(gf, adminQuery, srsName, ft);
+
+        if (ft instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
+            ((nl.b3p.xml.wfs.v100.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v100.Filter) filter);
+        }else if (ft instanceof nl.b3p.xml.wfs.v110.FeatureType) {
+            ((nl.b3p.xml.wfs.v110.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v110.Filter) filter);
+        }
+    }
+
     /**
      *Creates a bbox filter
      */
@@ -675,7 +690,7 @@ public class OgcWfsClient {
 
         if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
             StringBuffer sb = new StringBuffer();
-            sb.append("<Filter><Within><PropertyName>");
+            sb.append("<Filter><Intersects><PropertyName>");
             sb.append(attributeName);
             sb.append("</PropertyName>");
             sb.append("<gml:Polygon");
@@ -691,7 +706,7 @@ public class OgcWfsClient {
             sb.append("</gml:LinearRing>");
             sb.append("</gml:outerBoundaryIs>");
             sb.append("</gml:Polygon>");
-            sb.append("</Within></Filter>");
+            sb.append("</Intersects></Filter>");
             return (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
         } else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType) {
             StringBuffer sb = new StringBuffer();
@@ -714,6 +729,29 @@ public class OgcWfsClient {
             sb.append("</Intersects></Filter>");
             return (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
         } else {
+            throw new UnsupportedOperationException("Given Feature not supported");
+        }
+    }
+
+    /*
+     * Creates a filter
+     */
+    public static nl.b3p.xml.wfs.Filter createQueryFilter(GetFeature gf, String query, String srsName, nl.b3p.xml.wfs.FeatureType feature) throws Exception {
+        org.opengis.filter.Filter filter = CQL.toFilter(query);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        //create the encoder
+        Encoder encoder = new Encoder( new OGCConfiguration() );
+        QName name = new QName( "http://www.opengis.net/ogc", "Filter" );
+        encoder.encode(filter, name, baos);
+        String s = baos.toString();
+        
+        if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
+            return (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(s));
+        }else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType) {
+            return (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(s));
+        }else{
             throw new UnsupportedOperationException("Given Feature not supported");
         }
     }
@@ -830,6 +868,8 @@ public class OgcWfsClient {
             for(int i = 0; i < featureArray.length; i++){
                 returnList.add(featureArray[i]);
             }
+        }else if (o instanceof Envelope){
+            log.debug("no features found");
         }else{
             throw new UnsupportedOperationException("Can not make returnList from " + o.getClass());
         }
@@ -1016,5 +1056,60 @@ public class OgcWfsClient {
             }
         }
         return methodsAllowed;
+    }
+    
+    /*
+     * Combines 2 filters with <AND> and will add it to the getFeature.
+     * Will look like:
+     * <filter>
+     * <and>
+     * geomFilter
+     * queryFilter
+     * </and>
+     * </filter>
+     */
+    public static void addCombinedAndFilter(GetFeature gf, FeatureType ft, Filter queryFilter, Filter geomFilter) throws Exception {
+        Filter combinedFilter = null;
+
+        String geomFilterString = OgcWfsClient.removeFilterTags(geomFilter);
+        String queryFilterString = OgcWfsClient.removeFilterTags(queryFilter);
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("<Filter><And>");
+        sb.append(geomFilterString);
+        sb.append(queryFilterString);
+        sb.append("</And></Filter>");
+
+        String filter = sb.toString();
+
+        if (ft instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
+            combinedFilter = (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(filter));
+            ((nl.b3p.xml.wfs.v100.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v100.Filter) combinedFilter);
+        }else if (ft instanceof nl.b3p.xml.wfs.v110.FeatureType) {
+            combinedFilter = (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(filter));
+            ((nl.b3p.xml.wfs.v110.GetFeature) gf).getQuery(0).setFilter((nl.b3p.xml.ogc.v110.Filter) combinedFilter);
+        }else{
+            throw new UnsupportedOperationException("Given Feature not supported");
+        }
+    }
+    
+    /*
+     * Returns everything between the <filter></filter> tages as a string.
+     */
+    public static String removeFilterTags(Filter filter) throws MarshalException, ValidationException{
+        String filterString = "";
+        
+        StringWriter sw = new StringWriter();
+        Marshaller.marshal(filter, sw);
+        String tempString = sw.toString();
+
+        String[] tempArray = tempString.split("<");
+        for(int i = 0; i < tempArray.length; i++){
+            if(!tempArray[i].equals("") && !tempArray[i].startsWith("Filter") && !tempArray[i].startsWith("/Filter") && !tempArray[i].startsWith("?xml")){
+                filterString += "<" + tempArray[i];
+            }
+        }
+
+        return filterString;
     }
 }
