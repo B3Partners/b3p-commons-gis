@@ -32,7 +32,7 @@ import java.util.Set;
  */
 public class WfsServiceProvider {
 
-    private int id;
+    private Integer id;
     private String abbr;
     private String name;
     private String title;
@@ -61,11 +61,11 @@ public class WfsServiceProvider {
         wfsLayers.add(layer);
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -124,4 +124,5 @@ public class WfsServiceProvider {
     public void setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
     }
+
 }
