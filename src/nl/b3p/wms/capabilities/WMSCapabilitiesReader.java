@@ -34,8 +34,6 @@ WMT_MS wmt = wms.getWMT_MS("http://viz.globe.gov/viz-bin/wmt.cgi?SERVICE=WMS&VER
  */
 package nl.b3p.wms.capabilities;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import nl.b3p.ogc.utils.KBConfiguration;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
@@ -75,7 +73,6 @@ public class WMSCapabilitiesReader {
     private static final String host = AuthScope.ANY_HOST; // "localhost";
     private static final int port = AuthScope.ANY_PORT;
     private static final int RTIMEOUT = 20000;
-    private XMLReader parser = null;
     private Stack stack = new Stack();
     private Switcher s = null;
     private ServiceProvider serviceProvider = null;
@@ -178,14 +175,16 @@ public class WMSCapabilitiesReader {
     }
 
     public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
-		String xml = getCapabilities(location, username, password);
-		ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes(KBConfiguration.CHARSET));
+
+        String xml = getCapabilities(location, username, password);
+        ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes(KBConfiguration.CHARSET));
 
         //Nu kan het service provider object gemaakt en gevuld worden
         serviceProvider = new ServiceProvider();
         XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
-        reader.setFeature(VALIDATION_FEATURE, true);
-        reader.setFeature(SCHEMA_FEATURE, true);
+        // niet zinvol met IgnoreEntityResolver hierna
+//        reader.setFeature(VALIDATION_FEATURE, true);
+//        reader.setFeature(SCHEMA_FEATURE, true);
 
         IgnoreEntityResolver r = new IgnoreEntityResolver();
         reader.setEntityResolver(r);
