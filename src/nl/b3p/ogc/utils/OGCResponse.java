@@ -383,9 +383,13 @@ public class OGCResponse {
                     String[] newKvp = kvpSplit[z].split("=");
                     if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
                         String[] layer = newKvp[1].split(":");
-                        String changedlayer = layer[0] + ":" + serverPrefix + "_" + layer[1];
+                        String changedlayer = null;
+                        if (layer.length>1) {
+                            changedlayer = layer[0] + ":" + serverPrefix + "_" + layer[1];
+                        } else {
+                            changedlayer = serverPrefix + "_" + layer[0];
+                        }
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
-                        ;
                     } else {
                         newToken = newToken + "&" + kvpSplit[z];
                     }

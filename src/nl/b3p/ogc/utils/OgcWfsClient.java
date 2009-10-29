@@ -843,13 +843,18 @@ public class OgcWfsClient {
         try{
             o=parser.parse(new StringReader(elementToString(e)));
         }catch(Exception ex){
-            log.warn("GML version "+gmlVersion+" not corect. Trying other version");
+            log.warn("GML version "+gmlVersion+" not correct. Trying other version");
             if(gmlVersion == 2){
                 parser = new org.geotools.xml.Parser(new org.geotools.gml3.GMLConfiguration());
             }else if(gmlVersion == 3){
                 parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
             }
+            try {
             o=parser.parse(new StringReader(elementToString(e)));
+            } catch (Exception ex2) {
+                log.warn("No GML version correct. Giving up...");
+                throw new Exception("No suitable GML parser found", ex2);
+            }
         }
         FeatureCollection fc = null;
         if (o instanceof FeatureCollection){
