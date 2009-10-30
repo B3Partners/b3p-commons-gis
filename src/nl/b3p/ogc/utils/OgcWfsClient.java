@@ -82,6 +82,7 @@ import org.geotools.xml.Encoder;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -801,19 +802,44 @@ public class OgcWfsClient {
         }
     }
 
+    /**
+     *
+     * TODO schema location moet nog aangepast worden, omdat geotools anders
+     * contact maakt met kaartenbalie en dan xml terug krijgt met AccessDenied
+     * vervolgens heeft geotools een bug die tot npe leidt.
+     * @param node
+     * @param original
+     * @param replacement
+     */
+    public static void replaceSchemaLocations(Node node, String original, String replacement) {
+        NamedNodeMap map = node.getAttributes();
+        if (map != null) {
+            for (int i = 0; map.getLength() > i; i++) {
+                String name = map.item(i).getNodeName();
+                String[] tokens = name.split(":",2);
+                if (tokens[0].equalsIgnoreCase("xmlns")) {
+                    String value = map.item(i).getNodeValue();
+//                    addOrReplaceNameSpace(tokens.length == 1 ? "" : tokens[1], value);
+                } else if (tokens.length == 2) {
+                    if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
+                        String value = map.item(i).getNodeValue();
+//                        addOrReplaceSchemaLocation(tokens[1], value);
+                    }
+                }
+            }
+        }
+        if (node.hasChildNodes()) {
+            NodeList lijst = node.getChildNodes();
+            for (int i = 0; i < lijst.getLength(); i++) {
+                replaceSchemaLocations(lijst.item(i), original, replacement);
+            }
+        }
+    }
+
     public static ArrayList getFeatureElements(GetFeature gf, OGCRequest or) throws Exception {
         ArrayList returnList = new ArrayList();
-        Element e = doRequest(gf, or.getUrlWithNonOGCparams(), or.getNameSpaces(),or.getUsername(),or.getPassword());
-        //B3pGMLReader bgr = new B3pGMLReader();
-        //HashMap hm = bgr.createGMLInputTemplates(getDescribeFeatureType(or));
-        //Iterator it = hm.values().iterator();
-        /*while (it.hasNext()) {
-            GMLInputTemplate template = (GMLInputTemplate) it.next();
-            bgr.setInputTemplate(template);
-            FeatureCollection fc = bgr.read(new StringReader(elementToString(e)));
-            returnList.addAll(fc.getFeatures());
-        }*/
-        //String output = or.getParameter(OGCRequest.WFS_PARAM_OUTPUTFORMAT);
+        Element elem = doRequest(gf, or.getUrlWithNonOGCparams(), or.getNameSpaces(),or.getUsername(),or.getPassword());
+        replaceSchemaLocations(elem, "wat", "dit");
         String outputFormat = gf.getOutputFormat();
         String version = "";
         if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature) {
@@ -841,18 +867,18 @@ public class OgcWfsClient {
         }
         Object o = null;
         try{
-            o=parser.parse(new StringReader(elementToString(e)));
+            o=parser.parse(new StringReader(elementToString(elem)));
         }catch(Exception ex){
-            log.warn("GML version "+gmlVersion+" not correct. Trying other version");
+            log.warn("GML version "+gmlVersion+" not correct. Trying other version:",ex);
             if(gmlVersion == 2){
                 parser = new org.geotools.xml.Parser(new org.geotools.gml3.GMLConfiguration());
             }else if(gmlVersion == 3){
                 parser = new org.geotools.xml.Parser(new org.geotools.gml2.GMLConfiguration());
             }
             try {
-            o=parser.parse(new StringReader(elementToString(e)));
+            o=parser.parse(new StringReader(elementToString(elem)));
             } catch (Exception ex2) {
-                log.warn("No GML version correct. Giving up...");
+                log.error("No GML version correct. Giving up...",ex2);
                 throw new Exception("No suitable GML parser found", ex2);
             }
         }

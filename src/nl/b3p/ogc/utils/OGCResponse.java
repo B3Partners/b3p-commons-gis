@@ -123,7 +123,7 @@ public class OGCResponse {
                 response = OGCConstants.WFS_FEATURECOLLECTION;
                 version = request.getFinalVersion();
 
-                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                if (version!=null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                     um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
                     o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
@@ -338,12 +338,12 @@ public class OGCResponse {
 
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
         String newSchemalocations = "";
-        if (schemaLocations != null) {
-            Set keys = schemaLocations.keySet();
+        if (getSchemaLocations() != null) {
+            Set keys = getSchemaLocations().keySet();
             Iterator it = keys.iterator();
             for (int i = 0; it.hasNext(); i++) {
                 String prefix = (String) it.next();
-                String location = (String) schemaLocations.get(prefix);
+                String location = (String) getSchemaLocations().get(prefix);
                 newSchemalocations = changeLocation(location, serverPrefix);
                 addOrReplaceSchemaLocation(prefix, newSchemalocations);
             }
@@ -355,12 +355,12 @@ public class OGCResponse {
 
     public nl.b3p.xml.wfs.v110.FeatureCollection replaceFeatureCollectionV110Url(nl.b3p.xml.wfs.v110.FeatureCollection featureCollection, String serverPrefix) {
         String newSchemalocations = "";
-        if (schemaLocations != null) {
-            Set keys = schemaLocations.keySet();
+        if (getSchemaLocations() != null) {
+            Set keys = getSchemaLocations().keySet();
             Iterator it = keys.iterator();
             for (int i = 0; it.hasNext(); i++) {
                 String prefix = (String) it.next();
-                String location = (String) schemaLocations.get(prefix);
+                String location = (String) getSchemaLocations().get(prefix);
                 newSchemalocations = changeLocation(location, serverPrefix);
                 addOrReplaceSchemaLocation(prefix, newSchemalocations);
             }
@@ -456,12 +456,12 @@ public class OGCResponse {
                     m.setNamespaceMapping(prefix, location);
                 }
             }
-            if (schemaLocations != null) {
-                Set keys = schemaLocations.keySet();
+            if (getSchemaLocations() != null) {
+                Set keys = getSchemaLocations().keySet();
                 Iterator it = keys.iterator();
                 for (int i = 0; it.hasNext(); i++) {
                     String prefix = (String) it.next();
-                    String location = (String) schemaLocations.get(prefix);
+                    String location = (String) getSchemaLocations().get(prefix);
                     m.setSchemaLocation(location);
                 }
             }
@@ -513,10 +513,10 @@ public class OGCResponse {
 
     public void addOrReplaceSchemaLocation(String prefix, String location) {
         if (prefix != null && location != null) {
-            if (schemaLocations == null) {
-                schemaLocations = new HashMap();
+            if (getSchemaLocations() == null) {
+                setSchemaLocations(new HashMap());
             }
-            schemaLocations.put(prefix, location);
+            getSchemaLocations().put(prefix, location);
         }
     }
 
@@ -975,5 +975,19 @@ public class OGCResponse {
                 }
             }
         }
+    }
+
+    /**
+     * @return the schemaLocations
+     */
+    public HashMap getSchemaLocations() {
+        return schemaLocations;
+    }
+
+    /**
+     * @param schemaLocations the schemaLocations to set
+     */
+    public void setSchemaLocations(HashMap schemaLocations) {
+        this.schemaLocations = schemaLocations;
     }
 }
