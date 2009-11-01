@@ -24,6 +24,12 @@ package nl.b3p.wms.capabilities;
 
 public class Roles {
 
+    public static final String ADMIN = "beheerder";
+    public static final String ORG_ADMIN = "organisatiebeheerder";
+    public static final String THEME_ADMIN = "themabeheerder";
+    public static final String USER = "gebruiker";
+    public static final String GUEST = "demogebruiker";
+
     private Integer id;
     private String role;
 
