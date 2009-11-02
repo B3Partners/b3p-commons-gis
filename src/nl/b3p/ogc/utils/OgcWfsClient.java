@@ -55,8 +55,6 @@ import java.io.StringReader;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
-import nl.b3p.gis.xml.IgnoreSchemaLocationResolver;
-import nl.b3p.gis.xml.IgnoreSchemaLocator;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
