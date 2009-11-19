@@ -36,18 +36,29 @@ import com.vividsolutions.jts.geom.MultiPoint;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
 import com.vividsolutions.jump.feature.FeatureDataset;
 import com.vividsolutions.jump.io.DriverProperties;
 import com.vividsolutions.jump.io.IllegalParametersException;
 import com.vividsolutions.jump.io.ShapefileWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.geotools.data.DefaultTransaction;
+import org.geotools.data.FeatureStore;
+import org.geotools.data.Transaction;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.feature.DefaultFeatureCollection;
+import org.geotools.feature.FeatureIterator;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.FeatureType;
 
 /**
  *
@@ -75,8 +86,9 @@ public class B3pShapeWriter {
      *@filename The filename to use bij writing the shape file.
      *
      *@return a list of file's of type java.io.File
+     * @deprecated
      */
-    public List writeToShape(FeatureCollection fcAll, String filename) throws IllegalParametersException, Exception {
+    public List writeToShape(com.vividsolutions.jump.feature.FeatureCollection fcAll, String filename) throws IllegalParametersException, Exception {
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allPoly = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());
@@ -85,7 +97,7 @@ public class B3pShapeWriter {
         FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());*/
         Iterator it = fcAll.iterator();
         while (it.hasNext()) {
-            Feature f = (Feature) it.next();
+            com.vividsolutions.jump.feature.Feature f = (com.vividsolutions.jump.feature.Feature) it.next();
             if (f.getGeometry() instanceof Point) {
                 allPoint.add(f);
             } else if (f.getGeometry() instanceof Polygon) {
@@ -123,12 +135,118 @@ public class B3pShapeWriter {
         } */
         return files;
     }
+     /**
+     * writes the featurecollection to shapefiles. Use this function if the features in the featurecollection CAN be different types.
+     *@fcAll The feature collection (can have different types)
+     *@filename The filename to use bij writing the shape file.
+     *
+     *@return a list of file's of type java.io.File
+     */
+    public List writeToShape(org.geotools.feature.FeatureCollection fcAll, String filename, Boolean spatialIndex) throws IllegalParametersException, Exception {
+        DefaultFeatureCollection allPoint = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
+        DefaultFeatureCollection allPoly = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
+        DefaultFeatureCollection allLine = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
+        /*FeatureDataset allMPoint = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMPoly = new FeatureDataset(fcAll.getFeatureSchema());
+        FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());*/
+        FeatureIterator it = fcAll.features();
+        while (it.hasNext()) {
+            SimpleFeature f = (SimpleFeature) it.next();
+            if (f.getDefaultGeometry() instanceof Point) {
+                allPoint.add((SimpleFeature) f);
+            } else if (f.getDefaultGeometry() instanceof Polygon) {
+                allPoly.add(f);
+            } else if (f.getDefaultGeometry() instanceof LineString) {
+                allLine.add(f);
+            } else if (f.getDefaultGeometry() instanceof MultiPoint) {
+                allPoint.add(f);
+            } else if (f.getDefaultGeometry() instanceof MultiPolygon) {
+                allPoly.add(f);
+            } else if (f.getDefaultGeometry() instanceof MultiLineString) {
+                allLine.add(f);
+            } else if(f.getDefaultGeometry()==null) {
+                log.info("No default geometry set.");
+            }else{
+                log.error("Geometry type not found: " + f.getDefaultGeometry().getClass().toString());
+            }
+        }
+        ArrayList files = new ArrayList();
+        if (allPoint.size() > 0) {
+            files.addAll(writeShape(allPoint, filename + "_p.shp",spatialIndex));
+        }
+        if (allPoly.size() > 0) {
+            files.addAll(writeShape(allPoly, filename + "_v.shp",spatialIndex));
+        }
+        if (allLine.size() > 0) {
+            files.addAll(writeShape(allLine, filename + "_l.shp",spatialIndex));
+        }
+        /*if (allMPoint.size()>0){
+        files.addAll(writeShape(allMPoint,filename+"_mp.shp"));
+        }
+        if (allMPoly.size()>0){
+        files.addAll(writeShape(allMPoly,filename+"_mv.shp"));
+        }
+        if(allMLine.size()>0){
+        files.addAll(writeShape(allMLine,filename+"_ml.shp"));
+        } */
+        return files;
+    }
+    /**
+     * Writes a FeatureCollection to shape using the folder and the given name
+     * @param fc The feature collection (CAN'T have different types)
+     * @param shpName the name of the shape file.
+     */
+    public List writeShape(DefaultFeatureCollection fc, String shpName,Boolean spatialIndex) throws IOException {
+        ArrayList files = new ArrayList();
+        if (!shpName.endsWith(".shp")) {
+            shpName += ".shp";
+        }
+        File newShape=new File(getFolder()+shpName);
+        boolean created=newShape.createNewFile();
+        ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
+        Map map = new HashMap();
+        map.put(ShapefileDataStoreFactory.URLP.key, newShape.toURI().toURL());
+        map.put(ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, spatialIndex);
+
+        ShapefileDataStore ds =(ShapefileDataStore) factory.createNewDataStore(map);
+        FeatureType ft= fc.getSchema();
+        ds.createSchema((SimpleFeatureType) ft);
+        Transaction transaction = new DefaultTransaction("create");
+
+        String typeName = ds.getTypeNames()[0];
+        FeatureStore fs=(FeatureStore) ds.getFeatureSource(typeName);
+        try{
+            fs.addFeatures(fc);
+            transaction.commit();
+        }catch(Exception ex){
+            log.error("Error writing shape file. ",ex);
+        }finally{
+            transaction.close();
+            ds.dispose();
+        }
+        String name = shpName.replace(".shp", "");
+        File shpFile = new File(getFolder() + shpName);
+        File dbfFile = new File(getFolder() + name + ".dbf");
+        File shxFile = new File(getFolder() + name + ".shx");
+        if (shpFile.exists()) {
+            files.add(shpFile);
+        }
+        if (dbfFile.exists()) {
+            files.add(dbfFile);
+        }
+        if (shxFile.exists()) {
+            files.add(dbfFile);
+        }
+        return files;
+    }
 
     /**
      * Writes a FeatureCollection to shape using the folder and the given name
-     *@fc The feature collection (CAN'T have different types) 
+     * @param fc The feature collection (CAN'T have different types)
+     * @param shpName the name of the shape file.
+     * @deprecated Use the writeShape with a GeoTools FeatureCollection
      */
-    public List writeShape(FeatureCollection fc, String shpName) throws IllegalParametersException, Exception {
+    public List writeShape(com.vividsolutions.jump.feature.FeatureCollection fc, String shpName) throws IllegalParametersException, Exception {
         ArrayList files = new ArrayList();
         if (!shpName.endsWith(".shp")) {
             shpName += ".shp";

@@ -30,9 +30,6 @@
  */
 package nl.b3p.gis.readers;
 
-import com.vividsolutions.jump.feature.FeatureCollection;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,6 +45,7 @@ import com.vividsolutions.jump.io.ParseException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.List;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -60,7 +58,12 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.geotools.gml2.GMLConfiguration;
+import org.eclipse.xsd.XSDSchema;
+import org.eclipse.xsd.util.XSDSchemaLocationResolver;
+import org.geotools.data.DataUtilities;
+import org.geotools.feature.FeatureCollection;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.InputSource;
@@ -85,50 +88,23 @@ public class B3pGMLReader extends GMLReader {
     public B3pGMLReader() {
         super();
     }
-
-    /** Reads a GML from a WFSgetFeature url and returns a FeatureCollection with all found Geometry objects.
-     * The template that is used to read the GML is created with a WFS DescribeFeatureType request. All attributes given
-     * will be added in the template.
+/** Reads a GML from a WFSgetFeature url and returns a FeatureCollection with all found Geometry objects.
      *
-     * @param wfsGetFeatureUrl The wfs getFeature url. The request needs to be valid, at the moment no check is done.
-     *  at least the attributes 'version' and 'typename' needs to be filled for creating a DescribeFeatureType request.
+     * @param wfsGetFeatureUrl The wfs getFeature url.
      *
      * @return a hashmap with key's the featuretypes and as values the featurecollections
      */
-    public HashMap readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception {
-        //OGCUrl wfsgf=new OGCUrl(wfsGetFeatureUrl); 
-        //HashMap templates = createGMLInputTemplateFromWFS(wfsgf);
+    public HashMap<String,FeatureCollection> readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception {
         wfsgf.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetFeature);
-        /*if (templates == null) {
-            log.error("No Templates founed/created.");
-            return null;
-        }*/
+
         HashMap features = new HashMap();
         PostMethod method = null;
         String[] featureTypes = null;
         if (wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
             featureTypes = wfsgf.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
         }
+        //doe per featureType een apart verzoek.
         for (int i = 0; i < featureTypes.length; i++) {
-            /*Object o = null;
-            o = templates.get(featureTypes[i]);
-            if (o == null) {
-                String[] tokens = featureTypes[i].split(":");
-                if (tokens.length > 1) {
-                    o = templates.get(tokens[1]);
-                }
-            }
-            if (o == null) {
-                if (featureTypes[i].indexOf("}") >= 0) {
-                    o = templates.get(featureTypes[i].split("}")[1]);
-                }
-            }
-
-            if (o == null) {
-                log.error("Kan template niet vinden voor " + featureTypes[i]);
-                throw new Exception("Kan template niet vinden voor " + featureTypes[i]);
-            }
-            GMLInputTemplate git = (GMLInputTemplate) o;*/
             wfsgf.addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, featureTypes[i]);
             HttpClient client = new HttpClient();
             String host = wfsgf.getUrlWithNonOGCparams();
@@ -140,30 +116,32 @@ public class B3pGMLReader extends GMLReader {
             int status = client.executeMethod(method);
             if (status == HttpStatus.SC_OK) {
                 log.debug("Response ok, trying to create FeatureCollection....");
-                /*Reader r = null;
-                r = new InputStreamReader();*/
-                /*GMLReader gr = new GMLReader();
-                gr.setInputTemplate(git);*/
-                GMLConfiguration configuration = new GMLConfiguration();
-                org.geotools.xml.Parser parser = new org.geotools.xml.Parser(configuration);
 
-                FeatureCollection fc = (FeatureCollection) parser.parse( method.getResponseBodyAsStream() );
-                if (fc.size() == 0) {
-                    //There are no Features loaded. So redo the post method and show the response to user.
-                    PostMethod method2 = new PostMethod(host);
-                    //work around voor ESRI post request. Contenttype mag geen text/xml zijn.
-                    //method2.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-                    method2.setRequestEntity(new StringRequestEntity(body, null,null));
-                    client.executeMethod(method2);
-                    String cause = method2.getResponseBodyAsString(1000);
-                    if (cause.indexOf("<ServiceExceptionReport") > 0) {
-                        throw new Exception("Service returned exception: " + cause);
-                    } else {
-                        log.error("No features returned");
+                String outputFormat = wfsgf.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT);
+                org.geotools.xml.Parser parser = createGmlParser(outputFormat);
+
+                Object o= parser.parse(method.getResponseBodyAsStream());
+
+                FeatureCollection fc= convertParsedObjectToFeatureCollection(o);
+                
+                /*check if there are features found*/
+                if(fc!=null){
+                    features.put(featureTypes[i],fc);
+                    if (fc.size() == 0) {
+                        //There are no Features loaded. So redo the post method and show the response to user.
+                        PostMethod method2 = new PostMethod(host);
+                        //work around voor ESRI post request. Contenttype mag geen text/xml zijn.
+                        //method2.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+                        method2.setRequestEntity(new StringRequestEntity(body, null, null));
+                        client.executeMethod(method2);
+                        String cause = method2.getResponseBodyAsString(1000);
+                        if (cause.indexOf("<ServiceExceptionReport") > 0) {
+                            throw new Exception("Service returned exception: " + cause);
+                        } else {
+                            log.info("No features returned");
+                        }
                     }
-
                 }
-                features.put(featureTypes[i], fc);
             } else {
                 log.error("Failed to connect with " + wfsgf.getUrlWithNonOGCparams() + " Using body: " + body);
             }
@@ -174,9 +152,55 @@ public class B3pGMLReader extends GMLReader {
             return features;
         }
     }
+    /**
+     * Convert The object representation of the root element of the document when parsed to a OpenGis FeatureCollection
+     * return null if failed. THE JUMP FEATURECOLLECTION IS NOT SUPPORTED
+     * @param o  The object representation of the root element of the document (result of org.geotools.xml.Parser.parse())
+     * @return a featureCollection.
+     */
+    public FeatureCollection convertParsedObjectToFeatureCollection (Object o){
+        FeatureCollection fc=null;
+        if (o instanceof HashMap) {
+            Object l = ((HashMap) o).get("featureMember");
+            if (l instanceof List) {
+                fc=DataUtilities.collection((List)l);
+            } else if (l instanceof org.opengis.feature.simple.SimpleFeature) {
+                fc=DataUtilities.collection((SimpleFeature)l);
+            }
+        } else if (o instanceof FeatureCollection) {
+            fc = (FeatureCollection) o;
+        }else{
+            log.error("Unable to convert parsed Object to featurecollection. Object: "+o.toString());
+            fc=null;
+        }
+        return fc;
+    }
+
+    public org.geotools.xml.Parser createGmlParser(String outputFormat) {
+        org.geotools.xml.Parser parser = null;
+        if (outputFormat != null && (outputFormat.toLowerCase().indexOf("gml/2") >= 0 || outputFormat.equalsIgnoreCase("gml2"))) {
+            org.geotools.gml2.GMLConfiguration gmlconfig = new org.geotools.gml2.GMLConfiguration();
+            gmlconfig.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
+                public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
+                    return "dummy";
+                }
+            });
+            parser = new org.geotools.xml.Parser(gmlconfig);
+        } else {
+            org.geotools.gml3.GMLConfiguration gmlconfig = new org.geotools.gml3.GMLConfiguration();
+            gmlconfig.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
+                public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
+                    return "dummy";
+                }
+            });
+            parser = new org.geotools.xml.Parser(new org.geotools.gml3.GMLConfiguration());
+        }
+        return parser;
+    }
 
     /**
      *@param el Een XML/GML element met daarin het antwoord op een describe feature type request.
+     *@deprecated was used for creating elements using JUMP
      */
     public HashMap createGMLInputTemplates(Element el) throws Exception {
         HashMap templates = new HashMap();
@@ -231,7 +255,7 @@ public class B3pGMLReader extends GMLReader {
                     String names = e.getNamespaceURI();
                     String prefix = e.getPrefix();
                     //if (e.getAttribute("type").equalsIgnoreCase("gml:GeometryPropertyType")){
-                    String elType=e.getAttribute("type");
+                    String elType = e.getAttribute("type");
                     if (elType.startsWith("gml:")) {
                         geom.append("<GeometryElement>");
                         if (defaultPrefix != null && !e.getAttribute("name").contains(defaultPrefix + ":")) {
@@ -244,7 +268,7 @@ public class B3pGMLReader extends GMLReader {
                         geom.append(e.getAttribute("ref"));
                         geom.append("</GeometryElement>");
                     }
-                    elType=allowedType(elType);
+                    elType = allowedType(elType);
                     if (elType != null && e.getAttribute("name") != null) {
                         cols.append("<column><name>");
                         if (maxColumnNameLength > 0 && e.getAttribute("name").length() > maxColumnNameLength) {
@@ -410,9 +434,9 @@ public class B3pGMLReader extends GMLReader {
         }
         if (type.equalsIgnoreCase("STRING") || type.equalsIgnoreCase("INTEGER") || type.equalsIgnoreCase("DOUBLE")) {
             return type;
-        } else if (type.equalsIgnoreCase("int")){
+        } else if (type.equalsIgnoreCase("int")) {
             return "INTEGER";
-        } else{
+        } else {
             return "STRING";
         }
     }

@@ -37,7 +37,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.transaction.NotSupportedException;
 
 /**
  *
@@ -80,7 +79,7 @@ public class SqlMetaDataUtils {
         return columns;
     }
 
-    static public AttributeType getAttributeTypeFromSqlType(int sqlType) throws NotSupportedException {
+    static public AttributeType getAttributeTypeFromSqlType(int sqlType) {
         AttributeType at = null;
         if (sqlType == java.sql.Types.BIGINT ||
                 sqlType == java.sql.Types.INTEGER ||

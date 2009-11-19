@@ -40,7 +40,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.transaction.NotSupportedException;
 import nl.b3p.gis.mapping.Attribute;
 import nl.b3p.gis.mapping.FeatureType;
 import nl.b3p.ogc.utils.SqlMetaDataUtils;
@@ -67,7 +66,7 @@ public class FeatureSchemaFactory {
      * @param table The name of the table in the given database. From this table a FeatureSchema is created
      * @return a FeatureSchema
      */
-    static public FeatureSchema createFeatureSchemaFromDbTable(String url, String user, String password, java.sql.Driver driver, String table, String[] dontAddColumns) throws SQLException, NotSupportedException, Exception {
+    static public FeatureSchema createFeatureSchemaFromDbTable(String url, String user, String password, java.sql.Driver driver, String table, String[] dontAddColumns) throws SQLException, Exception {
         DriverManager.registerDriver(driver);
         return createFeatureSchemaFromDbTable(DriverManager.getConnection(url, user, password), table, dontAddColumns);
     }
@@ -77,7 +76,7 @@ public class FeatureSchemaFactory {
      * @param table The name of the table in the given database. From this table a FeatureSchema is created
      * @return a FeatureSchema
      */
-    static public FeatureSchema createFeatureSchemaFromDbTable(Connection conn, String table, String[] dontAddColumns) throws SQLException, NotSupportedException, Exception {
+    static public FeatureSchema createFeatureSchemaFromDbTable(Connection conn, String table, String[] dontAddColumns) throws SQLException, Exception {
         FeatureSchema fs = new FeatureSchema();
         List tableNames = SqlMetaDataUtils.getTableAndViewNames(conn);
         DatabaseMetaData dbmd = conn.getMetaData();

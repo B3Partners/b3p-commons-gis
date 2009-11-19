@@ -37,7 +37,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import javax.transaction.NotSupportedException;
 import nl.b3p.commons.csv.CsvFormatException;
 import nl.b3p.commons.csv.CsvInputStream;
 import nl.b3p.gis.FeatureFactory;
@@ -104,13 +103,13 @@ public class CsvReader {
         this.rdyColumnName = DEFAULT_rdyColumnName;
     }
 
-    public void csvOgcSqlETL(Connection conn, CsvInputStream cis) throws SQLException, NotSupportedException, IOException, CsvFormatException, Exception {
+    public void csvOgcSqlETL(Connection conn, CsvInputStream cis) throws SQLException, IOException, CsvFormatException, Exception {
         FeatureSchema fs = getFeatureSchema(conn);
         FeatureDataset fc = readFeatureDataset(fs, cis);
         writeFeatureDataset(conn, fc);
     }
 
-    public FeatureSchema getFeatureSchema(Connection conn) throws SQLException, NotSupportedException, Exception {
+    public FeatureSchema getFeatureSchema(Connection conn) throws SQLException, Exception {
         return FeatureSchemaFactory.createFeatureSchemaFromDbTable(conn, getTableName(), getIgnoredColumnNames());
     }
 
