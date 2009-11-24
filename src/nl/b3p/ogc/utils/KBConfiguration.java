@@ -88,7 +88,7 @@ public class KBConfiguration {
     /*
      * For Accounting...
      */
-    public static String MESSAGE_AUTHORIZATION_INTRO = "Eén of meer van de door u opgevraagde kaarten vereisen autorisatie voor het afboeken van het credittegoed. ";
+    public static String MESSAGE_AUTHORIZATION_INTRO = "Een of meer van de door u opgevraagde kaarten vereisen autorisatie voor het afboeken van het credittegoed. ";
     public static String MESSAGE_AUTHORIZATION_START = "Vink hiertoe de goedkeuringskaart '";
     public static String MESSAGE_AUTHORIZATION_END = "' aan.\n";
     public static String MESSAGE_NO_DISPLAY_AGAIN = "Hierna zal de kaart worden getoond en dit bericht niet meer weergegeven worden.\n";
