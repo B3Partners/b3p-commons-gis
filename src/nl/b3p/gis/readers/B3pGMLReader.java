@@ -118,7 +118,7 @@ public class B3pGMLReader extends GMLReader {
                 log.debug("Response ok, trying to create FeatureCollection....");
 
                 String outputFormat = wfsgf.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT);
-                org.geotools.xml.Parser parser = createGmlParser(outputFormat);
+                org.geotools.xml.Parser parser = createGmlParser(outputFormat,wfsgf.getParameter(OGCConstants.WMS_VERSION));
 
                 Object o= parser.parse(method.getResponseBodyAsStream());
 
@@ -176,9 +176,9 @@ public class B3pGMLReader extends GMLReader {
         return fc;
     }
 
-    public org.geotools.xml.Parser createGmlParser(String outputFormat) {
+    public org.geotools.xml.Parser createGmlParser(String outputFormat, String version) {
         org.geotools.xml.Parser parser = null;
-        if (outputFormat==null || (outputFormat != null && (outputFormat.toLowerCase().indexOf("gml/2") >= 0 || outputFormat.equalsIgnoreCase("gml2")))) {
+        if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)|| (outputFormat != null && (outputFormat.toLowerCase().indexOf("gml/2") >= 0 || outputFormat.equalsIgnoreCase("gml2")))) {
             org.geotools.gml2.GMLConfiguration gmlconfig = new org.geotools.gml2.GMLConfiguration();
             gmlconfig.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
                 public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
