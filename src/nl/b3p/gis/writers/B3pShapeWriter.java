@@ -54,11 +54,17 @@ import org.geotools.data.FeatureStore;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
+import org.geotools.feature.type.GeometryTypeImpl;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
+import org.opengis.feature.type.GeometryDescriptor;
+import org.opengis.feature.type.GeometryType;
 
 /**
  *
@@ -143,12 +149,10 @@ public class B3pShapeWriter {
      *@return a list of file's of type java.io.File
      */
     public List writeToShape(org.geotools.feature.FeatureCollection fcAll, String filename, Boolean spatialIndex) throws IllegalParametersException, Exception {
-        DefaultFeatureCollection allPoint = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
-        DefaultFeatureCollection allPoly = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
-        DefaultFeatureCollection allLine = new DefaultFeatureCollection(null,(SimpleFeatureType)fcAll.getSchema());
-        /*FeatureDataset allMPoint = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allMPoly = new FeatureDataset(fcAll.getFeatureSchema());
-        FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());*/
+        //Shape files don't have single and multi geometries so always use Multi
+        DefaultFeatureCollection allPoint = new DefaultFeatureCollection(null,changeGeometryBinding((SimpleFeatureType)fcAll.getSchema(),MultiPoint.class));
+        DefaultFeatureCollection allPoly = new DefaultFeatureCollection(null,changeGeometryBinding((SimpleFeatureType)fcAll.getSchema(),MultiPolygon.class));
+        DefaultFeatureCollection allLine = new DefaultFeatureCollection(null,changeGeometryBinding((SimpleFeatureType)fcAll.getSchema(),MultiLineString.class));
         FeatureIterator it = fcAll.features();
         while (it.hasNext()) {
             SimpleFeature f = (SimpleFeature) it.next();
@@ -180,16 +184,28 @@ public class B3pShapeWriter {
         if (allLine.size() > 0) {
             files.addAll(writeShape(allLine, filename + "_l.shp",spatialIndex));
         }
-        /*if (allMPoint.size()>0){
-        files.addAll(writeShape(allMPoint,filename+"_mp.shp"));
-        }
-        if (allMPoly.size()>0){
-        files.addAll(writeShape(allMPoly,filename+"_mv.shp"));
-        }
-        if(allMLine.size()>0){
-        files.addAll(writeShape(allMLine,filename+"_ml.shp"));
-        } */
         return files;
+    }
+
+    public SimpleFeatureType changeGeometryBinding(SimpleFeatureType ft, Class geomBinding){
+        List<AttributeDescriptor> attributeDescriptors = new ArrayList<AttributeDescriptor>(ft.getAttributeDescriptors());
+        SimpleFeatureTypeBuilder builder= new SimpleFeatureTypeBuilder();
+        builder.init(ft);
+        if(ft.getGeometryDescriptor()!=null){
+            AttributeDescriptor gd=changeGeometryBinding(ft.getGeometryDescriptor(),geomBinding);
+            attributeDescriptors.set(ft.indexOf(ft.getGeometryDescriptor().getName()),gd);
+            builder.setDefaultGeometry(ft.getGeometryDescriptor().getName().getLocalPart());
+            builder.setAttributes(attributeDescriptors);
+        }
+        SimpleFeatureType newFt= builder.buildFeatureType();
+        return newFt;
+    }
+    public AttributeDescriptor changeGeometryBinding(GeometryDescriptor gd,Class geomBinding){
+        AttributeTypeBuilder builder = new AttributeTypeBuilder();
+        builder.init(gd);
+        builder.setBinding(geomBinding);
+        builder.setCRS(gd.getCoordinateReferenceSystem());
+        return builder.buildDescriptor(gd.getLocalName());
     }
     /**
      * Writes a FeatureCollection to shape using the folder and the given name

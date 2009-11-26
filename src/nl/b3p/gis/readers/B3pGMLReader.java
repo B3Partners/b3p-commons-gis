@@ -178,7 +178,7 @@ public class B3pGMLReader extends GMLReader {
 
     public org.geotools.xml.Parser createGmlParser(String outputFormat) {
         org.geotools.xml.Parser parser = null;
-        if (outputFormat != null && (outputFormat.toLowerCase().indexOf("gml/2") >= 0 || outputFormat.equalsIgnoreCase("gml2"))) {
+        if (outputFormat==null || (outputFormat != null && (outputFormat.toLowerCase().indexOf("gml/2") >= 0 || outputFormat.equalsIgnoreCase("gml2")))) {
             org.geotools.gml2.GMLConfiguration gmlconfig = new org.geotools.gml2.GMLConfiguration();
             gmlconfig.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
                 public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
@@ -186,7 +186,7 @@ public class B3pGMLReader extends GMLReader {
                 }
             });
             parser = new org.geotools.xml.Parser(gmlconfig);
-        } else {
+        } else{
             org.geotools.gml3.GMLConfiguration gmlconfig = new org.geotools.gml3.GMLConfiguration();
             gmlconfig.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
                 public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
