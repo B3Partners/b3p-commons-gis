@@ -680,7 +680,9 @@ public class OgcWfsClient {
             sb.append("</Intersects></Filter>");
             return (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(sb.toString()));
         } else {
-            throw new UnsupportedOperationException("Given Feature not supported");
+            throw new UnsupportedOperationException("Given Feature not supported" +
+                    ", class: " + (feature == null ? "" : feature.getClass()) +
+                    ", attribute: " + attributeName);
         }
     }
 
@@ -817,16 +819,14 @@ public class OgcWfsClient {
             version = "1.1.0";
         }
         int gmlVersion = 2;
-        if ("1.1.0".equals(version)
-                && outputFormat != null
-                && !"GML2".equalsIgnoreCase(outputFormat)
-                && outputFormat.indexOf("gml/2") == -1) {
+        if ("1.1.0".equals(version) && outputFormat != null && !"GML2".equalsIgnoreCase(outputFormat) && outputFormat.indexOf("gml/2") == -1) {
             gmlVersion = 3;
         }
 
         org.geotools.gml2.GMLConfiguration configGml2 = null;
         configGml2 = new org.geotools.gml2.GMLConfiguration();
         configGml2.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
+
             public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
                 return "dummy";
             }
@@ -835,6 +835,7 @@ public class OgcWfsClient {
         org.geotools.gml3.GMLConfiguration configGml3 = null;
         configGml3 = new org.geotools.gml3.GMLConfiguration();
         configGml3.getContext().registerComponentInstance(new XSDSchemaLocationResolver() {
+
             public String resolveSchemaLocation(XSDSchema xsds, String string, String string1) {
                 return "dummy";
             }
