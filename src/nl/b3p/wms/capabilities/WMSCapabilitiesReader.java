@@ -54,6 +54,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
 import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -97,19 +98,33 @@ public class WMSCapabilitiesReader {
             message.append("Service provider is null. ");
         } else if (obj instanceof Layer) {
             message.append("Layer is null. ");
-        //TODO andere objecten
+            //TODO andere objecten
         }
         throw new SAXException(message.toString());
     }
-    
+
     public String getCapabilities(String location) throws Exception {
-    	return getCapabilities(location, null, null);
+        return getCapabilities(location, null, null);
     }
-    
+
     public String getCapabilities(String location, String username, String password) throws Exception {
         HttpClient client = new HttpClient();
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
+
+        String proxyServer = System.getProperty("http.proxyHost");
+        String proxyPortProp = System.getProperty("http.proxyPort");
+        int proxyPort = 8080; // default to 8080
+        if (proxyPortProp != null) {
+            proxyPort = Integer.parseInt(proxyPortProp);
+        }
+        if (proxyServer != null) {
+            HostConfiguration hostConfiguration = client.getHostConfiguration();
+            hostConfiguration.setProxy(proxyServer, proxyPort);
+            log.debug("proxy settings, server: " + proxyServer + ", port: " + proxyPort);
+        } else {
+            log.debug("proxy settings: no proxy");
+        }
 
         if (username != null && password != null) {
             client.getParams().setAuthenticationPreemptive(true);
@@ -120,7 +135,7 @@ public class WMSCapabilitiesReader {
 
         // Create a method instance.
         GetMethod method = new GetMethod(location);
-        String result =null;
+        String result = null;
         try {
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
@@ -141,13 +156,13 @@ public class WMSCapabilitiesReader {
             }
 
             InputStream is = method.getResponseBodyAsStream();
-			int len = 0;
-			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			byte[] buf = new byte[1024];
-			while ((len = is.read(buf)) > -1) {
-				out.write(buf, 0, len);
-			}
-			result = new String(out.toByteArray(), KBConfiguration.CHARSET);
+            int len = 0;
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[1024];
+            while ((len = is.read(buf)) > -1) {
+                out.write(buf, 0, len);
+            }
+            result = new String(out.toByteArray(), KBConfiguration.CHARSET);
         } finally {
             // Release the connection.
             method.releaseConnection();
@@ -292,7 +307,7 @@ public class WMSCapabilitiesReader {
         s.setElementHandler("VendorSpecificCapabilities", new VendorSpecificCapabilitiesHandler());
         s.setElementHandler("Role", new RoleHandler());
         s.setElementHandler("OrganizationCode", new OrganizationCodeHandler());
-    //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
+        //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
     }
     // </editor-fold>
 
@@ -763,11 +778,11 @@ public class WMSCapabilitiesReader {
                 String nearestValue = attributes.getValue("nearestValue");
                 String multipleValues = attributes.getValue("multipleValues");
                 String current = attributes.getValue("current");
-            //extent.setName(name);
-            //extent.setDefaults(defaults);
-            //extent.setNearestValue(nearestValue);
-            //extent.setMultipleValues(multipleValues);
-            //extent.setCurrent(current);
+                //extent.setName(name);
+                //extent.setDefaults(defaults);
+                //extent.setNearestValue(nearestValue);
+                //extent.setMultipleValues(multipleValues);
+                //extent.setCurrent(current);
             }
         }
 
@@ -803,11 +818,11 @@ public class WMSCapabilitiesReader {
                 Layer layer = (Layer) object;
                 checkObject(layer);
                 layer.getIdentifiers();
-            //Still need to do something here
-            //Get the Identifiers and look through them to find the one with the same
-            //name as the one we have here. Add the value to this identifier and add the
-            //identifier again to the Set of identifiers
-            //place the renewed Set back in the Layer object.
+                //Still need to do something here
+                //Get the Identifiers and look through them to find the one with the same
+                //name as the one we have here. Add the value to this identifier and add the
+                //identifier again to the Set of identifiers
+                //place the renewed Set back in the Layer object.
             }
         }
 
