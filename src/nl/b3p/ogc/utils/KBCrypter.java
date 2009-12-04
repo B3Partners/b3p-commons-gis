@@ -48,7 +48,6 @@ public class KBCrypter {
     protected final static String encryptionPadding = "PKCS5Padding";
     protected static SecretKey secretKey;
     protected static String cipherParameters;
-    
 
     static {
         try {
@@ -79,6 +78,11 @@ public class KBCrypter {
         clearTextBytes = clearText.getBytes();
         byte encryptedText[] = c1.doFinal(clearTextBytes);
         String encryptedEncodedText = new String(encoder.encode(encryptedText), CHARSET);
+        /* Verwijder eventuele \r\n karakters die door Commons-Codec 1.4
+         * zijn toegevoegd. Deze zijn niet toegestaan in een cookie.
+         */
+        encryptedEncodedText = encryptedEncodedText.replaceAll("[\r\n]", "");
+
         return URLEncoder.encode(encryptedEncodedText, "utf-8");
     }
 
