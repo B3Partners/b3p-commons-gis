@@ -250,6 +250,7 @@ public interface OGCConstants {
                 WMS_REQUEST_GetMap,
                 WMS_REQUEST_GetFeatureInfo,
                 WMS_REQUEST_GetLegendGraphic,
+                WMS_REQUEST_DescribeLayer,
                 WFS_REQUEST_GetFeature,
                 WFS_REQUEST_DescribeFeatureType,
                 WFS_REQUEST_GetCapabilities,

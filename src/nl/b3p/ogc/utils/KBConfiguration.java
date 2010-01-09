@@ -64,6 +64,12 @@ public class KBConfiguration {
     public static String KB_PROXY = "proxy";
     public static String KB_ENCRYPT_KEY = "proxy007"; // minimaal 8 bytes voor encrypting
     public static String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
+    /**
+     * For proxy RWS
+     */
+    public static String KB_SERVICES_CONTEXT_PATH = "";
+    public static String KB_SERVICES_SERVER_URI = "";
+
     public static String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie";
     public static String REQUEST_NORIGHTS_EXCEPTION="Kaartenbalie request fout: Ongeldige kaartlaag in de LAYERS parameter, u heeft geen rechten op de kaart";
     public static String REQUEST_DUPLICATE_EXCEPTION="Kaartenbalie request fout: De gevraagde kaartlaag komt meerdere keren voor";
@@ -171,6 +177,9 @@ public class KBConfiguration {
         KB_PROXY_EXECPTION = prop.getProperty("KB_PROXY_EXECPTION", KB_PROXY_EXECPTION);
         KB_ENCRYPT_KEY = prop.getProperty("KB_PROXY_KEY", KB_ENCRYPT_KEY);
         KB_PROXY_URL = prop.getProperty("KB_PROXY_URL", KB_PROXY_URL);
+
+        KB_SERVICES_CONTEXT_PATH = prop.getProperty("KB_SERVICES_CONTEXT_PATH", KB_SERVICES_CONTEXT_PATH);
+        KB_SERVICES_SERVER_URI = prop.getProperty("KB_SERVICES_SERVER_URI", KB_SERVICES_SERVER_URI);
 
         //KB_USER=prop.getProperty("KB_USER",KB_USER);
 

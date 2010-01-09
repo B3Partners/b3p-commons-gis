@@ -1160,6 +1160,8 @@ public class OGCRequest implements OGCConstants {
                         requiredParams = PARAMS_GetFeatureInfo;
                     } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                         requiredParams = PARAMS_GetLegendGraphic;
+                    } else if (request.equals(WMS_REQUEST_DescribeLayer)){
+                    	requiredParams = PARAMS_DescribeLayer;
                     }
                     checkRequestURL(requiredParams, request);
                 } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)) {
