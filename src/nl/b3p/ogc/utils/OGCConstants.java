@@ -168,7 +168,7 @@ public interface OGCConstants {
                 REQUEST,
                 SERVICE,
                 VERSION,
-                WFS_PARAM_OUTPUTFORMAT,
+                /* WFS_PARAM_OUTPUTFORMAT, is optional */
                 WFS_PARAM_TYPENAME
             });
     public static final List WFS_REQUIRED_PARAMS_Transaction = Arrays.asList(new String[]{
