@@ -78,6 +78,7 @@
 			<xsd:element ref="ogc:Not"/>
 			<xsd:element ref="ogc:And"/>
 			<xsd:element ref="ogc:FeatureId" maxOccurs="unbounded"/>
+			<xsd:element ref="ogc:Intersect"/>
 		</xsd:choice>
 	</xsd:complexType>
 	<xsd:complexType name="FeatureIdType">
@@ -215,6 +216,7 @@
 					<xsd:element ref="ogc:Or" minOccurs="0"/>
 					<xsd:element ref="ogc:Not" minOccurs="0"/>
 					<xsd:element ref="ogc:And" minOccurs="0"/>
+					<xsd:element ref="ogc:Intersect" minOccurs="0"/>
 				</xsd:choice>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -247,6 +249,7 @@
 						<xsd:element ref="ogc:Or" minOccurs="0"/>
 						<xsd:element ref="ogc:Not" minOccurs="0"/>
 						<xsd:element ref="ogc:And" minOccurs="0"/>
+						<xsd:element ref="ogc:Intersect" minOccurs="0"/>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
