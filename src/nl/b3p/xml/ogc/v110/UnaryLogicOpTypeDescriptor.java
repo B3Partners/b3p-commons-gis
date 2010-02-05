@@ -894,6 +894,42 @@ public class UnaryLogicOpTypeDescriptor extends nl.b3p.xml.ogc.v110.LogicOpsType
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
+        //-- _intersect
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(nl.b3p.xml.ogc.v110.Intersect.class, "_intersect", "Intersect", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                UnaryLogicOpType target = (UnaryLogicOpType) object;
+                return target.getIntersect();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    UnaryLogicOpType target = (UnaryLogicOpType) object;
+                    target.setIntersect( (nl.b3p.xml.ogc.v110.Intersect) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new nl.b3p.xml.ogc.v110.Intersect();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/ogc");
+        desc.setRequired(true);
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _intersect
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        fieldValidator.setMinOccurs(1);
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
     } //-- nl.b3p.xml.ogc.v110.UnaryLogicOpTypeDescriptor()
 
 

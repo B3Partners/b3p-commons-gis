@@ -152,6 +152,11 @@ public class FilterType implements java.io.Serializable {
      */
     private java.util.ArrayList _featureIdList;
 
+    /**
+     * Field _intersect
+     */
+    private nl.b3p.xml.ogc.v100.Intersect _intersect;
+
 
       //----------------/
      //- Constructors -/
@@ -364,6 +369,17 @@ public class FilterType implements java.io.Serializable {
     {
         return _featureIdList.size();
     } //-- int getFeatureIdCount() 
+
+    /**
+     * Returns the value of field 'intersect'.
+     * 
+     * @return Intersect
+     * @return the value of field 'intersect'.
+     */
+    public nl.b3p.xml.ogc.v100.Intersect getIntersect()
+    {
+        return this._intersect;
+    } //-- nl.b3p.xml.ogc.v100.Intersect getIntersect() 
 
     /**
      * Returns the value of field 'intersects'.
@@ -711,6 +727,17 @@ public class FilterType implements java.io.Serializable {
             _featureIdList.add(featureIdArray[i]);
         }
     } //-- void setFeatureId(nl.b3p.xml.ogc.v100.FeatureId) 
+
+    /**
+     * Sets the value of field 'intersect'.
+     * 
+     * @param intersect the value of field 'intersect'.
+     */
+    public void setIntersect(nl.b3p.xml.ogc.v100.Intersect intersect)
+    {
+        this._intersect = intersect;
+        this._choiceValue = intersect;
+    } //-- void setIntersect(nl.b3p.xml.ogc.v100.Intersect) 
 
     /**
      * Sets the value of field 'intersects'.

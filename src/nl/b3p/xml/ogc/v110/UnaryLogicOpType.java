@@ -148,6 +148,11 @@ implements java.io.Serializable
      */
     private nl.b3p.xml.ogc.v110.Or _or;
 
+    /**
+     * Field _intersect
+     */
+    private nl.b3p.xml.ogc.v110.Intersect _intersect;
+
 
       //----------------/
      //- Constructors -/
@@ -263,6 +268,17 @@ implements java.io.Serializable
     {
         return this._equals;
     } //-- nl.b3p.xml.ogc.v110.Equals getEquals() 
+
+    /**
+     * Returns the value of field 'intersect'.
+     * 
+     * @return Intersect
+     * @return the value of field 'intersect'.
+     */
+    public nl.b3p.xml.ogc.v110.Intersect getIntersect()
+    {
+        return this._intersect;
+    } //-- nl.b3p.xml.ogc.v110.Intersect getIntersect() 
 
     /**
      * Returns the value of field 'intersects'.
@@ -562,6 +578,17 @@ implements java.io.Serializable
         this._equals = equals;
         this._choiceValue = equals;
     } //-- void setEquals(nl.b3p.xml.ogc.v110.Equals) 
+
+    /**
+     * Sets the value of field 'intersect'.
+     * 
+     * @param intersect the value of field 'intersect'.
+     */
+    public void setIntersect(nl.b3p.xml.ogc.v110.Intersect intersect)
+    {
+        this._intersect = intersect;
+        this._choiceValue = intersect;
+    } //-- void setIntersect(nl.b3p.xml.ogc.v110.Intersect) 
 
     /**
      * Sets the value of field 'intersects'.
