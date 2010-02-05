@@ -36,6 +36,7 @@
 			<xsd:element ref="ogc:And"/>
 			<xsd:element ref="ogc:FeatureId"/>
 			<xsd:element ref="ogc:GmlObjectId"/>
+			<xsd:element ref="ogc:Intersect"/>
 		</xsd:choice>
 	</xsd:complexType>
 	<xsd:element name="comparisonOps" type="ogc:ComparisonOpsType" abstract="false"/>
@@ -209,6 +210,7 @@
 					<xsd:element ref="ogc:And"/>
 					<xsd:element ref="ogc:Not"/>
 					<xsd:element ref="ogc:Or"/>
+					<xsd:element ref="ogc:Intersect"/>
 				</xsd:choice>
 			</xsd:extension>
 		</xsd:complexContent>
@@ -241,6 +243,7 @@
 						<xsd:element ref="ogc:And"/>
 						<xsd:element ref="ogc:Not"/>
 						<xsd:element ref="ogc:Or"/>
+						<xsd:element ref="ogc:Intersect"/>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:extension>
