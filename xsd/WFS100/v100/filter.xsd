@@ -33,6 +33,7 @@
 	<xsd:element name="Overlaps" type="ogc:BinarySpatialOpType" substitutionGroup="ogc:spatialOps"/>
 	<xsd:element name="Crosses" type="ogc:BinarySpatialOpType" substitutionGroup="ogc:spatialOps"/>
 	<xsd:element name="Intersects" type="ogc:BinarySpatialOpType" substitutionGroup="ogc:spatialOps"/>
+	<xsd:element name="Intersect" type="ogc:BinarySpatialOpType" substitutionGroup="ogc:spatialOps"/>
 	<xsd:element name="Contains" type="ogc:BinarySpatialOpType" substitutionGroup="ogc:spatialOps"/>
 	<!-- These operatons are from sec 4.2 of OpenGIS Catalog Interface -->
 	<xsd:element name="DWithin" type="ogc:DistanceBufferType" substitutionGroup="ogc:spatialOps"/>
