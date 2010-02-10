@@ -75,8 +75,7 @@ public class OGCResponse {
     private List getCapabilitiesV110 = new ArrayList();
     private List featureCollectionV100 = new ArrayList();
     private List featureCollectionV110 = new ArrayList();
-    private HashMap nameSpaces=null;
-    private String featureTypeNamespacePrefix;
+    private HashMap nameSpaces = null;
     private HashMap schemaLocations;
     private String srs = null;
     private List supportedOperations = new ArrayList();
@@ -87,8 +86,10 @@ public class OGCResponse {
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
         this.httpHost = request.getHost();
-        if (nameSpaces==null)
+        if (nameSpaces == null) {
             nameSpaces = new HashMap();
+
+        }
         findNameSpace(rootElement);
         Unmarshaller um;
         Object o;
@@ -96,9 +97,9 @@ public class OGCResponse {
         // if no prefix is given (wfs is default namespave), prefix it with wfs:
         String tagName = rootElement.getTagName();
         if (!tagName.startsWith(OGCConstants.WFS_NAMESPACE_PREFIX)) {
-        	tagName = OGCConstants.WFS_NAMESPACE_PREFIX + tagName;
+            tagName = OGCConstants.WFS_NAMESPACE_PREFIX + tagName;
         }
-        
+
         try {
             if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
                 response = OGCConstants.WFS_CAPABILITIES;
@@ -123,7 +124,7 @@ public class OGCResponse {
                 response = OGCConstants.WFS_FEATURECOLLECTION;
                 version = request.getFinalVersion();
 
-                if (version!=null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                if (version != null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                     um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
                     o = um.unmarshal(rootElement);
                     nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
@@ -182,8 +183,8 @@ public class OGCResponse {
         wfsCapabilities.getService().setOnlineResource(httpHost);
         nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
-        	String layer = featureTypeList[b].getName();
-        	String featureTypeName = this.determineFeatureTypeName(prefix, layer);
+            String layer = featureTypeList[b].getName();
+            String featureTypeName = this.determineFeatureTypeName(prefix, layer);
             featureTypeList[b].setName(featureTypeName);
         }
         List newSupportedOperations = new ArrayList();
@@ -268,8 +269,8 @@ public class OGCResponse {
     public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url(nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix) {
         nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
         for (int b = 0; b < featureTypeList.length; b++) {
-        	String layer = featureTypeList[b].getName();
-        	String featureTypeName = this.determineFeatureTypeName(prefix, layer);
+            String layer = featureTypeList[b].getName();
+            String featureTypeName = this.determineFeatureTypeName(prefix, layer);
             featureTypeList[b].setName(featureTypeName);
         }
         List newSupportedOperations = new ArrayList();
@@ -295,9 +296,9 @@ public class OGCResponse {
         }
         checkSupportedOperations(newSupportedOperations);
         //Check for null. Only check the values that can be null according the specs.
-        if (wfsCapabilities.getServiceProvider()!=null &&
-                wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo()!=null &&
-                wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource()!=null){
+        if (wfsCapabilities.getServiceProvider() != null
+                && wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo() != null
+                && wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource() != null) {
             wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
         }
         setSrs(null);
@@ -314,27 +315,28 @@ public class OGCResponse {
      * @param layer
      * @return
      */
-	private String determineFeatureTypeName(String prefix, String layer) {
-		int index = layer.indexOf("}");
-		if (index > -1) {
-			String namespace = layer.substring(1, index);
-			// iterate through namespaces to find prefix
-			for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator
-					.hasNext();) {
-				Map.Entry entry = (Map.Entry) iterator.next();
-				if (entry.getValue().equals(namespace)) {
-					featureTypeNamespacePrefix = (String) entry.getKey();
-					if (!"".equals(featureTypeNamespacePrefix)) {
-						featureTypeNamespacePrefix += ":";
-					}
-					break;
-				}
-			}
-			layer = layer.substring(index+1);//rename layer by removing namepace url
-		}
-		
-		return featureTypeNamespacePrefix + prefix + "_" + layer;
-	}
+    private String determineFeatureTypeName(String prefix, String layer) {
+        String featureTypeNamespacePrefix = "";
+
+        int index = layer.indexOf("}");
+        if (index > -1) {
+            String namespace = layer.substring(1, index);
+            // iterate through namespaces to find prefix
+            for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
+                Map.Entry entry = (Map.Entry) iterator.next();
+                if (entry.getValue().equals(namespace)) {
+                    featureTypeNamespacePrefix = (String) entry.getKey();
+                    if (!"".equals(featureTypeNamespacePrefix)) {
+                        featureTypeNamespacePrefix += ":";
+                    }
+                    break;
+                }
+            }
+            layer = layer.substring(index + 1);//rename layer by removing namepace url
+        }
+
+        return featureTypeNamespacePrefix + prefix + "_" + layer;
+    }
 
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
         String newSchemalocations = "";
@@ -384,7 +386,7 @@ public class OGCResponse {
                     if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
                         String[] layer = newKvp[1].split(":");
                         String changedlayer = null;
-                        if (layer.length>1) {
+                        if (layer.length > 1) {
                             changedlayer = layer[0] + ":" + serverPrefix + "_" + layer[1];
                         } else {
                             changedlayer = serverPrefix + "_" + layer[0];
@@ -410,7 +412,7 @@ public class OGCResponse {
         return newSchemalocations;
     }
 
-    public String getResponseBody(List spInfo) {
+    public String getResponseBody(List layers) {
         String body = null;
         Object castorObject = null;
 
@@ -418,14 +420,14 @@ public class OGCResponse {
             return body;
         }
         if (response.equals(OGCConstants.WFS_CAPABILITIES)) {
-            List layers = new ArrayList();
-            Iterator iter = spInfo.iterator();
+            List tlayers = new ArrayList();
+            Iterator iter = layers.iterator();
             while (iter.hasNext()) {
                 HashMap sp = (HashMap) iter.next();
-                String layerName = featureTypeNamespacePrefix + sp.get("spAbbr") + "_" + sp.get("layer");
-                layers.add(layerName);
+                String layerName = determineFeatureTypeName((String) sp.get("spAbbr"), (String) sp.get("layer"));
+                tlayers.add(layerName);
             }
-            castorObject = mergeCapabilities(layers);
+            castorObject = mergeCapabilities(tlayers);
         } else if (response.equals(OGCConstants.WFS_SERVER_EXCEPTION)) {
             castorObject = newExceptionReport;
         } else if (response.equals(OGCConstants.WFS_FEATURECOLLECTION)) {
@@ -482,7 +484,7 @@ public class OGCResponse {
         if (map != null) {
             for (int i = 0; map.getLength() > i; i++) {
                 String name = map.item(i).getNodeName();
-                String[] tokens = name.split(":",2);
+                String[] tokens = name.split(":", 2);
                 if (tokens[0].equalsIgnoreCase("xmlns")) {
                     String value = map.item(i).getNodeValue();
                     addOrReplaceNameSpace(tokens.length == 1 ? "" : tokens[1], value);
@@ -614,48 +616,44 @@ public class OGCResponse {
     }
 
     public nl.b3p.xml.wfs.v110.WFS_Capabilities getFeatureTypesV110(List layers) {
+        List foundFeatureTypes = new ArrayList();
+
         Iterator it = getCapabilitiesV110.iterator();
-        int i = 0;
         while (it.hasNext()) {
-            if (i == 0) {
-                newWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
-                i = +1;
-                nl.b3p.xml.wfs.v110.FeatureTypeList typeList = newWfsCapabilitiesV110.getFeatureTypeList();
-                for (int x = 0; x < typeList.getFeatureTypeCount(); x++) {
-                    nl.b3p.xml.wfs.v110.FeatureType feature = typeList.getFeatureType(x);
-                    boolean hasRights = false;
-                    Iterator il = layers.iterator();
-                    while (il.hasNext()) {
-                        String lName = il.next().toString();
-                        String temp = feature.getName();
-                        if (lName.equalsIgnoreCase(feature.getName())) {
-                            hasRights = true;
-                        }
-                    }
-                    if (hasRights == false) {
-                        newWfsCapabilitiesV110.getFeatureTypeList().removeFeatureType(feature);
+            nl.b3p.xml.wfs.v110.WFS_Capabilities nextWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
+            nl.b3p.xml.wfs.v110.FeatureTypeList nextTypeList = nextWfsCapabilitiesV110.getFeatureTypeList();
+            for (int x = 0; x < nextTypeList.getFeatureTypeCount(); x++) {
+                nl.b3p.xml.wfs.v110.FeatureType feature = nextTypeList.getFeatureType(x);
+                // TODO hack, nog beter uitzoeken
+                String[] name = feature.getName().split("[}:]");
+                String featureName = name[name.length - 1];
+
+                Iterator il = layers.iterator();
+                while (il.hasNext()) {
+                    String lName = (String) il.next();
+                    if (lName.equalsIgnoreCase(featureName)) {
+                        foundFeatureTypes.add(feature);
                     }
                 }
+            }
+            if (newWfsCapabilitiesV110 == null) {
+                newWfsCapabilitiesV110 = nextWfsCapabilitiesV110;
             } else {
-                nl.b3p.xml.wfs.v110.WFS_Capabilities nextWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
-                nl.b3p.xml.wfs.v110.FeatureType[] featureTypes = nextWfsCapabilitiesV110.getFeatureTypeList().getFeatureType();
-                for (int x = 0; x < featureTypes.length; x++) {
-                    nl.b3p.xml.wfs.v110.FeatureType feature = featureTypes[x];
-                    boolean hasRights = false;
-                    Iterator il = layers.iterator();
-                    while (il.hasNext()) {
-                        String lName = il.next().toString();
-                        if (lName.equalsIgnoreCase(feature.getName())) {
-                            hasRights = true;
-                        }
-                    }
-                    if (hasRights == true) {
-                        newWfsCapabilitiesV110.getFeatureTypeList().addFeatureType(feature);
-                    }
-                }
                 checkFilterCapabilities(newWfsCapabilitiesV110.getFilter_Capabilities(), nextWfsCapabilitiesV110.getFilter_Capabilities());
             }
         }
+
+        if (newWfsCapabilitiesV110 == null) {
+            return null;
+        }
+
+        // toevoegen van de featureTypes met rechten
+        Iterator it2 = foundFeatureTypes.iterator();
+        nl.b3p.xml.wfs.v110.FeatureTypeList foundTypeList = new nl.b3p.xml.wfs.v110.FeatureTypeList();
+        while (it2.hasNext()) {
+            foundTypeList.addFeatureType((nl.b3p.xml.wfs.v110.FeatureType) it2.next());
+        }
+        newWfsCapabilitiesV110.setFeatureTypeList(foundTypeList);
 
         Operation[] operations = newWfsCapabilitiesV110.getOperationsMetadata().getOperation();
         String[] names = new String[operations.length];
@@ -675,47 +673,44 @@ public class OGCResponse {
     }
 
     public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities getFeatureTypesV100(List layers) {
+        List foundFeatureTypes = new ArrayList();
+
         Iterator it = getCapabilitiesV100.iterator();
-        int i = 0;
         while (it.hasNext()) {
-            if (i == 0) {
-                newWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
-                i = +1;
-                nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList typeList = newWfsCapabilitiesV100.getFeatureTypeList();
-                for (int x = 0; x < typeList.getFeatureTypeCount(); x++) {
-                    FeatureType feature = typeList.getFeatureType(x);
-                    boolean hasRights = false;
-                    Iterator il = layers.iterator();
-                    while (il.hasNext()) {
-                        String lName = il.next().toString();
-                        if (lName.equalsIgnoreCase(feature.getName())) {
-                            hasRights = true;
-                        }
-                    }
-                    if (hasRights == false) {
-                        newWfsCapabilitiesV100.getFeatureTypeList().removeFeatureType(feature);
+            nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities nextWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
+            nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypes = nextWfsCapabilitiesV100.getFeatureTypeList().getFeatureType();
+            for (int x = 0; x < featureTypes.length; x++) {
+                FeatureType feature = featureTypes[x];
+                // TODO hack, nog beter uitzoeken
+                String[] name = feature.getName().split("[}:]");
+                String featureName = name[name.length - 1];
+
+                Iterator il = layers.iterator();
+                while (il.hasNext()) {
+                    String lName = (String) il.next();
+                    if (lName.equalsIgnoreCase(featureName)) {
+                        foundFeatureTypes.add(feature);
                     }
                 }
+            }
+            if (newWfsCapabilitiesV100 == null) {
+                newWfsCapabilitiesV100 = nextWfsCapabilitiesV100;
             } else {
-                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities nextWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
-                nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypes = nextWfsCapabilitiesV100.getFeatureTypeList().getFeatureType();
-                for (int x = 0; x < featureTypes.length; x++) {
-                    FeatureType feature = featureTypes[x];
-                    boolean hasRights = false;
-                    Iterator il = layers.iterator();
-                    while (il.hasNext()) {
-                        String lName = il.next().toString();
-                        if (lName.equalsIgnoreCase(feature.getName())) {
-                            hasRights = true;
-                        }
-                    }
-                    if (hasRights == true) {
-                        newWfsCapabilitiesV100.getFeatureTypeList().addFeatureType(feature);
-                    }
-                }
                 checkFilterCapabilities(newWfsCapabilitiesV100.getFilter_Capabilities(), nextWfsCapabilitiesV100.getFilter_Capabilities());
             }
         }
+
+        if (newWfsCapabilitiesV100 == null) {
+            return null;
+        }
+
+        // toevoegen van de featureTypes met rechten
+        Iterator it2 = foundFeatureTypes.iterator();
+        nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList foundTypeList = new nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList();
+        while (it2.hasNext()) {
+            foundTypeList.addFeatureType((nl.b3p.xml.wfs.v100.capabilities.FeatureType) it2.next());
+        }
+        newWfsCapabilitiesV100.setFeatureTypeList(foundTypeList);
 
         RequestTypeItem[] operations = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem();
         String[] names = new String[operations.length];
@@ -746,6 +741,7 @@ public class OGCResponse {
         return newWfsCapabilitiesV100;
     }
 
+    //TODO concurrent modification error check uitvoeren
     public void checkFilterCapabilities(Filter_Capabilities filterCapabilities, Filter_Capabilities newFilterCapabilities) {
         if (filterCapabilities instanceof nl.b3p.xml.ogc.v110.Filter_Capabilities) {
             nl.b3p.xml.ogc.v110.Filter_Capabilities filter = (nl.b3p.xml.ogc.v110.Filter_Capabilities) filterCapabilities;
@@ -792,18 +788,18 @@ public class OGCResponse {
             }
 
             nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] comparisonOperators = null;
-            if (filter.getScalar_Capabilities().getComparisonOperators()!=null){
+            if (filter.getScalar_Capabilities().getComparisonOperators() != null) {
                 comparisonOperators = filter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
             }
             nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] newComparisonOperators = null;
-            if (newFilter.getScalar_Capabilities().getComparisonOperators()!=null){
-                newComparisonOperators=newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
+            if (newFilter.getScalar_Capabilities().getComparisonOperators() != null) {
+                newComparisonOperators = newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
             }
-            if (comparisonOperators!=null){
+            if (comparisonOperators != null) {
                 for (int o = 0; o < comparisonOperators.length; o++) {
                     boolean isValid = false;
                     String value = comparisonOperators[o].getComparisonOperator().toString();
-                    if (newComparisonOperators!=null){
+                    if (newComparisonOperators != null) {
                         for (int p = 0; p < newComparisonOperators.length; p++) {
                             String newValue = newComparisonOperators[p].getComparisonOperator().toString();
                             if (value.equals(newValue)) {
@@ -817,18 +813,18 @@ public class OGCResponse {
                 }
             }
             nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] arithmeticOperators = null;
-            if (filter.getScalar_Capabilities().getArithmeticOperators()!=null){
-                arithmeticOperators=filter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
+            if (filter.getScalar_Capabilities().getArithmeticOperators() != null) {
+                arithmeticOperators = filter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
             }
             nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] newArithmeticOperators = null;
-            if (newFilter.getScalar_Capabilities().getArithmeticOperators()!=null){
+            if (newFilter.getScalar_Capabilities().getArithmeticOperators() != null) {
                 newFilter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
             }
-            if(arithmeticOperators!=null){
+            if (arithmeticOperators != null) {
                 for (int f = 0; f < arithmeticOperators.length; f++) {
                     boolean isValid = false;
                     String value = arithmeticOperators[f].getSimpleArithmetic().toString();
-                    if (newArithmeticOperators!=null){
+                    if (newArithmeticOperators != null) {
                         for (int h = 0; h < newArithmeticOperators.length; h++) {
                             String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
                             if (value.equals(newValue)) {
@@ -918,7 +914,7 @@ public class OGCResponse {
                                     }
                                 }
                                 if (isValid == false) {
-                                    if (x< filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItemCount()){
+                                    if (x < filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItemCount()) {
                                         filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getComparison_Operators().removeComparison_OperatorsTypeItem(comparisonOperators[k]);
                                     }
                                 }
@@ -929,9 +925,9 @@ public class OGCResponse {
                     boolean isValid = false;
                     String value = scalarCapabilities[x].getLogical_Operators().toString();
                     for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        String newValue =null;
-                        if (newScalarCapabilities!=null && newScalarCapabilities[y].getLogical_Operators()!=null){
-                            newValue= newScalarCapabilities[y].getLogical_Operators().toString();
+                        String newValue = null;
+                        if (newScalarCapabilities != null && newScalarCapabilities[y].getLogical_Operators() != null) {
+                            newValue = newScalarCapabilities[y].getLogical_Operators().toString();
                         }
                         if (value.equals(newValue)) {
                             isValid = true;

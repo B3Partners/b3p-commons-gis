@@ -28,7 +28,6 @@
  *
  * Class to make GetCapabilities request for new Serviceprovider and make objects so it can be saves in the database
  */
-
 package nl.b3p.ogc.wfs.v110;
 
 import java.io.IOException;
@@ -61,54 +60,55 @@ import org.w3c.dom.Element;
  * @author Jytte
  */
 public class WfsCapabilitiesReader {
+
     private static final Log log = LogFactory.getLog(WfsCapabilitiesReader.class);
     private HashMap nameSpaces;
     private String schemaLocation;
-    
+
     /** Creates a new instance of WfsCapabilitiesReader */
     public WfsCapabilitiesReader() {
         this.setNamespaces();
     }
-    
-    public WfsServiceProvider getProvider(String url)throws IOException, Exception {
+
+    public WfsServiceProvider getProvider(String url) throws IOException, Exception {
         WfsServiceProvider provider = new WfsServiceProvider();
-        HttpMethod method=null;
+        HttpMethod method = null;
         //PostMethod postMethod = null;
-        HttpClient client = new HttpClient();        
+        HttpClient client = new HttpClient();
         String host = url;
         OGCRequest or = new OGCRequest(url);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         or.addOrReplaceParameter(OGCConstants.SERVICE, OGCConstants.WMS_PARAM_WFS);
-        method= new GetMethod(or.getUrl());
-        int status=client.executeMethod(method);
-        if (status != HttpStatus.SC_OK){
-            log.error("Error doing Get getCapabilities: "+status+": "+method.getResponseBodyAsString());
+        method = new GetMethod(or.getUrl());
+        int status = client.executeMethod(method);
+        if (status != HttpStatus.SC_OK) {
+            log.error("Error doing Get getCapabilities: " + status + ": " + method.getResponseBodyAsString());
             log.info("try doing a Post getCapabilities");
             method = new PostMethod(host);
             String body = getGetCapabilitieBody();
             //work around voor Esri Post request. Contenttype mag geen text/xml zijn.
             //((PostMethod)method).setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-            ((PostMethod)method).setRequestEntity(new StringRequestEntity(body,null,null));
+            ((PostMethod) method).setRequestEntity(new StringRequestEntity(body, null, null));
             status = client.executeMethod(method);
         }
-        if(status == HttpStatus.SC_OK){
+        if (status == HttpStatus.SC_OK) {
             InputStream is = method.getResponseBodyAsStream();
-            
+
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = dbf.newDocumentBuilder();
             Document doc = builder.parse(is);
             Element rootElement = doc.getDocumentElement();
-            
+
             Unmarshaller um;
             Object o;
             String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
-            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)){
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);              
-                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities)o;
-                
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
+
                 provider.setWfsVersion(wfsCapabilities.getVersion());
-                Date date =  new Date(System.currentTimeMillis());
+                Date date = new Date(System.currentTimeMillis());
                 provider.setUpdatedDate(date);
                 String title = wfsCapabilities.getService().getTitle();
                 provider.setName("OGC:WFS");
@@ -117,70 +117,70 @@ public class WfsCapabilitiesReader {
                  * Info in Serviceprovider en layers opslaan
                  */
                 nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
-                for(int i = 0; i < featureTypeArray.length; i++){
+                for (int i = 0; i < featureTypeArray.length; i++) {
                     nl.b3p.xml.wfs.v100.capabilities.FeatureType featureType = featureTypeArray[i];
                     WfsLayer layer = new WfsLayer();
-                    String[] name = featureType.getName().split("}");
-                    layer.setName(name[1]); 
+                    String[] name = featureType.getName().split("[}:]");
+                    layer.setName(name[name.length -1]);
                     String layerTitle = featureType.getTitle();
-                    if(layerTitle != "" && layerTitle != null){
+                    if (layerTitle != null && layerTitle.length()!=0) {
                         layer.setTitle(layerTitle);
-                    }else{
-                        layer.setTitle(name[1]);
+                    } else {
+                        layer.setTitle(layer.getName());
                     }
                     layer.setWfsServiceProvider(provider);
                     provider.addWfsLayer(layer);
                 }
-            }else{
+            } else {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);              
-                nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities)o;
-                
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
+
                 provider.setWfsVersion(wfsCapabilities.getVersion());
-                Date date =  new Date(System.currentTimeMillis());
+                Date date = new Date(System.currentTimeMillis());
                 provider.setUpdatedDate(date);
                 String title = wfsCapabilities.getServiceProvider().getProviderName();
                 provider.setName("OGC:WFS");
                 provider.setTitle(title);
                 /*
                  * Info in Serviceprovider en layers opslaan
-                 */    
+                 */
 
                 nl.b3p.xml.wfs.v110.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
-                for(int i = 0; i < featureTypeArray.length; i++){
+                for (int i = 0; i < featureTypeArray.length; i++) {
                     nl.b3p.xml.wfs.v110.FeatureType featureType = featureTypeArray[i];
                     WfsLayer layer = new WfsLayer();
-                    String[] name = featureType.getName().split("}");
-                    layer.setName(name[1]);
+                    String[] name = featureType.getName().split("[}:]");
+                    layer.setName(name[name.length -1]);
                     String layerTitle = featureType.getTitle();
-                    if(layerTitle != "" && layerTitle != null){
+                    if (layerTitle != null && layerTitle.length()!=0) {
                         layer.setTitle(layerTitle);
-                    }else{
-                        layer.setTitle(name[1]);
+                    } else {
+                        layer.setTitle(layer.getName());
                     }
                     layer.setWfsServiceProvider(provider);
                     provider.addWfsLayer(layer);
                 }
             }
-        }else{
-            log.error("Error doing Post getCapabilities: "+status+": "+method.getResponseBodyAsString());
-            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: "+status+" request: "+or.getUrl());
+        } else {
+            log.error("Error doing Post getCapabilities: " + status + ": " + method.getResponseBodyAsString());
+            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: " + status + " request: " + or.getUrl());
         }
         provider.setUrl(url);
         return provider;
     }
-    
-    public String getGetCapabilitieBody(){
+
+    public String getGetCapabilitieBody() {
         String body = null;
         nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities = new nl.b3p.xml.wfs.v110.GetCapabilities();
         getCapabilities.setService(OGCConstants.WFS_SERVICE_WFS);
         /*
          * getCapabilities body maken
          */
-        try{
+        try {
             StringWriter sw = new StringWriter();
             Marshaller m = new Marshaller(sw);
-            if(nameSpaces != null){
+            if (nameSpaces != null) {
                 Set keys = nameSpaces.keySet();
                 Iterator it = keys.iterator();
                 for (int i = 0; it.hasNext(); i++) {
@@ -193,26 +193,26 @@ public class WfsCapabilitiesReader {
 
             m.marshal(getCapabilities);
             body = sw.toString();
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new UnsupportedOperationException("Failed to make body for getCapabilities request!");
         }
-        
+
         return body;
     }
-    
+
     /*
      * Makes HashMaps of nameSpaces and schemalocations so they can be added to the getCapabilities request.
      * Because there is no request to save the namespaces from they are set here. Probably not all namespaces
      * are necessary.
      */
-    public void setNamespaces(){
+    public void setNamespaces() {
         nameSpaces = new HashMap();
         nameSpaces.put("wfs", "http://www.opengis.net/wfs");
         nameSpaces.put("gml", "http://www.opengis.net/gml");
         nameSpaces.put("ogc", "http://www.opengis.net/ogc");
         nameSpaces.put("app", "http://www.deegree.org/app");
         nameSpaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        
+
         schemaLocation = "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd";
     }
 }
