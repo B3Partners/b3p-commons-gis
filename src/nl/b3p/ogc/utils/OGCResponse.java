@@ -625,8 +625,11 @@ public class OGCResponse {
             for (int x = 0; x < nextTypeList.getFeatureTypeCount(); x++) {
                 nl.b3p.xml.wfs.v110.FeatureType feature = nextTypeList.getFeatureType(x);
                 // TODO hack, nog beter uitzoeken
-                String[] name = feature.getName().split("[}:]");
-                String featureName = name[name.length - 1];
+                String name = feature.getName();
+                int i = 0;
+                i = Math.max(i, name.lastIndexOf(":")+1);
+                i = Math.max(i, name.lastIndexOf("}")+1);
+                String featureName = name.substring(i);
 
                 Iterator il = layers.iterator();
                 while (il.hasNext()) {
@@ -682,8 +685,11 @@ public class OGCResponse {
             for (int x = 0; x < featureTypes.length; x++) {
                 FeatureType feature = featureTypes[x];
                 // TODO hack, nog beter uitzoeken
-                String[] name = feature.getName().split("[}:]");
-                String featureName = name[name.length - 1];
+                String name = feature.getName();
+                int i = 0;
+                i = Math.max(i, name.lastIndexOf(":")+1);
+                i = Math.max(i, name.lastIndexOf("}")+1);
+                String featureName = name.substring(i);
 
                 Iterator il = layers.iterator();
                 while (il.hasNext()) {
