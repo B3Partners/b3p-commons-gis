@@ -103,11 +103,11 @@ public class WMSCapabilitiesReader {
         throw new SAXException(message.toString());
     }
 
-    public String getCapabilities(String location) throws Exception {
+    public ByteArrayOutputStream getCapabilities(String location) throws Exception {
         return getCapabilities(location, null, null);
     }
 
-    public String getCapabilities(String location, String username, String password) throws Exception {
+    public ByteArrayOutputStream getCapabilities(String location, String username, String password) throws Exception {
         HttpClient client = new HttpClient();
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
@@ -135,7 +135,7 @@ public class WMSCapabilitiesReader {
 
         // Create a method instance.
         GetMethod method = new GetMethod(location);
-        String result = null;
+        ByteArrayOutputStream out = null;
         try {
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
@@ -157,22 +157,25 @@ public class WMSCapabilitiesReader {
 
             InputStream is = method.getResponseBodyAsStream();
             int len = 0;
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            out = new ByteArrayOutputStream();
             byte[] buf = new byte[1024];
             while ((len = is.read(buf)) > -1) {
                 out.write(buf, 0, len);
             }
-            result = new String(out.toByteArray(), KBConfiguration.CHARSET);
+
+        } catch (IOException ex) {
+            log.error("Could not read inputsource.", ex);
+
         } finally {
             // Release the connection.
             method.releaseConnection();
         }
 
-        if (result == null) {
+        if (out == null) {
             log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
             throw new Exception("Host: " + location + " error: No service provider object could be created, unkown reason!");
         }
-        return result;
+        return out;
     }
 
     /** Private method which validates a XML document at a given location.
@@ -191,8 +194,10 @@ public class WMSCapabilitiesReader {
 
     public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
 
-        String xml = getCapabilities(location, username, password);
-        ByteArrayInputStream in = new ByteArrayInputStream(xml.getBytes(KBConfiguration.CHARSET));
+        ByteArrayOutputStream getCap = getCapabilities(location, username, password);
+        //String xml = getCapabilities(location, username, password);
+        ByteArrayInputStream in = new ByteArrayInputStream(getCap.toByteArray());
+
 
         //Nu kan het service provider object gemaakt en gevuld worden
         serviceProvider = new ServiceProvider();
@@ -207,6 +212,7 @@ public class WMSCapabilitiesReader {
         reader.setContentHandler(s);
         InputSource is = new InputSource(in);
         is.setEncoding(KBConfiguration.CHARSET);
+
         reader.parse(is);
 
         if (serviceProvider == null) {
