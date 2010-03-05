@@ -45,6 +45,7 @@ import com.vividsolutions.jump.io.ParseException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.List;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -158,14 +159,29 @@ public class B3pGMLReader extends GMLReader {
      * @param o  The object representation of the root element of the document (result of org.geotools.xml.Parser.parse())
      * @return a featureCollection.
      */
-    public FeatureCollection convertParsedObjectToFeatureCollection (Object o){
+    public static FeatureCollection convertParsedObjectToFeatureCollection (Object o) throws Exception{
         FeatureCollection fc=null;
         if (o instanceof HashMap) {
-            Object l = ((HashMap) o).get("featureMember");
-            if (l instanceof List) {
-                fc=DataUtilities.collection((List)l);
-            } else if (l instanceof org.opengis.feature.simple.SimpleFeature) {
-                fc=DataUtilities.collection((SimpleFeature)l);
+            //Object l = ((HashMap) o).get("featureMember");
+            HashMap map = ((HashMap) o);
+            if (map.get("featureMember")!=null){
+                Object l = map.get("featureMember");
+                if (l instanceof List) {
+                    fc=DataUtilities.collection((List)l);
+                } else if (l instanceof org.opengis.feature.simple.SimpleFeature) {
+                    fc=DataUtilities.collection((SimpleFeature)l);
+                }
+            }else if (map.get("Exception")!=null){
+                HashMap exceptionMap = (HashMap) map.get("Exception");
+                Iterator it=exceptionMap.values().iterator();
+                String exception="";
+                while (it.hasNext()){
+                    exception+=it.next().toString();
+                    exception+=". ";
+                }
+                throw new Exception(exception);
+            }else{
+                throw new Exception("Hashmap not understood.");
             }
         } else if (o instanceof FeatureCollection) {
             fc = (FeatureCollection) o;
