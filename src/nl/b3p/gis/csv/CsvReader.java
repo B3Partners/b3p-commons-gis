@@ -75,6 +75,8 @@ public class CsvReader {
     private boolean useMultiPoint = false;
     private String ignoreValue;
 
+    private boolean doInsert = false;
+
     public CsvReader(String tableName, String spaceName, String spaceValue, String[] uidNames) {
         this(tableName, spaceName, spaceValue, uidNames, null, ',', false);
     }
@@ -161,18 +163,29 @@ public class CsvReader {
         B3pOgcSqlWriter bow = new B3pOgcSqlWriter(conn);
         bow.setBatchValue(0);
         String[] columnsToCheck = null;
-        int len = getUidNames().length;
-        if (len == 0 && getSpaceName() != null) {
-            columnsToCheck = new String[]{getSpaceName()};
-        } else if (getSpaceName() != null) {
-            columnsToCheck = new String[len + 1];
-            for (int i = 0; i < len; i++) {
-                columnsToCheck[i] = getUidNames()[i];
+
+        /* Als er altijd een insert gedaan moetn worden dan kan
+         * voor columnsToCheck null worden meegegeven */
+
+        if (!doInsert) {
+            int len = 0;
+
+            if (getUidNames() != null)
+                len = getUidNames().length;
+
+            if (len == 0 && getSpaceName() != null) {
+                columnsToCheck = new String[]{getSpaceName()};
+            } else if (getSpaceName() != null) {
+                columnsToCheck = new String[len + 1];
+                for (int i = 0; i < len; i++) {
+                    columnsToCheck[i] = getUidNames()[i];
+                }
+                columnsToCheck[len] = getSpaceName();
+            } else {
+                columnsToCheck = getUidNames();
             }
-            columnsToCheck[len] = getSpaceName();
-        } else {
-            columnsToCheck = getUidNames();
         }
+
         bow.write(fc, getTableName(), getGeomColumnName(), getSrs(), 2, false, true, columnsToCheck, getIgnoreValue());
     }
 
@@ -361,5 +374,13 @@ public class CsvReader {
             return 0.0d;
         }
         return n.doubleValue();
+    }
+
+    public boolean isDoInsert() {
+        return doInsert;
+    }
+
+    public void setDoInsert(boolean doInsert) {
+        this.doInsert = doInsert;
     }
 }
