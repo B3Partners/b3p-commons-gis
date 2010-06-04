@@ -696,6 +696,22 @@ public class OgcWfsClient {
         }
 
         if (feature instanceof nl.b3p.xml.wfs.v100.capabilities.FeatureType) {
+            /*
+             * Omdat in de polygon de spaties en komma's precies anders om staan en ArcGis zich
+             * niks van de cs en ts settings aantrekt word de polygon veranderd zodat deze aan
+             * de default cs en ts voldoet.
+             */
+            String newPolygon = "";
+            String[] splitKomma = polygon.split(",");
+            for(int i = 0; i < splitKomma.length; i++){
+                String[] splitSpatie = splitKomma[i].split(" ");
+                if(i+1 < splitKomma.length ){
+                    newPolygon += splitSpatie[0] + "," + splitSpatie[1] + " ";
+                }else{
+                    newPolygon += splitSpatie[0] + "," + splitSpatie[1];
+                }
+            }
+
             StringBuffer sb = new StringBuffer();
             sb.append("<Filter><Intersects><PropertyName>");
             sb.append(attributeName);
@@ -707,13 +723,16 @@ public class OgcWfsClient {
             }
             sb.append("\"><gml:outerBoundaryIs>");
             sb.append("<gml:LinearRing>");
-            sb.append("<gml:coordinates cs=\" \" decimal=\".\" ts=\",\">");
-            sb.append(polygon);
+            /* cs, ts en decimal zijn ingesteld zoals de default. */
+            sb.append("<gml:coordinates cs=\",\" decimal=\".\" ts=\" \">");
+            //sb.append(polygon);
+            sb.append(newPolygon);
             sb.append("</gml:coordinates>");
             sb.append("</gml:LinearRing>");
             sb.append("</gml:outerBoundaryIs>");
             sb.append("</gml:Polygon>");
             sb.append("</Intersects></Filter>");
+            
             return (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(sb.toString()));
         } else if (feature instanceof nl.b3p.xml.wfs.v110.FeatureType) {
             StringBuffer sb = new StringBuffer();
