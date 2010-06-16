@@ -108,6 +108,16 @@ public class OGCRequest implements OGCConstants {
         setUrl(url);
     }
 
+    public static String removeNamespace(String tagName) {
+        if (tagName==null || tagName.length()==0)
+            return "";
+        String[] tokens = tagName.split(":");
+        if (tokens.length>1) {
+            return tokens[1];
+        }
+        return tokens[0];
+    }
+
     /**
      * Constructor
      * For HTTP POST
@@ -122,7 +132,7 @@ public class OGCRequest implements OGCConstants {
         httpHost = tokens[0];
         setFinalVersion(rootElement.getAttribute(OGCConstants.VERSION.toLowerCase()));
 
-        if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)) {
+        if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)) {
             String version = finalVersion;
 
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
@@ -136,7 +146,7 @@ public class OGCRequest implements OGCConstants {
                 nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities = (nl.b3p.xml.wfs.v110.GetCapabilities) o;
                 setGetCapabilitiesV110(getCapabilities);
             }
-        } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)) {
+        } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)) {
             String version = finalVersion;
 
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
@@ -150,7 +160,7 @@ public class OGCRequest implements OGCConstants {
                 nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v110.DescribeFeatureType) o;
                 setDescribeFeatureTypeV110(describeFeatureType);                
             }
-        } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
+        } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
             String version = finalVersion;
 
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
@@ -164,7 +174,7 @@ public class OGCRequest implements OGCConstants {
                 nl.b3p.xml.wfs.v110.GetFeature getFeature = (nl.b3p.xml.wfs.v110.GetFeature) o;
                 setGetFeatureV110(getFeature);
             }
-        } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_TRANSACTION)) {
+        } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_TRANSACTION)) {
             String version = finalVersion;
 
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
@@ -178,9 +188,9 @@ public class OGCRequest implements OGCConstants {
                 nl.b3p.xml.wfs.v110.Transaction transaction = (nl.b3p.xml.wfs.v110.Transaction) o;
                 setTransactionV110(transaction);
             }
-        } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_LOCKFEATURE)) {
+        } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_LOCKFEATURE)) {
             throw new UnsupportedOperationException("kaartenbalie doesn't suport " + OGCConstants.WFS_LOCKFEATURE + " yet!");
-        } else if (rootElement.getTagName().equalsIgnoreCase(OGCConstants.WFS_GETFEATUREWITHLOCK)) {
+        } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATUREWITHLOCK)) {
             throw new UnsupportedOperationException("kaartenbalie doesn't suport " + OGCConstants.WFS_GETFEATUREWITHLOCK + " yet!");
         } else {
             throw new UnsupportedOperationException("No supported WFS service found in request!");

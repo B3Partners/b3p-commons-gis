@@ -94,11 +94,7 @@ public class OGCResponse {
         Unmarshaller um;
         Object o;
 
-        // if no prefix is given (wfs is default namespave), prefix it with wfs:
-        String tagName = rootElement.getTagName();
-        if (!tagName.startsWith(OGCConstants.WFS_NAMESPACE_PREFIX)) {
-            tagName = OGCConstants.WFS_NAMESPACE_PREFIX + tagName;
-        }
+        String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
         try {
             if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {

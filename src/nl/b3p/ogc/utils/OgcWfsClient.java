@@ -151,7 +151,7 @@ public class OgcWfsClient {
 
     public static Element doRequest(Object o, String host, HashMap namespaces, String username, String password) throws Exception {
         Element el = readXml2Element(new InputStreamReader(getInputStreamReader(o, host, namespaces, username, password)));
-        if (el.getTagName().equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)) {
+        if (OGCRequest.removeNamespace(el.getTagName()).equalsIgnoreCase(OGCConstants.WFS_OBJECT_SERVICEEXCEPTIONREPORT)) {
             nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport ser = getServiceExceptionReport(el);
             StringBuffer sb = new StringBuffer();
             nl.b3p.xml.ogc.v100.exception.ServiceException se = null;
@@ -160,7 +160,6 @@ public class OgcWfsClient {
                     sb.append(" and ");
                 }
                 se = ser.getServiceException(i);
-                sb.append(se.getCode() + ":");
                 sb.append(se.getContent());
             }
             throw new Exception(sb.toString());

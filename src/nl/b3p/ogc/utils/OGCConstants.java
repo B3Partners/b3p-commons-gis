@@ -133,19 +133,18 @@ public interface OGCConstants {
     public static final String WFS_SERVICE_WFS = "WFS";
     public static final String FEATURE_INFO_FORMAT = "application/vnd.ogc.gml";
     public static final String WFS_OBJECT_CAPABILITIES = "WFS_Capabilities";
-    public static final String WFS_GETCAPABILITIES = "wfs:GetCapabilities";
-    public static final String WFS_DESCRIBEFEATURETYPE = "wfs:DescribeFeatureType";
-    public static final String WFS_GETFEATURE = "wfs:GetFeature";
-    public static final String WFS_TRANSACTION = "wfs:Transaction";
-    public static final String WFS_LOCKFEATURE = "wfs:LockFeature";
-    public static final String WFS_GETFEATUREWITHLOCK = "wfs:GetFeatureWithLock";
-    public static final String WFS_CAPABILITIES = "wfs:WFS_Capabilities";
-    public static final String WFS_FEATURECOLLECTION = "wfs:FeatureCollection";
+    public static final String WFS_GETCAPABILITIES = "GetCapabilities";
+    public static final String WFS_DESCRIBEFEATURETYPE = "DescribeFeatureType";
+    public static final String WFS_GETFEATURE = "GetFeature";
+    public static final String WFS_TRANSACTION = "Transaction";
+    public static final String WFS_LOCKFEATURE = "LockFeature";
+    public static final String WFS_GETFEATUREWITHLOCK = "GetFeatureWithLock";
+    public static final String WFS_CAPABILITIES = "WFS_Capabilities";
+    public static final String WFS_FEATURECOLLECTION = "FeatureCollection";
     public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT = "ServiceExceptionReport";
     public static final String WFS_OBJECT_GEOMETRYTYPE = "gml:GeometryPropertyType";
     public static final String WFS_SERVER_EXCEPTION = "ServiceExceptionReport";
     public static final String WFS_TRANSACTIONRESPONSE = "TransactionResponse";
-    public static final String WFS_NAMESPACE_PREFIX = "wfs:";
     // </editor-fold>
     // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
     /**
