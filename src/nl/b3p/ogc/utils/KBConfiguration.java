@@ -65,7 +65,7 @@ public class KBConfiguration {
     public static String KB_ENCRYPT_KEY = "proxy007"; // minimaal 8 bytes voor encrypting
     public static String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
     /**
-     * For proxy RWS
+     * For proxy config
      */
     public static String KB_SERVICES_CONTEXT_PATH = "";
     public static String KB_SERVICES_SERVER_URI = "";
