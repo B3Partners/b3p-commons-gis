@@ -48,4 +48,27 @@ public class Roles {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public boolean isProtectedRole() {
+        if (role==null) {
+            return false;
+        }
+        if (role.equalsIgnoreCase(Roles.ADMIN)) {
+            return true;
+        }
+        if (role.equalsIgnoreCase(Roles.GUEST)) {
+            return true;
+        }
+        if (role.equalsIgnoreCase(Roles.ORG_ADMIN)) {
+            return true;
+        }
+        if (role.equalsIgnoreCase(Roles.THEME_ADMIN)) {
+            return true;
+        }
+        if (role.equalsIgnoreCase(Roles.USER)) {
+            return true;
+        }
+        return false;
+    }
+
 }
