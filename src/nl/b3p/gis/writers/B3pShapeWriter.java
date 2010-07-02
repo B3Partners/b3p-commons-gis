@@ -169,7 +169,7 @@ public class B3pShapeWriter {
             } else if (f.getDefaultGeometry() instanceof MultiLineString) {
                 allLine.add(f);
             } else if(f.getDefaultGeometry()==null) {
-                log.info("No default geometry set.");
+                log.error("No default geometry set.");
             }else{
                 log.error("Geometry type not found: " + f.getDefaultGeometry().getClass().toString());
             }
