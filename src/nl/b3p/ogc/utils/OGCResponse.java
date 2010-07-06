@@ -38,6 +38,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
+import java.util.Properties;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 import nl.b3p.xml.ows.v100.DCP;
 import nl.b3p.xml.ows.v100.HTTP;
 import nl.b3p.xml.ows.v100.Operation;
@@ -79,9 +92,43 @@ public class OGCResponse {
     private HashMap schemaLocations;
     private String srs = null;
     private List supportedOperations = new ArrayList();
+    private Node currentNode = null;
 
     /** Creates a new instance of OGCResponse */
     public OGCResponse() {
+    }
+
+    public OGCResponse(Node current) {
+        this.currentNode = current;
+        findNameSpace(currentNode);
+    }
+
+    public void replaceStringInNode(String xPathFrag, String[] oldVals, String[] newVals) throws Exception {
+        if (xPathFrag == null || oldVals == null || newVals == null) {
+            return;
+        }
+        if (xPathFrag.length() == 0 || oldVals.length == 0 || newVals.length == 0) {
+            return;
+        }
+        if (oldVals.length != newVals.length) {
+            throw new Exception("replaceStringInNode: old values array must have same length as new values array!");
+        }
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext(getNamespaceContext());
+
+        XPathExpression expr = xpath.compile(xPathFrag);
+        Object result = expr.evaluate(currentNode, XPathConstants.NODESET);
+        NodeList nodes = (NodeList) result;
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node n = nodes.item(i);
+            String textContent = n.getTextContent();
+            for (int j = 0; j < oldVals.length; j++) {
+                if (textContent != null && textContent.equals(oldVals[j])) {
+                    n.setTextContent(newVals[j]);
+                }
+            }
+        }
     }
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
@@ -96,72 +143,68 @@ public class OGCResponse {
 
         String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
-        try {
-            if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
-                response = OGCConstants.WFS_CAPABILITIES;
-                version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
-                isSupportedVersion(version);
+        if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
+            response = OGCConstants.WFS_CAPABILITIES;
+            version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+            isSupportedVersion(version);
 
-                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
-
-                    getCapabilitiesV100.add(replaceCapabilitiesV100Url(wfsCapabilities, prefix));
-                } else {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
-
-                    getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
-                }
-                checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
-            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
-                response = OGCConstants.WFS_FEATURECOLLECTION;
-                version = request.getFinalVersion();
-
-                if (version != null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
-
-                    featureCollectionV100.add(replaceFeatureCollectionV100Url(featureCollection, prefix));
-                } else {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
-
-                    featureCollectionV110.add(replaceFeatureCollectionV110Url(featureCollection, prefix));
-                }
-            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
-                response = OGCConstants.WFS_SERVER_EXCEPTION;
-                version = request.getFinalVersion();
-
-                um = new Unmarshaller(nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport.class);
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
                 o = um.unmarshal(rootElement);
-                nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport) o;
+                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
 
-                newExceptionReport = exceptionReport;
-            } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
-                response = OGCConstants.WFS_TRANSACTIONRESPONSE;
-                version = request.getFinalVersion();
+                getCapabilitiesV100.add(replaceCapabilitiesV100Url(wfsCapabilities, prefix));
+            } else {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
 
-                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v100.transaction.TransactionResult.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse = (nl.b3p.xml.wfs.v100.transaction.TransactionResult) o;
-
-                    newTransactionResponseV100 = replaceTransactionResponseV100Url(transactionResponse, prefix);
-                } else {
-                    um = new Unmarshaller(nl.b3p.xml.wfs.v110.TransactionResponse.class);
-                    o = um.unmarshal(rootElement);
-                    nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse = (nl.b3p.xml.wfs.v110.TransactionResponse) o;
-
-                    newTransactionResponseV110 = replaceTransactionResponseV110Url(transactionResponse, prefix);
-                }
+                getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
             }
-        } catch (Exception e) {
-            throw e;
+            checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
+        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
+            response = OGCConstants.WFS_FEATURECOLLECTION;
+            version = request.getFinalVersion();
+
+            if (version != null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
+
+                featureCollectionV100.add(replaceFeatureCollectionV100Url(featureCollection, prefix));
+            } else {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
+
+                featureCollectionV110.add(replaceFeatureCollectionV110Url(featureCollection, prefix));
+            }
+        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
+            response = OGCConstants.WFS_SERVER_EXCEPTION;
+            version = request.getFinalVersion();
+
+            um = new Unmarshaller(nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport.class);
+            o = um.unmarshal(rootElement);
+            nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport) o;
+
+            newExceptionReport = exceptionReport;
+        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
+            response = OGCConstants.WFS_TRANSACTIONRESPONSE;
+            version = request.getFinalVersion();
+
+            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v100.transaction.TransactionResult.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse = (nl.b3p.xml.wfs.v100.transaction.TransactionResult) o;
+
+                newTransactionResponseV100 = replaceTransactionResponseV100Url(transactionResponse, prefix);
+            } else {
+                um = new Unmarshaller(nl.b3p.xml.wfs.v110.TransactionResponse.class);
+                o = um.unmarshal(rootElement);
+                nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse = (nl.b3p.xml.wfs.v110.TransactionResponse) o;
+
+                newTransactionResponseV110 = replaceTransactionResponseV110Url(transactionResponse, prefix);
+            }
         }
     }
 
@@ -317,16 +360,9 @@ public class OGCResponse {
         int index = layer.indexOf("}");
         if (index > -1) {
             String namespace = layer.substring(1, index);
-            // iterate through namespaces to find prefix
-            for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
-                Map.Entry entry = (Map.Entry) iterator.next();
-                if (entry.getValue().equals(namespace)) {
-                    featureTypeNamespacePrefix = (String) entry.getKey();
-                    if (!"".equals(featureTypeNamespacePrefix)) {
-                        featureTypeNamespacePrefix += ":";
-                    }
-                    break;
-                }
+            featureTypeNamespacePrefix = getNameSpacePrefix(namespace);
+            if (!"".equals(featureTypeNamespacePrefix)) {
+                featureTypeNamespacePrefix += ":";
             }
             layer = layer.substring(index + 1);//rename layer by removing namepace url
         }
@@ -473,6 +509,52 @@ public class OGCResponse {
         }
 
         return body;
+    }
+
+    public String serializeNode(Node doc) throws TransformerConfigurationException, TransformerException {
+        StringWriter outText = new StringWriter();
+        StreamResult sr = new StreamResult(outText);
+        Properties oprops = new Properties();
+        oprops.put(OutputKeys.METHOD, "xml");
+        TransformerFactory tf = TransformerFactory.newInstance();
+        Transformer t = tf.newTransformer();
+        t.setOutputProperties(oprops);
+        t.transform(new DOMSource(doc), sr);
+        return outText.toString();
+    }
+
+    public NamespaceContext getNamespaceContext() {
+
+        return new NamespaceContext() {
+
+            public String getNamespaceURI(String prefix) {
+                return (String) nameSpaces.get(prefix);
+            }
+
+            // Dummy implementation - not used!
+            public Iterator getPrefixes(String val) {
+                return null;
+            }
+
+            // Dummy implemenation - not used!
+            public String getPrefix(String uri) {
+                return null;
+            }
+        };
+    }
+
+    public String getNameSpacePrefix(String namespace) {
+        if (nameSpaces.size() == 0) {
+            return "";
+        }
+        // iterate through namespaces to find prefix
+        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
+            Map.Entry entry = (Map.Entry) iterator.next();
+            if (entry.getValue().equals(namespace)) {
+                return (String) entry.getKey();
+            }
+        }
+        return "";
     }
 
     public void findNameSpace(Node node) {
@@ -623,8 +705,8 @@ public class OGCResponse {
                 // TODO hack, nog beter uitzoeken
                 String name = feature.getName();
                 int i = 0;
-                i = Math.max(i, name.lastIndexOf(":")+1);
-                i = Math.max(i, name.lastIndexOf("}")+1);
+                i = Math.max(i, name.lastIndexOf(":") + 1);
+                i = Math.max(i, name.lastIndexOf("}") + 1);
                 String featureName = name.substring(i);
 
                 Iterator il = layers.iterator();
@@ -683,8 +765,8 @@ public class OGCResponse {
                 // TODO hack, nog beter uitzoeken
                 String name = feature.getName();
                 int i = 0;
-                i = Math.max(i, name.lastIndexOf(":")+1);
-                i = Math.max(i, name.lastIndexOf("}")+1);
+                i = Math.max(i, name.lastIndexOf(":") + 1);
+                i = Math.max(i, name.lastIndexOf("}") + 1);
                 String featureName = name.substring(i);
 
                 Iterator il = layers.iterator();
