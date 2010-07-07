@@ -103,15 +103,9 @@ public class OGCResponse {
         findNameSpace(currentNode);
     }
 
-    public void replaceStringInNode(String xPathFrag, String[] oldVals, String[] newVals) throws Exception {
-        if (xPathFrag == null || oldVals == null || newVals == null) {
-            return;
-        }
-        if (xPathFrag.length() == 0 || oldVals.length == 0 || newVals.length == 0) {
-            return;
-        }
-        if (oldVals.length != newVals.length) {
-            throw new Exception("replaceStringInNode: old values array must have same length as new values array!");
+    public NodeList getNodeListFromXPath(String xPathFrag) throws Exception {
+        if (xPathFrag == null || xPathFrag.length() == 0) {
+            return null;
         }
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
@@ -119,16 +113,7 @@ public class OGCResponse {
 
         XPathExpression expr = xpath.compile(xPathFrag);
         Object result = expr.evaluate(currentNode, XPathConstants.NODESET);
-        NodeList nodes = (NodeList) result;
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            String textContent = n.getTextContent();
-            for (int j = 0; j < oldVals.length; j++) {
-                if (textContent != null && textContent.equals(oldVals[j])) {
-                    n.setTextContent(newVals[j]);
-                }
-            }
-        }
+        return (NodeList) result;
     }
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
@@ -541,6 +526,52 @@ public class OGCResponse {
                 return null;
             }
         };
+    }
+
+    public Map splitLayerInParts(String fullLayerName) {
+        String tPrefix = null;
+        String tLayerName = null;
+        String tSpAbbr = null;
+        String tSpLayerName = null;
+        String tNsUrl = null;
+        String[] temp = fullLayerName.split("}");
+        if (temp.length > 1) {
+            tSpLayerName = temp[1];
+            int index1 = fullLayerName.indexOf("{");
+            int index2 = fullLayerName.indexOf("}");
+            tNsUrl = fullLayerName.substring(index1 + 1, index2);
+            tPrefix = getNameSpacePrefix(tNsUrl);
+        } else {
+            String temp2[] = temp[0].split(":");
+            if (temp2.length > 1) {
+                tSpLayerName = temp2[1];
+                // assume same for now
+                tLayerName = tSpLayerName;
+                tPrefix = temp2[0];
+                tNsUrl = getNameSpace(tPrefix);
+            } else {
+                tSpLayerName = fullLayerName;
+                 // assume same for now
+                tLayerName = tSpLayerName;
+           }
+        }
+        int index1 = tSpLayerName.indexOf("_");
+        if (index1 != -1) {
+            tSpAbbr = tSpLayerName.substring(0, index1);
+            tLayerName = tSpLayerName.substring(index1 + 1);
+        }
+        Map returnMap = new HashMap();
+        returnMap.put("prefix",tPrefix);
+        returnMap.put("spAbbr",tSpAbbr);
+        returnMap.put("layerName",tLayerName);
+        returnMap.put("spLayerName",tSpLayerName);
+        returnMap.put("nsUrl",tNsUrl);
+        return returnMap;
+    }
+
+
+    public String getNameSpace(String prefix) {
+        return (String) nameSpaces.get(prefix);
     }
 
     public String getNameSpacePrefix(String namespace) {

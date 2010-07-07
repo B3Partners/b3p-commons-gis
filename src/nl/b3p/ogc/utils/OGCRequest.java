@@ -81,17 +81,15 @@ public class OGCRequest implements OGCConstants {
     private Map getFeaturePropertyNameListMap = new HashMap();
     private String abbr;
     private List layers = new ArrayList();
-
     private String username;
     private String password;
     // version that will be returned to client
     private String finalVersion;
-
     public static final List NAMESPACES_NOT_IN_URL = Arrays.asList(new String[]{
-        "http://www.opengis.net/wfs",
-        "http://www.w3.org/2001/xmlschema-instance",
-        "http://www.opengis.net/gml",
-        "http://www.opengis.net/ogc"
+                "http://www.opengis.net/wfs",
+                "http://www.w3.org/2001/xmlschema-instance",
+                "http://www.opengis.net/gml",
+                "http://www.opengis.net/ogc"
             });
 
     /*Default constr.*/
@@ -109,13 +107,55 @@ public class OGCRequest implements OGCConstants {
     }
 
     public static String removeNamespace(String tagName) {
-        if (tagName==null || tagName.length()==0)
+        if (tagName == null || tagName.length() == 0) {
             return "";
+        }
         String[] tokens = tagName.split(":");
-        if (tokens.length>1) {
+        if (tokens.length > 1) {
             return tokens[1];
         }
         return tokens[0];
+    }
+
+    public Map splitLayerInParts(String fullLayerName) {
+        String tPrefix = null;
+        String tLayerName = null;
+        String tSpAbbr = null;
+        String tSpLayerName = null;
+        String tNsUrl = null;
+        String[] temp = fullLayerName.split("}");
+        if (temp.length > 1) {
+            tSpLayerName = temp[1];
+            int index1 = fullLayerName.indexOf("{");
+            int index2 = fullLayerName.indexOf("}");
+            tNsUrl = fullLayerName.substring(index1 + 1, index2);
+            tPrefix = getNameSpacePrefix(tNsUrl);
+        } else {
+            String temp2[] = temp[0].split(":");
+            if (temp2.length > 1) {
+                tSpLayerName = temp2[1];
+                // assume same for now
+                tLayerName = tSpLayerName;
+                tPrefix = temp2[0];
+                tNsUrl = getNameSpace(tPrefix);
+            } else {
+                tSpLayerName = fullLayerName;
+                // assume same for now
+                tLayerName = tSpLayerName;
+            }
+        }
+        int index1 = tSpLayerName.indexOf("_");
+        if (index1 != -1) {
+            tSpAbbr = tSpLayerName.substring(0, index1);
+            tLayerName = tSpLayerName.substring(index1 + 1);
+        }
+        Map returnMap = new HashMap();
+        returnMap.put("prefix",tPrefix);
+        returnMap.put("spAbbr",tSpAbbr);
+        returnMap.put("layerName",tLayerName);
+        returnMap.put("spLayerName",tSpLayerName);
+        returnMap.put("nsUrl",tNsUrl);
+        return returnMap;
     }
 
     /**
@@ -158,7 +198,7 @@ public class OGCRequest implements OGCConstants {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.DescribeFeatureType.class);
                 o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType = (nl.b3p.xml.wfs.v110.DescribeFeatureType) o;
-                setDescribeFeatureTypeV110(describeFeatureType);                
+                setDescribeFeatureTypeV110(describeFeatureType);
             }
         } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
             String version = finalVersion;
@@ -280,7 +320,7 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
         if (getFeature.getMaxFeatures() > 0) {
-        	addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+            addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
         }
         nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
         if (qlist.length > 0) {
@@ -297,11 +337,11 @@ public class OGCRequest implements OGCConstants {
                 StringBuffer propertyNameList = new StringBuffer();
                 for (int j = 0; j < qlist[i].getPropertyNameCount(); j++) {
                     propertyNameList.append(qlist[i].getPropertyName(j).getContent());
-                    if (j+1 < qlist[i].getPropertyNameCount()) {
-                    	propertyNameList.append(',');
+                    if (j + 1 < qlist[i].getPropertyNameCount()) {
+                        propertyNameList.append(',');
                     }
-				}
-                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString(): null);
+                }
+                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString() : null);
             }
         }
     }
@@ -314,7 +354,7 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_HANDLE, getFeature.getHandle());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT, getFeature.getOutputFormat());
         if (getFeature.getMaxFeatures() > 0) {
-        	addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
+            addOrReplaceParameter(OGCConstants.WFS_PARAM_MAXFEATURES, "" + getFeature.getMaxFeatures());
         }
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKDEPTH, getFeature.getTraverseXlinkDepth());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TRAVERSEXLINKEXPIRY, "" + getFeature.getTraverseXlinkExpiry());
@@ -333,16 +373,16 @@ public class OGCRequest implements OGCConstants {
                 StringBuffer propertyNameList = new StringBuffer();
                 for (int j = 0; j < qlist[i].getQueryTypeChoiceCount(); j++) {
                     for (int k = 0; k < qlist[i].getQueryTypeChoice(j).getQueryTypeChoiceItemCount(); k++) {
-                    	String propertyName = qlist[i].getQueryTypeChoice(j).getQueryTypeChoiceItem(k).getPropertyName();
-                    	if (propertyNameList.length() > 0) {
-                    		propertyNameList.append(',');
-                    	}
-                    	if (propertyName != null) {
-                    		propertyNameList.append(propertyName);
-                    	}
-					}
-				}
-                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString(): null);
+                        String propertyName = qlist[i].getQueryTypeChoice(j).getQueryTypeChoiceItem(k).getPropertyName();
+                        if (propertyNameList.length() > 0) {
+                            propertyNameList.append(',');
+                        }
+                        if (propertyName != null) {
+                            propertyNameList.append(propertyName);
+                        }
+                    }
+                }
+                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString() : null);
             }
         }
     }
@@ -642,8 +682,9 @@ public class OGCRequest implements OGCConstants {
     public String getUrl() {
         StringBuffer sb = new StringBuffer();
         sb.append(httpHost);
-        if (sb.indexOf("?")<0)
+        if (sb.indexOf("?") < 0) {
             sb.append("?");
+        }
         Set keys = parameters.keySet();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
@@ -652,12 +693,12 @@ public class OGCRequest implements OGCConstants {
                 sb.append(o);
                 sb.append("=");
                 if (parameters.get(o) != null) {
-                    try{
-                    String s=(String) parameters.get(o);
-                    s=URLEncoder.encode(s,"utf-8");
-                    sb.append(s);
-                    }catch(UnsupportedEncodingException nee){
-                        log.error("Fout bij encoding voor het opbouwen van url.",nee);
+                    try {
+                        String s = (String) parameters.get(o);
+                        s = URLEncoder.encode(s, "utf-8");
+                        sb.append(s);
+                    } catch (UnsupportedEncodingException nee) {
+                        log.error("Fout bij encoding voor het opbouwen van url.", nee);
                     }
                 }
                 sb.append("&");
@@ -669,7 +710,7 @@ public class OGCRequest implements OGCConstants {
             it = mapEntries.iterator();
             while (it.hasNext()) {
                 Map.Entry me = (Entry) it.next();
-                if (!NAMESPACES_NOT_IN_URL.contains(me.getValue().toString().toLowerCase())){
+                if (!NAMESPACES_NOT_IN_URL.contains(me.getValue().toString().toLowerCase())) {
                     sb.append("xmlns(");
                     sb.append(me.getKey());
                     sb.append("=");
@@ -686,14 +727,13 @@ public class OGCRequest implements OGCConstants {
         }
     }
     public static HashMap scaleCalibrations = new HashMap();
-    
 
     static {
         // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
         scaleCalibrations.put("EPSG:28992", new Double(3272));
         // defaultPixelsPerlatLonDegree = 284479860
         scaleCalibrations.put("EPSG:4326", new Double(284479860));
-    // TODO andere omrekenfactor toevoegen!
+        // TODO andere omrekenfactor toevoegen!
     }
 
     public double calcScale() {
@@ -832,17 +872,17 @@ public class OGCRequest implements OGCConstants {
      *
      * @return previous value associated with specified param, or null  if there was no mapping for param
      */
-    public String addOrReplaceParameter(String param, String v) {        
+    public String addOrReplaceParameter(String param, String v) {
         String value;
         try {
-            if (v!=null){
+            if (v != null) {
                 value = URLDecoder.decode(v, "UTF-8");
-            }else{
-                value=v;
+            } else {
+                value = v;
             }
         } catch (UnsupportedEncodingException ex) {
-            value=v;
-            log.error("Error deconding value. Try with the original value",ex);
+            value = v;
+            log.error("Error deconding value. Try with the original value", ex);
         }
         if (param == null) {
             return null;
@@ -852,25 +892,25 @@ public class OGCRequest implements OGCConstants {
         if (value != null) {
             value = value.trim();
         }
-        if (WFS_PARAM_TYPENAME.equals(param)){
-            int index1=param.indexOf("{");
-            int index2=param.indexOf("}");
-            if (index1>=0 && index2>=0 ){
-                String nameSpaceUri=param.substring(index1+1,index2);
-                String prefix= getPrefix(nameSpaceUri);
+        if (WFS_PARAM_TYPENAME.equals(param)) {
+            int index1 = param.indexOf("{");
+            int index2 = param.indexOf("}");
+            if (index1 >= 0 && index2 >= 0) {
+                String nameSpaceUri = param.substring(index1 + 1, index2);
+                String prefix = getNameSpacePrefix(nameSpaceUri);
                 //als namespace nog niet is toegevoegd
-                if (prefix==null){
-                    int nsTeller=1;
+                if (prefix == null) {
+                    int nsTeller = 1;
                     //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
-                    String ns = getNameSpace("ns"+nsTeller);
-                    while(ns!=null){
+                    String ns = getNameSpace("ns" + nsTeller);
+                    while (ns != null) {
                         nsTeller++;
-                        ns=getNameSpace("ns"+nsTeller);
+                        ns = getNameSpace("ns" + nsTeller);
                     }
-                    prefix="ns"+nsTeller;
+                    prefix = "ns" + nsTeller;
                     addOrReplaceNameSpace(prefix, nameSpaceUri);
                 }
-                param=prefix+":"+param.substring(index2+1);
+                param = prefix + ":" + param.substring(index2 + 1);
             }
         }
         parameters.put(param, value);
@@ -989,12 +1029,12 @@ public class OGCRequest implements OGCConstants {
             if (value == null) {
                 value = "";
             }
-           	try {
-           		//FIX so get requests will be valid when containing invalid values
-				returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				returnvalue[i] = key + "=" + value;
-			}
+            try {
+                //FIX so get requests will be valid when containing invalid values
+                returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                returnvalue[i] = key + "=" + value;
+            }
         }
         return returnvalue;
     }
@@ -1083,9 +1123,10 @@ public class OGCRequest implements OGCConstants {
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
-        if (getPassword()!=null)
+        if (getPassword() != null) {
             returnv.setPassword(new String(this.getPassword()));
-        if (getUsername()!=null){
+        }
+        if (getUsername() != null) {
             returnv.setUsername(new String(this.getUsername()));
         }
         if (this.getFinalVersion() != null) {
@@ -1170,8 +1211,8 @@ public class OGCRequest implements OGCConstants {
                         requiredParams = PARAMS_GetFeatureInfo;
                     } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                         requiredParams = PARAMS_GetLegendGraphic;
-                    } else if (request.equals(WMS_REQUEST_DescribeLayer)){
-                    	requiredParams = PARAMS_DescribeLayer;
+                    } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
+                        requiredParams = PARAMS_DescribeLayer;
                     }
                     checkRequestURL(requiredParams, request);
                 } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)) {
@@ -1195,9 +1236,9 @@ public class OGCRequest implements OGCConstants {
                     throw new UnsupportedOperationException("Service '" + service + "' not supported!");
                 }
             } else {
-                throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to " +
-                        "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&" +
-                        "VERSION=1.1.1&SERVICE=WMS");
+                throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to "
+                        + "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&"
+                        + "VERSION=1.1.1&SERVICE=WMS");
             }
         } else {
             throw new UnsupportedOperationException("No request parameter found!");
@@ -1328,7 +1369,7 @@ public class OGCRequest implements OGCConstants {
     }
 
     public String getNameSpace(String param) {
-        if (param == null || nameSpaces==null) {
+        if (param == null || nameSpaces == null) {
             return null;
         }
         Object o = nameSpaces.get(param);
@@ -1338,12 +1379,11 @@ public class OGCRequest implements OGCConstants {
         return (String) o;
     }
 
-    public String getPrefix(String namespaceUrl) {
-        if (nameSpaces==null || nameSpaces.size()==0){
+    public String getNameSpacePrefix(String namespaceUrl) {
+        if (nameSpaces == null || nameSpaces.size() == 0) {
             return null;
         }
-        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator
-					.hasNext();) {
+        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry entry = (Map.Entry) iterator.next();
             if (entry.getValue().equals(namespaceUrl)) {
                 return (String) entry.getKey();
@@ -1351,6 +1391,7 @@ public class OGCRequest implements OGCConstants {
         }
         return null;
     }
+
     /**
      * @return the username
      */
