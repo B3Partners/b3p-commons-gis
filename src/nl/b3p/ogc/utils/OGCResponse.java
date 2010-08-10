@@ -913,11 +913,11 @@ public class OGCResponse {
             if (comparisonOperators != null) {
                 for (int o = 0; o < comparisonOperators.length; o++) {
                     boolean isValid = false;
-                    String value = comparisonOperators[o].getComparisonOperator().toString();
+                    Class valueClass = comparisonOperators[o].getComparisonOperator().getClass();
                     if (newComparisonOperators != null) {
                         for (int p = 0; p < newComparisonOperators.length; p++) {
-                            String newValue = newComparisonOperators[p].getComparisonOperator().toString();
-                            if (value.equals(newValue)) {
+                            Class newValueClass = newComparisonOperators[p].getComparisonOperator().getClass();
+                            if (valueClass.equals(newValueClass)) {
                                 isValid = true;
                             }
                         }
@@ -938,11 +938,11 @@ public class OGCResponse {
             if (arithmeticOperators != null) {
                 for (int f = 0; f < arithmeticOperators.length; f++) {
                     boolean isValid = false;
-                    String value = arithmeticOperators[f].getSimpleArithmetic().toString();
+                    Class valueClass = arithmeticOperators[f].getSimpleArithmetic().getClass();
                     if (newArithmeticOperators != null) {
                         for (int h = 0; h < newArithmeticOperators.length; h++) {
-                            String newValue = newArithmeticOperators[h].getSimpleArithmetic().toString();
-                            if (value.equals(newValue)) {
+                            Class newValueClass = newArithmeticOperators[h].getSimpleArithmetic().getClass();
+                            if (valueClass.equals(newValueClass)) {
                                 isValid = true;
                             }
                         }
@@ -957,10 +957,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v110.Id_CapabilitiesTypeItem[] newIdCapabilities = newFilter.getId_Capabilities().getId_CapabilitiesTypeItem();
             for (int a = 0; a < idCapabilities.length; a++) {
                 boolean isValid = false;
-                String value = idCapabilities[a].getChoiceValue().toString();
+                Class valueClass = idCapabilities[a].getChoiceValue().getClass();
                 for (int b = 0; b < newIdCapabilities.length; b++) {
-                    String newValue = newIdCapabilities[b].getChoiceValue().toString();
-                    if (value.equals(newValue)) {
+                    Class newValueClass = newIdCapabilities[b].getChoiceValue().getClass();
+                    if (valueClass.equals(newValueClass)) {
                         isValid = true;
                     }
                 }
@@ -977,10 +977,10 @@ public class OGCResponse {
             nl.b3p.xml.ogc.v100.capabilities.Spatial_OperatorsTypeItem[] newSpatialOperators = newFilter.getSpatial_Capabilities().getSpatial_Operators().getSpatial_OperatorsTypeItem();
             for (int i = 0; i < spatialOperators.length; i++) {
                 boolean isValid = false;
-                String value = spatialOperators[i].toString();
+                Class valueClass = spatialOperators[i].getChoiceValue().getClass();
                 for (int j = 0; j < newSpatialOperators.length; j++) {
-                    String newValue = newSpatialOperators[j].toString();
-                    if (value.equals(newValue)) {
+                    Class newValueClass = newSpatialOperators[j].getChoiceValue().getClass();
+                    if (newValueClass.equals(valueClass)) {
                         isValid = true;
                     }
                 }
@@ -1000,10 +1000,10 @@ public class OGCResponse {
 
                             for (int k = 0; k < arithmeticOperators.length; k++) {
                                 boolean isValid = false;
-                                String value = arithmeticOperators[k].toString();
+                                Class valueClass = arithmeticOperators[k].getChoiceValue().getClass();
                                 for (int l = 0; l < newArithmeticOperators.length; l++) {
-                                    String newValue = newArithmeticOperators[l].toString();
-                                    if (value.equals(newValue)) {
+                                    Class newValueClass = newArithmeticOperators[l].getChoiceValue().getClass();
+                                    if (valueClass.equals(newValueClass)) {
                                         isValid = true;
                                     }
                                 }
@@ -1021,10 +1021,10 @@ public class OGCResponse {
 
                             for (int k = 0; k < comparisonOperators.length; k++) {
                                 boolean isValid = false;
-                                String value = comparisonOperators[k].toString();
+                                Class valueClass = comparisonOperators[k].getChoiceValue().getClass();
                                 for (int l = 0; l < newComparisonOperators.length; l++) {
-                                    String newValue = newComparisonOperators[l].toString();
-                                    if (value.equals(newValue)) {
+                                    Class newValueClass = newComparisonOperators[l].getChoiceValue().getClass();
+                                    if (valueClass.equals(newValueClass)) {
                                         isValid = true;
                                     }
                                 }
@@ -1038,13 +1038,13 @@ public class OGCResponse {
                     }
                 } else if (scalarCapabilities[x].getLogical_Operators() != null) {
                     boolean isValid = false;
-                    String value = scalarCapabilities[x].getLogical_Operators().toString();
+                    Class valueClass = scalarCapabilities[x].getLogical_Operators().getClass();
                     for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        String newValue = null;
+                        Class newValueClass = null;
                         if (newScalarCapabilities != null && newScalarCapabilities[y].getLogical_Operators() != null) {
-                            newValue = newScalarCapabilities[y].getLogical_Operators().toString();
+                            newValueClass = newScalarCapabilities[y].getLogical_Operators().getClass();
                         }
-                        if (value.equals(newValue)) {
+                        if (valueClass.equals(newValueClass)) {
                             isValid = true;
                         }
                     }
