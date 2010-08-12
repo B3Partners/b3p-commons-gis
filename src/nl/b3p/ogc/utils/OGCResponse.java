@@ -63,6 +63,7 @@ import nl.b3p.xml.wfs.v100.capabilities.DCPType_TransactionType;
 import nl.b3p.xml.wfs.v100.capabilities.FeatureType;
 import nl.b3p.xml.wfs.v100.capabilities.HTTPTypeItem;
 import nl.b3p.xml.wfs.v100.capabilities.RequestTypeItem;
+import org.apache.xerces.dom.DeferredElementNSImpl;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.w3c.dom.Element;
@@ -116,6 +117,56 @@ public class OGCResponse {
         return (NodeList) result;
     }
 
+    private void replaceFeatureTypeName(Element elem, String spAbbr) throws Exception {
+        // update layer names in response
+        String wfsPrefix = getNameSpacePrefix("http://www.opengis.net/wfs");
+        String gmlPrefix = getNameSpacePrefix("http://www.opengis.net/gml");
+        StringBuilder sb = new StringBuilder();
+        sb.append("/");
+        if (wfsPrefix != null && wfsPrefix.length() > 0) {
+            sb.append(wfsPrefix);
+            sb.append(":");
+        }
+        sb.append("FeatureCollection/");
+        if (gmlPrefix != null && gmlPrefix.length() > 0) {
+            sb.append(gmlPrefix);
+            sb.append(":");
+        }
+        sb.append("featureMember");
+        NodeList nodes = getNodeListFromXPath(sb.toString());
+        for (int i = 0; i < nodes.getLength(); i++) {
+            Node n = nodes.item(i);
+            Node cn = n.getFirstChild();
+             while (cn != null) {
+                if (cn.getNodeType() == Node.ELEMENT_NODE) {
+                    String cn_ns = cn.getNamespaceURI();
+                    String oldName = null;
+                    if (cn_ns != null && cn_ns.length() > 0) {
+                        oldName = "{" + cn_ns + "}" + cn.getLocalName();
+                    } else {
+                        oldName = cn.getLocalName();
+                    }
+                    String newName = determineFeatureTypeName(spAbbr, oldName);
+                    Element e = elem.getOwnerDocument().createElementNS(cn_ns, newName);
+                    n.appendChild(e);
+
+                    if (cn instanceof DeferredElementNSImpl || cn instanceof Element) {
+                        Element e2 = (Element) cn;
+                        NodeList childs = e2.getChildNodes();
+                        for (int j = 0; j < childs.getLength(); j++) {
+                            Node child = childs.item(j);
+                            Node tempNode = child.cloneNode(true);
+                            e.appendChild(tempNode);
+                        }
+                        n.replaceChild(e, cn);
+                    }
+                }
+                cn = cn.getNextSibling();
+            }
+        }
+        return;
+    }
+
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
         this.httpHost = request.getHost();
         if (nameSpaces == null) {
@@ -152,12 +203,18 @@ public class OGCResponse {
             version = request.getFinalVersion();
 
             if (version != null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                // replace in dom tree, AnyNode is not mutable
+                replaceFeatureTypeName(rootElement, prefix);
+
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
                 o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
 
                 featureCollectionV100.add(replaceFeatureCollectionV100Url(featureCollection, prefix));
             } else {
+                // replace in dom tree, AnyNode is not mutable
+                replaceFeatureTypeName(rootElement, prefix);
+
                 um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
                 o = um.unmarshal(rootElement);
                 nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
@@ -529,6 +586,10 @@ public class OGCResponse {
     }
 
     public Map splitLayerInParts(String fullLayerName) {
+        return splitLayerInParts(fullLayerName, true);
+    }
+
+    public Map splitLayerInParts(String fullLayerName, boolean splitName) {
         String tPrefix = null;
         String tLayerName = null;
         String tSpAbbr = null;
@@ -545,20 +606,20 @@ public class OGCResponse {
             String temp2[] = temp[0].split(":");
             if (temp2.length > 1) {
                 tSpLayerName = temp2[1];
-                // assume same for now
-                tLayerName = tSpLayerName;
                 tPrefix = temp2[0];
                 tNsUrl = getNameSpace(tPrefix);
             } else {
                 tSpLayerName = fullLayerName;
-                 // assume same for now
-                tLayerName = tSpLayerName;
            }
         }
-        int index1 = tSpLayerName.indexOf("_");
-        if (index1 != -1) {
-            tSpAbbr = tSpLayerName.substring(0, index1);
-            tLayerName = tSpLayerName.substring(index1 + 1);
+        // assume same for now
+        tLayerName = tSpLayerName;
+        if (splitName) {
+            int index1 = tSpLayerName.indexOf("_");
+            if (index1 != -1) {
+                tSpAbbr = tSpLayerName.substring(0, index1);
+                tLayerName = tSpLayerName.substring(index1 + 1);
+            }
         }
         Map returnMap = new HashMap();
         returnMap.put("prefix",tPrefix);
@@ -579,13 +640,19 @@ public class OGCResponse {
             return "";
         }
         // iterate through namespaces to find prefix
+        String prefix = "";
         for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry entry = (Map.Entry) iterator.next();
             if (entry.getValue().equals(namespace)) {
-                return (String) entry.getKey();
+                prefix = (String) entry.getKey();
+                // if default namespace and one explicit namespace refer to same url
+                // xpath search needs explicit namespace
+                if (prefix!=null && prefix.length()>0) {
+                    return prefix;
+                }
             }
         }
-        return "";
+        return prefix;
     }
 
     public void findNameSpace(Node node) {
@@ -1101,4 +1168,5 @@ public class OGCResponse {
     public void setSchemaLocations(HashMap schemaLocations) {
         this.schemaLocations = schemaLocations;
     }
+
 }

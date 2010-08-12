@@ -71,6 +71,7 @@ zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in sta
 public class OGCRequest implements OGCConstants {
 
     private static final Log log = LogFactory.getLog(OGCRequest.class);
+    private String httpMethod;
     private String httpHost;
     private WFS_Capabilities capabilities;
     private HashMap parameters;
@@ -118,6 +119,10 @@ public class OGCRequest implements OGCConstants {
     }
 
     public Map splitLayerInParts(String fullLayerName) {
+        return splitLayerInParts(fullLayerName, true);
+    }
+
+    public Map splitLayerInParts(String fullLayerName, boolean splitName) {
         String tPrefix = null;
         String tLayerName = null;
         String tSpAbbr = null;
@@ -134,27 +139,27 @@ public class OGCRequest implements OGCConstants {
             String temp2[] = temp[0].split(":");
             if (temp2.length > 1) {
                 tSpLayerName = temp2[1];
-                // assume same for now
-                tLayerName = tSpLayerName;
                 tPrefix = temp2[0];
                 tNsUrl = getNameSpace(tPrefix);
             } else {
                 tSpLayerName = fullLayerName;
-                // assume same for now
-                tLayerName = tSpLayerName;
             }
         }
-        int index1 = tSpLayerName.indexOf("_");
-        if (index1 != -1) {
-            tSpAbbr = tSpLayerName.substring(0, index1);
-            tLayerName = tSpLayerName.substring(index1 + 1);
+        // assume same for now
+        tLayerName = tSpLayerName;
+        if (splitName) {
+            int index1 = tSpLayerName.indexOf("_");
+            if (index1 != -1) {
+                tSpAbbr = tSpLayerName.substring(0, index1);
+                tLayerName = tSpLayerName.substring(index1 + 1);
+            }
         }
         Map returnMap = new HashMap();
-        returnMap.put("prefix",tPrefix);
-        returnMap.put("spAbbr",tSpAbbr);
-        returnMap.put("layerName",tLayerName);
-        returnMap.put("spLayerName",tSpLayerName);
-        returnMap.put("nsUrl",tNsUrl);
+        returnMap.put("prefix", tPrefix);
+        returnMap.put("spAbbr", tSpAbbr);
+        returnMap.put("layerName", tLayerName);
+        returnMap.put("spLayerName", tSpLayerName);
+        returnMap.put("nsUrl", tNsUrl);
         return returnMap;
     }
 
@@ -237,7 +242,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    public void findNameSpace(Node node) {
+    public final void findNameSpace(Node node) {
         NamedNodeMap map = node.getAttributes();
         if (map != null) {
             for (int i = 0; map.getLength() > i; i++) {
@@ -269,19 +274,19 @@ public class OGCRequest implements OGCConstants {
     /**
      * Serie of methods to fill the HashMap parameters
      */
-    public void setGetCapabilitiesV100(nl.b3p.xml.wfs.v100.GetCapabilities getCapabilities) {
+    public final void setGetCapabilitiesV100(nl.b3p.xml.wfs.v100.GetCapabilities getCapabilities) {
         addOrReplaceParameter(OGCConstants.VERSION, getCapabilities.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, getCapabilities.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
     }
 
-    public void setGetCapabilitiesV110(nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities) {
+    public final void setGetCapabilitiesV110(nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities) {
         addOrReplaceParameter(OGCConstants.VERSION, finalVersion);//OGCConstants.WFS_VERSION_110);
         addOrReplaceParameter(OGCConstants.SERVICE, getCapabilities.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
     }
 
-    public void setDescribeFeatureTypeV100(nl.b3p.xml.wfs.v100.DescribeFeatureType describeFeatureType) {
+    public final void setDescribeFeatureTypeV100(nl.b3p.xml.wfs.v100.DescribeFeatureType describeFeatureType) {
         addOrReplaceParameter(OGCConstants.VERSION, describeFeatureType.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, describeFeatureType.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_DescribeFeatureType);
@@ -297,7 +302,7 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
 
-    public void setDescribeFeatureTypeV110(nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType) {
+    public final void setDescribeFeatureTypeV110(nl.b3p.xml.wfs.v110.DescribeFeatureType describeFeatureType) {
         addOrReplaceParameter(OGCConstants.VERSION, describeFeatureType.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, describeFeatureType.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_DescribeFeatureType);
@@ -313,7 +318,7 @@ public class OGCRequest implements OGCConstants {
         addOrReplaceParameter(OGCConstants.WFS_PARAM_TYPENAME, str.toString());
     }
 
-    public void setGetFeatureV100(nl.b3p.xml.wfs.v100.GetFeature getFeature) throws Exception {
+    public final void setGetFeatureV100(nl.b3p.xml.wfs.v100.GetFeature getFeature) throws Exception {
         addOrReplaceParameter(OGCConstants.VERSION, getFeature.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, getFeature.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetFeature);
@@ -346,7 +351,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    public void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature) throws Exception {
+    public final void setGetFeatureV110(nl.b3p.xml.wfs.v110.GetFeature getFeature) throws Exception {
         addOrReplaceParameter(OGCConstants.VERSION, getFeature.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, getFeature.getService());
         addOrReplaceParameter(OGCConstants.WFS_PARAM_RESULTTYPE, getFeature.getResultType().toString());
@@ -387,7 +392,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    public void setTransactionV100(nl.b3p.xml.wfs.v100.transaction.Transaction transaction) throws Exception {
+    public final void setTransactionV100(nl.b3p.xml.wfs.v100.transaction.Transaction transaction) throws Exception {
         addOrReplaceParameter(OGCConstants.VERSION, transaction.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, transaction.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_Transaction);
@@ -447,7 +452,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    public void setTransactionV110(nl.b3p.xml.wfs.v110.Transaction transaction) throws Exception {
+    public final void setTransactionV110(nl.b3p.xml.wfs.v110.Transaction transaction) throws Exception {
         addOrReplaceParameter(OGCConstants.VERSION, transaction.getVersion());
         addOrReplaceParameter(OGCConstants.SERVICE, transaction.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_Transaction);
@@ -623,7 +628,7 @@ public class OGCRequest implements OGCConstants {
      *
      * @return the param value that is removed or null if the parameter key not is found
      */
-    public void setUrl(String url) {
+    public final void setUrl(String url) {
         if (url == null) {
             return;
         }
@@ -726,7 +731,7 @@ public class OGCRequest implements OGCConstants {
             return null;
         }
     }
-    public static HashMap scaleCalibrations = new HashMap();
+    public final static HashMap scaleCalibrations = new HashMap();
 
     static {
         // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
@@ -835,7 +840,7 @@ public class OGCRequest implements OGCConstants {
      *
      * @return the value of the given param or null if the param isn't found.
      */
-    public String getParameter(String param) {
+    public final String getParameter(String param) {
         if (param == null) {
             return null;
         }
@@ -847,7 +852,7 @@ public class OGCRequest implements OGCConstants {
         return (String) o;
     }
 
-    public boolean containsParameter(String param) {
+    public final boolean containsParameter(String param) {
         if (param == null) {
             return false;
         }
@@ -898,18 +903,6 @@ public class OGCRequest implements OGCConstants {
             if (index1 >= 0 && index2 >= 0) {
                 String nameSpaceUri = param.substring(index1 + 1, index2);
                 String prefix = getNameSpacePrefix(nameSpaceUri);
-                //als namespace nog niet is toegevoegd
-                if (prefix == null) {
-                    int nsTeller = 1;
-                    //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
-                    String ns = getNameSpace("ns" + nsTeller);
-                    while (ns != null) {
-                        nsTeller++;
-                        ns = getNameSpace("ns" + nsTeller);
-                    }
-                    prefix = "ns" + nsTeller;
-                    addOrReplaceNameSpace(prefix, nameSpaceUri);
-                }
                 param = prefix + ":" + param.substring(index2 + 1);
             }
         }
@@ -920,7 +913,7 @@ public class OGCRequest implements OGCConstants {
         return (String) o;
     }
 
-    /** Adds or replaces a string with params
+   /** Adds or replaces a string with params
      *
      * @param params A String with parameters seperated by a '&'
      *
@@ -1162,6 +1155,20 @@ public class OGCRequest implements OGCConstants {
         this.httpHost = httpHost;
     }
 
+    /**
+     * @param method - the HTTP method of the request (GET/POST/etc)
+     */
+    public void setHttpMethod(String method) {
+        this.httpMethod = method;
+    }
+
+    /**
+     * @return http method (GET/POST/etc)
+     */
+    public String getHttpMethod() {
+        return this.httpMethod;
+    }
+
     protected HashMap getParameters() {
         return parameters;
     }
@@ -1196,45 +1203,79 @@ public class OGCRequest implements OGCConstants {
             if (request == null || request.equals("")) {
                 throw new UnsupportedOperationException("No request parameter found in url!");
             }
+            if (service == null) {
+                service = "NULL";
+            }
 
             List requiredParams = null;
 
             if (SUPPORTED_REQUESTS.contains(request)) {
-                if (service == null || service.equals("")) {
-                    throw new UnsupportedOperationException("No service parameter for request found in url!");
-                } else if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS)) {
-                    if (request.equals(WMS_REQUEST_GetCapabilities)) {
-                        requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                    } else if (request.equals(WMS_REQUEST_GetMap)) {
-                        requiredParams = PARAMS_GetMap;
-                    } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
-                        requiredParams = PARAMS_GetFeatureInfo;
-                    } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
-                        requiredParams = PARAMS_GetLegendGraphic;
-                    } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
-                        requiredParams = PARAMS_DescribeLayer;
-                    }
-                    checkRequestURL(requiredParams, request);
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)) {
-                    if (request.equals(WFS_REQUEST_GetCapabilities)) {
-                        requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
-                    } else if (request.equals(WFS_REQUEST_GetFeature)) {
-                        requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
-                    } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
-                        requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
-                    } else if (request.equals(WFS_REQUEST_Transaction)) {
-                        requiredParams = WFS_REQUIRED_PARAMS_Transaction;
-                    } else if (request.equals(WFS_REQUEST_GetFeatureWithLock)) {
-                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                    } else if (request.equals(WFS_REQUEST_LockFeature)) {
-                        throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                    }
-                    // validation has been done when unmarshalled with castor
-                    // but has to be done for kvp requests
-                    checkRequestURL(requiredParams, request);
-                } else {
-                    throw new UnsupportedOperationException("Service '" + service + "' not supported!");
+                //Only Capabilities request require service param, which should be
+                //checked by checkRequestUrl(requiredParams, request).
+                //Server may erroneously require service param (http://trac.osgeo.org/mapserver/ticket/2737),
+                //but Kaartenbalie shouldn't need it.
+                if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS) && request.equals(WMS_REQUEST_GetCapabilities)) {
+                    requiredParams = REQUIRED_PARAMS_GetCapabilities;
+                } else if (request.equals(WMS_REQUEST_GetMap)) {
+                    requiredParams = PARAMS_GetMap;
+                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+                    requiredParams = PARAMS_GetFeatureInfo;
+                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+                    requiredParams = PARAMS_GetLegendGraphic;
+                } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
+                    requiredParams = PARAMS_DescribeLayer;
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetCapabilities)) {
+                    requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetFeature)) {
+                    requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_DescribeFeatureType)) {
+                    requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_Transaction)) {
+                    requiredParams = WFS_REQUIRED_PARAMS_Transaction;
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetFeatureWithLock)) {
+                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_LockFeature)) {
+                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
                 }
+                checkRequestURL(requiredParams, request);
+
+                /*
+                if (service == null || service.equals("")) {
+                throw new UnsupportedOperationException("No service parameter for request found in url!");
+                } else if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS)) {
+                if (request.equals(WMS_REQUEST_GetCapabilities)) {
+                requiredParams = REQUIRED_PARAMS_GetCapabilities;
+                } else if (request.equals(WMS_REQUEST_GetMap)) {
+                requiredParams = PARAMS_GetMap;
+                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+                requiredParams = PARAMS_GetFeatureInfo;
+                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+                requiredParams = PARAMS_GetLegendGraphic;
+                } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
+                requiredParams = PARAMS_DescribeLayer;
+                }
+                checkRequestURL(requiredParams, request);
+                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)) {
+                if (request.equals(WFS_REQUEST_GetCapabilities)) {
+                requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
+                } else if (request.equals(WFS_REQUEST_GetFeature)) {
+                requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
+                } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
+                requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
+                } else if (request.equals(WFS_REQUEST_Transaction)) {
+                requiredParams = WFS_REQUIRED_PARAMS_Transaction;
+                } else if (request.equals(WFS_REQUEST_GetFeatureWithLock)) {
+                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                } else if (request.equals(WFS_REQUEST_LockFeature)) {
+                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+                }
+                // validation has been done when unmarshalled with castor
+                // but has to be done for kvp requests
+                checkRequestURL(requiredParams, request);
+                } else {
+                throw new UnsupportedOperationException("Service '" + service + "' not supported!");
+                }
+                 */
             } else {
                 throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to "
                         + "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&"
@@ -1307,7 +1348,7 @@ public class OGCRequest implements OGCConstants {
      * to the request of te client. It doesn't have to be the same version as the client requested.
      * See paragraph 6.2 of the WFS 1.1.0 specification for more details.
      */
-    public void setFinalVersion(String clientVersion) {
+    public final void setFinalVersion(String clientVersion) {
         if (clientVersion == null || clientVersion.equals("")) {
             finalVersion = OGCConstants.WFS_VERSION_UNSPECIFIED;
         } else if (OGCConstants.SUPPORTED_WFS_VERSIONS.contains(clientVersion)) {
@@ -1389,7 +1430,18 @@ public class OGCRequest implements OGCConstants {
                 return (String) entry.getKey();
             }
         }
-        return null;
+        //als namespace nog niet is toegevoegd
+        String prefix = null;
+        int nsTeller = 1;
+        //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
+        String ns = getNameSpace("ns" + nsTeller);
+        while (ns != null) {
+            nsTeller++;
+            ns = getNameSpace("ns" + nsTeller);
+        }
+        prefix = "ns" + nsTeller;
+        addOrReplaceNameSpace(prefix, namespaceUrl);
+        return prefix;
     }
 
     /**

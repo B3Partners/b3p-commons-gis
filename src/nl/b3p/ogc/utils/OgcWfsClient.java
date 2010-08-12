@@ -402,6 +402,16 @@ public class OgcWfsClient {
         if (or.getParameter(OGCConstants.SERVICE) != null) {
             gf.setService(or.getParameter(OGCConstants.SERVICE));
         }
+        if (or.getParameter(OGCConstants.WFS_PARAM_MAXFEATURES) != null) {
+            int mf;
+            try {
+                mf = Integer.parseInt(or.getParameter(OGCConstants.WFS_PARAM_MAXFEATURES));
+            } catch (NumberFormatException nfe) {
+                mf=10;
+                log.debug("error parsing MAXFEATURES, using:" + mf, nfe);
+            }
+            gf.setMaxFeatures(mf);
+        }
         if (or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT) != null) {
             gf.setOutputFormat(or.getParameter(OGCConstants.WFS_PARAM_OUTPUTFORMAT));
         } else {
