@@ -657,7 +657,7 @@ public class OGCRequest implements OGCConstants {
                             }
                         }
                     }
-                } else {
+               } else {
                     if (keyValuePair.length > 2) {
                         String value = "";
                         for (int b = 1; b < keyValuePair.length; b++) {
@@ -678,6 +678,33 @@ public class OGCRequest implements OGCConstants {
         if (OGCConstants.WFS_SERVICE_WFS.equals(getParameter(OGCConstants.SERVICE))) {
             finalVersion = getParameter(OGCConstants.VERSION);
         }
+
+
+
+//        if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
+//        nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
+//        if (qlist.length > 0) {
+//            for (int i = 0; i < qlist.length; i++) {
+//                String typename = qlist[i].getTypeName();
+//                String filter = null;
+//
+//                addGetFeatureFilterMap(typename, filter);
+//
+//                StringBuffer propertyNameList = new StringBuffer();
+//                for (int j = 0; j < qlist[i].getPropertyNameCount(); j++) {
+//                    propertyNameList.append(qlist[i].getPropertyName(j).getContent());
+//                    if (j + 1 < qlist[i].getPropertyNameCount()) {
+//                        propertyNameList.append(',');
+//                    }
+//                }
+//                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString() : null);
+//            }
+//        }
+//         }
+
+
+
+
     }
 
     /** Gets the full url with the params
@@ -1022,12 +1049,12 @@ public class OGCRequest implements OGCConstants {
             if (value == null) {
                 value = "";
             }
-            try {
+//            try {
                 //FIX so get requests will be valid when containing invalid values
-                returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
+//                returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
+//            } catch (UnsupportedEncodingException e) {
                 returnvalue[i] = key + "=" + value;
-            }
+//            }
         }
         return returnvalue;
     }

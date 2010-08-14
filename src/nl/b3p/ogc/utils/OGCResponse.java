@@ -93,18 +93,18 @@ public class OGCResponse {
     private HashMap schemaLocations;
     private String srs = null;
     private List supportedOperations = new ArrayList();
-    private Node currentNode = null;
+//    private Node currentNode = null;
 
     /** Creates a new instance of OGCResponse */
     public OGCResponse() {
     }
 
-    public OGCResponse(Node current) {
-        this.currentNode = current;
-        findNameSpace(currentNode);
-    }
+//    public OGCResponse(Node current) {
+//        this.currentNode = current;
+//        findNameSpace(currentNode);
+//    }
 
-    public NodeList getNodeListFromXPath(String xPathFrag) throws Exception {
+    public NodeList getNodeListFromXPath(Node currentNode, String xPathFrag) throws Exception {
         if (xPathFrag == null || xPathFrag.length() == 0) {
             return null;
         }
@@ -133,7 +133,7 @@ public class OGCResponse {
             sb.append(":");
         }
         sb.append("featureMember");
-        NodeList nodes = getNodeListFromXPath(sb.toString());
+        NodeList nodes = getNodeListFromXPath(elem, sb.toString());
         for (int i = 0; i < nodes.getLength(); i++) {
             Node n = nodes.item(i);
             Node cn = n.getFirstChild();
@@ -763,9 +763,11 @@ public class OGCResponse {
             while (it.hasNext()) {
                 nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) it.next();
                 if (i == 0) {
-                    featureCollection = newFeatureCollection;
-                    i++;
+                     featureCollection = newFeatureCollection;
+                     featureCount = newFeatureCollection.getFeatureMemberCount();
+                   i++;
                 } else {
+                    featureCount += newFeatureCollection.getFeatureMemberCount();
                     Object[] o = newFeatureCollection.getFeatureMember();
                     for (int x = 0; x < o.length; x++) {
                         Object featureMember = o[x];
@@ -774,6 +776,7 @@ public class OGCResponse {
                     i++;
                 }
             }
+            //featureCollection.setNumberOfFeatures(featureCount); not supported by wfs 1.0.0
             return featureCollection;
         }
     }
@@ -941,7 +944,7 @@ public class OGCResponse {
                     }
                 }
                 if (isValid == false) {
-                    filter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().removeGeometryOperand(geometryOperand[i]);
+//                    filter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().removeGeometryOperand(geometryOperand[i]);
                 }
             }
 
@@ -957,7 +960,7 @@ public class OGCResponse {
                     }
                 }
                 if (isValid == false) {
-                    filter.getSpatial_Capabilities().getSpatialOperators().removeSpatialOperator(spatialOperator[x]);
+//                    filter.getSpatial_Capabilities().getSpatialOperators().removeSpatialOperator(spatialOperator[x]);
                 }
             }
 
@@ -1055,6 +1058,19 @@ public class OGCResponse {
                     filter.getSpatial_Capabilities().getSpatial_Operators().removeSpatial_OperatorsTypeItem(spatialOperators[i]);
                 }
             }
+//            for (int i = 0; i < newSpatialOperators.length; i++) {
+//                boolean isValid = false;
+//                Class newValueClass = newSpatialOperators[i].getChoiceValue().getClass();
+//                for (int j = 0; j < spatialOperators.length; j++) {
+//                    Class valueClass = spatialOperators[j].getChoiceValue().getClass();
+//                    if (newValueClass.equals(valueClass)) {
+//                        isValid = true;
+//                    }
+//                }
+//                if (isValid == false) {
+//                    filter.getSpatial_Capabilities().getSpatial_Operators().addSpatial_OperatorsTypeItem(newSpatialOperators[i]);
+//                }
+//            }
 
             nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] scalarCapabilities = filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
             nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] newScalarCapabilities = newFilter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
