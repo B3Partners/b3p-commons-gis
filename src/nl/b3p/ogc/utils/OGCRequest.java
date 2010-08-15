@@ -246,18 +246,20 @@ public class OGCRequest implements OGCConstants {
         NamedNodeMap map = node.getAttributes();
         if (map != null) {
             for (int i = 0; map.getLength() > i; i++) {
+                String value = map.item(i).getNodeValue();
+                if (value==null || value.length()==0) {
+                    continue;
+                }
                 String name = map.item(i).getNodeName();
                 String[] tokens = name.split(":");
                 if (tokens[0].equalsIgnoreCase("xmlns")) {
-                    String value = map.item(i).getNodeValue();
                     if (tokens.length > 1) {
                         addOrReplaceNameSpace(tokens[1], value);
                     } else {
-                        addOrReplaceNameSpace(tokens[0], value);
+                        addOrReplaceNameSpace("", value);
                     }
                 } else if (tokens.length == 2) {
                     if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
-                        String value = map.item(i).getNodeValue();
                         addOrReplaceSchemaLocation(tokens[1], value);
                     }
                 }
@@ -652,7 +654,13 @@ public class OGCRequest implements OGCConstants {
                                 if (prefixUriPair.length == 2) {
                                     addOrReplaceNameSpace(prefixUriPair[0], prefixUriPair[1]);
                                 } else {
-                                    addOrReplaceNameSpace(prefixUriPair[0], null);
+                                    if (namespaces[b].startsWith("=")) {
+                                        // default namespace
+                                        addOrReplaceNameSpace("", prefixUriPair[1]);
+                                    } else {
+                                        // illegal
+//                                        addOrReplaceNameSpace(prefixUriPair[0], null);
+                                    }
                                 }
                             }
                         }
