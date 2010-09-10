@@ -76,6 +76,20 @@ import org.w3c.dom.NodeList;
 /**
  *
  * @author Roy
+ * @deprecated Don't use this one!!! Since Geotools 2.6.4 there is a streaming parser. Use like:
+ *  org.geotools.xml.Configuration gml3Configuration = new org.geotools.gml3.GMLConfiguration();
+    org.geotools.xml.Configuration gml2Configuration = new org.geotools.gml2.GMLConfiguration();
+
+    Class c = GeotoolsTest.class;
+    URL xmlUrl = c.getResource("Bodemgebruik2000.gml");
+    InputStream in = new FileInputStream(xmlUrl.getFile());
+
+    StreamingParser parser = new StreamingParser(gml2Configuration, in, SimpleFeature.class);
+
+    SimpleFeature f = null;
+    while ((f = (SimpleFeature) parser.parse()) != null) {
+        
+    }
  */
 public class B3pGMLReader extends GMLReader {
 
@@ -94,6 +108,7 @@ public class B3pGMLReader extends GMLReader {
      * @param wfsGetFeatureUrl The wfs getFeature url.
      *
      * @return a hashmap with key's the featuretypes and as values the featurecollections
+ * @deprecated since the use of geotools 2.6.4. Now there is a
      */
     public HashMap<String,FeatureCollection> readWFSUrl(OGCRequest wfsgf) throws TransformerException, Exception {
         wfsgf.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetFeature);

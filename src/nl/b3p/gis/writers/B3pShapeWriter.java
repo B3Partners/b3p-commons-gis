@@ -69,6 +69,7 @@ import org.opengis.feature.type.GeometryType;
 /**
  *
  * @author Roy
+ * @deprecated
  */
 public class B3pShapeWriter {
 
@@ -92,7 +93,7 @@ public class B3pShapeWriter {
      *@filename The filename to use bij writing the shape file.
      *
      *@return a list of file's of type java.io.File
-     * @deprecated
+     * @deprecated use StreamingShapeWriter instead.
      */
     public List writeToShape(com.vividsolutions.jump.feature.FeatureCollection fcAll, String filename) throws IllegalParametersException, Exception {
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
