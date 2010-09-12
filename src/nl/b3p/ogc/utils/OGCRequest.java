@@ -95,6 +95,8 @@ public class OGCRequest implements OGCConstants {
 
     /*Default constr.*/
     public OGCRequest() {
+        nameSpaces = new HashMap();
+        parameters = new HashMap();
     }
 
     /** Main constructor
@@ -104,6 +106,8 @@ public class OGCRequest implements OGCConstants {
      *  For HTTP GET
      */
     public OGCRequest(String url) {
+        nameSpaces = new HashMap();
+        parameters = new HashMap();
         setUrl(url);
     }
 
@@ -169,17 +173,17 @@ public class OGCRequest implements OGCConstants {
      */
     public OGCRequest(Element rootElement, String url) throws ValidationException, Exception {
         nameSpaces = new HashMap();
-        findNameSpace(rootElement);
         parameters = new HashMap();
+        setUrl(url);
+        findNameSpace(rootElement);
+
         Unmarshaller um;
         Object o;
-        String[] tokens = url.split("\\?|&");
-        httpHost = tokens[0];
+
         setFinalVersion(rootElement.getAttribute(OGCConstants.VERSION.toLowerCase()));
+        String version = finalVersion;
 
         if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETCAPABILITIES)) {
-            String version = finalVersion;
-
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetCapabilities.class);
                 o = um.unmarshal(rootElement);
@@ -192,8 +196,6 @@ public class OGCRequest implements OGCConstants {
                 setGetCapabilitiesV110(getCapabilities);
             }
         } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_DESCRIBEFEATURETYPE)) {
-            String version = finalVersion;
-
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.DescribeFeatureType.class);
                 o = um.unmarshal(rootElement);
@@ -206,8 +208,6 @@ public class OGCRequest implements OGCConstants {
                 setDescribeFeatureTypeV110(describeFeatureType);
             }
         } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
-            String version = finalVersion;
-
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.GetFeature.class);
                 o = um.unmarshal(rootElement);
@@ -220,8 +220,6 @@ public class OGCRequest implements OGCConstants {
                 setGetFeatureV110(getFeature);
             }
         } else if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_TRANSACTION)) {
-            String version = finalVersion;
-
             if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
                 um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.Transaction.class);
                 o = um.unmarshal(rootElement);
@@ -634,13 +632,9 @@ public class OGCRequest implements OGCConstants {
         if (url == null) {
             return;
         }
-        parameters = new HashMap();
-        httpHost = "";
         String[] tokens = url.split("\\?|&");
+        setHttpHost(tokens[0]);
         for (int i = 0; i < tokens.length; i++) {
-            if (i == 0) {
-                httpHost = tokens[i];
-            }
             if (tokens[i].contains("=")) {
                 String keyValuePair[] = tokens[i].split("=");
                 //if it's a namespace
@@ -683,36 +677,10 @@ public class OGCRequest implements OGCConstants {
                 }
             }
         }
+
         if (OGCConstants.WFS_SERVICE_WFS.equals(getParameter(OGCConstants.SERVICE))) {
-            finalVersion = getParameter(OGCConstants.VERSION);
+            setFinalVersion(getParameter(OGCConstants.VERSION));
         }
-
-
-
-//        if (removeNamespace(rootElement.getTagName()).equalsIgnoreCase(OGCConstants.WFS_GETFEATURE)) {
-//        nl.b3p.xml.wfs.v100.Query[] qlist = getFeature.getQuery();
-//        if (qlist.length > 0) {
-//            for (int i = 0; i < qlist.length; i++) {
-//                String typename = qlist[i].getTypeName();
-//                String filter = null;
-//
-//                addGetFeatureFilterMap(typename, filter);
-//
-//                StringBuffer propertyNameList = new StringBuffer();
-//                for (int j = 0; j < qlist[i].getPropertyNameCount(); j++) {
-//                    propertyNameList.append(qlist[i].getPropertyName(j).getContent());
-//                    if (j + 1 < qlist[i].getPropertyNameCount()) {
-//                        propertyNameList.append(',');
-//                    }
-//                }
-//                addGetFeaturePropertyNameListMap(typename, propertyNameList.length() > 0 ? propertyNameList.toString() : null);
-//            }
-//        }
-//         }
-
-
-
-
     }
 
     /** Gets the full url with the params
@@ -722,9 +690,6 @@ public class OGCRequest implements OGCConstants {
     public String getUrl() {
         StringBuffer sb = new StringBuffer();
         sb.append(httpHost);
-        if (sb.indexOf("?") < 0) {
-            sb.append("?");
-        }
         Set keys = parameters.keySet();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
@@ -1187,7 +1152,15 @@ public class OGCRequest implements OGCConstants {
     }
 
     public void setHttpHost(String httpHost) {
-        this.httpHost = httpHost;
+        if (httpHost.indexOf('?') < 0) {
+            this.httpHost = httpHost + "?";
+        } else if (httpHost.indexOf('?') == httpHost.length() - 1) {
+            this.httpHost = httpHost;
+        } else if (httpHost.lastIndexOf('&') == httpHost.length() - 1) {
+            this.httpHost = httpHost;
+        } else {
+            this.httpHost = httpHost + "&";
+        }
     }
 
     /**
@@ -1384,7 +1357,8 @@ public class OGCRequest implements OGCConstants {
      * See paragraph 6.2 of the WFS 1.1.0 specification for more details.
      */
     public final void setFinalVersion(String clientVersion) {
-        if (clientVersion == null || clientVersion.equals("")) {
+        if (clientVersion == null || clientVersion.equals("") ||
+                clientVersion.equals(OGCConstants.WFS_VERSION_UNSPECIFIED)) {
             finalVersion = OGCConstants.WFS_VERSION_UNSPECIFIED;
         } else if (OGCConstants.SUPPORTED_WFS_VERSIONS.contains(clientVersion)) {
             finalVersion = clientVersion;

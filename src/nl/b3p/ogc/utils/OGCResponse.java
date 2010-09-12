@@ -168,7 +168,7 @@ public class OGCResponse {
     }
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
-        this.httpHost = request.getHost();
+        this.httpHost = request.getUrlWithNonOGCparams();
         if (nameSpaces == null) {
             nameSpaces = new HashMap();
 
@@ -368,7 +368,7 @@ public class OGCResponse {
                 int httpCount = http.getHTTPItemCount();
                 for (int x = 0; x < httpCount; x++) {
                     if (http.getHTTPItem(x).getGet() != null) {
-                        http.getHTTPItem(x).getGet().setHref(httpHost + "?");
+                        http.getHTTPItem(x).getGet().setHref(httpHost);
                     } else if (http.getHTTPItem(x).getPost() != null) {
                         http.getHTTPItem(x).getPost().setHref(httpHost);
                     }
@@ -471,9 +471,9 @@ public class OGCResponse {
                     }
                 }
                 if (x != 0) {
-                    newSchemalocations = newSchemalocations + " " + httpHost + "?" + newToken;
+                    newSchemalocations = newSchemalocations + " " + httpHost + newToken;
                 } else {
-                    newSchemalocations = newSchemalocations + httpHost + "?" + newToken;
+                    newSchemalocations = newSchemalocations + httpHost + newToken;
                 }
             } else {
                 if (x != 0) {
