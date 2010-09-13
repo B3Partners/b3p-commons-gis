@@ -688,8 +688,12 @@ public class OGCRequest implements OGCConstants {
      * @return the full url.
      */
     public String getUrl() {
+        return getUrl(httpHost);
+    }
+
+    public String getUrl(String host) {
         StringBuffer sb = new StringBuffer();
-        sb.append(httpHost);
+        sb.append(host);
         Set keys = parameters.keySet();
         Iterator it = keys.iterator();
         while (it.hasNext()) {
