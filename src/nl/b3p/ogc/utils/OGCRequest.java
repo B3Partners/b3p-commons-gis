@@ -79,9 +79,9 @@ public class OGCRequest implements OGCConstants {
     private HashMap schemaLocations;
     private HashMap transactionList = new HashMap();
     private HashMap getFeatureFilterMap = new HashMap();
-    private Map getFeaturePropertyNameListMap = new HashMap();
+    private HashMap getFeaturePropertyNameListMap = new HashMap();
     private String abbr;
-    private List layers = new ArrayList();
+    private ArrayList layers = new ArrayList();
     private String username;
     private String password;
     // version that will be returned to client
@@ -415,7 +415,7 @@ public class OGCRequest implements OGCConstants {
                 if (transactionTypeChoiceItem.getDelete() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Delete delete = transactionTypeChoiceItem.getDelete();
                     String layer = delete.getTypeName();
-                    layers.add(layer);
+                    getLayers().add(layer);
                     String[] temp = layer.split("}");
                     if (temp.length > 1) {
                         layer = temp[1];
@@ -431,14 +431,14 @@ public class OGCRequest implements OGCConstants {
                     m.marshal(insert);
                     String insertString = sw.toString();
                     String[] layer = insertString.split("<");
-                    layers.add(layer[0]);
+                    getLayers().add(layer[0]);
                     String[] spLayer = layer[0].split("_");
                     addElementToTransactionList(insert, spLayer[0]);
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
-                    layers.add(layer);
+                    getLayers().add(layer);
                     String[] temp = layer.split("}");
                     if (temp.length > 1) {
                         layer = temp[1];
@@ -475,7 +475,7 @@ public class OGCRequest implements OGCConstants {
                 if (transactionTypeChoiceItem.getDelete() != null) {
                     Delete delete = transactionTypeChoiceItem.getDelete();
                     String layer = delete.getTypeName();
-                    layers.add(layer);
+                    getLayers().add(layer);
                     String[] temp = layer.split("}");
                     if (temp.length > 1) {
                         layer = temp[1];
@@ -491,14 +491,14 @@ public class OGCRequest implements OGCConstants {
                     m.marshal(insert);
                     String insertString = sw.toString();
                     String[] layer = insertString.split("<");
-                    layers.add(layer[0]);
+                    getLayers().add(layer[0]);
                     String[] spLayer = layer[0].split("_");
                     addElementToTransactionList(insert, spLayer[0]);
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
-                    layers.add(layer);
+                    getLayers().add(layer);
                     String[] temp = layer.split("}");
                     if (temp.length > 1) {
                         layer = temp[1];
@@ -562,11 +562,11 @@ public class OGCRequest implements OGCConstants {
         return abbr;
     }
 
-    public List getLayers() {
+    public ArrayList getLayers() {
         return layers;
     }
 
-    public Map getGetFeatureFilterMap() {
+    public HashMap getGetFeatureFilterMap() {
         return getFeatureFilterMap;
     }
 
@@ -594,11 +594,11 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    public Map getGetFeaturePropertyNameListMap() {
+    public HashMap getGetFeaturePropertyNameListMap() {
         return getFeaturePropertyNameListMap;
     }
 
-    public void setGetFeaturePropertyNameListMap(Map getFeaturePropertyNameListMap) {
+    public void setGetFeaturePropertyNameListMap(HashMap getFeaturePropertyNameListMap) {
         this.getFeaturePropertyNameListMap = getFeaturePropertyNameListMap;
     }
 
@@ -628,7 +628,7 @@ public class OGCRequest implements OGCConstants {
      *
      * @return the param value that is removed or null if the parameter key not is found
      */
-    public final void setUrl(String url) {
+    private final void setUrl(String url) {
         if (url == null) {
             return;
         }
@@ -1144,8 +1144,24 @@ public class OGCRequest implements OGCConstants {
         if (this.getAbbr() != null) {
             returnv.setAbbr(new String(this.getAbbr()));
         }
+
+        returnv.setHttpMethod(new String(this.getHttpMethod()));
+        if (this.getCapabilities() != null) {
+            returnv.setCapabilities(this.getCapabilities());
+        }
+        if (this.getGetFeatureFilterMap() != null) {
+            returnv.setGetFeatureFilterMap((HashMap) this.getGetFeatureFilterMap().clone());
+        }
+        if (this.getGetFeaturePropertyNameListMap() != null) {
+            returnv.setGetFeaturePropertyNameListMap((HashMap) this.getGetFeaturePropertyNameListMap().clone());
+        }
+        if (this.getLayers() != null) {
+            returnv.setLayers((ArrayList) this.getLayers().clone());
+        }
+
         return returnv;
     }
+
 
     public String getHost() {
         return getHttpHost();
@@ -1483,5 +1499,12 @@ public class OGCRequest implements OGCConstants {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * @param layers the layers to set
+     */
+    public void setLayers(ArrayList layers) {
+        this.layers = layers;
     }
 }
