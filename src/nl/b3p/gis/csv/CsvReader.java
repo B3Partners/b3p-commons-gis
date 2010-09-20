@@ -131,15 +131,24 @@ public class CsvReader {
 
         cis.setCheckColumnCount(true);
         int rdxindex = -1, rdyindex = -1;
+
+        /* eerst de processColumns doen voordat de rdx of rdy index
+         * wordt bekeken. De rdx en rdy moeten namelijk uppercase zijn
+         * wil de indexOf hieronder de juiste index teruggeven.
+         * processColumns geeft de mogelijkheid om dit te doen.
+         */
+        columnList = processColumns(columnList);
+
         if (columnList != null) {
             rdxindex = columnList.indexOf(getRdxColumnName());
             rdyindex = columnList.indexOf(getRdyColumnName());
         }
-        columnList = processColumns(columnList);
+
         String[] columns = null;
         if (columnList != null) {
             columns = (String[]) columnList.toArray(new String[]{});
         }
+
         List attributeList = null;
         while ((attributeList = cis.readRecordAsList()) != null) {
 
