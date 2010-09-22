@@ -628,12 +628,14 @@ public class OGCRequest implements OGCConstants {
      *
      * @return the param value that is removed or null if the parameter key not is found
      */
-    private final void setUrl(String url) {
+    public final void setUrl(String url) {
         if (url == null) {
             return;
         }
         String[] tokens = url.split("\\?|&");
-        setHttpHost(tokens[0]);
+        if (tokens.length>0) {
+            setHttpHost(tokens[0]);
+        }
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i].contains("=")) {
                 String keyValuePair[] = tokens[i].split("=");
