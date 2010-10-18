@@ -1147,7 +1147,10 @@ public class OGCRequest implements OGCConstants {
             returnv.setAbbr(new String(this.getAbbr()));
         }
 
-        returnv.setHttpMethod(new String(this.getHttpMethod()));
+        if (this.getHttpMethod() != null){
+            returnv.setHttpMethod(new String(this.getHttpMethod()));
+        }
+
         if (this.getCapabilities() != null) {
             returnv.setCapabilities(this.getCapabilities());
         }
