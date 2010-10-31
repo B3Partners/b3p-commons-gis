@@ -22,6 +22,7 @@
  */
 package nl.b3p.wms.capabilities;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -133,7 +134,8 @@ public class StyleDomainResource implements XMLElement {
         return cloneSDR;
     }
 
-    protected void overwriteURL(String newUrl, Layer layer) {
+    protected void convertValues2KB(HashMap conversionValues) {
+        String newUrl = (String)conversionValues.get("url");
         String originalURL = this.getUrl();
         int pos = newUrl.indexOf("?");
         if (pos == -1) {

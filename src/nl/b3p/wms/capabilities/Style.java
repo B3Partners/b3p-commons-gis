@@ -22,6 +22,7 @@
  */
 package nl.b3p.wms.capabilities;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -102,15 +103,15 @@ public class Style implements XMLElement {
      *
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
-    // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    protected void overwriteURL(String newUrl) {
+    // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
+    protected void convertValues2KB(HashMap conversionValues) {
         Iterator it;
         //StyleDomainResource:
         if (null != this.getDomainResource() && this.getDomainResource().size() != 0) {
             it = this.getDomainResource().iterator();
             while (it.hasNext()) {
                 StyleDomainResource sdr = (StyleDomainResource) it.next();
-                sdr.overwriteURL(newUrl, layer);
+                sdr.convertValues2KB(conversionValues);
             }
         }
     }

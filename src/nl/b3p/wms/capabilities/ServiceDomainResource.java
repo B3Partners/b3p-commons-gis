@@ -22,6 +22,7 @@
  */
 package nl.b3p.wms.capabilities;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -125,8 +126,9 @@ public class ServiceDomainResource implements XMLElement {
      *
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
-    // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    protected void overwriteURL(String newUrl) {
+    // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
+    protected void convertValues2KB(HashMap conversionValues) {
+        String newUrl = (String)conversionValues.get("url");
         this.setGetUrl(newUrl);
         this.setPostUrl(newUrl);
     }

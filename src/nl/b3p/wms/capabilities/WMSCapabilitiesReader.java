@@ -112,20 +112,6 @@ public class WMSCapabilitiesReader {
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
 
-//        String proxyServer = System.getProperty("http.proxyHost");
-//        String proxyPortProp = System.getProperty("http.proxyPort");
-//        int proxyPort = 8080; // default to 8080
-//        if (proxyPortProp != null) {
-//            proxyPort = Integer.parseInt(proxyPortProp);
-//        }
-//        if (proxyServer != null) {
-//            HostConfiguration hostConfiguration = client.getHostConfiguration();
-//            hostConfiguration.setProxy(proxyServer, proxyPort);
-//            log.debug("proxy settings, server: " + proxyServer + ", port: " + proxyPort);
-//        } else {
-//            log.debug("proxy settings: no proxy");
-//        }
-
         if (username != null && password != null) {
             client.getParams().setAuthenticationPreemptive(true);
             Credentials defaultcreds = new UsernamePasswordCredentials(username, password);

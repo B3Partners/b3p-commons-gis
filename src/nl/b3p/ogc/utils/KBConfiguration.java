@@ -60,7 +60,6 @@ public class KBConfiguration {
     public static String KB_USER = "user";
     public static String KB_PERSONAL_URL = "personalURL";
     public static String KB_DEFAULT_ROLE = "gebruiker";
-    public static String KB_PROXY_URL = "purl";
     public static String KB_PROXY = "proxy";
     public static String KB_ENCRYPT_KEY = "proxy007"; // minimaal 8 bytes voor encrypting
     public static String KB_PROXY_EXECPTION = "Kaartenbalie Proxy fout: parameter purl niet gevonden.";
@@ -176,7 +175,6 @@ public class KBConfiguration {
         KB_PROXY = prop.getProperty("KB_PROXY", KB_PROXY);
         KB_PROXY_EXECPTION = prop.getProperty("KB_PROXY_EXECPTION", KB_PROXY_EXECPTION);
         KB_ENCRYPT_KEY = prop.getProperty("KB_PROXY_KEY", KB_ENCRYPT_KEY);
-        KB_PROXY_URL = prop.getProperty("KB_PROXY_URL", KB_PROXY_URL);
 
         KB_SERVICES_CONTEXT_PATH = prop.getProperty("KB_SERVICES_CONTEXT_PATH", KB_SERVICES_CONTEXT_PATH);
         KB_SERVICES_SERVER_URI = prop.getProperty("KB_SERVICES_SERVER_URI", KB_SERVICES_SERVER_URI);

@@ -457,15 +457,21 @@ public class Layer implements XMLElement,Comparable{
      *
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
-    // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    protected void overwriteURL(String newUrl) {
+    // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
+    protected void convertValues2KB(HashMap conversionValues) {
+        conversionValues.put("layerName", this.getName());
+        String spAbbr = "unknown";
+        if (this.getServiceProvider()!=null) {
+            spAbbr = this.getServiceProvider().getAbbr();
+        }
+        conversionValues.put("spAbbr", spAbbr);
         Iterator it;
         //Layers:
         if (null != this.getLayers() && this.getLayers().size() != 0) {
             it = this.getLayers().iterator();
             while (it.hasNext()) {
                 Layer l = (Layer) it.next();
-                l.overwriteURL(newUrl);
+                l.convertValues2KB(conversionValues);
             }
         }
 
@@ -474,7 +480,7 @@ public class Layer implements XMLElement,Comparable{
             it = domainResource.iterator();
             while (it.hasNext()) {
                 LayerDomainResource ldr = (LayerDomainResource) it.next();
-                ldr.overwriteURL(newUrl);
+                ldr.convertValues2KB(conversionValues);
             }
         }
 
@@ -483,7 +489,7 @@ public class Layer implements XMLElement,Comparable{
             it = styles.iterator();
             while (it.hasNext()) {
                 Style style = (Style) it.next();
-                style.overwriteURL(newUrl);
+                style.convertValues2KB(conversionValues);
             }
         }
     }
@@ -750,7 +756,7 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
-        hlist = (ArrayList) srshash.get("AuthorityURL");
+        hlist = (ArrayList) ldrhash.get("AuthorityURL");
         if (hlist != null && !hlist.isEmpty()) {
             Iterator it = hlist.iterator();
             while (it.hasNext()) {
@@ -767,7 +773,7 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
-        hlist = (ArrayList) srshash.get("MetadataURL");
+        hlist = (ArrayList) ldrhash.get("MetadataURL");
         if (hlist != null && !hlist.isEmpty()) {
             Iterator it = hlist.iterator();
             while (it.hasNext()) {
@@ -776,7 +782,7 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
-        hlist = (ArrayList) srshash.get("DataURL");
+        hlist = (ArrayList) ldrhash.get("DataURL");
         if (hlist != null && !hlist.isEmpty()) {
             Iterator it = hlist.iterator();
             while (it.hasNext()) {
@@ -785,7 +791,7 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
-        hlist = (ArrayList) srshash.get("FeatureListURL");
+        hlist = (ArrayList) ldrhash.get("FeatureListURL");
         if (hlist != null && !hlist.isEmpty()) {
             Iterator it = hlist.iterator();
             while (it.hasNext()) {

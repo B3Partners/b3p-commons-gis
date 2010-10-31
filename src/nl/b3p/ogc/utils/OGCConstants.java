@@ -26,7 +26,14 @@ import java.util.Arrays;
 import java.util.List;
 
 public interface OGCConstants {
-    // <editor-fold defaultstate="" desc="Predefined static final WMS request keys strings">
+    // Non OGC constants for collecting metadata, e.g. SERVICE=METADATA&LAYER=demo_basis
+
+    public static final String NONOGC_SERVICE_METADATA = "METADATA";
+    public static final String METADATA_LAYER = "LAYER";
+    public static final String METADATA_XML = "text/xml";
+    // Non OGC constants for proxing of urls
+    public static final String NONOGC_SERVICE_PROXY = "PROXY";
+    public static final String PROXY_URL = "PURL";
     // Required request keys for GetCapabilities:
     public static final String WMS_VERSION = "VERSION";
     public static final String WMS_REQUEST = "REQUEST";
@@ -66,8 +73,6 @@ public interface OGCConstants {
     public static final String WMS_PARAM_SLD_BODY = "SLD_BODY";    // Required request keys for DescribeLayer:
     // SERVICE, REQUEST, VERSION & LAYERS are already defined above
     // DescribeLayer has no optional request keys
-    // </editor-fold>
-    // <editor-fold defaultstate="" desc="Predefined static final WMS request params strings">
     public static final String WMS_REQUEST_GetCapabilities = "GetCapabilities";
     public static final String WMS_REQUEST_GetMap = "GetMap";
     public static final String WMS_REQUEST_GetFeatureInfo = "GetFeatureInfo";
@@ -90,8 +95,6 @@ public interface OGCConstants {
     public static final String FORMAT_TIFF = "image/tiff";
     public static final String FORMAT_GIF = "image/gif";
     public static final String FORMAT_INIMAGE = "INIMAGE";
-    // </editor-fold>
-    // <editor-fold defaultstate="" desc="Predefined static final WFS request keys strings">
     /*TODO: dit moet nog een keer aangepast worden!!
      *Hier moeten alle WFS parameters inkomen.Niet alleen de WFS parameters die WMS niet heeft (zoals nu)
      */
@@ -145,8 +148,6 @@ public interface OGCConstants {
     public static final String WFS_OBJECT_GEOMETRYTYPE = "gml:GeometryPropertyType";
     public static final String WFS_SERVER_EXCEPTION = "ServiceExceptionReport";
     public static final String WFS_TRANSACTIONRESPONSE = "TransactionResponse";
-    // </editor-fold>
-    // <editor-fold defaultstate="" desc="List with essential parameters per wms service.">
     /**
      * List with essential parameters per wms service.
      */
@@ -160,20 +161,25 @@ public interface OGCConstants {
             });
     public static final List WFS_REQUIRED_PARAMS_GetFeature = Arrays.asList(new String[]{
                 REQUEST,
-                SERVICE,
                 VERSION
             });
     public static final List WFS_REQUIRED_PARAMS_DescribeFeatureType = Arrays.asList(new String[]{
                 REQUEST,
-                SERVICE,
                 VERSION,
                 /* WFS_PARAM_OUTPUTFORMAT, is optional */
                 WFS_PARAM_TYPENAME
             });
     public static final List WFS_REQUIRED_PARAMS_Transaction = Arrays.asList(new String[]{
                 REQUEST,
-                SERVICE,
                 VERSION
+            });
+    public static final List REQUIRED_PARAMS_PROXY = Arrays.asList(new String[]{
+                SERVICE,
+                PROXY_URL
+            });
+    public static final List REQUIRED_PARAMS_METADATA = Arrays.asList(new String[]{
+                SERVICE,
+                METADATA_LAYER
             });
     public static final List NON_REQUIRED_PARAMS_GetCapabilities = Arrays.asList(new String[]{
                 UPDATESEQUENCE
@@ -239,8 +245,6 @@ public interface OGCConstants {
                 VERSION,
                 WMS_PARAM_LAYERS
             });
-    // </editor-fold>
-    // <editor-fold defaultstate="" desc="List with implemented requests.">
     /**
      * List with implemented requests.
      */
@@ -250,41 +254,27 @@ public interface OGCConstants {
                 WMS_REQUEST_GetFeatureInfo,
                 WMS_REQUEST_GetLegendGraphic,
                 WMS_REQUEST_DescribeLayer,
-                WFS_REQUEST_GetFeature,
-                WFS_REQUEST_DescribeFeatureType,
-                WFS_REQUEST_GetCapabilities,
-                WFS_REQUEST_Transaction
             });
-    // </editor-fold>
-    public static final List SUPPORT_WFS_REQUESTS = Arrays.asList(new String[]{
+    public static final List SUPPORTED_WFS_REQUESTS = Arrays.asList(new String[]{
                 WFS_REQUEST_DescribeFeatureType,
                 WFS_REQUEST_GetCapabilities,
                 WFS_REQUEST_GetFeature,
                 //WFS_REQUEST_GetFeatureWithLock,
                 //WFS_REQUEST_LockFeature,
                 WFS_REQUEST_Transaction
-            });    // <editor-fold defaultstate="" desc="List with implemented services.">
-    /**
-     * List with implemented services.
-     */
-    public static final List SUPPORTED_SERVICES = Arrays.asList(new String[]{
-                WMS_SERVICE_WMS
             });
-    // </editor-fold>
-    // <editor-fold defaultstate="" desc="List with implemented versions.">
     /**
      * List with implemented versions.
      */
     public static final List SUPPORTED_VERSIONS = Arrays.asList(new String[]{
                 WMS_VERSION_111, WMS_VERSION_110
             });
-    // </editor-fold>
     /**
      * List with implemented versions for WFS.
      */
     public static final List SUPPORTED_WFS_VERSIONS = Arrays.asList(new String[]{
                 WFS_VERSION_100, WFS_VERSION_110
-            });    // <editor-fold defaultstate="" desc="List with implemented exceptions.">
+            });
     /**
      * List with implemented exceptions.
      */
@@ -292,5 +282,4 @@ public interface OGCConstants {
                 WMS_PARAM_WMS_XML,
                 WMS_PARAM_EXCEPTION_XML
             });
-    // </editor-fold>
 }

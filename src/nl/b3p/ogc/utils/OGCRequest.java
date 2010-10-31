@@ -245,7 +245,7 @@ public class OGCRequest implements OGCConstants {
         if (map != null) {
             for (int i = 0; map.getLength() > i; i++) {
                 String value = map.item(i).getNodeValue();
-                if (value==null || value.length()==0) {
+                if (value == null || value.length() == 0) {
                     continue;
                 }
                 String name = map.item(i).getNodeName();
@@ -633,7 +633,7 @@ public class OGCRequest implements OGCConstants {
             return;
         }
         String[] tokens = url.split("\\?|&");
-        if (tokens.length>0) {
+        if (tokens.length > 0) {
             setHttpHost(tokens[0]);
         }
         for (int i = 0; i < tokens.length; i++) {
@@ -661,7 +661,7 @@ public class OGCRequest implements OGCConstants {
                             }
                         }
                     }
-               } else {
+                } else {
                     if (keyValuePair.length > 2) {
                         String value = "";
                         for (int b = 1; b < keyValuePair.length; b++) {
@@ -919,7 +919,7 @@ public class OGCRequest implements OGCConstants {
         return (String) o;
     }
 
-   /** Adds or replaces a string with params
+    /** Adds or replaces a string with params
      *
      * @param params A String with parameters seperated by a '&'
      *
@@ -1029,10 +1029,10 @@ public class OGCRequest implements OGCConstants {
                 value = "";
             }
 //            try {
-                //FIX so get requests will be valid when containing invalid values
+            //FIX so get requests will be valid when containing invalid values
 //                returnvalue[i] = key + "=" + URLEncoder.encode(value, "UTF-8");
 //            } catch (UnsupportedEncodingException e) {
-                returnvalue[i] = key + "=" + value;
+            returnvalue[i] = key + "=" + value;
 //            }
         }
         return returnvalue;
@@ -1147,7 +1147,7 @@ public class OGCRequest implements OGCConstants {
             returnv.setAbbr(new String(this.getAbbr()));
         }
 
-        if (this.getHttpMethod() != null){
+        if (this.getHttpMethod() != null) {
             returnv.setHttpMethod(new String(this.getHttpMethod()));
         }
 
@@ -1166,7 +1166,6 @@ public class OGCRequest implements OGCConstants {
 
         return returnv;
     }
-
 
     public String getHost() {
         return getHttpHost();
@@ -1230,90 +1229,60 @@ public class OGCRequest implements OGCConstants {
         if (parameters == null) {
             throw new UnsupportedOperationException("No parameters found in url!");
         }
+        String service = null;
+        if (containsParameter(SERVICE)) {
+            service = getParameter(SERVICE);
+            if (service == null || service.equals("")) {
+                throw new UnsupportedOperationException("Empty service parameter found in url!");
+            }
+            if (service.equalsIgnoreCase(NONOGC_SERVICE_METADATA)) {
+                checkRequestURL(REQUIRED_PARAMS_METADATA, service);
+                return;
+            } else if (service.equalsIgnoreCase(NONOGC_SERVICE_PROXY)) {
+                checkRequestURL(REQUIRED_PARAMS_PROXY, service);
+                return;
+            }
+        }
+
         if (containsParameter(REQUEST)) {
             String request = getParameter(OGCConstants.REQUEST);
-            String service = getParameter(OGCConstants.SERVICE);
             if (request == null || request.equals("")) {
-                throw new UnsupportedOperationException("No request parameter found in url!");
-            }
-            if (service == null) {
-                service = "NULL";
+                throw new UnsupportedOperationException("Empty request parameter found in url!");
             }
 
+            //Only Capabilities request require service param, which should be
+            //checked by checkRequestUrl(requiredParams, request).
+            //Server may erroneously require service param (http://trac.osgeo.org/mapserver/ticket/2737),
+            //but Kaartenbalie shouldn't need it.
             List requiredParams = null;
-
-            if (SUPPORTED_REQUESTS.contains(request)) {
-                //Only Capabilities request require service param, which should be
-                //checked by checkRequestUrl(requiredParams, request).
-                //Server may erroneously require service param (http://trac.osgeo.org/mapserver/ticket/2737),
-                //but Kaartenbalie shouldn't need it.
-                if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS) && request.equals(WMS_REQUEST_GetCapabilities)) {
-                    requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                } else if (request.equals(WMS_REQUEST_GetMap)) {
-                    requiredParams = PARAMS_GetMap;
-                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
-                    requiredParams = PARAMS_GetFeatureInfo;
-                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
-                    requiredParams = PARAMS_GetLegendGraphic;
-                } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
-                    requiredParams = PARAMS_DescribeLayer;
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetCapabilities)) {
-                    requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetFeature)) {
-                    requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_DescribeFeatureType)) {
-                    requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_Transaction)) {
-                    requiredParams = WFS_REQUIRED_PARAMS_Transaction;
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetFeatureWithLock)) {
-                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_LockFeature)) {
-                    throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                }
-                checkRequestURL(requiredParams, request);
-
-                /*
-                if (service == null || service.equals("")) {
-                throw new UnsupportedOperationException("No service parameter for request found in url!");
-                } else if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS)) {
-                if (request.equals(WMS_REQUEST_GetCapabilities)) {
+            if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS) && request.equals(WMS_REQUEST_GetCapabilities)) {
                 requiredParams = REQUIRED_PARAMS_GetCapabilities;
-                } else if (request.equals(WMS_REQUEST_GetMap)) {
+            } else if (request.equals(WMS_REQUEST_GetMap)) {
                 requiredParams = PARAMS_GetMap;
-                } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
+            } else if (request.equals(WMS_REQUEST_GetFeatureInfo)) {
                 requiredParams = PARAMS_GetFeatureInfo;
-                } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
+            } else if (request.equals(WMS_REQUEST_GetLegendGraphic)) {
                 requiredParams = PARAMS_GetLegendGraphic;
-                } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
+            } else if (request.equals(WMS_REQUEST_DescribeLayer)) {
                 requiredParams = PARAMS_DescribeLayer;
-                }
-                checkRequestURL(requiredParams, request);
-                } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS)) {
-                if (request.equals(WFS_REQUEST_GetCapabilities)) {
+            } else if (service.equalsIgnoreCase(OGCConstants.WFS_SERVICE_WFS) && request.equals(WFS_REQUEST_GetCapabilities)) {
                 requiredParams = WFS_REQUIRED_PARAMS_GetCapabilities;
-                } else if (request.equals(WFS_REQUEST_GetFeature)) {
+            } else if (request.equals(WFS_REQUEST_GetFeature)) {
                 requiredParams = WFS_REQUIRED_PARAMS_GetFeature;
-                } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
+            } else if (request.equals(WFS_REQUEST_DescribeFeatureType)) {
                 requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
-                } else if (request.equals(WFS_REQUEST_Transaction)) {
+            } else if (request.equals(WFS_REQUEST_Transaction)) {
                 requiredParams = WFS_REQUIRED_PARAMS_Transaction;
-                } else if (request.equals(WFS_REQUEST_GetFeatureWithLock)) {
-                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                } else if (request.equals(WFS_REQUEST_LockFeature)) {
-                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-                }
-                // validation has been done when unmarshalled with castor
-                // but has to be done for kvp requests
-                checkRequestURL(requiredParams, request);
-                } else {
-                throw new UnsupportedOperationException("Service '" + service + "' not supported!");
-                }
-                 */
+//            } else if (request.equals(WFS_REQUEST_GetFeatureWithLock)) {
+//                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
+//            } else if (request.equals(WFS_REQUEST_LockFeature)) {
+//                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
             } else {
                 throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to "
-                        + "get the list of supported functions. Usage: i.e. http://urltoserver/personalurl?REQUEST=GetCapabilities&"
-                        + "VERSION=1.1.1&SERVICE=WMS");
+                        + "get the list of supported functions.");
             }
+            checkRequestURL(requiredParams, request);
+
         } else {
             throw new UnsupportedOperationException("No request parameter found!");
         }
@@ -1382,8 +1351,8 @@ public class OGCRequest implements OGCConstants {
      * See paragraph 6.2 of the WFS 1.1.0 specification for more details.
      */
     public final void setFinalVersion(String clientVersion) {
-        if (clientVersion == null || clientVersion.equals("") ||
-                clientVersion.equals(OGCConstants.WFS_VERSION_UNSPECIFIED)) {
+        if (clientVersion == null || clientVersion.equals("")
+                || clientVersion.equals(OGCConstants.WFS_VERSION_UNSPECIFIED)) {
             finalVersion = OGCConstants.WFS_VERSION_UNSPECIFIED;
         } else if (OGCConstants.SUPPORTED_WFS_VERSIONS.contains(clientVersion)) {
             finalVersion = clientVersion;

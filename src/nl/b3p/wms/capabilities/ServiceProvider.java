@@ -23,6 +23,7 @@
 package nl.b3p.wms.capabilities;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
@@ -283,20 +284,22 @@ public class ServiceProvider implements XMLElement {
      *
      * @param newUrl String representing the URL the old URL has to be replaced with.
      */
-    // <editor-fold defaultstate="" desc="overwriteURL(String newUrl) method">
-    public void overwriteURL(String newUrl) throws Exception {
+    // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
+    public void convertValues2KB(HashMap conversionValues) throws Exception {
+        conversionValues.put("spAbbr", this.abbr);
+        String newUrl = (String)conversionValues.get("url");
         this.url = newUrl;
 
         if (domainResource != null) {
             Iterator it = domainResource.iterator();
             while (it.hasNext()) {
                 ServiceDomainResource sdr = (ServiceDomainResource) it.next();
-                sdr.overwriteURL(newUrl);
+                sdr.convertValues2KB(conversionValues);
             }
         }
         Layer tl = getTopLayer();
         if (tl != null) {
-            tl.overwriteURL(newUrl);
+            tl.convertValues2KB(conversionValues);
         }
     }
     // </editor-fold>

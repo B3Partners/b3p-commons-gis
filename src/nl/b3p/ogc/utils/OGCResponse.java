@@ -197,7 +197,7 @@ public class OGCResponse {
 
                 getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
             }
-            checkSupportedOperations(OGCConstants.SUPPORT_WFS_REQUESTS);
+            checkSupportedOperations(OGCConstants.SUPPORTED_WFS_REQUESTS);
         } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
             response = OGCConstants.WFS_FEATURECOLLECTION;
             version = request.getFinalVersion();
