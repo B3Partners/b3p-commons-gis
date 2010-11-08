@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import nl.b3p.ogc.utils.KBCrypter;
+import nl.b3p.ogc.utils.OGCConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -135,20 +136,27 @@ public class StyleDomainResource implements XMLElement {
     }
 
     protected void convertValues2KB(HashMap conversionValues) {
-        String newUrl = (String)conversionValues.get("url");
-        String originalURL = this.getUrl();
+        String newUrl = (String) conversionValues.get("url");
         int pos = newUrl.indexOf("?");
         if (pos == -1) {
-            newUrl += "?purl=";
+            newUrl += "?";
         } else {
-            newUrl += "&purl=";
+            newUrl += "&";
         }
+
+        newUrl += OGCConstants.SERVICE;
+        newUrl += "=";
+        newUrl += OGCConstants.NONOGC_SERVICE_PROXY;
+        newUrl += "&";
+        newUrl += OGCConstants.PROXY_URL;
+        newUrl += "=";
         try {
+            String originalURL = this.getUrl();
             newUrl += KBCrypter.encryptText(originalURL);
-            this.setUrl(newUrl);
         } catch (Exception ex) {
             log.error("error:", ex);
         }
+        this.setUrl(newUrl);
     }
 
     /** Method that will create piece of the XML tree to create a proper XML docuement.
