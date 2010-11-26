@@ -25,12 +25,13 @@ package nl.b3p.ogc.wfs.v110;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import nl.b3p.ogc.ServiceProviderInterface;
 
 /**
  *
  * @author Jytte
  */
-public class WfsServiceProvider {
+public class WfsServiceProvider implements ServiceProviderInterface {
 
     private Integer id;
     private String abbr;
@@ -123,6 +124,10 @@ public class WfsServiceProvider {
 
     public void setUpdatedDate(Date updatedDate) {
         this.updatedDate = updatedDate;
+    }
+
+    public String getType() {
+        return "WFS";
     }
 
 }

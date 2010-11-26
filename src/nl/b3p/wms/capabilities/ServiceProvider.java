@@ -28,6 +28,7 @@ import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import nl.b3p.ogc.ServiceProviderInterface;
 import nl.b3p.ogc.utils.KBConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +36,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-public class ServiceProvider implements XMLElement {
+public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private static final Log log = LogFactory.getLog(ServiceProvider.class);
     private Integer id;
     private String abbr;
@@ -514,5 +515,9 @@ public class ServiceProvider implements XMLElement {
         sc.setUrl(this.getUrl());
         sc.setWmsVersion(this.getWmsVersion());
         return sc;
+    }
+
+    public String getType() {
+        return "WMS";
     }
 }
