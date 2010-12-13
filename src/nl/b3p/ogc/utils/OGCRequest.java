@@ -680,7 +680,7 @@ public class OGCRequest implements OGCConstants {
             }
         }
 
-        if (OGCConstants.WFS_SERVICE_WFS.equals(getParameter(OGCConstants.SERVICE))) {
+        if (OGCConstants.SUPPORTED_WFS_REQUESTS.contains(getParameter(OGCConstants.REQUEST))) {
             setFinalVersion(getParameter(OGCConstants.VERSION));
         }
     }
@@ -1255,7 +1255,8 @@ public class OGCRequest implements OGCConstants {
             //Server may erroneously require service param (http://trac.osgeo.org/mapserver/ticket/2737),
             //but Kaartenbalie shouldn't need it.
             List requiredParams = null;
-            if (service.equalsIgnoreCase(OGCConstants.WMS_SERVICE_WMS) && request.equals(WMS_REQUEST_GetCapabilities)) {
+            if (request.equals(WMS_REQUEST_GetCapabilities) && 
+                    (OGCConstants.WMS_SERVICE_WMS.equalsIgnoreCase(service) || service == null) ) {
                 requiredParams = REQUIRED_PARAMS_GetCapabilities;
             } else if (request.equals(WMS_REQUEST_GetMap)) {
                 requiredParams = PARAMS_GetMap;
