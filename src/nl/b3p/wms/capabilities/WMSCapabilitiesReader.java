@@ -125,7 +125,7 @@ public class WMSCapabilitiesReader {
         try {
             int statusCode = client.executeMethod(method);
             if (statusCode != HttpStatus.SC_OK) {
-                log.error("Host: " + location + " error: " + method.getStatusLine().getReasonPhrase());
+//                log.error("Host: " + location + " error: " + method.getStatusLine().getReasonPhrase());
                 throw new Exception("Host: " + location + " error: " + method.getStatusLine().getReasonPhrase());
             }
             String mimeType = null;
@@ -133,11 +133,11 @@ public class WMSCapabilitiesReader {
                 mimeType = method.getResponseHeader("Content-Type").getValue();
             }
             if (mimeType == null || mimeType.indexOf("xml") == -1) {
-                log.error("Host: " + location + " error: Cannot get a GetCapabilities document from server");
+//                log.error("Host: " + location + " error: Cannot get a GetCapabilities document from server");
                 throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document from server");
             }
             if (mimeType.equals("application/vnd.ogc.se_xml")) {
-                log.error("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
+//                log.error("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
                 throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
             }
 
@@ -158,7 +158,7 @@ public class WMSCapabilitiesReader {
         }
 
         if (out == null) {
-            log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
+//            log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
             throw new Exception("Host: " + location + " error: No service provider object could be created, unkown reason!");
         }
         return out;
