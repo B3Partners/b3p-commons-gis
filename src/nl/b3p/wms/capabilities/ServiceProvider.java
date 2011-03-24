@@ -24,7 +24,6 @@ package nl.b3p.wms.capabilities;
 
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +57,10 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private Set allRoles;
     private String code;
     private boolean isSynchronized = false;
+
+    private Date expireDate;
+    private String userName;
+    private String personalCode;
 
     /** default ServiceProvider() constructor.
      */
@@ -336,7 +339,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             serviceElement.appendChild(abstractElement);
         }
 
-        if (null != this.getServiceProviderKeywordList() && this.getServiceProviderKeywordList().size() != 0) {
+        if (null != this.getServiceProviderKeywordList() && !this.getServiceProviderKeywordList().isEmpty()) {
             Element keywordListElement = doc.createElement("KeywordList");
 
             Iterator it = this.getServiceProviderKeywordList().iterator();
@@ -384,7 +387,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         Element requestElement = doc.createElement("Request");
 
         if (domainResource != null) {
-            Hashtable sdrhash = new Hashtable();
+            HashMap sdrhash = new HashMap();
             ServiceDomainResource sdr = null;
             Iterator it = domainResource.iterator();
             while (it.hasNext()) {
@@ -455,6 +458,27 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             vendorSpecificElement.appendChild(orgcode);
         }
 
+        if (this.getExpireDate() != null) {
+            Element expireDate = doc.createElement("ExpireDate");
+            Text text = doc.createTextNode(this.getExpireDate().toString());
+            expireDate.appendChild(text);
+            vendorSpecificElement.appendChild(expireDate);
+        }
+
+        if (this.getUserName() != null) {
+            Element userName = doc.createElement("UserName");
+            Text text = doc.createTextNode(this.getUserName());
+            userName.appendChild(text);
+            vendorSpecificElement.appendChild(userName);
+        }
+
+        if (this.getPersonalCode() != null) {
+            Element pCode = doc.createElement("PersonalCode");
+            Text text = doc.createTextNode(this.getPersonalCode());
+            pCode.appendChild(text);
+            vendorSpecificElement.appendChild(pCode);
+        }
+
         capabilityElement.appendChild(vendorSpecificElement);
 
         //De beschikbare layers.
@@ -500,6 +524,30 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public void setAbbr(String abbr) {
         this.abbr = abbr;
+    }
+
+    public Date getExpireDate() {
+        return expireDate;
+    }
+
+    public void setExpireDate(Date expireDate) {
+        this.expireDate = expireDate;
+    }
+
+    public String getPersonalCode() {
+        return personalCode;
+    }
+
+    public void setPersonalCode(String personalCode) {
+        this.personalCode = personalCode;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 
     public ServiceProvider shallowClone() {

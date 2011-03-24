@@ -44,6 +44,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.xml.sax.Attributes;
 
@@ -54,7 +58,6 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
 import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
@@ -298,7 +301,10 @@ public class WMSCapabilitiesReader {
         //These two Handlers are not being used
         s.setElementHandler("VendorSpecificCapabilities", new VendorSpecificCapabilitiesHandler());
         s.setElementHandler("Role", new RoleHandler());
-        s.setElementHandler("OrganizationCode", new OrganizationCodeHandler());
+        s.setElementHandler("OrganizationCode", new OrganizationCodeHandler());        
+        s.setElementHandler("ExpireDate", new ExpireDateHandler());
+        s.setElementHandler("UserName", new UserNameHandler());
+        s.setElementHandler("PersonalCode", new PersonalCodeHandler());
         //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
     }
     // </editor-fold>
@@ -1584,6 +1590,82 @@ public class WMSCapabilitiesReader {
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
             checkObject(serviceProvider);
             serviceProvider.setOrganizationCode(sb.toString());
+        }
+    }
+
+    private class ExpireDateHandler extends ElementHandler {
+
+        StringBuffer sb;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        @Override
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
+
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            Date today = null;
+
+            try {
+                today = df.parse(sb.toString());
+            } catch (ParseException e) {
+                log.error("Error pasring string to Date." + e);
+            }
+
+            serviceProvider.setExpireDate(today);
+        }
+    }
+
+    private class UserNameHandler extends ElementHandler {
+
+        StringBuffer sb;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        @Override
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
+            serviceProvider.setUserName(sb.toString());
+        }
+    }
+
+    private class PersonalCodeHandler extends ElementHandler {
+
+        StringBuffer sb;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        @Override
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
+            serviceProvider.setPersonalCode(sb.toString());
         }
     }
 
