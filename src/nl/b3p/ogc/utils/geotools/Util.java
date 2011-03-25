@@ -76,7 +76,18 @@ public class Util {
             }
             //if doesn't need to skip, add to new list
             if (!skip) {
-                newAttributeDescriptors.add(attributeDescriptors.get(a));
+                AttributeDescriptor ad= attributeDescriptors.get(a);
+                if (ad.getLocalName().length()>10){
+                    AttributeTypeBuilder attributeTypeBuilder = new AttributeTypeBuilder();
+                    attributeTypeBuilder.init(ad);
+                    String newName=ad.getLocalName();
+                    if (newName.indexOf(".") > 0 &&
+                            newName.indexOf(".")+1 < newName.length()){
+                        newName=newName.substring(newName.lastIndexOf(".")+1);
+                    }
+                    ad=attributeTypeBuilder.buildDescriptor(newName);
+                }
+                newAttributeDescriptors.add(ad);
                 newAttributes.add(attributes.get(a));
             }
         }

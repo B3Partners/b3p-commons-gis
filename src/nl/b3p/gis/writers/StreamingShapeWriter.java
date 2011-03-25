@@ -32,6 +32,7 @@ import org.geotools.feature.IllegalAttributeException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 import org.xml.sax.SAXException;
 
@@ -51,7 +52,16 @@ public class StreamingShapeWriter {
     private String workingDir = null;
     private boolean shapeIndex = true;
     private List<String> skipAttributeNames = null;
+    private CoordinateReferenceSystem defaultCoordRefSys=null;
 
+
+    /**
+     * Constructor with shapeIndex=true
+     */
+    public StreamingShapeWriter(String workingDir, CoordinateReferenceSystem defaultCoordRefSys) throws IOException {
+        this(workingDir);
+        this.defaultCoordRefSys=defaultCoordRefSys;
+    }
     /**
      * Constructor with shapeIndex=true
      */
@@ -205,8 +215,22 @@ public class StreamingShapeWriter {
             ds.createSchema(Util.changeGeometryBinding(type, geomClass));
             datastores.put(hashKey, ds);
         }
+        if (type.getCoordinateReferenceSystem()!=null)
+            ds.forceSchemaCRS(type.getCoordinateReferenceSystem());
+        else if (defaultCoordRefSys!=null)
+            ds.forceSchemaCRS(defaultCoordRefSys);
         //create transaction and writer
-        return ds.getFeatureWriterAppend(type.getTypeName(), Transaction.AUTO_COMMIT);
+        //sometimes (when a crs is forced) the typename is resolved bij the shp fileName... 
+        //So check if the suffix is needed because the suffix is in the filename.
+        String[] typeNames= ds.getTypeNames();
+        for (int i=0; i< typeNames.length; i++){
+            if (typeNames[i].equals(type.getTypeName())){
+                return ds.getFeatureWriterAppend(type.getTypeName(), Transaction.AUTO_COMMIT);
+            }else if (typeNames[i].equals(type.getTypeName()+suffix)){
+                return ds.getFeatureWriterAppend(type.getTypeName()+suffix, Transaction.AUTO_COMMIT);
+            }
+        }
+        return ds.getFeatureWriterAppend(type.getTypeName()+suffix, Transaction.AUTO_COMMIT);
     }
 
     private String createHashKey(Class newGeomClass, String typeName) {
