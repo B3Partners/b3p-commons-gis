@@ -62,6 +62,11 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private String userName;
     private String personalCode;
 
+    private String status;
+
+    /* password to check againt when object is already been cached */
+    private String password;
+
     /** default ServiceProvider() constructor.
      */
     // <editor-fold defaultstate="" desc="default ServiceProvider() constructor">
@@ -548,6 +553,22 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public ServiceProvider shallowClone() {
