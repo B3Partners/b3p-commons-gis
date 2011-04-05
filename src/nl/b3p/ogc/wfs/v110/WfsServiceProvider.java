@@ -43,6 +43,8 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     private Date updatedDate;
     private Set wfsLayers;
 
+    private String status;
+
     /** Creates a new instance of WfsServiceProvider */
     public WfsServiceProvider() {
     }
@@ -128,6 +130,14 @@ public class WfsServiceProvider implements ServiceProviderInterface {
 
     public String getType() {
         return "WFS";
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
 }
