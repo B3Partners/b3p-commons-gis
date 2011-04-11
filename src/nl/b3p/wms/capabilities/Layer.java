@@ -63,7 +63,10 @@ public class Layer implements XMLElement,Comparable{
     private Set organizationLayers;
     private Set srsbb;
     private Set layers;
+    private String oldMetadata;
     private String metadata;
+    private Set layerMetadata;
+
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
         return id;
@@ -409,12 +412,51 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getMetadata() {
-        return metadata;
+        Set<LayerMetadata> metaDataLayers = getLayerMetadata();
+
+        if (metaDataLayers == null || metaDataLayers.isEmpty()) {
+            return getOldMetadata();
+        }
+
+        for (LayerMetadata lmd : metaDataLayers) {
+            if (lmd.getMetadata() != null) {
+                return lmd.getMetadata();
+            }
+        }
+
+        return null;
     }
 
     public void setMetadata(String metaData) {
-        this.metadata = metaData;
+        if (metaData != null) {
+            LayerMetadata layerMetadata = new LayerMetadata();
+            layerMetadata.setLayer(this);
+            layerMetadata.setMetadata(metaData);
+            
+            Set<LayerMetadata> newLayers = new HashSet<LayerMetadata>();
+            newLayers.add(layerMetadata);
+
+            this.setLayerMetadata(newLayers);
+            this.setOldMetadata(null);
+        }
     }
+
+    private String getOldMetadata() {
+        return oldMetadata;
+    }
+
+    private void setOldMetadata(String oldMetadata) {
+        this.oldMetadata = oldMetadata;
+    }
+
+    public Set getLayerMetadata() {
+        return layerMetadata;
+    }
+
+    public void setLayerMetadata(Set layerMetadata) {
+        this.layerMetadata = layerMetadata;
+    }
+
     // </editor-fold>
     public Set getAuthSubLayersClone(Set authLayerIds) {
         if (authLayerIds == null || authLayerIds.isEmpty()) {
