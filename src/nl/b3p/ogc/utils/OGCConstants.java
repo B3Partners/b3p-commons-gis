@@ -85,7 +85,10 @@ public interface OGCConstants {
     public static final String WMS_VERSION_111 = "1.1.1";
     public static final String WMS_PARAM_TRANSPARENT_TRUE = "TRUE";    //Output formats GetCapabilities:
     public static final String WMS_PARAM_WMS_XML = "application/vnd.ogc.wms_xml";
-    public static final String WMS_PARAM_WMS_GML = "application/vnd.ogc.wms_gml";    //Exception formats:
+    public static final String WMS_PARAM_WMS_GML = "application/vnd.ogc.wms_gml";
+    public static final String WMS_PARAM_XML = "application/vnd.ogc.xml";
+    public static final String WMS_PARAM_GML = "application/vnd.ogc.gml";
+    public static final String WMS_PARAM_WMS_HTML = "text/html";   //Exception formats:
     public static final String WMS_PARAM_EXCEPTION_XML = "application/vnd.ogc.se_xml";
     public static final String WMS_PARAM_EXCEPTION_INIMAGE = "application/vnd.ogc.se_inimage";
     public static final String WMS_PARAM_SHORT_EXCEPTION_INIMAGE = "inimage";
