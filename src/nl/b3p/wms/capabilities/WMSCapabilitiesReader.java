@@ -598,15 +598,26 @@ public class WMSCapabilitiesReader {
 
     private class StyleHandler extends ElementHandler {
 
+        @Override
         public void startElement(String uri, String localName, String qName, Attributes atts) {
             Style style = new Style();
             stack.push(style);
         }
 
+        @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             Style style = (Style) stack.pop();
             Layer layer = (Layer) stack.peek();
             checkObject(layer);
+
+            if (style.getName() == null || style.getName().equals("")) {
+                style.setName("default");
+            }
+
+            if (style.getTitle() == null || style.getTitle().equals("")) {
+                style.setTitle("default");
+            }
+            
             layer.addStyle(style);
         }
     }
