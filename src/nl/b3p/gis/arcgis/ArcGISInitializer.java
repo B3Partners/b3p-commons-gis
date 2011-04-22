@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package nl.b3p.commons.arcgis;
+package nl.b3p.gis.arcgis;
 
 import com.esri.arcgis.system.AoInitialize;
 import com.esri.arcgis.system.EngineInitializer;
