@@ -2,7 +2,7 @@
  * $Id$
  */
 
-package nl.b3p.commons.geotools;
+package nl.b3p.gis.geotools;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -13,7 +13,7 @@ import org.geotools.util.logging.Logging;
 /**
  * Configureer in web.xml als:
     <listener>
-        <listener-class>nl.b3p.commons.geotools.GeoToolsLoggingInitializer</listener-class>
+        <listener-class>nl.b3p.gis.geotools.GeoToolsLoggingInitializer</listener-class>
     </listener>
  *
  * Voorbeeld log4j.properties:
