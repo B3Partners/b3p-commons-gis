@@ -420,73 +420,122 @@ public class OgcWfsClient {
 
         if (gf instanceof nl.b3p.xml.wfs.v100.GetFeature) {
             nl.b3p.xml.wfs.v100.GetFeature gfv100 = (nl.b3p.xml.wfs.v100.GetFeature) gf;
-            nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
-            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
-                q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
-            }
+            //nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
+            nl.b3p.xml.ogc.v100.Filter filter=null;
+            //make filter
             if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
                 try {
-                    nl.b3p.xml.ogc.v100.Filter f = (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
-                    q.setFilter(f);
+                    filter = (nl.b3p.xml.ogc.v100.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v100.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));                    
                 } catch (Exception e) {
                     log.error("Filter v100 (WFS version 1.0.0) not correct", e);
                 }
             }
+            nl.b3p.xml.ogc.v100.PropertyName[] properties=null;
+            //make properties
             if (or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME) != null) {
                 try {
                     String[] propertyNames = or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME).split(",");
-                    nl.b3p.xml.ogc.v100.PropertyName[] p = new nl.b3p.xml.ogc.v100.PropertyName[propertyNames.length];
+                    properties = new nl.b3p.xml.ogc.v100.PropertyName[propertyNames.length];
                     for (int i = 0; i < propertyNames.length; i++) {
-                        p[i] = new nl.b3p.xml.ogc.v100.PropertyName();
-                        p[i].setContent(propertyNames[i]);
+                        properties[i] = new nl.b3p.xml.ogc.v100.PropertyName();
+                        properties[i].setContent(propertyNames[i]);
                     }
-                    q.setPropertyName(p);
+                    //q.setPropertyName(p);
                 } catch (Exception e) {
                     log.error("PropertyName v100 (WFS version 1.0.0) not correct", e);
                 }
             }
-            gfv100.addQuery(q);
+            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {                
+                String[] typenames=or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
+                for (int i=0; i < typenames.length; i++){
+                    nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
+                    q.setTypeName(typenames[i]);
+                    if (filter!=null){
+                        q.setFilter(filter);                        
+                    }
+                    if (properties!=null){
+                        q.setPropertyName(properties);
+                    }                    
+                    gfv100.addQuery(q);
+                }               
+            }else{            
+                nl.b3p.xml.wfs.v100.Query q = new nl.b3p.xml.wfs.v100.Query();
+                if (filter!=null){
+                    q.setFilter(filter);                        
+                }
+                if (properties!=null){
+                    q.setPropertyName(properties);
+                } 
+                gfv100.addQuery(q);
+            }
+            
         } else if (gf instanceof nl.b3p.xml.wfs.v110.GetFeature) {
             nl.b3p.xml.wfs.v110.GetFeature gfv110 = (nl.b3p.xml.wfs.v110.GetFeature) gf;
-            nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
-            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
-                q.setTypeName(or.getParameter(OGCConstants.WFS_PARAM_TYPENAME));
-            }
-            if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
-                q.setSrsName(or.getParameter(OGCConstants.WFS_PARAM_SRSNAME));
-            }
-            if (or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE) != null) {
-                ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
-                gfv110.setResultType(resultType);
-            }
+            nl.b3p.xml.ogc.v110.Filter filter=null;
+            //make filter            
             if (or.getParameter(OGCConstants.WFS_PARAM_FILTER) != null) {
                 try {
-                    nl.b3p.xml.ogc.v110.Filter f = (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));
-                    q.setFilter(f);
+                    filter = (nl.b3p.xml.ogc.v110.Filter) Unmarshaller.unmarshal(nl.b3p.xml.ogc.v110.Filter.class, new StringReader(or.getParameter(OGCConstants.WFS_PARAM_FILTER)));                    
                 } catch (Exception e) {
                     log.error("Filter v110 (WFS version 1.1.0) not correct", e);
                     // without throwing exception it goes on but without aplying filter
                     throw new UnsupportedOperationException("Filter is not correct!");
                 }
             }
+            //make querytypechoice
+            nl.b3p.xml.wfs.v110.QueryTypeChoice[] queryTypeChoice=null;
             if (or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME) != null) {
                 try {
                     String[] propertyNames = or.getParameter(OGCConstants.WFS_PARAM_PROPERTYNAME).split(",");
-                    nl.b3p.xml.wfs.v110.QueryTypeChoice[] queryTypeChoice = new nl.b3p.xml.wfs.v110.QueryTypeChoice[1];
+                    queryTypeChoice = new nl.b3p.xml.wfs.v110.QueryTypeChoice[1];
                     queryTypeChoice[0] = new nl.b3p.xml.wfs.v110.QueryTypeChoice();
                     for (int i = 0; i < propertyNames.length; i++) {
                         nl.b3p.xml.wfs.v110.QueryTypeChoiceItem queryTypeChoiceItem = new nl.b3p.xml.wfs.v110.QueryTypeChoiceItem();
                         queryTypeChoiceItem.setPropertyName(propertyNames[i]);
                         queryTypeChoice[0].addQueryTypeChoiceItem(queryTypeChoiceItem);
-                    }
-                    q.setQueryTypeChoice(queryTypeChoice);
+                    }                    
                 } catch (Exception e) {
                     log.error("PropertyName v100 (WFS version 1.0.0) not correct", e);
                 }
             }
-            gfv110.addQuery(q);
+            if (or.getParameter(OGCConstants.WFS_PARAM_TYPENAME) != null) {
+                String[] typeNames=or.getParameter(OGCConstants.WFS_PARAM_TYPENAME).split(",");
+                for (int i=0; i < typeNames.length; i++){                    
+                    nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();
+                    q.setTypeName(typeNames[i]);
+                    if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
+                        q.setSrsName(or.getParameter(OGCConstants.WFS_PARAM_SRSNAME));
+                    }
+                    if (or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE) != null) {
+                        ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
+                        gfv110.setResultType(resultType);
+                    }
+                    if (filter!=null){
+                        q.setFilter(filter);
+                    }
+                    if(queryTypeChoice!=null){
+                        q.setQueryTypeChoice(queryTypeChoice);
+                    }
+                    gfv110.addQuery(q);
+                }                
+            }else{
+                nl.b3p.xml.wfs.v110.Query q = new nl.b3p.xml.wfs.v110.Query();                
+                if (or.getParameter(OGCConstants.WFS_PARAM_SRSNAME) != null) {
+                    q.setSrsName(or.getParameter(OGCConstants.WFS_PARAM_SRSNAME));
+                }
+                if (or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE) != null) {
+                    ResultTypeType resultType = gfv110.getResultType().valueOf(or.getParameter(OGCConstants.WFS_PARAM_RESULTTYPE));
+                    gfv110.setResultType(resultType);
+                }
+                if (filter!=null){
+                    q.setFilter(filter);
+                }
+                if(queryTypeChoice!=null){
+                    q.setQueryTypeChoice(queryTypeChoice);
+                }
+                gfv110.addQuery(q);
+            }
         }
-
         return gf;
     }
 
