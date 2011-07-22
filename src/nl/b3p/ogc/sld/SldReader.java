@@ -1,22 +1,20 @@
 package nl.b3p.ogc.sld;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 /**
  *
@@ -24,29 +22,63 @@ import org.xml.sax.SAXException;
  */
 public class SldReader {
 
-    public List<String> getNamedLayers(String url) throws Exception {
-        List<String> layers = new ArrayList();
+    private static final Log logFile = LogFactory.getLog(SldReader.class);
+
+    public List<Node> getNamedLayers(String url) throws Exception {
+        List<Node> nodes = new ArrayList();
 
         Document doc = getDocument(url);
 
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
 
-        XPathExpression exNamedLayers = xpath.compile("/StyledLayerDescriptor/NamedLayer/Name");
+        XPathExpression exNamedLayers = xpath.compile("/StyledLayerDescriptor/NamedLayer");
         NodeList namedLayers = (NodeList) exNamedLayers.evaluate(doc.getDocumentElement(), XPathConstants.NODESET);
 
         for (int i = 0; i < namedLayers.getLength(); i++) {
             if (namedLayers.item(i) != null) {
-                if (namedLayers.item(i).getFirstChild() != null) {
-                    String namedLayerName = namedLayers.item(i).getFirstChild()
-                            .getNodeValue();
-
-                    layers.add(namedLayerName);
-                }
+                Node node = namedLayers.item(i);
+                nodes.add(node);
             }
         }
 
-        return layers;
+        for (Node n : nodes) {
+            getUserStyles(n);
+        }
+
+        return nodes;
+    }
+
+    public List<Node> getUserStyles(Node n) throws Exception {
+        List<Node> nodes = new ArrayList();
+
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+
+        XPathExpression exUserStyles = xpath.compile("UserStyle/*");
+        NodeList userStyles = (NodeList) exUserStyles.evaluate(n, XPathConstants.NODESET);
+
+        for (int i = 0; i < userStyles.getLength(); i++) {
+            if (userStyles.item(i) != null) {
+                Node node = userStyles.item(i);
+                nodes.add(node);
+
+                getUserStyleName(node);
+            }
+        }
+
+        return nodes;
+    }
+
+    public String getUserStyleName(Node n) {
+        String name = null;
+
+        if (n.getAttributes().getNamedItem("Name") != null) {
+            name = n.getAttributes().getNamedItem("Name").getNodeValue();
+            logFile.info("UserStyle name=" + name);
+        }
+
+        return name;
     }
 
     private Document getDocument(String urlString) throws Exception {
