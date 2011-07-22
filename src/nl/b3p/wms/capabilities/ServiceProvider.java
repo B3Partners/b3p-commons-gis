@@ -67,6 +67,8 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     /* password to check againt when object is already been cached */
     private String password;
 
+    private String sldUrl;
+
     /** default ServiceProvider() constructor.
      */
     // <editor-fold defaultstate="" desc="default ServiceProvider() constructor">
@@ -569,6 +571,14 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSldUrl() {
+        return sldUrl;
+    }
+
+    public void setSldUrl(String sldUrl) {
+        this.sldUrl = sldUrl;
     }
 
     public ServiceProvider shallowClone() {
