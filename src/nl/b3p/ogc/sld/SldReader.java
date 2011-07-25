@@ -3,16 +3,21 @@ package nl.b3p.ogc.sld;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -24,59 +29,43 @@ public class SldReader {
 
     private static final Log logFile = LogFactory.getLog(SldReader.class);
 
-    public List<Node> getNamedLayers(String url) throws Exception {
-        List<Node> nodes = new ArrayList();
-
+    public void getNamedLayers(String url) throws Exception {
         Document doc = getDocument(url);
 
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
+        setNameSpaceContext(xpath);
 
-        XPathExpression exNamedLayers = xpath.compile("/StyledLayerDescriptor/NamedLayer");
-        NodeList namedLayers = (NodeList) exNamedLayers.evaluate(doc.getDocumentElement(), XPathConstants.NODESET);
+        String expr = "/StyledLayerDescriptor/NamedLayer";
+        NodeList nodeSet = (NodeList) xpath.evaluate(expr, doc, XPathConstants.NODESET);
 
-        for (int i = 0; i < namedLayers.getLength(); i++) {
-            if (namedLayers.item(i) != null) {
-                Node node = namedLayers.item(i);
-                nodes.add(node);
-            }
+        for (int i = 0; i < nodeSet.getLength(); i++) {
+            Node node = (Node) nodeSet.item(i);
+            getUserStyles(node);
         }
-
-        for (Node n : nodes) {
-            getUserStyles(n);
-        }
-
-        return nodes;
     }
 
-    public List<Node> getUserStyles(Node n) throws Exception {
-        List<Node> nodes = new ArrayList();
-
+    public void getUserStyles(Node node) throws Exception {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
+        setNameSpaceContext(xpath);
 
-        XPathExpression exUserStyles = xpath.compile("UserStyle/*");
-        NodeList userStyles = (NodeList) exUserStyles.evaluate(n, XPathConstants.NODESET);
+        String expr = "UserStyle";
+        NodeList nodeSet = (NodeList) xpath.evaluate(expr, node, XPathConstants.NODESET);
 
-        for (int i = 0; i < userStyles.getLength(); i++) {
-            if (userStyles.item(i) != null) {
-                Node node = userStyles.item(i);
-                nodes.add(node);
-
-                getUserStyleName(node);
-            }
+        for (int i = 0; i < nodeSet.getLength(); i++) {
+            Node n = (Node) nodeSet.item(i);
+            getStyleName(n);
         }
-
-        return nodes;
     }
 
-    public String getUserStyleName(Node n) {
-        String name = null;
+    public String getStyleName(Node node) throws XPathExpressionException {
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        setNameSpaceContext(xpath);
 
-        if (n.getAttributes().getNamedItem("Name") != null) {
-            name = n.getAttributes().getNamedItem("Name").getNodeValue();
-            logFile.info("UserStyle name=" + name);
-        }
+        XPathExpression xPathExpression = xpath.compile("Name");
+        String name = xPathExpression.evaluate(node);
 
         return name;
     }
@@ -97,5 +86,31 @@ public class SldReader {
                 is.close();
             }
         }
+    }
+
+    private void setNameSpaceContext(XPath xpath) {
+        xpath.setNamespaceContext((NamespaceContext) new NamespaceContext() {
+            public String getNamespaceURI(String prefix) {
+                if (prefix == null) {
+                    throw new NullPointerException("Null prefix");
+                } else if ("sld".equals(prefix)) {
+                    return "http://www.opengis.net/sld";
+                } else if ("ogc".equals(prefix)) {
+                    return "http://www.opengis.net/ogc";
+                } else if ("xml".equals(prefix)) {
+                    return XMLConstants.XML_NS_URI;
+                }
+
+                return XMLConstants.NULL_NS_URI;
+            }
+
+            public String getPrefix(String namespaceURI) {
+                throw new UnsupportedOperationException("");
+            }
+
+            public Iterator getPrefixes(String namespaceURI) {
+                throw new UnsupportedOperationException("");
+            }
+        });
     }
 }
