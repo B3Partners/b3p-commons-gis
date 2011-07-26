@@ -33,7 +33,7 @@ public class SldReader {
 
     private static final Log logFile = LogFactory.getLog(SldReader.class);
 
-    public void getNamedLayers(String url) throws Exception {
+    public SldNamedLayer[] getNamedLayers(String url) throws Exception {
         Document doc = getDocument(url);
 
         XPathFactory factory = XPathFactory.newInstance();
@@ -43,26 +43,41 @@ public class SldReader {
         String expr = "/StyledLayerDescriptor/NamedLayer";
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, doc, XPathConstants.NODESET);
 
+        SldNamedLayer[] namedLayers = new SldNamedLayer[nodeSet.getLength()];
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node node = (Node) nodeSet.item(i);
-            getUserStyles(node);
+
+            String name = getStyleName(node);
+            String sldPart = serializeXpathNode(node);
+
+            SldNamedLayer sldNamedLayer = new SldNamedLayer(name, sldPart, node);
+            namedLayers[i] = sldNamedLayer;
         }
+
+        return namedLayers;
     }
 
-    private void getUserStyles(Node node) throws Exception {
+    public SldUserStyle[] getUserStyles(SldNamedLayer sldNamedLayer) throws Exception {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
 
         String expr = "UserStyle";
+        Node node = sldNamedLayer.getNode();
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, node, XPathConstants.NODESET);
-        
+
+        SldUserStyle[] userStyles = new SldUserStyle[nodeSet.getLength()];
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node n = (Node) nodeSet.item(i);
 
-            String userStyleName = getStyleName(n);
-            String xml = serializeXpathNode(n);
+            String name = getStyleName(n);
+            String sldPart = serializeXpathNode(n);
+
+            SldUserStyle sldUserStyle = new SldUserStyle(name, sldPart, node);
+            userStyles[i] = sldUserStyle;
         }
+
+        return userStyles;
     }
 
     private String getStyleName(Node node) throws XPathExpressionException {
