@@ -39,6 +39,8 @@ public class Style implements XMLElement {
     private String abstracts;
     private Layer layer;
     private Set domainResource;
+    private String sldPart;
+
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
         return id;
@@ -95,6 +97,15 @@ public class Style implements XMLElement {
     public void setLayer(Layer layer) {
         this.layer = layer;
     }
+
+    public String getSldPart() {
+        return sldPart;
+    }
+
+    public void setSldPart(String sldPart) {
+        this.sldPart = sldPart;
+    }
+
     // </editor-fold>
     /** Method that will overwrite the URL's stored in the database with the URL specified for Kaartenbalie.
      * This new URL indicate the link to the kaartenbalie, while the old link is used to indicate the URL
@@ -144,6 +155,11 @@ public class Style implements XMLElement {
                 cloneStyle.domainResource.add(sdr);
             }
         }
+
+        if (null != this.sldPart) {
+            cloneStyle.sldPart = new String(this.sldPart);
+        }
+
         return cloneStyle;
     }
     // </editor-fold>
