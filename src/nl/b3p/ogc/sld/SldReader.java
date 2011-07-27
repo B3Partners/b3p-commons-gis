@@ -3,7 +3,9 @@ package nl.b3p.ogc.sld;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -33,7 +35,7 @@ public class SldReader {
 
     private static final Log logFile = LogFactory.getLog(SldReader.class);
 
-    public SldNamedLayer[] getNamedLayers(String url) throws Exception {
+    public List<SldNamedLayer> getNamedLayers(String url) throws Exception {
         Document doc = getDocument(url);
 
         XPathFactory factory = XPathFactory.newInstance();
@@ -43,7 +45,7 @@ public class SldReader {
         String expr = "/StyledLayerDescriptor/NamedLayer";
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, doc, XPathConstants.NODESET);
 
-        SldNamedLayer[] namedLayers = new SldNamedLayer[nodeSet.getLength()];
+        List<SldNamedLayer> namedLayers= new ArrayList<SldNamedLayer>();
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node node = (Node) nodeSet.item(i);
 
@@ -51,13 +53,34 @@ public class SldReader {
             String sldPart = serializeXpathNode(node);
 
             SldNamedLayer sldNamedLayer = new SldNamedLayer(name, sldPart, node);
-            namedLayers[i] = sldNamedLayer;
+            namedLayers.add(sldNamedLayer);
         }
 
         return namedLayers;
     }
+    
+    public List<SldNamedLayer> getNamedLayers(String url, String layerName) throws Exception{
+        List<SldNamedLayer> allNamedLayers=getNamedLayers(url);
+        List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
+        for (SldNamedLayer namedLayer : allNamedLayers){
+            if (namedLayer.getName().equals(layerName)){
+                namedLayersWithName.add(namedLayer);
+            }
+        }
+        return namedLayersWithName;
+    }
+    
+    public List<SldNamedLayer> getNamedLayers(List<SldNamedLayer> namedLayers, String layerName) throws Exception{        
+        List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
+        for (SldNamedLayer namedLayer : namedLayers){
+            if (namedLayer.getName().equals(layerName)){
+                namedLayersWithName.add(namedLayer);
+            }
+        }
+        return namedLayersWithName;
+    }
 
-    public SldUserStyle[] getUserStyles(SldNamedLayer sldNamedLayer) throws Exception {
+    public List<SldUserStyle> getUserStyles(SldNamedLayer sldNamedLayer) throws Exception {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
@@ -66,7 +89,7 @@ public class SldReader {
         Node node = sldNamedLayer.getNode();
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, node, XPathConstants.NODESET);
 
-        SldUserStyle[] userStyles = new SldUserStyle[nodeSet.getLength()];
+        List<SldUserStyle> userStyles = new ArrayList<SldUserStyle>();
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node n = (Node) nodeSet.item(i);
 
@@ -74,7 +97,7 @@ public class SldReader {
             String sldPart = serializeXpathNode(n);
 
             SldUserStyle sldUserStyle = new SldUserStyle(name, sldPart, node);
-            userStyles[i] = sldUserStyle;
+            userStyles.add(sldUserStyle);
         }
 
         return userStyles;
