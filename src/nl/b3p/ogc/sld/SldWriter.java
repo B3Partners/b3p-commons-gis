@@ -1,8 +1,11 @@
 package nl.b3p.ogc.sld;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import javax.servlet.http.HttpServletResponse;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import nl.b3p.wms.capabilities.Style;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -14,28 +17,38 @@ public class SldWriter {
 
     private static final Log logFile = LogFactory.getLog(SldWriter.class);
 
-    public String createNamedLayerStringForSld(SldUserStyle[] userStyles, String namedLayerName) {
+    public String createNamedLayerStringForSld(List<SldUserStyle> userStyles, String namedLayerName) {
         String xml = "";
 
-        if (userStyles.length < 1) {
+        if (userStyles.size() < 1) {
             return xml;
         }
 
-        xml += "<sld:NamedLayer>";
-        xml += "<sld:Name>" + namedLayerName + "</sld:Name>";
+        xml += "<NamedLayer>";
+        xml += "<Name>" + namedLayerName + "</Name>";
 
-        for (int i = 0; i < userStyles.length; i++) {
-            SldUserStyle sldUserStyle = userStyles[i];
-
+        for (SldUserStyle sldUserStyle : userStyles) {
             xml += sldUserStyle.getSldPart();
         }
 
-        xml += "</sld:NamedLayer>";
+        xml += "</NamedLayer>";
 
         return xml;
     }
 
-    public void createSld(String xmlPart, HttpServletResponse response) throws IOException {
+    public String createSLD(List<Style> kbStyles) throws UnsupportedEncodingException, IOException{        
+        StringBuffer result = new StringBuffer();
+        result.append(getSldHeader());
+        for (Style style : kbStyles){
+            List<SldUserStyle> sldStyles= new ArrayList<SldUserStyle>();
+            sldStyles.add(new SldUserStyle(style));
+            String namedLayer=createNamedLayerStringForSld(sldStyles,style.getLayer().getName());
+            result.append(namedLayer);
+        }
+        result.append(getSldFooter());        
+        return result.toString();
+    }
+    /*public void createSld(String xmlPart, HttpServletResponse response) throws IOException {
         String xml = createSldString(xmlPart);
 
         PrintWriter writer = response.getWriter();
@@ -53,7 +66,7 @@ public class SldWriter {
         } finally {
             writer.close();
         }
-    }
+    }*/
 
     private String createSldString(String xmlPart) {
         String xml = "";
@@ -66,7 +79,8 @@ public class SldWriter {
     }
 
     private String getSldHeader() {
-        return "<sld:StyledLayerDescriptor"
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+                + "<StyledLayerDescriptor"
                 + " xmlns=\"http://www.opengis.net/sld\""
                 + " xmlns:ogc=\"http://www.opengis.net/ogc\""
                 + " xmlns:xlink=\"http://www.w3.org/1999/xlink\""
@@ -77,6 +91,6 @@ public class SldWriter {
     }
 
     private String getSldFooter() {
-        return "</sld:StyledLayerDescriptor>";
+        return "</StyledLayerDescriptor>";
     }
 }

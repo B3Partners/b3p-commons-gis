@@ -1,5 +1,6 @@
 package nl.b3p.ogc.sld;
 
+import nl.b3p.wms.capabilities.Style;
 import org.w3c.dom.Node;
 
 /**
@@ -19,6 +20,11 @@ public class SldUserStyle {
         this.name = name;
         this.sldPart = sldPart;
         this.node = node;
+    }
+    
+    public SldUserStyle(Style s){
+        this.setName(s.getName());
+        this.setSldPart(s.getSldPart());
     }
 
     public String getName() {

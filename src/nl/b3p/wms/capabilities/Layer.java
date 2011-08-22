@@ -235,17 +235,17 @@ public class Layer implements XMLElement,Comparable{
         keywordList.add(keyword);
     }
 
-    public Set getStyles() {
+    public Set<Style> getStyles() {
         return styles;
     }
 
-    public void setStyles(Set styles) {
+    public void setStyles(Set<Style> styles) {
         this.styles = styles;
     }
 
     public void addStyle(Style style) {
         if (null == styles) {
-            styles = new HashSet();
+            styles = new HashSet<Style>();
         }
         styles.add(style);
         style.setLayer(this);
