@@ -31,6 +31,7 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.feature.IllegalAttributeException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
@@ -176,7 +177,11 @@ public class StreamingShapeWriter {
         // Write to datastore
         SimpleFeature newFeature = (SimpleFeature) writer.next();        
         try {
-            newFeature.setAttributes(feature.getAttributes());
+            //omdat je niet weet wat de nieuwe volgorde is: Deze doorlopen ipv alle in 1 keer schrijven.
+            List<AttributeDescriptor> ads=newFeature.getFeatureType().getAttributeDescriptors();
+            for (AttributeDescriptor ad : ads){
+                newFeature.setAttribute(ad.getName(), feature.getAttribute(ad.getName()));
+            }
             newFeature.setDefaultGeometry(feature.getDefaultGeometry());
         } catch (IllegalAttributeException writeProblem) {
             throw new IllegalAttributeException("Could not create " + feature.getFeatureType().getTypeName() + " out of provided SimpleFeature: " + feature.getID() + "\n" + writeProblem);
