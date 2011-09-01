@@ -1,13 +1,14 @@
 package nl.b3p.ogc.sld;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.xpath.XPathExpressionException;
 import nl.b3p.wms.capabilities.Style;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 
 /**
  *
@@ -36,17 +37,34 @@ public class SldWriter {
         return xml;
     }
 
-    public String createSLD(List<Style> kbStyles) throws UnsupportedEncodingException, IOException{        
+    public String createSLDWithKBStyles(List<Style> kbStyles) throws UnsupportedEncodingException, IOException, XPathExpressionException, Exception{        
         StringBuffer result = new StringBuffer();
         result.append(getSldHeader());
-        for (Style style : kbStyles){
+        for (Style kbStyle : kbStyles){
             List<SldUserStyle> sldStyles= new ArrayList<SldUserStyle>();
-            sldStyles.add(new SldUserStyle(style));
-            String namedLayer=createNamedLayerStringForSld(sldStyles,style.getLayer().getName());
+            //sldStyles.add(new SldUserStyle(style));
+            StringBuffer sb=new StringBuffer();
+            sb.append("<UserStyle>");
+            if (kbStyle.getName()!=null)
+                sb.append("<Name>"+kbStyle.getName()+"</Name>");
+            sb.append(kbStyle.getSldPart());
+            sb.append("</UserStyle>");
+            Document doc=SldReader.getDocument(sb.toString(),"UTF-8");
+            sldStyles.add(new SldUserStyle(doc.getDocumentElement()));
+            String namedLayer=createNamedLayerStringForSld(sldStyles,kbStyle.getLayer().getName());
             result.append(namedLayer);
         }
         result.append(getSldFooter());        
         return result.toString();
+    }
+    
+    public String createSLD(List<SldNamedLayer> namedLayers){
+        StringBuffer xml = new StringBuffer();
+        for (SldNamedLayer snl : namedLayers){
+            //xml.append(createNamedLayerStringForSld(snl.getUserStyles()));
+            xml.append(snl.getSldPart());
+        }
+        return createSldString(xml.toString());
     }
     /*public void createSld(String xmlPart, HttpServletResponse response) throws IOException {
         String xml = createSldString(xmlPart);
@@ -93,4 +111,5 @@ public class SldWriter {
     private String getSldFooter() {
         return "</StyledLayerDescriptor>";
     }
+
 }

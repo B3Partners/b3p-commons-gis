@@ -1,5 +1,6 @@
 package nl.b3p.ogc.sld;
 
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.URL;
@@ -33,11 +34,9 @@ import org.w3c.dom.NodeList;
  */
 public class SldReader {
 
-    private static final Log logFile = LogFactory.getLog(SldReader.class);
+    private static final Log log = LogFactory.getLog(SldReader.class);
 
-    public List<SldNamedLayer> getNamedLayers(String url) throws Exception {
-        Document doc = getDocument(url);
-
+    public List<SldNamedLayer> getNamedLayers(Document doc) throws Exception {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
@@ -48,19 +47,30 @@ public class SldReader {
         List<SldNamedLayer> namedLayers= new ArrayList<SldNamedLayer>();
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node node = (Node) nodeSet.item(i);
-
-            String name = getStyleName(node);
-            String sldPart = serializeXpathNode(node);
-
-            SldNamedLayer sldNamedLayer = new SldNamedLayer(name, sldPart, node);
+            
+            SldNamedLayer sldNamedLayer = new SldNamedLayer(node);
             namedLayers.add(sldNamedLayer);
         }
 
         return namedLayers;
     }
+    /**
+     * get the named layers by providing the url
+     */
+    public List<SldNamedLayer> getNamedLayersByUrl(String url) throws Exception {
+        Document doc = getDocument(url);
+        return getNamedLayers(doc);
+    }
+    /**
+     * get the named layers by provinding the complete SLD
+     */
+    public List<SldNamedLayer> getNamedLayersBySld(String sld, String charSet) throws Exception{
+        Document doc = getDocument(sld,charSet);
+        return getNamedLayers(doc);
+    }
     
     public List<SldNamedLayer> getNamedLayers(String url, String layerName) throws Exception{
-        List<SldNamedLayer> allNamedLayers=getNamedLayers(url);
+        List<SldNamedLayer> allNamedLayers=getNamedLayersByUrl(url);
         List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
         for (SldNamedLayer namedLayer : allNamedLayers){
             if (namedLayer.getName().equals(layerName)){
@@ -79,24 +89,24 @@ public class SldReader {
         }
         return namedLayersWithName;
     }
-
-    public List<SldUserStyle> getUserStyles(SldNamedLayer sldNamedLayer) throws Exception {
+    
+    
+    public List<SldUserStyle> getUserStyles(Node node) throws Exception {
         XPathFactory factory = XPathFactory.newInstance();
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
 
         String expr = "UserStyle";
-        Node node = sldNamedLayer.getNode();
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, node, XPathConstants.NODESET);
 
         List<SldUserStyle> userStyles = new ArrayList<SldUserStyle>();
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node n = (Node) nodeSet.item(i);
 
-            String name = getStyleName(n);
-            String sldPart = serializeXpathNode(n);
+            /*String name = getStyleName(n);
+            String sldPart = serializeXpathNode(n);*/
 
-            SldUserStyle sldUserStyle = new SldUserStyle(name, sldPart, node);
+            SldUserStyle sldUserStyle = new SldUserStyle(node);
             userStyles.add(sldUserStyle);
         }
 
@@ -120,11 +130,24 @@ public class SldReader {
         try {
             URL url = new URL(urlString.trim());
             is = url.openConnection().getInputStream();
-
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = builder.parse(is);
-
-            return doc;
+            return getDocument(is);
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+    public static Document getDocument(InputStream is) throws Exception {        
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(is);
+        return doc;        
+    }
+    
+    public static Document getDocument(String sld, String charSet) throws Exception{
+        InputStream is = null;
+        try {            
+            is = new ByteArrayInputStream(sld.getBytes(charSet));
+            return getDocument(is);
         } finally {
             if (is != null) {
                 is.close();
@@ -159,40 +182,5 @@ public class SldReader {
         });
     }
 
-    private String serializeXpathNode(Node node) {
-        StringWriter writer = new StringWriter();
-
-        try {
-            TransformerFactory factory = TransformerFactory.newInstance();
-            Transformer transformer;
-
-            transformer = factory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-
-            if (isTextNode(node)) {
-                writer.write(node.getNodeValue());
-            } else if (node.getNodeType() == Node.ATTRIBUTE_NODE) {
-                writer.write(((Attr) node).getValue());
-            } else if (node.getNodeType() == Node.ELEMENT_NODE) {
-                transformer.transform(new DOMSource(node), new StreamResult(writer));
-            }
-            
-        } catch (Exception e) {
-            logFile.error("Fout tijdens serializen XPath Node: " + e);
-        }
-
-        return writer.toString();
-    }
-
-    private boolean isTextNode(Node node) {
-        short nodeType;
-
-        if (node == null) {
-            return false;
-        }
-
-        nodeType = node.getNodeType();
-
-        return nodeType == Node.CDATA_SECTION_NODE || nodeType == Node.TEXT_NODE;
-    }
+    
 }

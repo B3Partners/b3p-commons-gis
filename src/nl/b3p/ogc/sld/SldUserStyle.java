@@ -1,5 +1,8 @@
 package nl.b3p.ogc.sld;
 
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
 import nl.b3p.wms.capabilities.Style;
 import org.w3c.dom.Node;
 
@@ -7,32 +10,39 @@ import org.w3c.dom.Node;
  *
  * @author Boy de Wit
  */
-public class SldUserStyle {
-
-    private String name;
-    private String sldPart;
-    private Node node;
-
+public class SldUserStyle extends SldNode{
+    
+    private static XPathExpression xpath_name;
+    
+    private Node node;    
+    
+    static{
+        try{
+            xpath_name = xpath.compile("Name");
+        }catch(Exception e){}
+    }
+       
     public SldUserStyle() {
     }
 
-    public SldUserStyle(String name, String sldPart, Node node) {
-        this.name = name;
-        this.sldPart = sldPart;
+    public SldUserStyle(Node node) {
         this.node = node;
     }
     
-    public SldUserStyle(Style s){
-        this.setName(s.getName());
+    /*public SldUserStyle(Style s) throws XPathExpressionException{
+       this.setName(s.getName());
         this.setSldPart(s.getSldPart());
+        
+    }*/
+
+    public String getName() throws XPathExpressionException {
+        return xpath_name.evaluate(node);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String name) throws XPathExpressionException{
+        //this.name = name;
+        Node n=(Node) xpath_name.evaluate(node, XPathConstants.NODE);
+        n.setNodeValue(name);
     }
 
     public Node getNode() {
@@ -44,10 +54,7 @@ public class SldUserStyle {
     }
 
     public String getSldPart() {
-        return sldPart;
+        return serializeXpathNode(node);
     }
 
-    public void setSldPart(String sldPart) {
-        this.sldPart = sldPart;
-    }
 }
