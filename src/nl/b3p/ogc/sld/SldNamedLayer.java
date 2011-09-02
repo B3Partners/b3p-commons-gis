@@ -71,7 +71,7 @@ public class SldNamedLayer extends SldNode{
         List<SldUserStyle> userStyles = new ArrayList<SldUserStyle>();
         for (int i = 0; i < nodeSet.getLength(); i++) {
             Node n = (Node) nodeSet.item(i);
-            SldUserStyle sldUserStyle = new SldUserStyle(node);
+            SldUserStyle sldUserStyle = new SldUserStyle(n);
             userStyles.add(sldUserStyle);
         }
 

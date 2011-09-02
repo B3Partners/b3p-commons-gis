@@ -42,14 +42,7 @@ public class SldWriter {
         result.append(getSldHeader());
         for (Style kbStyle : kbStyles){
             List<SldUserStyle> sldStyles= new ArrayList<SldUserStyle>();
-            //sldStyles.add(new SldUserStyle(style));
-            StringBuffer sb=new StringBuffer();
-            sb.append("<UserStyle>");
-            if (kbStyle.getName()!=null)
-                sb.append("<Name>"+kbStyle.getName()+"</Name>");
-            sb.append(kbStyle.getSldPart());
-            sb.append("</UserStyle>");
-            Document doc=SldReader.getDocument(sb.toString(),"UTF-8");
+            Document doc=SldReader.getDocument(kbStyle.getSldPart(),"UTF-8");
             sldStyles.add(new SldUserStyle(doc.getDocumentElement()));
             String namedLayer=createNamedLayerStringForSld(sldStyles,kbStyle.getLayer().getName());
             result.append(namedLayer);
