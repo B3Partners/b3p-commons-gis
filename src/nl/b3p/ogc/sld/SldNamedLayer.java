@@ -12,6 +12,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -36,7 +37,19 @@ public class SldNamedLayer extends SldNode{
 
     public SldNamedLayer() {
     }
-
+    
+    public SldNamedLayer(List<SldUserStyle> userStyles, String namedLayerName) throws Exception{
+        String xml = "";
+        xml += "<NamedLayer>";
+        xml += "<Name>" + namedLayerName + "</Name>";
+        for (SldUserStyle sldUserStyle : userStyles) {
+            xml += sldUserStyle.getSldPart();
+        }
+        xml += "</NamedLayer>";
+        Document doc=SldReader.getDocument(xml,"UTF-8");
+        
+        this.node=doc.getDocumentElement();  
+    }
     public SldNamedLayer(Node node) {
         this.node = node;
     }

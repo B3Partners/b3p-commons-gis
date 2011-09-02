@@ -33,22 +33,19 @@ public class SldWriter {
         }
 
         xml += "</NamedLayer>";
-
         return xml;
     }
 
-    public String createSLDWithKBStyles(List<Style> kbStyles) throws UnsupportedEncodingException, IOException, XPathExpressionException, Exception{        
-        StringBuffer result = new StringBuffer();
-        result.append(getSldHeader());
+    public List<SldNamedLayer> createNamedLayersWithKBStyles(List<Style> kbStyles) throws UnsupportedEncodingException, IOException, XPathExpressionException, Exception{        
+        List<SldNamedLayer> namedLayers= new ArrayList<SldNamedLayer>();
         for (Style kbStyle : kbStyles){
             List<SldUserStyle> sldStyles= new ArrayList<SldUserStyle>();
             Document doc=SldReader.getDocument(kbStyle.getSldPart(),"UTF-8");
             sldStyles.add(new SldUserStyle(doc.getDocumentElement()));
-            String namedLayer=createNamedLayerStringForSld(sldStyles,kbStyle.getLayer().getName());
-            result.append(namedLayer);
-        }
-        result.append(getSldFooter());        
-        return result.toString();
+            SldNamedLayer snl = new SldNamedLayer(sldStyles,kbStyle.getLayer().getName());
+            namedLayers.add(snl);
+        }        
+        return namedLayers;
     }
     
     public String createSLD(List<SldNamedLayer> namedLayers){
