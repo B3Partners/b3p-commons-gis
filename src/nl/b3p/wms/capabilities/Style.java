@@ -27,6 +27,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import nl.b3p.ogc.utils.OGCConstants;
+import nl.b3p.ogc.utils.OGCRequest;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -117,6 +119,44 @@ public class Style implements XMLElement {
     // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
     protected void convertValues2KB(HashMap conversionValues) {
         Iterator it;
+        //check if its a 
+        if (this.sldPart!=null && (this.getDomainResource()==null || this.getDomainResource().size() == 0)){
+            //TODO: check of er een getLegendGraphic kan wordne gedaan.
+            ServiceProvider sp = this.getLayer().getServiceProvider();
+            //make getLegendGraphic url   
+            String wmsVersion=sp.getWmsVersion();
+            OGCRequest url = new OGCRequest(this.getLayer().getServiceProvider().getUrl());
+            url.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WMS_REQUEST_GetLegendGraphic);
+            if (wmsVersion!=null){
+                url.addOrReplaceParameter(OGCConstants.WMS_VERSION, wmsVersion);
+            }else{
+                //if no version then fallback to 1.1.1
+                url.addOrReplaceNameSpace(OGCConstants.WMS_VERSION, OGCConstants.WMS_VERSION_111);
+            }
+            url.addOrReplaceParameter(OGCConstants.WMS_PARAM_LAYER, this.getLayer().getName());
+            //todo: uitzoeken welk formaat ondersteund wordt.
+            url.addOrReplaceParameter(OGCConstants.WMS_PARAM_FORMAT, "image/png");
+            
+            //make SLDProxy Url.
+            String sldProxyUrl=(String)conversionValues.get("url");
+            sldProxyUrl = sldProxyUrl.replace("/services/", "/ProxySLD/");
+            if (sldProxyUrl.indexOf("?")!=sldProxyUrl.length()-1 &&
+                    sldProxyUrl.indexOf("&")!=sldProxyUrl.length()-1){
+                sldProxyUrl+= sldProxyUrl.indexOf("?")>0 ? "&" : "?";
+            }
+            sldProxyUrl+="styles=";
+            sldProxyUrl+=this.getId();
+            sldProxyUrl+="&";            
+            url.addOrReplaceParameter(OGCConstants.WMS_PARAM_SLD,sldProxyUrl);
+                        
+            //make StyleDomainResource and add to style.
+            StyleDomainResource sdr = new StyleDomainResource();
+            sdr.setDomain("LegendURL");
+            sdr.setUrl(url.toString()); 
+            HashSet set = new HashSet();
+            set.add(sdr);
+            setDomainResource(set);
+        }
         //StyleDomainResource:
         if (null != this.getDomainResource() && this.getDomainResource().size() != 0) {
             it = this.getDomainResource().iterator();
