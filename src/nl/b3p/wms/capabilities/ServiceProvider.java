@@ -310,7 +310,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         }
         Layer tl = getTopLayer();
         if (tl != null) {
-            tl.convertValues2KB(conversionValues);
+            tl.convertValues2KB(conversionValues);           
         }
     }
     // </editor-fold>
@@ -593,7 +593,28 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         sc.setTitle(this.getTitle());
         sc.setUrl(this.getUrl());
         sc.setWmsVersion(this.getWmsVersion());
+        
+        HashSet dr=new HashSet();
+        dr.addAll(this.getDomainResource());
+        sc.setDomainResource(dr);
+        
         return sc;
+    }
+    /**
+     * Checks if this operation is in the domainresources of the Service.
+     */
+    public boolean supportsOperation(String operationName){
+        if (this.getDomainResource()==null)
+            return false;
+        Iterator<ServiceDomainResource> sdit= this.getDomainResource().iterator();
+        boolean canHandleGetLegend=false;
+        while (sdit.hasNext() && !canHandleGetLegend){
+            ServiceDomainResource sdr=sdit.next();
+            if (sdr.getDomain().equals(operationName)){
+                canHandleGetLegend=true;
+            }
+        }
+        return canHandleGetLegend;
     }
 
     public String getType() {
