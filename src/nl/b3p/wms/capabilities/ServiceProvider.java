@@ -601,20 +601,20 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         return sc;
     }
     /**
-     * Checks if this operation is in the domainresources of the Service.
+     * Returns the ServiceDomainResource with the given operationname and null if not exists
      */
-    public boolean supportsOperation(String operationName){
+    public ServiceDomainResource getServiceDomainResourceByOperationName(String operationName){
         if (this.getDomainResource()==null)
-            return false;
+            return null;
         Iterator<ServiceDomainResource> sdit= this.getDomainResource().iterator();
         boolean canHandleGetLegend=false;
         while (sdit.hasNext() && !canHandleGetLegend){
             ServiceDomainResource sdr=sdit.next();
             if (sdr.getDomain().equals(operationName)){
-                canHandleGetLegend=true;
+                return sdr;
             }
         }
-        return canHandleGetLegend;
+        return null;
     }
 
     public String getType() {

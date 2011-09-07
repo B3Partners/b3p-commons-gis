@@ -122,8 +122,9 @@ public class Style implements XMLElement {
         //check if its a Kaartenbalie added sld style.
         if (this.sldPart!=null && (this.getDomainResource()==null || this.getDomainResource().size() == 0)){
             //check if this serviceProvider supports GetLegendGraphic requests
-            ServiceProvider sp= this.getLayer().getServiceProvider();            
-            if(sp.supportsOperation("GetLegendGraphic")){
+            ServiceProvider sp= this.getLayer().getServiceProvider();  
+            ServiceDomainResource getLegendResource=sp.getServiceDomainResourceByOperationName("GetLegendGraphic");            
+            if(getLegendResource!=null){
                 //make getLegendGraphic url   
                 String wmsVersion=sp.getWmsVersion();
                 OGCRequest url = new OGCRequest(this.getLayer().getServiceProvider().getUrl());
@@ -135,8 +136,13 @@ public class Style implements XMLElement {
                     url.addOrReplaceNameSpace(OGCConstants.WMS_VERSION, OGCConstants.WMS_VERSION_111);
                 }
                 url.addOrReplaceParameter(OGCConstants.WMS_PARAM_LAYER, this.getLayer().getName());
+                String format="image/png";
+                if(getLegendResource.getFormats()!=null){
+                    format=(String) getLegendResource.getFormats().iterator().next();
+                }
+                    
                 //todo: uitzoeken welk formaat ondersteund wordt.
-                url.addOrReplaceParameter(OGCConstants.WMS_PARAM_FORMAT, "image/png");
+                url.addOrReplaceParameter(OGCConstants.WMS_PARAM_FORMAT,format);
 
                 //make SLDProxy Url.
                 String sldProxyUrl=(String)conversionValues.get("url");
