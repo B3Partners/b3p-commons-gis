@@ -32,6 +32,7 @@ import org.geotools.feature.IllegalAttributeException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.Name;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
@@ -179,8 +180,46 @@ public class StreamingShapeWriter {
         try {
             //omdat je niet weet wat de nieuwe volgorde is: Deze doorlopen ipv alle in 1 keer schrijven.
             List<AttributeDescriptor> ads=newFeature.getFeatureType().getAttributeDescriptors();
-            for (AttributeDescriptor ad : ads){
-                newFeature.setAttribute(ad.getName(), feature.getAttribute(ad.getName()));
+            for (int i=0; i < ads.size(); i++){
+                AttributeDescriptor ad =ads.get(i);                
+                
+                Name name=ad.getName();            
+                /*controleer of er wel een property kan worden gevonden, dit lukt bijvoorbeeld niet
+                 als de naam korter is geworden omdat deze groter dan 10 karakters was.
+                 De waarden is dan niet te vinden met de naam.
+                 */
+                if(feature.getProperty(name)==null){
+                    //controleer eerst of de naam van de zelfde index goed is.
+                    Name newName=feature.getFeatureType().getDescriptor(i).getName();
+                    if(newName.getLocalPart().startsWith(name.getLocalPart())){
+                        name=newName;
+                    }                    
+                    /*het kan zijn dat de geometry naar voren is geplaatst (dat doet de shp datastore)
+                     dan is de index met 1 verhoogt.*/
+                    if (feature.getProperty(name)==null && i > 0){
+                        newName=feature.getFeatureType().getDescriptor(i-1).getName();
+                        if(newName.getLocalPart().startsWith(name.getLocalPart())){
+                            name=newName;
+                        }
+                    }
+                    //als het nog steeds null is dan kijken wat de naam is die er het beste bij past. (met startsWith)
+                    if (feature.getProperty(name)==null){
+                        newName=null;
+                        List<AttributeDescriptor> oldAds=feature.getFeatureType().getAttributeDescriptors();
+                        for(int a=0; a < oldAds.size() && newName==null; a++){                            
+                            if (oldAds.get(a).getName().getLocalPart().startsWith(name.getLocalPart())){
+                                newName=oldAds.get(a).getName();
+                            }
+                        }
+                        if(newName!=null){
+                            name=newName;
+                        }else{
+                            log.debug("Can't find the correct attribute name.");
+                        }                        
+                    }
+                    
+                }
+                newFeature.setAttribute(ad.getName(), feature.getAttribute(name));                
             }
             newFeature.setDefaultGeometry(feature.getDefaultGeometry());
         } catch (IllegalAttributeException writeProblem) {
