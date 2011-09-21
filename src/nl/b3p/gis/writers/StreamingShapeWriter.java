@@ -178,46 +178,61 @@ public class StreamingShapeWriter {
         // Write to datastore
         SimpleFeature newFeature = (SimpleFeature) writer.next();        
         try {
+            //controleer of de geometry al voor aan stond of dat deze is verplaatst naar voren.
+            boolean geometryAttributeIsMoved=false;
+            //if (feature.)
+            int indexNewGeomAttribute=newFeature.getFeatureType().indexOf(newFeature.getFeatureType().getGeometryDescriptor().getName());
+            int indexOldGeomAttribute=feature.getFeatureType().indexOf(feature.getFeatureType().getGeometryDescriptor().getName());
+            if (indexNewGeomAttribute != indexOldGeomAttribute){
+                geometryAttributeIsMoved=true;
+            }
             //omdat je niet weet wat de nieuwe volgorde is: Deze doorlopen ipv alle in 1 keer schrijven.
-            List<AttributeDescriptor> ads=newFeature.getFeatureType().getAttributeDescriptors();
+            List<AttributeDescriptor> ads=newFeature.getFeatureType().getAttributeDescriptors();            
             for (int i=0; i < ads.size(); i++){
-                AttributeDescriptor ad =ads.get(i);                
-                
+                AttributeDescriptor ad =ads.get(i);                                
                 Name name=ad.getName();            
-                /*controleer of er wel een property kan worden gevonden, dit lukt bijvoorbeeld niet
-                 als de naam korter is geworden omdat deze groter dan 10 karakters was.
-                 De waarden is dan niet te vinden met de naam.
+                /*Zoek de goede name voor het attribuut op.
+                 * controleer of er wel een property kan worden gevonden, dit lukt bijvoorbeeld niet
+                 * als de naam korter is geworden omdat deze groter dan 10 karakters was.
+                 * De originelewaarden is dan niet te vinden met de naam.
                  */
-                if(feature.getProperty(name)==null){
-                    //controleer eerst of de naam van de zelfde index goed is.
-                    Name newName=feature.getFeatureType().getDescriptor(i).getName();
-                    if(newName.getLocalPart().startsWith(name.getLocalPart())){
-                        name=newName;
-                    }                    
-                    /*het kan zijn dat de geometry naar voren is geplaatst (dat doet de shp datastore)
-                     dan is de index met 1 verhoogt.*/
-                    if (feature.getProperty(name)==null && i > 0){
-                        newName=feature.getFeatureType().getDescriptor(i-1).getName();
-                        if(newName.getLocalPart().startsWith(name.getLocalPart())){
-                            name=newName;
+                if(feature.getProperty(name)==null){                    
+                    String new10CharName = name.getLocalPart(); 
+                                       
+                    if (new10CharName.length()>10){
+                        new10CharName=new10CharName.substring(0,10);
+                    }       
+                                   
+                    List<Name> validNames=new ArrayList<Name>();
+                    List<AttributeDescriptor> oldAds=feature.getFeatureType().getAttributeDescriptors();
+                    for(int a=0; a < oldAds.size(); a++){                            
+                        if (oldAds.get(a).getName().getLocalPart().startsWith(new10CharName)){
+                            validNames.add(oldAds.get(a).getName());
                         }
                     }
-                    //als het nog steeds null is dan kijken wat de naam is die er het beste bij past. (met startsWith)
-                    if (feature.getProperty(name)==null){
-                        newName=null;
-                        List<AttributeDescriptor> oldAds=feature.getFeatureType().getAttributeDescriptors();
-                        for(int a=0; a < oldAds.size() && newName==null; a++){                            
-                            if (oldAds.get(a).getName().getLocalPart().startsWith(name.getLocalPart())){
-                                newName=oldAds.get(a).getName();
+
+                    if(validNames.size()==1){
+                        name=validNames.get(0);
+                    }else if (validNames.size()>1){
+                        //als er meerdere zijn gevonden dan 1. Dan betekent het dat er 
+                        //meerdere 10 karakter namen zijn die voldoen aan de criteria. Het nummer
+                        //achter de naam geeft dan aan welke het moet zijn.
+                        try{
+                            int index=0;
+                            if (name.getLocalPart().length()>10){
+                                index= new Integer(name.getLocalPart().substring(10,name.getLocalPart().length()));                                                                            
                             }
+                            if (index < validNames.size())
+                                name=validNames.get(index);
+                            else
+                                name= validNames.get(validNames.size()-1);
+                            
+                        }catch(NumberFormatException e){
+                            log.error("Can't make a number out of the string that is added to the attribute name to make it unique.");
                         }
-                        if(newName!=null){
-                            name=newName;
-                        }else{
-                            log.debug("Can't find the correct attribute name.");
-                        }                        
-                    }
-                    
+                    }else{
+                        log.debug("Can't find the correct attribute name.");
+                    }                     
                 }
                 newFeature.setAttribute(ad.getName(), feature.getAttribute(name));                
             }
