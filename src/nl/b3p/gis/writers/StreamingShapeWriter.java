@@ -274,10 +274,15 @@ public class StreamingShapeWriter {
             ds.createSchema(Util.changeGeometryBinding(type, geomClass));
             datastores.put(hashKey, ds);
         }
-        if (type.getCoordinateReferenceSystem()!=null)
-            ds.forceSchemaCRS(type.getCoordinateReferenceSystem());
-        else if (defaultCoordRefSys!=null)
+
+        /* TODO: Bij een zelf meegegeven crs geeft dit mogelijk nog een lock op
+         * de .prj file en kan deze niet verwijderd worden. forceSchemaCRS()
+         * doet nog wat funky's met storageFile.replaceOriginal()
+         */
+        if (defaultCoordRefSys != null) {
             ds.forceSchemaCRS(defaultCoordRefSys);
+        }
+
         //create transaction and writer
         //sometimes (when a crs is forced) the typename is resolved bij the shp fileName... 
         //So check if the suffix is needed because the suffix is in the filename.
