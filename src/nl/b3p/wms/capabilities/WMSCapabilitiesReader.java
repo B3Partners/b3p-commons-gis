@@ -49,6 +49,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import java.util.Iterator;
+import java.util.Set;
 import org.xml.sax.Attributes;
 
 import javax.xml.transform.Source;
@@ -77,6 +79,7 @@ public class WMSCapabilitiesReader {
     private static final String host = AuthScope.ANY_HOST; // "localhost";
     private static final int port = AuthScope.ANY_PORT;
     private static final int RTIMEOUT = 20000;
+
     private Stack stack = new Stack();
     private Switcher s = null;
     private ServiceProvider serviceProvider = null;
@@ -306,6 +309,14 @@ public class WMSCapabilitiesReader {
         s.setElementHandler("UserName", new UserNameHandler());
         s.setElementHandler("PersonalCode", new PersonalCodeHandler());
         //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
+        
+        s.setElementHandler("TileSet", new TileSetHandler());
+        s.setElementHandler("Resolutions", new ResolutionsHandler());
+        s.setElementHandler("Width", new WidthHandler());
+        s.setElementHandler("Height", new HeightHandler());
+        s.setElementHandler("Format", new FormatHandler());
+        s.setElementHandler("Layers", new LayersHandler());
+        s.setElementHandler("Styles", new StylesHandler());
     }
     // </editor-fold>
 
@@ -343,7 +354,41 @@ public class WMSCapabilitiesReader {
         public void startElement(String uri, String localName, String qName, Attributes atts) {
         }
 
-        public void endElement(String uri, String localName, String qName) {
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object obj=stack.peek();
+            if (obj instanceof ServiceProvider){
+                ServiceProvider sp = (ServiceProvider) obj;
+                checkObject(sp);
+                //controleer of de provider ook de layers heeft zoals genoemd in de tileset.
+                if (sp.getTileSets()!=null){
+                    Iterator<TileSet> it = sp.getTileSets().iterator();
+                    Set<Layer> layers=sp.getAllLayers();
+                    while(it.hasNext()){                        
+                        TileSet ts=it.next();
+                        if (ts.getLayerString()!=null){
+                            String[] tsLayers=ts.getLayerString().split(",");
+                            Iterator<Layer> lit=layers.iterator();
+                            while(lit.hasNext()){
+                                Layer l = lit.next();
+                                for (int i=0; i < tsLayers.length; i++){
+                                    if (l.getName()!=null && l.getName().equals(tsLayers[i])){
+                                        ts.addLayer(l);
+                                    }
+                                }                                
+                            }
+                            if (ts.getLayers().size()!=tsLayers.length){
+                                log.error("Fout bij inlezen TileSet. "
+                                        + "Niet alle layers in de tileset zijn aanwezig. TileSet is niet ingelezen.");
+                                it.remove();
+                                continue;
+                            }
+                        }
+                        if (ts.getLayers()==null || ts.getLayers().size()==0){
+                            it.remove();
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -656,6 +701,10 @@ public class WMSCapabilitiesReader {
                 ServiceProvider serviceProvider = (ServiceProvider) object;
                 checkObject(serviceProvider);
                 serviceProvider.addException(sb.toString());
+            } else if (object instanceof TileSet){
+                TileSet tileset = (TileSet)object;
+                checkObject(tileset);
+                tileset.setFormat(sb.toString());
             }
         }
     }
@@ -691,7 +740,12 @@ public class WMSCapabilitiesReader {
                     srsbb.setSrs(srssen);
                     layer.addSrsbb(srsbb);
                 }
+            }else if (object instanceof TileSet) {
+                TileSet tileset = (TileSet)object;
+                checkObject(tileset);
+                tileset.setSrs(sb.toString());                
             }
+        
         }
     }
     //Begin part of layer
@@ -701,19 +755,23 @@ public class WMSCapabilitiesReader {
 
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             Object object = stack.peek();
+            
+            SrsBoundingBox srsbb = new SrsBoundingBox();
+            srsbb.setSrs(attributes.getValue("SRS"));
+            srsbb.setMinx(attributes.getValue("minx"));
+            srsbb.setMiny(attributes.getValue("miny"));
+            srsbb.setMaxx(attributes.getValue("maxx"));
+            srsbb.setMaxy(attributes.getValue("maxy"));
+            srsbb.setResx(attributes.getValue("resx"));
+            srsbb.setResy(attributes.getValue("resy"));
+            
             if (object instanceof Layer) {
-                Layer layer = (Layer) object;
-                SrsBoundingBox srsbb = new SrsBoundingBox();
-                srsbb.setSrs(attributes.getValue("SRS"));
-                srsbb.setMinx(attributes.getValue("minx"));
-                srsbb.setMiny(attributes.getValue("miny"));
-                srsbb.setMaxx(attributes.getValue("maxx"));
-                srsbb.setMaxy(attributes.getValue("maxy"));
-                srsbb.setResx(attributes.getValue("resx"));
-                srsbb.setResy(attributes.getValue("resy"));
+                Layer layer = (Layer) object;                
                 srsbb.setLayer(layer);
                 layer.addSrsbb(srsbb);
-
+            }else if (object instanceof TileSet){
+                TileSet tileset = (TileSet)object;
+                tileset.setBoundingBox(srsbb);
             }
         }
 
@@ -1679,7 +1737,132 @@ public class WMSCapabilitiesReader {
             serviceProvider.setPersonalCode(sb.toString());
         }
     }
+    
+    private class TileSetHandler extends ElementHandler {
+        public void startElement(String uri, String localName, String qName, Attributes attributes) {
+            TileSet tileset = new TileSet();
+            stack.push(tileset);
+        }
 
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            TileSet ts = (TileSet) stack.pop();
+            Object object = stack.peek();
+            if (object instanceof ServiceProvider){
+                ServiceProvider sp = (ServiceProvider)object;
+                checkObject(sp);
+                sp.addTileSet(ts);
+                ts.setServiceProvider(serviceProvider);
+            }
+        }
+    }
+    
+    private class ResolutionsHandler extends ElementHandler {
+        StringBuffer sb;
+
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+        
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object object = stack.peek();
+            if (object instanceof TileSet){                
+                TileSet tileset = (TileSet)object;
+                checkObject(tileset);
+                tileset.setResolutions(sb.toString());
+            }
+        }
+    }
+    
+    
+    private class HeightHandler extends ElementHandler {
+        StringBuffer sb;
+
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object object = stack.peek();
+            if (object instanceof TileSet) {
+                TileSet tileset= (TileSet)object;
+                checkObject(tileset);
+                tileset.setHeight(new Integer(sb.toString()));
+            }
+        }
+    }
+
+    private class LayersHandler extends ElementHandler {
+        StringBuffer sb;
+
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object object = stack.peek();
+            if (object instanceof TileSet) {
+                TileSet tileset= (TileSet)object;
+                checkObject(tileset);
+                tileset.setLayerString(sb.toString());
+            }
+        }
+    }
+    
+    private class StylesHandler extends ElementHandler {
+        StringBuffer sb;
+
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object object = stack.peek();
+            if (object instanceof TileSet) {
+                TileSet tileset= (TileSet)object;
+                checkObject(tileset);
+                tileset.setStyles(sb.toString());
+            }
+        }
+    }
+
+
+    private class WidthHandler extends ElementHandler {
+        StringBuffer sb;
+
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            Object object = stack.peek();
+            if (object instanceof TileSet) {
+                TileSet tileset= (TileSet)object;
+                checkObject(tileset);
+                tileset.setWidth(new Integer(sb.toString()));
+            }
+        }
+    }
+    
     private class UserDefinedSymbolizationHandler extends ElementHandler {
 
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
@@ -1687,7 +1870,7 @@ public class WMSCapabilitiesReader {
 
         public void endElement(String uri, String localName, String qName) {
         }
-    }
+    }    
     //end not being used
     // </editor-fold>
 }

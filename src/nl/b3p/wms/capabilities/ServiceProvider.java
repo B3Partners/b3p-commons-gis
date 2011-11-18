@@ -53,6 +53,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private Set serviceProviderKeywordList;
     private Set exceptions;
     private Set layers;
+    private Set<TileSet> tileSets;
     private Layer topLayer;
     private Set allRoles;
     private String code;
@@ -485,6 +486,15 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             pCode.appendChild(text);
             vendorSpecificElement.appendChild(pCode);
         }
+        //add the styles
+        if (this.getTileSets()!=null){
+            Iterator<TileSet> it=this.getTileSets().iterator();
+            while(it.hasNext()){                
+                TileSet ts=it.next();
+                if (ts!=null)
+                    vendorSpecificElement.appendChild(ts.toElement(doc,doc.createElement("TileSet")));
+            }            
+        }
 
         capabilityElement.appendChild(vendorSpecificElement);
 
@@ -619,5 +629,40 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public String getType() {
         return "WMS";
+    }
+
+    public Set<TileSet> getTileSets() {
+        return tileSets;
+    }
+
+    public void setTileSets(Set<TileSet> tileSets) {
+        this.tileSets = tileSets;
+    }
+
+    public void addTileSet(TileSet ts) {
+        if (this.tileSets==null){
+            this.tileSets = new HashSet<TileSet>();            
+        }
+        this.tileSets.add(ts);
+    }
+    /**
+     * Returned de tileset van (alleen) deze layer. Als er meerder layers in een tileset
+     * zitten wordt deze tileset niet gereturned.
+     */
+    public TileSet getTileSet(Layer layer){
+        if (this.tileSets==null){
+            return null;
+        }
+        Iterator<TileSet> tilesetIt=this.tileSets.iterator();
+        while(tilesetIt.hasNext()){
+            TileSet ts=tilesetIt.next();
+            //return alleen tilesets die gedekt worden door de layer.
+            if (ts.getLayers()!=null && ts.getLayers().size()==1){
+                if(ts.getLayers().contains(layer)){
+                    return ts;
+                }
+            }
+        }
+        return null;
     }
 }
