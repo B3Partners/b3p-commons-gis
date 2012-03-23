@@ -110,10 +110,10 @@ public class WMSCapabilitiesReader {
     }
 
     public ByteArrayOutputStream getCapabilities(String location) throws Exception {
-        return getCapabilities(location, null, null);
+        return getCapabilities(location, null, null, null);
     }
 
-    public ByteArrayOutputStream getCapabilities(String location, String username, String password) throws Exception {
+    public ByteArrayOutputStream getCapabilities(String location, String username, String password, String remoteAddr) throws Exception {
         HttpClient client = new HttpClient();
         client.getHttpConnectionManager().
                 getParams().setConnectionTimeout(RTIMEOUT);
@@ -124,9 +124,15 @@ public class WMSCapabilitiesReader {
             AuthScope authScope = new AuthScope(host, port);
             client.getState().setCredentials(authScope, defaultcreds);
         }
-
+     
         // Create a method instance.
         GetMethod method = new GetMethod(location);
+        
+        if(remoteAddr != null) {
+            // Add a header so Kaartenbalie can check the IP of the client logging in
+            method.addRequestHeader("X-Forwarded-For", remoteAddr);
+        }
+        
         ByteArrayOutputStream out = null;
         try {
             int statusCode = client.executeMethod(method);
@@ -181,12 +187,12 @@ public class WMSCapabilitiesReader {
      */
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
     public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
-        return getProvider(location, null, null);
+        return getProvider(location, null, null, null);
     }
 
-    public ServiceProvider getProvider(String location, String username, String password) throws IOException, SAXException, Exception {
+    public ServiceProvider getProvider(String location, String username, String password, String remoteAddr) throws IOException, SAXException, Exception {
 
-        ByteArrayOutputStream getCap = getCapabilities(location, username, password);
+        ByteArrayOutputStream getCap = getCapabilities(location, username, password, remoteAddr);
         //String xml = getCapabilities(location, username, password);
         ByteArrayInputStream in = new ByteArrayInputStream(getCap.toByteArray());
 
