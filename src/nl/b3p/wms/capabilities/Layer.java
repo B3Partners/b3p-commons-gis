@@ -72,7 +72,7 @@ public class Layer implements XMLElement,Comparable{
         return id;
     }
 
-    private void setId(Integer id) {
+    protected void setId(Integer id) {
         this.id = id;
     }
 
