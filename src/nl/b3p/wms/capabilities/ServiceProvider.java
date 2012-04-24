@@ -86,7 +86,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         return id;
     }
 
-    private void setId(Integer id) {
+    protected void setId(Integer id) {
         this.id = id;
     }
 
