@@ -69,6 +69,8 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private String password;
 
     private String sldUrl;
+    
+    private Boolean ignoreResource;
 
     /** default ServiceProvider() constructor.
      */
@@ -664,5 +666,13 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             }
         }
         return null;
+    }
+
+    public Boolean getIgnoreResource() {
+        return ignoreResource;
+    }
+
+    public void setIgnoreResource(Boolean ignoreResource) {
+        this.ignoreResource = ignoreResource;
     }
 }
