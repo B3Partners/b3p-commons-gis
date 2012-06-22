@@ -189,6 +189,23 @@ public class WMSCapabilitiesReader {
     public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
         return getProvider(location, null, null, null);
     }
+    
+    /** Private method which validates a XML document at a given location.
+     *
+     * @param location String representing the location where the document can be found.
+     *
+     * @param username  The username
+     * @param password  The password
+     * @return a filled ServiceProvider with the information read from the XML document.
+     *
+     * @throws IOException
+     * @throws SAXException
+     * @throws Exception  
+     */
+    // <editor-fold defaultstate="" desc="getProvider(String location) method.">
+    public ServiceProvider getProvider(String location,String username,String password) throws IOException, SAXException, Exception {
+        return getProvider(location, username, password, null);
+    }
 
     public ServiceProvider getProvider(String location, String username, String password, String remoteAddr) throws IOException, SAXException, Exception {
 

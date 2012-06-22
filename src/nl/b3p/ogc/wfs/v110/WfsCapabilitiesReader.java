@@ -39,6 +39,7 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import nl.b3p.gis.CredentialsParser;
 import nl.b3p.ogc.utils.OGCConstants;
 import nl.b3p.ogc.utils.OGCRequest;
 //import nl.b3p.xml.wfs.v110.FeatureType;
@@ -69,12 +70,17 @@ public class WfsCapabilitiesReader {
     public WfsCapabilitiesReader() {
         this.setNamespaces();
     }
-
+    
     public WfsServiceProvider getProvider(String url) throws IOException, Exception {
+        return getProvider(url,null,null);
+    }
+
+    public WfsServiceProvider getProvider(String url,String username,String password) throws IOException, Exception {
         WfsServiceProvider provider = new WfsServiceProvider();
         HttpMethod method = null;
         //PostMethod postMethod = null;
-        HttpClient client = new HttpClient();
+        HttpClient client = CredentialsParser.HttpClientCredentials(url,username,password);
+                
         String host = url;
         OGCRequest or = new OGCRequest(url);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
