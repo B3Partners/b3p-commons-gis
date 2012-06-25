@@ -21,6 +21,10 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import nl.b3p.gis.CredentialsParser;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
@@ -57,8 +61,8 @@ public class SldReader {
     /**
      * get the named layers by providing the url
      */
-    public List<SldNamedLayer> getNamedLayersByUrl(String url) throws Exception {
-        Document doc = getDocument(url);
+    public List<SldNamedLayer> getNamedLayersByUrl(String url,String username,String password) throws Exception {
+        Document doc = getDocument(url,username,password);
         return getNamedLayers(doc);
     }
     /**
@@ -70,7 +74,11 @@ public class SldReader {
     }
     
     public List<SldNamedLayer> getNamedLayers(String url, String layerName) throws Exception{
-        List<SldNamedLayer> allNamedLayers=getNamedLayersByUrl(url);
+        return getNamedLayers(url,layerName,null,null);
+    }
+    
+    public List<SldNamedLayer> getNamedLayers(String url, String layerName,String username,String password) throws Exception{
+        List<SldNamedLayer> allNamedLayers=getNamedLayersByUrl(url,username,password);
         List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
         for (SldNamedLayer namedLayer : allNamedLayers){
             if (namedLayer.getName().equals(layerName)){
@@ -124,18 +132,20 @@ public class SldReader {
         return name;
     }
 
-    private Document getDocument(String urlString) throws Exception {
+    private Document getDocument(String urlString,String username,String password) throws Exception {
         InputStream is = null;
+        
+        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(username, password);
+        GetMethod method = new GetMethod(urlString);
 
-        try {
-            URL url = new URL(urlString.trim());
-            is = url.openConnection().getInputStream();
-            return getDocument(is);
-        } finally {
-            if (is != null) {
-                is.close();
-            }
+        int statusCode = client.executeMethod(method);
+        if (statusCode != HttpStatus.SC_OK) {
+               throw new Exception("Host: " + urlString + " error: " + method.getStatusLine().getReasonPhrase());
         }
+         
+        is  = method.getResponseBodyAsStream();
+        
+        return getDocument(is);
     }
     public static Document getDocument(InputStream is) throws Exception {        
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();

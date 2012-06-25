@@ -55,15 +55,13 @@ import java.io.StringReader;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
+import nl.b3p.gis.CredentialsParser;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
-import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
@@ -84,7 +82,6 @@ import org.geotools.xml.Encoder;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -173,7 +170,8 @@ public class OgcWfsClient {
      *
      */
     private static InputStream getInputStreamReader(Object o, String host, HashMap namespaces, String username, String password) throws Exception {
-        HttpClient client = new HttpClient();
+        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(username, password);
+        
         int status;
         HttpMethod httpmethod = null;
         if (o instanceof String) {
@@ -209,12 +207,7 @@ public class OgcWfsClient {
             postmethod.setRequestEntity(new StringRequestEntity(body, null, null));
             httpmethod = postmethod;
         }
-        if (username != null && password != null) {
-            client.getParams().setAuthenticationPreemptive(true);
-            Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-            AuthScope authScope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT);
-            client.getState().setCredentials(authScope, defaultcreds);
-        }
+        
         status = client.executeMethod(httpmethod);
         if (status == HttpStatus.SC_OK) {
             /*DEBUG:

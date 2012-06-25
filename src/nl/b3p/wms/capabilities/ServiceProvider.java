@@ -605,6 +605,8 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         sc.setTitle(this.getTitle());
         sc.setUrl(this.getUrl());
         sc.setWmsVersion(this.getWmsVersion());
+        sc.setUserName(this.getUserName());
+        sc.setPassword(this.getPassword());
         
         HashSet dr=new HashSet();
         dr.addAll(this.getDomainResource());
