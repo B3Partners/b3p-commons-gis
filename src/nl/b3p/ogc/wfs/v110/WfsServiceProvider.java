@@ -42,7 +42,8 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     private String wfsVersion;
     private Date updatedDate;
     private Set wfsLayers;
-
+    private String username;
+    private String password;
     private String status;
 
     /** Creates a new instance of WfsServiceProvider */
@@ -139,5 +140,20 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     public void setStatus(String status) {
         this.status = status;
     }
-
+    
+    public String getUsername(){
+        return this.username;
+    }
+    
+    public void setUsername(String username){
+        this.username   = username;
+    } 
+    
+    public String getPassword(){
+        return this.password;
+    }
+    
+    public void setPassword(String password){
+        this.password   = password;
+    }
 }
