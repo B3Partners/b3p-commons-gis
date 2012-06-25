@@ -59,6 +59,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
+import nl.b3p.gis.B3PCredentials;
 import nl.b3p.gis.CredentialsParser;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -109,11 +110,11 @@ public class WMSCapabilitiesReader {
     }
 
     public ByteArrayOutputStream getCapabilities(String location) throws Exception {
-        return getCapabilities(location, null, null, null);
+        return getCapabilities(location, null, null);
     }
 
-    public ByteArrayOutputStream getCapabilities(String location, String username, String password, String remoteAddr) throws Exception {
-        HttpClient client   = CredentialsParser.CommonsHttpClientCredentials(username, password);
+    public ByteArrayOutputStream getCapabilities(String location, B3PCredentials credentials, String remoteAddr) throws Exception {
+        HttpClient client   = CredentialsParser.CommonsHttpClientCredentials(credentials);
      
         // Create a method instance.
         GetMethod method = new GetMethod(location);
@@ -177,7 +178,7 @@ public class WMSCapabilitiesReader {
      */
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
     public ServiceProvider getProvider(String location) throws IOException, SAXException, Exception {
-        return getProvider(location, null, null, null);
+        return getProvider(location, null,  null);
     }
     
     /** Private method which validates a XML document at a given location.
@@ -193,13 +194,13 @@ public class WMSCapabilitiesReader {
      * @throws Exception  
      */
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
-    public ServiceProvider getProvider(String location,String username,String password) throws IOException, SAXException, Exception {
-        return getProvider(location, username, password, null);
+    public ServiceProvider getProvider(String location,B3PCredentials credentials) throws IOException, SAXException, Exception {
+        return getProvider(location, credentials, null);
     }
 
-    public ServiceProvider getProvider(String location, String username, String password, String remoteAddr) throws IOException, SAXException, Exception {
+    public ServiceProvider getProvider(String location,B3PCredentials credentials, String remoteAddr) throws IOException, SAXException, Exception {
 
-        ByteArrayOutputStream getCap = getCapabilities(location, username, password, remoteAddr);
+        ByteArrayOutputStream getCap = getCapabilities(location, credentials, remoteAddr);
         //String xml = getCapabilities(location, username, password);
         ByteArrayInputStream in = new ByteArrayInputStream(getCap.toByteArray());
 

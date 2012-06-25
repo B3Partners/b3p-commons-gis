@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import nl.b3p.gis.B3PCredentials;
 import nl.b3p.ogc.ServiceProviderInterface;
 import nl.b3p.ogc.utils.KBConfiguration;
 import org.apache.commons.logging.Log;
@@ -676,5 +677,18 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public void setIgnoreResource(Boolean ignoreResource) {
         this.ignoreResource = ignoreResource;
+    }
+
+    /**
+     * Returns the service login credentials
+     * 
+     * @return The credentials
+     */
+    public B3PCredentials getCredentials() {
+        B3PCredentials credentials  = new B3PCredentials();
+        credentials.setUserName(this.userName);
+        credentials.setPassword(this.password);
+        
+        return credentials;
     }
 }

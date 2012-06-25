@@ -55,6 +55,7 @@ import java.io.StringReader;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
+import nl.b3p.gis.B3PCredentials;
 import nl.b3p.gis.CredentialsParser;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
@@ -170,7 +171,11 @@ public class OgcWfsClient {
      *
      */
     private static InputStream getInputStreamReader(Object o, String host, HashMap namespaces, String username, String password) throws Exception {
-        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(username, password);
+        B3PCredentials credentials  = new B3PCredentials();
+        credentials.setUserName(username);
+        credentials.setPassword(password);
+        
+        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(credentials);
         
         int status;
         HttpMethod httpmethod = null;

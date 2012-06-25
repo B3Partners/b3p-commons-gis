@@ -33,6 +33,8 @@ package nl.b3p.gis;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthPolicy;
@@ -53,35 +55,37 @@ public class CredentialsParser {
      * @return HttpClient
      */
     public static HttpClient CommonsHttpClientCredentials(){
-        return CredentialsParser.CommonsHttpClientCredentials(null, null, HOST, PORT, RTIMEOUT);
+        return CredentialsParser.CommonsHttpClientCredentials(null, HOST, PORT, RTIMEOUT);
     }
         
     /**
      * Generates the authentication HttpClient with default host, default port (any) and default timeout
      * 
-     * @param username      The username
-     * @param password      The password
+     * @param credentials   The credentials
      * @return HttpClient
      */
-    public static HttpClient CommonsHttpClientCredentials(String username,String password){
-        return CredentialsParser.CommonsHttpClientCredentials(username,password,HOST,PORT,RTIMEOUT);
+    public static HttpClient CommonsHttpClientCredentials(B3PCredentials credentials){
+        return CredentialsParser.CommonsHttpClientCredentials(credentials,HOST,PORT,RTIMEOUT);
     }
     
     /**
      * Generates the authentication HttpClient
      * 
-     * @param username      The username
-     * @param password      The password 
+     * @param credentials   The credentials 
      * @param url           The host URL
      * @param port          The communication port (80|443)
      * @param timeout       The connection timeout in milliseconds
      * @return HttpClient
      */
-    public static HttpClient CommonsHttpClientCredentials(String username,String password,String url,int port,int timeout){
+    public static HttpClient CommonsHttpClientCredentials(B3PCredentials credentials,String url,int port,int timeout){
         HttpClient client   = new HttpClient();  
         client.getHttpConnectionManager().getParams().setConnectionTimeout(RTIMEOUT);
         
-        if (username != null && password != null) {
+        if( credentials == null ){
+            return client;
+        }
+        
+        if ( credentials.getUserName() != null && credentials.getPassword() != null) {
             client.getParams().setAuthenticationPreemptive(true);
             
             if( port != 80 && port != 443 ) port    = CredentialsParser.PORT;
@@ -91,9 +95,34 @@ public class CredentialsParser {
             authPrefs.add(AuthPolicy.BASIC);
             // This will exclude the NTLM authentication scheme
             client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-            UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(username, password);
+            UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(credentials.getUserName(), credentials.getPassword());
             AuthScope scope = new AuthScope(url, port);
             client.getState().setCredentials(scope, defaultcreds);
+        }
+        
+        if( credentials.getProxyHost() != null ){
+            client  = CredentialsParser.setProxy(client, credentials);
+        }
+        
+        return client;
+    }
+    
+    /**
+     * Adds a proxy to the HttpClient
+     * 
+     * @param client        The HttpClient
+     * @param credentials   The credentials
+     * @return The modified HttpClient
+     */
+    public static HttpClient setProxy(HttpClient client,B3PCredentials credentials){
+        HostConfiguration config = client.getHostConfiguration();
+        config.setProxy(credentials.getProxyHost(), credentials.getProxyPort());
+        
+        if( credentials.getProxyUserName() != null && credentials.getProxyPassword() != null ){
+            Credentials pCredentials = new UsernamePasswordCredentials(credentials.getProxyUserName(), credentials.getProxyPassword());
+            AuthScope authScope = new AuthScope(credentials.getProxyHost(), credentials.getProxyPort());
+
+            client.getState().setProxyCredentials(authScope, pCredentials);
         }
         
         return client;

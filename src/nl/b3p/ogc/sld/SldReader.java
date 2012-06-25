@@ -21,6 +21,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import nl.b3p.gis.B3PCredentials;
 import nl.b3p.gis.CredentialsParser;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
@@ -61,8 +62,8 @@ public class SldReader {
     /**
      * get the named layers by providing the url
      */
-    public List<SldNamedLayer> getNamedLayersByUrl(String url,String username,String password) throws Exception {
-        Document doc = getDocument(url,username,password);
+    public List<SldNamedLayer> getNamedLayersByUrl(String url,B3PCredentials credentials) throws Exception {
+        Document doc = getDocument(url,credentials);
         return getNamedLayers(doc);
     }
     /**
@@ -74,11 +75,11 @@ public class SldReader {
     }
     
     public List<SldNamedLayer> getNamedLayers(String url, String layerName) throws Exception{
-        return getNamedLayers(url,layerName,null,null);
+        return getNamedLayers(url,layerName,null);
     }
     
-    public List<SldNamedLayer> getNamedLayers(String url, String layerName,String username,String password) throws Exception{
-        List<SldNamedLayer> allNamedLayers=getNamedLayersByUrl(url,username,password);
+    public List<SldNamedLayer> getNamedLayers(String url, String layerName,B3PCredentials credentials) throws Exception{
+        List<SldNamedLayer> allNamedLayers=getNamedLayersByUrl(url,credentials);
         List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
         for (SldNamedLayer namedLayer : allNamedLayers){
             if (namedLayer.getName().equals(layerName)){
@@ -132,10 +133,10 @@ public class SldReader {
         return name;
     }
 
-    private Document getDocument(String urlString,String username,String password) throws Exception {
+    private Document getDocument(String urlString,B3PCredentials credentials) throws Exception {
         InputStream is = null;
         
-        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(username, password);
+        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(credentials);
         GetMethod method = new GetMethod(urlString);
 
         int statusCode = client.executeMethod(method);

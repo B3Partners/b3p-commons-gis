@@ -25,6 +25,7 @@ package nl.b3p.ogc.wfs.v110;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import nl.b3p.gis.B3PCredentials;
 import nl.b3p.ogc.ServiceProviderInterface;
 
 /**
@@ -155,5 +156,18 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     
     public void setPassword(String password){
         this.password   = password;
+    }
+
+    /**
+     * Returns the service login credentials
+     * 
+     * @return The credentials
+     */
+    public B3PCredentials getCredentials() {
+        B3PCredentials credentials  = new B3PCredentials();
+        credentials.setUserName(this.username);
+        credentials.setPassword(this.password);
+        
+        return credentials;
     }
 }
