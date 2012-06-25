@@ -79,7 +79,7 @@ public class WfsCapabilitiesReader {
         WfsServiceProvider provider = new WfsServiceProvider();
         HttpMethod method = null;
         //PostMethod postMethod = null;
-        HttpClient client = CredentialsParser.HttpClientCredentials(url,username,password);
+        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(username,password);
                 
         String host = url;
         OGCRequest or = new OGCRequest(url);

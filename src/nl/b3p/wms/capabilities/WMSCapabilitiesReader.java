@@ -59,10 +59,9 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
-import org.apache.commons.httpclient.Credentials;
+import nl.b3p.gis.CredentialsParser;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.logging.Log;
@@ -114,16 +113,7 @@ public class WMSCapabilitiesReader {
     }
 
     public ByteArrayOutputStream getCapabilities(String location, String username, String password, String remoteAddr) throws Exception {
-        HttpClient client = new HttpClient();
-        client.getHttpConnectionManager().
-                getParams().setConnectionTimeout(RTIMEOUT);
-
-        if (username != null && password != null) {
-            client.getParams().setAuthenticationPreemptive(true);
-            Credentials defaultcreds = new UsernamePasswordCredentials(username, password);
-            AuthScope authScope = new AuthScope(host, port);
-            client.getState().setCredentials(authScope, defaultcreds);
-        }
+        HttpClient client   = CredentialsParser.CommonsHttpClientCredentials(username, password);
      
         // Create a method instance.
         GetMethod method = new GetMethod(location);

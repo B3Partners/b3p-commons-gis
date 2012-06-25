@@ -43,48 +43,56 @@ import org.apache.commons.httpclient.auth.AuthScope;
  * @author rachelle
  */
 public class CredentialsParser {
-    private static int RTIMEOUT = 20000;
-    private static int port = AuthScope.ANY_PORT;
+    private static final int RTIMEOUT = 20000;
+    private static final int PORT = AuthScope.ANY_PORT;
+    private static final String HOST = AuthScope.ANY_HOST; // "localhost";
     
     /**
-     * Generates the authentication HttpClient with default port (any) and default timeout
+     * Generates the authentication HttpClient with default settings
      * 
-     * @param url           The URL
+     * @return HttpClient
+     */
+    public static HttpClient CommonsHttpClientCredentials(){
+        return CredentialsParser.CommonsHttpClientCredentials(null, null, HOST, PORT, RTIMEOUT);
+    }
+        
+    /**
+     * Generates the authentication HttpClient with default host, default port (any) and default timeout
+     * 
      * @param username      The username
      * @param password      The password
      * @return HttpClient
      */
-    public static HttpClient HttpClientCredentials(String url,String username,String password){
-        return CredentialsParser.HttpClientCredentials(url,username,password,CredentialsParser.port,CredentialsParser.RTIMEOUT);
+    public static HttpClient CommonsHttpClientCredentials(String username,String password){
+        return CredentialsParser.CommonsHttpClientCredentials(username,password,HOST,PORT,RTIMEOUT);
     }
     
     /**
      * Generates the authentication HttpClient
      * 
-     * @param url           The URL
      * @param username      The username
-     * @param password      The password
+     * @param password      The password 
+     * @param url           The host URL
      * @param port          The communication port (80|443)
      * @param timeout       The connection timeout in milliseconds
      * @return HttpClient
      */
-    public static HttpClient HttpClientCredentials(String url,String username,String password,int port,int timeout){
+    public static HttpClient CommonsHttpClientCredentials(String username,String password,String url,int port,int timeout){
         HttpClient client   = new HttpClient();  
         client.getHttpConnectionManager().getParams().setConnectionTimeout(RTIMEOUT);
         
-        if( username != null ){
+        if (username != null && password != null) {
             client.getParams().setAuthenticationPreemptive(true);
             
-            if( port != 80 && port != 443 ) port    = CredentialsParser.port;
+            if( port != 80 && port != 443 ) port    = CredentialsParser.PORT;
             
             List authPrefs = new ArrayList(2);
             authPrefs.add(AuthPolicy.DIGEST);
             authPrefs.add(AuthPolicy.BASIC);
             // This will exclude the NTLM authentication scheme
             client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
-
             UsernamePasswordCredentials defaultcreds = new UsernamePasswordCredentials(username, password);
-            AuthScope scope = new AuthScope(url, port, AuthScope.ANY_REALM);
+            AuthScope scope = new AuthScope(url, port);
             client.getState().setCredentials(scope, defaultcreds);
         }
         
