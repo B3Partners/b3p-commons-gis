@@ -35,22 +35,10 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.*;
 import nl.b3p.xml.wfs.WFS_Capabilities;
-import nl.b3p.xml.wfs.v110.BaseRequestType;
-import nl.b3p.xml.wfs.v110.Delete;
-import nl.b3p.xml.wfs.v110.Insert;
-import nl.b3p.xml.wfs.v110.Native;
-import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
-import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
-import nl.b3p.xml.wfs.v110.Update;
+import nl.b3p.xml.wfs.v110.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.exolab.castor.xml.Marshaller;
@@ -70,22 +58,22 @@ en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden he
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
 public class OGCRequest implements OGCConstants {
 
-    private static final Log log = LogFactory.getLog(OGCRequest.class);
-    private String httpMethod;
-    private String httpHost;
-    private WFS_Capabilities capabilities;
-    private HashMap parameters;
-    private HashMap nameSpaces;
-    private HashMap schemaLocations;
-    private HashMap transactionList = new HashMap();
-    private HashMap getFeatureFilterMap = new HashMap();
-    private HashMap getFeaturePropertyNameListMap = new HashMap();
-    private String abbr;
-    private ArrayList layers = new ArrayList();
-    private String username;
-    private String password;
+    protected static final Log log = LogFactory.getLog(OGCRequest.class);
+    protected String httpMethod;
+    protected String httpHost;
+    protected WFS_Capabilities capabilities;
+    protected HashMap parameters;
+    protected HashMap nameSpaces;
+    protected HashMap schemaLocations;
+    protected HashMap transactionList = new HashMap();
+    protected HashMap getFeatureFilterMap = new HashMap();
+    protected HashMap getFeaturePropertyNameListMap = new HashMap();
+    protected String abbr;
+    protected ArrayList layers = new ArrayList();
+    protected String username;
+    protected String password;
     // version that will be returned to client
-    private String finalVersion;
+    protected String finalVersion;
     public static final List NAMESPACES_NOT_IN_URL = Arrays.asList(new String[]{
                 "http://www.opengis.net/wfs",
                 "http://www.w3.org/2001/xmlschema-instance",
@@ -1011,6 +999,7 @@ public class OGCRequest implements OGCConstants {
         removeParameter(WFS_PARAM_RELEASEACTION);
     }
 
+    @Override
     public String toString() {
         return this.getUrl();
     }
@@ -1289,7 +1278,7 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    private void checkRequestURL(List requiredParams, String request) throws Exception {
+    protected void checkRequestURL(List requiredParams, String request) throws Exception {
         StringBuffer reason = new StringBuffer();
         if (parameters == null || requiredParams == null || (parameters.isEmpty() && !requiredParams.isEmpty())) {
             reason.append("Not all parameters for request '");
