@@ -36,6 +36,11 @@ import org.w3c.dom.Element;
 public class OGCScriptingRequest extends OGCRequest {
     public static final String COMMAND = "command";
     public static final String UPDATE_SERVICES = "update_services";
+    public static final String SERVICE_TYPE = "service_type";
+    public static final String URL = "url";
+    public static final String SLD = "sld";
+    public static final String USERNAME = "username";
+    public static final String PASSWORD = "password";
     protected HashSet<String> acceptable;
     
     /*Default constr.*/
