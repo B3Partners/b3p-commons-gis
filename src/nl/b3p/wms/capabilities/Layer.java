@@ -185,11 +185,13 @@ public class Layer implements XMLElement,Comparable{
             layerset = new HashSet();
         }
         this.serviceProvider = serviceProvider;
+        /* TODO: Check op dubbele namen nagaan */
         if (layerset.contains(this) && this.getName()!=null) {
             String msg = "Conflicting layer names: layer to add to set equals layer already in set, layer is not added! ";
             log.error(msg);
             throw new Exception(msg);
         }
+        
         layerset.add(this);
 
         Set layers = getLayers();
@@ -319,6 +321,7 @@ public class Layer implements XMLElement,Comparable{
         if (layers == null) {
             layers = new HashSet();
         }
+        /* TODO: Check op dubbele namen nagaan */
         /* name, title en cascaded moeten uniek zijn binnen siblings */
         if (layers.contains(layer)) {
             String thisLayerDesc = "sp_abbr="
@@ -331,7 +334,9 @@ public class Layer implements XMLElement,Comparable{
                         + ", name=" + layer.getName()
                         + ", title=" + layer.getTitle()
                         + ", cascaded=" + layer.getCascaded();
+            
             String msg = "Duplicate sibling layer added to parent [" + thisLayerDesc + "]: duplicate [" + layerDesc + "]";
+            
             throw new Exception(msg);
         } else {
             layers.add(layer);

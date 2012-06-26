@@ -61,6 +61,7 @@ import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
 import nl.b3p.gis.B3PCredentials;
 import nl.b3p.gis.CredentialsParser;
+import org.apache.bcel.generic.AALOAD;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -196,6 +197,17 @@ public class WMSCapabilitiesReader {
     // <editor-fold defaultstate="" desc="getProvider(String location) method.">
     public ServiceProvider getProvider(String location,B3PCredentials credentials) throws IOException, SAXException, Exception {
         return getProvider(location, credentials, null);
+    }
+    
+    public ServiceProvider getProvider(String location, String username, String password, String ip)
+        throws IOException, SAXException, Exception {
+        
+        B3PCredentials cred = new B3PCredentials();
+        cred.setUserName(username);
+        cred.setPassword(password);
+        
+        return getProvider(location, cred, ip);
+        
     }
 
     public ServiceProvider getProvider(String location,B3PCredentials credentials, String remoteAddr) throws IOException, SAXException, Exception {
@@ -636,6 +648,7 @@ public class WMSCapabilitiesReader {
             stack.push(layer);
         }
 
+        @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
             Layer layer = (Layer) stack.pop();
             Object obj = stack.peek();
