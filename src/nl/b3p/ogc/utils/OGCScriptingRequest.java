@@ -18,6 +18,8 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with B3P Kaartenbalie.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Rachelle Scheijen
  */
 package nl.b3p.ogc.utils;
 
@@ -29,10 +31,6 @@ import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.w3c.dom.Element;
 
-/**
- *
- * @author Rachelle Scheijen
- */
 public class OGCScriptingRequest extends OGCRequest {
     public static final String COMMAND = "command";
     public static final String UPDATE_SERVICES = "update_services";
@@ -46,6 +44,9 @@ public class OGCScriptingRequest extends OGCRequest {
     public static final String GROUPS = "groups";
     public static final String NAME = "name";
     public static final String UPDATE = "update";
+    public static final String ADD_ALLOWED_SERVICES = "add_allowed_services";
+    public static final String DELETE_ALLOWED_SERVICES = "delete_allowed_services";
+    public static final String DELETE_ALL_ALLOWED_SERVICES = "delete_all_allowed_services";
     
     
     protected HashSet<String> acceptable;
@@ -113,6 +114,7 @@ public class OGCScriptingRequest extends OGCRequest {
     /**
      * Not supported in OGScriptingRequest
      */
+    @Override
     public String getXMLBody() throws Exception {
         throw new Exception("Not supported");
     }
@@ -353,6 +355,7 @@ public class OGCScriptingRequest extends OGCRequest {
      * @param layers the layers to set
      * Not supported in OGScriptingRequest
      */
+    @Override
     public void setLayers(ArrayList layers) {
     }
 }
