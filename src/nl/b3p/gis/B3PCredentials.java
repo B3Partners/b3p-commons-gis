@@ -1,5 +1,8 @@
 package nl.b3p.gis;
 
+import nl.b3p.ogc.wfs.v110.WfsServiceProvider;
+import nl.b3p.wms.capabilities.ServiceProvider;
+
 /**
  *
  * @author rachelle
@@ -11,6 +14,16 @@ public class B3PCredentials {
     private int proxyPort  = 80;
     private String proxyUserName = null;
     private String proxyPassword = null;
+    
+    public void parseCredentials(WfsServiceProvider sp){
+        this.userName   = sp.getUsername();
+        this.password   = sp.getPassword();
+    }
+    
+    public void parseCredentials(ServiceProvider sp){
+        this.userName   = sp.getUserName();
+        this.password   = sp.getPassword();
+    }
     
     public String getUserName(){
         return this.userName;

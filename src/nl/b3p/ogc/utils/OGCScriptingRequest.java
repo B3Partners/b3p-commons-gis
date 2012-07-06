@@ -35,12 +35,12 @@ public class OGCScriptingRequest extends OGCRequest {
     public static final String COMMAND = "command";
     public static final String UPDATE_SERVICES = "update_services";
     public static final String SERVICE_TYPE = "service_type";
+    public static final String ABBR = "abbr";
     public static final String URL = "url";
     public static final String SLD = "sld";
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String ADD_SERVICE = "add_service";
-    public static final String ABBR = "abbr";
     public static final String GROUPS = "groups";
     public static final String NAME = "name";
     public static final String UPDATE = "update";
