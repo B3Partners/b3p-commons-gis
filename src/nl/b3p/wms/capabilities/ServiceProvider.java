@@ -72,6 +72,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private String sldUrl;
     
     private Boolean ignoreResource;
+    private Boolean allowed = Boolean.FALSE;
 
     /** default ServiceProvider() constructor.
      */
@@ -690,5 +691,13 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         credentials.setPassword(this.password);
         
         return credentials;
+    }
+    
+    public void setAllowed(Boolean allowed){
+        this.allowed    = allowed;
+    }
+
+    public Boolean getAllowed() {
+        return this.allowed;
     }
 }

@@ -46,6 +46,7 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     private String username;
     private String password;
     private String status;
+    private Boolean allowed = Boolean.FALSE;
 
     /** Creates a new instance of WfsServiceProvider */
     public WfsServiceProvider() {
@@ -156,6 +157,14 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     
     public void setPassword(String password){
         this.password   = password;
+    }
+    
+    public void setAllowed(Boolean allowed){
+        this.allowed    = allowed;
+    }
+
+    public Boolean getAllowed() {
+        return this.allowed;
     }
 
     /**
