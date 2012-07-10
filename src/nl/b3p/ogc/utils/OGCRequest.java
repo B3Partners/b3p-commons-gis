@@ -74,6 +74,7 @@ public class OGCRequest implements OGCConstants {
     protected String password;
     // version that will be returned to client
     protected String finalVersion;
+    protected String serviceName;
     public static final List NAMESPACES_NOT_IN_URL = Arrays.asList(new String[]{
                 "http://www.opengis.net/wfs",
                 "http://www.w3.org/2001/xmlschema-instance",
@@ -620,6 +621,9 @@ public class OGCRequest implements OGCConstants {
         if (url == null) {
             return;
         }
+        
+        this.serviceName    = null;
+        
         String[] tokens = url.split("\\?|&");
         if (tokens.length > 0) {
             setHttpHost(tokens[0]);
@@ -1174,6 +1178,14 @@ public class OGCRequest implements OGCConstants {
         } else {
             this.httpHost = httpHost + "&";
         }
+        
+        if( this.httpHost.contains("/services/") ){
+            String[] parts    = this.httpHost.split("/services/");
+            if( parts[1].contains("/") ){
+                parts   = parts[1].split("/");
+                this.serviceName    = parts[0];
+            }
+        }
     }
 
     /**
@@ -1470,5 +1482,9 @@ public class OGCRequest implements OGCConstants {
      */
     public void setLayers(ArrayList layers) {
         this.layers = layers;
+    }
+    
+    public String getServiceName(){
+        return this.serviceName;
     }
 }
