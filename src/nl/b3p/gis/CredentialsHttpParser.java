@@ -110,7 +110,9 @@ public class CredentialsHttpParser {
         httpclient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,RTIMEOUT);
         httpclient.getParams().setParameter("http.protocol.version", http_version);
 
-        if( credentials == null )   return httpclient;
+        if (credentials == null || credentials.getPassword() == null) {
+            return httpclient;
+        }
 
         org.apache.http.auth.AuthScope scope = new org.apache.http.auth.AuthScope(targetHost.getHostName(), targetHost.getPort());
         org.apache.http.auth.UsernamePasswordCredentials defaultcreds = new org.apache.http.auth.UsernamePasswordCredentials(credentials.getUserName(),credentials.getPassword());

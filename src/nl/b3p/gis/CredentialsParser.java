@@ -95,7 +95,7 @@ public class CredentialsParser {
         
         client.getParams().setParameter("http.protocol.version", version);
         
-        if( credentials == null ){
+        if (credentials == null || credentials.getPassword() == null) {
             return client;
         }
         
