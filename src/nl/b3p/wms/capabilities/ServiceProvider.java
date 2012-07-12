@@ -72,7 +72,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private String sldUrl;
     
     private Boolean ignoreResource;
-    private Boolean allowed = Boolean.FALSE;
+    private Boolean allowed = Boolean.TRUE;
 
     /** default ServiceProvider() constructor.
      */

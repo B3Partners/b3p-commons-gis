@@ -46,7 +46,7 @@ public class WfsServiceProvider implements ServiceProviderInterface {
     private String username;
     private String password;
     private String status;
-    private Boolean allowed = Boolean.FALSE;
+    private Boolean allowed = Boolean.TRUE;
 
     /** Creates a new instance of WfsServiceProvider */
     public WfsServiceProvider() {
