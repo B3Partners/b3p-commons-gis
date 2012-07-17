@@ -98,7 +98,9 @@ public class CredentialsHttpParser {
             http_version = HTTP_VERSION2;
         }
         
-        if( port != 80 && port != 443 ) port    = CredentialsParser.PORT;
+        if (port != 80 && port != 443) {
+            port = CredentialsParser.PORT;
+        }
         
         URL aURL = new URL(url);
         String hostname = aURL.getHost();
@@ -110,7 +112,7 @@ public class CredentialsHttpParser {
         httpclient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT,RTIMEOUT);
         httpclient.getParams().setParameter("http.protocol.version", http_version);
 
-        if (credentials == null || credentials.getPassword() == null) {
+        if (credentials == null || credentials.getPassword() == null || credentials.getPassword().equals("")) {
             return httpclient;
         }
 
