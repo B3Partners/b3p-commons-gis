@@ -275,48 +275,29 @@ public class OGCScriptingRequest extends OGCRequest {
         return null;
     }
 
+    /*
+     * Checks if the url contains SERVICE_TYPE and COMMAND parameters, because these are required for a scripting request.
+     */
     @Override
     public void checkRequestURL() throws Exception {
         if (parameters == null) {
             throw new UnsupportedOperationException("No parameters found in url!");
         }
-        String service = null;
-        if (containsParameter(SERVICE)) {
-            service = getParameter(SERVICE);
-            if (service == null || service.equals("")) {
-                throw new UnsupportedOperationException("Empty service parameter found in url!");
-            }
-            if (service.equalsIgnoreCase(NONOGC_SERVICE_METADATA)) {
-                checkRequestURL(REQUIRED_PARAMS_METADATA, service);
-                return;
-            } else if (service.equalsIgnoreCase(NONOGC_SERVICE_PROXY)) {
-                checkRequestURL(REQUIRED_PARAMS_PROXY, service);
-                return;
+        String serviceType = null;
+        if (containsParameter(SERVICE_TYPE)) {
+            serviceType = getParameter(SERVICE_TYPE);
+            if (serviceType == null || serviceType.equals("")) {
+                throw new UnsupportedOperationException("Empty serviceType parameter found in url!");
             }
         }
 
-        if (containsParameter(REQUEST)) {
-            String request = getParameter(OGCConstants.REQUEST);
-            if (request == null || request.equals("")) {
-                throw new UnsupportedOperationException("Empty request parameter found in url!");
+        if (containsParameter(COMMAND)) {
+            String command = getParameter(COMMAND);
+            if (command == null || command.equals("")) {
+                throw new UnsupportedOperationException("Empty command parameter found in url!");
             }
-
-            //Only Capabilities request require service param, which should be
-            //checked by checkRequestUrl(requiredParams, request).
-            //Server may erroneously require service param (http://trac.osgeo.org/mapserver/ticket/2737),
-            //but Kaartenbalie shouldn't need it.
-            List requiredParams = null;
-            /* To implement */
-            if( true ){
-            
-            } else {
-                throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to "
-                        + "get the list of supported functions.");
-            }
-            checkRequestURL(requiredParams, request);
-
         } else {
-            throw new UnsupportedOperationException("No request parameter found!");
+            throw new UnsupportedOperationException("No command parameter found!");
         }
     }
     
