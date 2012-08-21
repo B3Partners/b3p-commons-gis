@@ -33,6 +33,7 @@ import org.w3c.dom.Element;
 
 public class OGCScriptingRequest extends OGCRequest {
     public static final String COMMAND = "command";
+    public static final String LOCATION = "location";
     public static final String UPDATE_SERVICES = "update_services";
     public static final String SERVICE_TYPE = "service_type";
     public static final String ABBR = "abbr";
@@ -47,6 +48,7 @@ public class OGCScriptingRequest extends OGCRequest {
     public static final String ADD_ALLOWED_SERVICES = "add_allowed_services";
     public static final String DELETE_ALLOWED_SERVICES = "delete_allowed_services";
     public static final String DELETE_ALL_ALLOWED_SERVICES = "delete_all_allowed_services";
+    public static final String GET_GROUP_XML = "get_group_xml";
     
     
     protected HashSet<String> acceptable;
