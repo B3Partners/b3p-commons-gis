@@ -73,6 +73,8 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     
     private Boolean ignoreResource;
     private Boolean allowed = Boolean.TRUE;
+    
+    private boolean urlServiceProvideCode = false;
 
     /** default ServiceProvider() constructor.
      */
@@ -273,6 +275,14 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         this.topLayer = topLayer;
     }
 
+    public boolean isUrlServiceProvideCode() {
+        return urlServiceProvideCode;
+    }
+
+    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
+        this.urlServiceProvideCode = urlServiceProvideCode;
+    }
+
     public Set getServiceProviderKeywordList() {
         return serviceProviderKeywordList;
     }
@@ -293,6 +303,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         }
     }
     // </editor-fold>
+    
     /** Method that will overwrite the URL's stored in the database with the URL specified for Kaartenbalie.
      * This new URL indicate the link to the kaartenbalie, while the old link is used to indicate the URL
      * to the real location of the service. Because the client which is connected to kaartenbalie has to send
@@ -374,7 +385,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             serviceElement.appendChild(onlineElement);
         }
 
-        if (null != this.getContactInformation()) {
+        if (null != this.getContactInformation()) { 
             serviceElement = this.getContactInformation().toElement(doc, serviceElement);
         }
 
@@ -504,6 +515,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
         //De beschikbare layers.
         if (topLayer != null) {
+            topLayer.setUrlServiceProvideCode(urlServiceProvideCode);
             capabilityElement = topLayer.toElement(doc, capabilityElement);        //End of Capability
         }
         rootElement.appendChild(serviceElement);

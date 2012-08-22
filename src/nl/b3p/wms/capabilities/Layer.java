@@ -66,6 +66,8 @@ public class Layer implements XMLElement,Comparable{
     private String oldMetadata;
     private String metadata;
     private Set layerMetadata;
+    
+    private boolean urlServiceProvideCode = false;
 
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
@@ -245,6 +247,14 @@ public class Layer implements XMLElement,Comparable{
         this.styles = styles;
     }
 
+    public boolean isUrlServiceProvideCode() {
+        return urlServiceProvideCode;
+    }
+
+    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
+        this.urlServiceProvideCode = urlServiceProvideCode;
+    }
+
     public void addStyle(Style style) {
         if (null == styles) {
             styles = new HashSet<Style>();
@@ -402,7 +412,11 @@ public class Layer implements XMLElement,Comparable{
         if (this.getName() == null) {
             return null;
         }
-        return getSpAbbr() + "_" + this.getName();
+        if(isUrlServiceProvideCode()){
+            return this.getName();
+        }else{
+            return getSpAbbr() + "_" + this.getName();
+        }
     }
     public String getCompleteTitle(){
         if (getTitle()==null){
@@ -872,6 +886,7 @@ public class Layer implements XMLElement,Comparable{
             Iterator it = this.getLayers().iterator();
             while (it.hasNext()) {
                 Layer l = (Layer) it.next();
+                l.setUrlServiceProvideCode(urlServiceProvideCode);
                 layerElement = l.toElement(doc, layerElement);
             }
         }
