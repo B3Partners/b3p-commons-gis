@@ -28,6 +28,8 @@ public class TileSet {
     private String styles;
     private String layerString;
     private ServiceProvider serviceProvider;
+    
+     private boolean urlServiceProvideCode = false;
 
     //<editor-fold defaultstate="collapsed" desc="Getters/setters">
     public Integer getId() {
@@ -84,6 +86,14 @@ public class TileSet {
     
     public void setLayers(Set<Layer> layers) {
         this.layers = layers;
+    }
+
+    public boolean isUrlServiceProvideCode() {
+        return urlServiceProvideCode;
+    }
+
+    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
+        this.urlServiceProvideCode = urlServiceProvideCode;
     }
     
     public String getStyles() {
@@ -180,7 +190,7 @@ public class TileSet {
                 //domme check maar kan ook een domme waarde komen.
                 if (abbr!=null && abbr.equals("0"))
                     abbr=null;
-                if (abbr!=null){
+                if (abbr!=null && !urlServiceProvideCode){
                     layerString+=l.getSpAbbr()+"_";
                 }
                 layerString+=l.getName();

@@ -506,6 +506,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             Iterator<TileSet> it=this.getTileSets().iterator();
             while(it.hasNext()){                
                 TileSet ts=it.next();
+                ts.setUrlServiceProvideCode(urlServiceProvideCode);
                 if (ts!=null)
                     vendorSpecificElement.appendChild(ts.toElement(doc,doc.createElement("TileSet")));
             }            
