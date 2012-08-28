@@ -408,8 +408,12 @@ public class OGCResponse {
             }
             layer = layer.substring(index + 1);//rename layer by removing namepace url
         }
-
-        return featureTypeNamespacePrefix + prefix + "_" + layer;
+        
+        if(prefix.equals("")){
+            return featureTypeNamespacePrefix + layer;
+        }else{
+            return featureTypeNamespacePrefix + prefix + "_" + layer;
+        }
     }
 
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
