@@ -3,7 +3,7 @@
  * reading and writing. Included are wms, wfs, gml, csv and other
  * general helper classes and extensions.
  *
- * Copyright 2005 - 2008 B3Partners BV
+ * Copyright 2005 - 2012 B3Partners BV
  * 
  * This file is part of B3P Commons GIS.
  * 
@@ -68,6 +68,8 @@ public class KBConfiguration {
      */
     public static String KB_SERVICES_CONTEXT_PATH = "";
     public static String KB_SERVICES_SERVER_URI = "";
+    public static String KB_SERVICES_INTERNAL_CONTEXT_PATH = "";
+    public static String KB_SERVICES_INTERNAL_SERVER_URI = "";
 
     public static String GETMAP_EXCEPTION = "Kaartenbalie GetMap fout: Ongeldige kaartlaag in de LAYERS parameter, update uw service providers in Kaartenbalie";
     public static String REQUEST_NORIGHTS_EXCEPTION="Kaartenbalie request fout: Ongeldige kaartlaag in de LAYERS parameter, u heeft geen rechten op de kaart";
@@ -178,6 +180,8 @@ public class KBConfiguration {
 
         KB_SERVICES_CONTEXT_PATH = prop.getProperty("KB_SERVICES_CONTEXT_PATH", KB_SERVICES_CONTEXT_PATH);
         KB_SERVICES_SERVER_URI = prop.getProperty("KB_SERVICES_SERVER_URI", KB_SERVICES_SERVER_URI);
+        KB_SERVICES_INTERNAL_CONTEXT_PATH = prop.getProperty("KB_SERVICES_INTERNAL_CONTEXT_PATH", KB_SERVICES_INTERNAL_CONTEXT_PATH);
+        KB_SERVICES_INTERNAL_SERVER_URI = prop.getProperty("KB_SERVICES_INTERNAL_SERVER_URI", KB_SERVICES_INTERNAL_SERVER_URI);
 
         //KB_USER=prop.getProperty("KB_USER",KB_USER);
 
