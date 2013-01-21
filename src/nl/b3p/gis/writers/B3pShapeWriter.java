@@ -51,6 +51,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureStore;
+import org.geotools.data.FileDataStoreFactorySpi;
 import org.geotools.data.Transaction;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
@@ -58,13 +59,11 @@ import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.feature.type.GeometryTypeImpl;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
-import org.opengis.feature.type.GeometryType;
 
 /**
  *
@@ -220,12 +219,14 @@ public class B3pShapeWriter {
         }
         File newShape=new File(getFolder()+shpName);
         boolean created=newShape.createNewFile();
+        
         ShapefileDataStoreFactory factory = new ShapefileDataStoreFactory();
         Map map = new HashMap();
         map.put(ShapefileDataStoreFactory.URLP.key, newShape.toURI().toURL());
         map.put(ShapefileDataStoreFactory.CREATE_SPATIAL_INDEX.key, spatialIndex);
 
         ShapefileDataStore ds =(ShapefileDataStore) factory.createNewDataStore(map);
+        
         FeatureType ft= fc.getSchema();
         ds.createSchema((SimpleFeatureType) ft);
         Transaction transaction = new DefaultTransaction("create");
