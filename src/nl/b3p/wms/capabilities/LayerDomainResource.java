@@ -149,6 +149,11 @@ public class LayerDomainResource implements XMLElement {
                 log.error("error:", ex);
             }
         }
+        
+        /* TODO: Kijken of er een parameter meegegeven kan worden bij een
+         * persoonlijke kaartenbalie getcap zodat de metadataurl niet vervangen
+         * wordt door de kaartenbalie versie RVOB ? */
+         
         this.setUrl(newUrl);
     }
 
