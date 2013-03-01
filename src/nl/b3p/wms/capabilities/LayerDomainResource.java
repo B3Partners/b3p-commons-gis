@@ -153,8 +153,11 @@ public class LayerDomainResource implements XMLElement {
         /* TODO: Kijken of er een parameter meegegeven kan worden bij een
          * persoonlijke kaartenbalie getcap zodat de metadataurl niet vervangen
          * wordt door de kaartenbalie versie RVOB ? */
-         
-        this.setUrl(newUrl);
+        Boolean useKbMetadataUrl = (Boolean) conversionValues.get("KB_METADATA_URL");
+        
+        if (useKbMetadataUrl == null || useKbMetadataUrl) {
+            this.setUrl(newUrl);
+        }
     }
 
     /** Method that will create piece of the XML tree to create a proper XML docuement.
