@@ -4,7 +4,7 @@ set JDK_DIR=%JAVA_HOME%
 
 @echo Create the classpath
 set CP=;
-for %%i in (..\..\lib\*.jar) do call cp.bat %%i
+for %%i in (..\..\..\dist\lib\*.jar) do call cp.bat %%i
 set CP=%CP%;"%JDK_DIR%\lib\tools.jar"
 echo %CP%
 
