@@ -198,6 +198,45 @@ public class ResultFormatTypeItemDescriptor extends org.exolab.castor.xml.util.X
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
+        //-- validation code for: _JSON
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);
+        //-- _CSV
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_JSON", "JSON", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            @Override
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                ResultFormatTypeItem target = (ResultFormatTypeItem) object;
+                return target.getJSON();
+            }
+            @Override
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    ResultFormatTypeItem target = (ResultFormatTypeItem) object;
+                    target.setJSON((java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            
+            @Override
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/wfs");
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
         //-- validation code for: _CSV
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
         { //-- local scope

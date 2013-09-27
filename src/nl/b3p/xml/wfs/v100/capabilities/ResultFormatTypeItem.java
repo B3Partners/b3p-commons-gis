@@ -43,6 +43,11 @@ public class ResultFormatTypeItem implements java.io.Serializable {
      * Field _SHAPEZIP
      */
     private java.lang.Object _SHAPEZIP;
+    
+    /**
+     * Field _JSON
+     */
+    private java.lang.Object _JSON;
 
 
       //----------------/
@@ -163,5 +168,15 @@ public class ResultFormatTypeItem implements java.io.Serializable {
     {
         this._SHAPEZIP = SHAPEZIP;
     } //-- void setSHAPEZIP(java.lang.Object) 
-
+    
+    
+    public java.lang.Object getJSON()
+    {
+        return this._JSON;
+    }
+    
+    public void setJSON(java.lang.Object JSON)
+    {
+        this._JSON = JSON;
+    }
 }
