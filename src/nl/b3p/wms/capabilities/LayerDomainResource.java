@@ -22,12 +22,9 @@
  */
 package nl.b3p.wms.capabilities;
 
-import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import nl.b3p.ogc.utils.KBCrypter;
-import nl.b3p.ogc.utils.OGCConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -110,54 +107,6 @@ public class LayerDomainResource implements XMLElement {
             cloneLDR.domain = new String(this.domain);
         }
         return cloneLDR;
-    }
-
-    protected void convertValues2KB(HashMap conversionValues) {
-        String newUrl = (String) conversionValues.get("url");
-        String spAbbr = (String) conversionValues.get("spAbbr");
-        String layerName = (String) conversionValues.get("layerName");
-        int pos = newUrl.indexOf("?");
-        if (pos == -1) {
-            newUrl += "?";
-        } else {
-            newUrl += "&";
-        }
-
-         if (METADATA_DOMAIN.equalsIgnoreCase(domain)) {
-            // replace metadata link with KB metadata link
-            //http://localhost:8084/kaartenbalie/services/2214ecfe0462f961fe1fb3e864358249?SERVICE=METADATA&LAYER=plimverkee_wegdistricten_v
-            newUrl += OGCConstants.SERVICE;
-            newUrl += "=";
-            newUrl += OGCConstants.NONOGC_SERVICE_METADATA;
-            newUrl += "&";
-            newUrl += OGCConstants.METADATA_LAYER;
-            newUrl += "=";
-            newUrl += spAbbr;
-            newUrl += "_";
-            newUrl += layerName;
-        } else {
-            newUrl += OGCConstants.SERVICE;
-            newUrl += "=";
-            newUrl += OGCConstants.NONOGC_SERVICE_PROXY;
-            newUrl += "&";
-            newUrl += OGCConstants.PROXY_URL;
-            newUrl += "=";
-            try {
-                String originalURL = this.getUrl();
-                newUrl += KBCrypter.encryptText(originalURL);
-            } catch (Exception ex) {
-                log.error("error:", ex);
-            }
-        }
-        
-        /* TODO: Kijken of er een parameter meegegeven kan worden bij een
-         * persoonlijke kaartenbalie getcap zodat de metadataurl niet vervangen
-         * wordt door de kaartenbalie versie RVOB ? */
-        Boolean useKbMetadataUrl = (Boolean) conversionValues.get("KB_METADATA_URL");
-        
-        if (useKbMetadataUrl == null || useKbMetadataUrl) {
-            this.setUrl(newUrl);
-        }
     }
 
     /** Method that will create piece of the XML tree to create a proper XML docuement.

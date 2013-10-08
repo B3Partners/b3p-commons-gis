@@ -541,7 +541,9 @@ public class Layer implements XMLElement,Comparable{
             it = domainResource.iterator();
             while (it.hasNext()) {
                 LayerDomainResource ldr = (LayerDomainResource) it.next();
-                ldr.convertValues2KB(conversionValues);
+                // deze url worden niet meer obfuscated, nut niet aangetoond
+                // en voor sommige klanten lastig
+//                ldr.convertValues2KB(conversionValues);
             }
         }
 
