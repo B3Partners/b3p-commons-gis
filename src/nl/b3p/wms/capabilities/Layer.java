@@ -448,14 +448,27 @@ public class Layer implements XMLElement,Comparable{
 
     public void setMetadata(String metaData) {
         if (metaData != null) {
-            LayerMetadata layerMetadata = new LayerMetadata();
-            layerMetadata.setLayer(this);
-            layerMetadata.setMetadata(metaData);
-            
-            Set<LayerMetadata> newLayers = new HashSet<LayerMetadata>();
-            newLayers.add(layerMetadata);
+            Set<LayerMetadata> metaDataLayers = getLayerMetadata();
 
-            this.setLayerMetadata(newLayers);
+            if (metaDataLayers.isEmpty()) {
+                LayerMetadata lmd = new LayerMetadata();
+                lmd.setLayer(this);
+                lmd.setMetadata(metaData);
+                metaDataLayers.add(lmd);
+            } else {
+                boolean first = true;
+                Iterator<LayerMetadata> iterator = metaDataLayers.iterator();
+                while (iterator.hasNext()) {
+                    LayerMetadata lmd = iterator.next();
+                    if (first) {
+                        lmd.setMetadata(metaData);
+                        first = false;
+                    } else {
+                        iterator.remove();
+                    }
+                }
+
+            }
             this.setOldMetadata(null);
         }
     }
@@ -541,9 +554,7 @@ public class Layer implements XMLElement,Comparable{
             it = domainResource.iterator();
             while (it.hasNext()) {
                 LayerDomainResource ldr = (LayerDomainResource) it.next();
-                // deze url worden niet meer obfuscated, nut niet aangetoond
-                // en voor sommige klanten lastig
-//                ldr.convertValues2KB(conversionValues);
+                ldr.convertValues2KB(conversionValues);
             }
         }
 
