@@ -22,9 +22,13 @@
  */
 package nl.b3p.wms.capabilities;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
+import nl.b3p.ogc.utils.KBCrypter;
+import nl.b3p.ogc.utils.OGCConstants;
+import nl.b3p.ogc.utils.OGCRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -109,6 +113,57 @@ public class LayerDomainResource implements XMLElement {
         return cloneLDR;
     }
 
+    protected void convertValues2KB(HashMap conversionValues) {
+        String newUrl = (String) conversionValues.get("url");
+        String spAbbr = (String) conversionValues.get("spAbbr");
+        String layerName = (String) conversionValues.get("layerName");
+        String layerUniqueName = spAbbr+"_"+layerName;
+        int pos = newUrl.indexOf("?");
+        if (pos == -1) {
+            newUrl += "?";
+        } else {
+            newUrl += "&";
+        }
+        
+        OGCRequest ogcrequest = new OGCRequest(this.getUrl());
+        String ls = ogcrequest.getParameter(OGCConstants.SERVICE);
+        String lmd = ogcrequest.getParameter(OGCConstants.METADATA_LAYER);
+        if (METADATA_DOMAIN.equalsIgnoreCase(domain)) {
+            // check if metadata url is from kaartenbalie and has correct layerid
+            if (ls != null && ls.equalsIgnoreCase(OGCConstants.NONOGC_SERVICE_METADATA)
+                    && lmd != null && lmd.equalsIgnoreCase(layerUniqueName)) {
+                // if so replace with proper url
+                // TODO check if de metadata is from other kaartenbalie
+                newUrl += OGCConstants.SERVICE;
+                newUrl += "=";
+                newUrl += OGCConstants.NONOGC_SERVICE_METADATA;
+                newUrl += "&";
+                newUrl += OGCConstants.METADATA_LAYER;
+                newUrl += "=";
+                newUrl += layerUniqueName;
+
+                this.setUrl(newUrl);
+            } else {
+                // return with url unchanged, no obfuscation
+            }
+        } else {
+            // use obfuscation
+            newUrl += OGCConstants.SERVICE;
+            newUrl += "=";
+            newUrl += OGCConstants.NONOGC_SERVICE_PROXY;
+            newUrl += "&";
+            newUrl += OGCConstants.PROXY_URL;
+            newUrl += "=";
+            try {
+                String originalURL = this.getUrl();
+                newUrl += KBCrypter.encryptText(originalURL);
+                this.setUrl(newUrl);
+            } catch (Exception ex) {
+                log.error("error:", ex);
+            }
+        }
+    }
+    
     /** Method that will create piece of the XML tree to create a proper XML docuement.
      *
      * @param doc Document object which is being used to create new Elements
