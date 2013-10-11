@@ -321,9 +321,18 @@ public class OGCCommunication implements OGCConstants {
         return new String[]{layerCode, layerName};
     }
     
+	/* zo was het:
+	                // TODO hack, nog beter uitzoeken
+                String name = feature.getName();
+                int i = 0;
+                i = Math.max(i, name.lastIndexOf(":") + 1);
+                i = Math.max(i, name.lastIndexOf("}") + 1);
+                String featureName = name.substring(i);
+	*/
     public static final String getLayerName(String ln) {
         try {
-            return toCodeAndName(ln)[1];
+			Map m = splitLayerWithoutNsFix(completeLayerName);
+			return (String) m.get("spLayerName");
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
         }
@@ -389,7 +398,7 @@ public class OGCCommunication implements OGCConstants {
         String featureTypeNamespacePrefix = "";
         String spLayerName = layer;
         try {
-            m = splitLayerInParts(layer, false);
+            m = splitLayerInParts(layer);
             featureTypeNamespacePrefix = (String) m.get("prefix");
             spLayerName = (String) m.get("spLayerName");
         } catch (Exception ex) {

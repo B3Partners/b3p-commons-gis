@@ -700,6 +700,16 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
             for (int x = 0; x < featureTypes.length; x++) {
                 FeatureType feature = featureTypes[x];
                 String name = feature.getName();
+				// TODO hier of regel 642 zit waarschijnlijk de fout:
+				/*
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ServiceExceptionReport SYSTEM "http://localhost:8080/kaartenbalie/dtd/exception_1_1_1.dtd">
+<ServiceExceptionReport version="1.1.1">
+<ServiceException code="java.lang.UnsupportedOperationException"><![CDATA[Failed to get body of XML! Exception: ValidationException: The following exception occured while validating field: _featureTypeList of class: nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities: A minimum of 1 _featureTypeList object(s) (whose xml name is 'FeatureType') are required for class: nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList;
+- location of error: XPATH: WFS_Capabilities
+A minimum of 1 _featureTypeList object(s) (whose xml name is 'FeatureType') are required for class: nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList]]></ServiceException>
+</ServiceExceptionReport>				
+				*/
                 String featureName = OGCCommunication.getLayerName(name);
 
                 Iterator il = layers.iterator();
