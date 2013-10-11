@@ -247,14 +247,6 @@ public class Layer implements XMLElement,Comparable{
         this.styles = styles;
     }
 
-    public boolean isUrlServiceProvideCode() {
-        return urlServiceProvideCode;
-    }
-
-    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
-        this.urlServiceProvideCode = urlServiceProvideCode;
-    }
-
     public void addStyle(Style style) {
         if (null == styles) {
             styles = new HashSet<Style>();
@@ -397,37 +389,87 @@ public class Layer implements XMLElement,Comparable{
 
     public String getSpAbbr() {
         if (serviceProvider == null) {
-            return "0";
+            return null;
         }
-        String abbr = serviceProvider.getAbbr();
-        if (abbr == null) {
-            return "0";
-        }
-        return abbr;
+        return serviceProvider.getAbbr();
     }
 
     public String getUniqueName() {
-        // Indien naam leeg is, dan mag de layer nooit getoond worden via GetMap
-        // dus wij mogen naam nooit vullen als hij oorspronkelijk leeg was!
-        if (this.getName() == null) {
-            return null;
-        }
-        if(isUrlServiceProvideCode()){
-            return this.getName();
-        }else{
-            return getSpAbbr() + "_" + this.getName();
-        }
+        return Layer.attachPrefix(getSpAbbr(), this.getName());
     }
+	
+	static public String attachPrefix(String sp, String l) {
+		return Layer.attachPrefix(sp, l, null);
+	}
+	
+	static public String attachPrefix(String sp, String l, String ns) {
+		if (l==null || l.isEmpty()) {
+			return null;
+		}
+		if (sp==null || sp.isEmpty()) {
+			if (ns==null || ns.isEmpty()) {
+				return l;
+			} else {
+				return ns + ":" + l
+			}
+		}
+		if (ns==null || ns.isEmpty()) {
+			return  sp + "_" + l;
+		} else {
+			return sp + "_" + ns + ":" + l
+		}
+	}
+ 
+    static public Map splitLayerInParts(String fullLayerName) {
+        return splitLayerInParts(fullLayerName, true);
+    }
+
+	static public Map splitLayerInParts(String fullLayerName, boolean splitName) {
+        String tPrefix = null;
+        String tLayerName = null;
+        String tSpAbbr = null;
+        String tSpLayerName = null;
+        String tNsUrl = null;
+        String[] temp = fullLayerName.split("}");
+        if (temp.length > 1) {
+            tSpLayerName = temp[1];
+            int index1 = fullLayerName.indexOf("{");
+            int index2 = fullLayerName.indexOf("}");
+            tNsUrl = fullLayerName.substring(index1 + 1, index2);
+            tPrefix = getNameSpacePrefix(tNsUrl);
+        } else {
+            String temp2[] = temp[0].split(":");
+            if (temp2.length > 1) {
+                tSpLayerName = temp2[1];
+                tPrefix = temp2[0];
+                tNsUrl = getNameSpace(tPrefix);
+            } else {
+                tSpLayerName = fullLayerName;
+            }
+        }
+        // assume same for now
+        tLayerName = tSpLayerName;
+        if (splitName) {
+            int index1 = tSpLayerName.indexOf("_");
+            if (index1 != -1) {
+                tSpAbbr = tSpLayerName.substring(0, index1);
+                tLayerName = tSpLayerName.substring(index1 + 1);
+            }
+        }
+        Map returnMap = new HashMap();
+        returnMap.put("prefix", tPrefix);
+        returnMap.put("spAbbr", tSpAbbr);
+        returnMap.put("layerName", tLayerName);
+        returnMap.put("spLayerName", tSpLayerName);
+        returnMap.put("nsUrl", tNsUrl);
+        return returnMap;
+    }
+
     public String getCompleteTitle(){
         if (getTitle()==null){
             return null;
         }
-        String t="";
-        if (getSpAbbr()!=null)
-             t+=getSpAbbr();
-        if (getTitle()!=null)
-            t+="_"+getTitle().replace(" ", "");
-        return title;
+		return Layer.attachPrefix(this.getSpAbbr(), this.getTitle().replace(" ", ""))
     }
 
     public String getMetadata() {

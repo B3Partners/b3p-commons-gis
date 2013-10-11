@@ -111,51 +111,6 @@ public class OGCRequest implements OGCConstants {
         return tokens[0];
     }
 
-    public Map splitLayerInParts(String fullLayerName) {
-        return splitLayerInParts(fullLayerName, true);
-    }
-
-    public Map splitLayerInParts(String fullLayerName, boolean splitName) {
-        String tPrefix = null;
-        String tLayerName = null;
-        String tSpAbbr = null;
-        String tSpLayerName = null;
-        String tNsUrl = null;
-        String[] temp = fullLayerName.split("}");
-        if (temp.length > 1) {
-            tSpLayerName = temp[1];
-            int index1 = fullLayerName.indexOf("{");
-            int index2 = fullLayerName.indexOf("}");
-            tNsUrl = fullLayerName.substring(index1 + 1, index2);
-            tPrefix = getNameSpacePrefix(tNsUrl);
-        } else {
-            String temp2[] = temp[0].split(":");
-            if (temp2.length > 1) {
-                tSpLayerName = temp2[1];
-                tPrefix = temp2[0];
-                tNsUrl = getNameSpace(tPrefix);
-            } else {
-                tSpLayerName = fullLayerName;
-            }
-        }
-        // assume same for now
-        tLayerName = tSpLayerName;
-        if (splitName) {
-            int index1 = tSpLayerName.indexOf("_");
-            if (index1 != -1) {
-                tSpAbbr = tSpLayerName.substring(0, index1);
-                tLayerName = tSpLayerName.substring(index1 + 1);
-            }
-        }
-        Map returnMap = new HashMap();
-        returnMap.put("prefix", tPrefix);
-        returnMap.put("spAbbr", tSpAbbr);
-        returnMap.put("layerName", tLayerName);
-        returnMap.put("spLayerName", tSpLayerName);
-        returnMap.put("nsUrl", tNsUrl);
-        return returnMap;
-    }
-
     /**
      * Constructor
      * For HTTP POST
@@ -405,12 +360,10 @@ public class OGCRequest implements OGCConstants {
                     nl.b3p.xml.wfs.v100.transaction.Delete delete = transactionTypeChoiceItem.getDelete();
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
-                    String[] temp = layer.split("}");
-                    if (temp.length > 1) {
-                        layer = temp[1];
-                    }
-                    String[] spLayer = layer.split("_");
-                    addElementToTransactionList(delete, spLayer[0]);
+					
+					Map m = Layer.splitLayerInParts(layer);
+					addElementToTransactionList(delete, m.get("spAbbr"));
+					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Insert insert = transactionTypeChoiceItem.getInsert();
 
@@ -421,19 +374,18 @@ public class OGCRequest implements OGCConstants {
                     String insertString = sw.toString();
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
-                    String[] spLayer = layer[0].split("_");
-                    addElementToTransactionList(insert, spLayer[0]);
+					
+					Map m = Layer.splitLayerInParts(layer[0]);
+					addElementToTransactionList(insert, m.get("spAbbr"));
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
-                    String[] temp = layer.split("}");
-                    if (temp.length > 1) {
-                        layer = temp[1];
-                    }
-                    String[] spLayer = layer.split("_");
-                    addElementToTransactionList(update, spLayer[0]);
+					
+					Map m = Layer.splitLayerInParts(layer);
+					addElementToTransactionList(update, m.get("spAbbr"));
+	
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Native nativetransaction = transactionTypeChoiceItem.getNative();
                 }
@@ -465,12 +417,10 @@ public class OGCRequest implements OGCConstants {
                     Delete delete = transactionTypeChoiceItem.getDelete();
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
-                    String[] temp = layer.split("}");
-                    if (temp.length > 1) {
-                        layer = temp[1];
-                    }
-                    String[] spLayer = layer.split("_");
-                    addElementToTransactionList(delete, spLayer[0]);
+ 					
+					Map m = Layer.splitLayerInParts(layer);
+					addElementToTransactionList(delete, m.get("spAbbr"));
+					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     Insert insert = transactionTypeChoiceItem.getInsert();
 
@@ -481,19 +431,18 @@ public class OGCRequest implements OGCConstants {
                     String insertString = sw.toString();
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
-                    String[] spLayer = layer[0].split("_");
-                    addElementToTransactionList(insert, spLayer[0]);
+ 					
+					Map m = Layer.splitLayerInParts(layer[0]);
+					addElementToTransactionList(insert, m.get("spAbbr"));
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
-                    String[] temp = layer.split("}");
-                    if (temp.length > 1) {
-                        layer = temp[1];
-                    }
-                    String[] spLayer = layer.split("_");
-                    addElementToTransactionList(update, spLayer[0]);
+					
+					Map m = Layer.splitLayerInParts(layer);
+					addElementToTransactionList(update, m.get("spAbbr"));
+					
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     Native nativetransaction = transactionTypeChoiceItem.getNative();
                 }

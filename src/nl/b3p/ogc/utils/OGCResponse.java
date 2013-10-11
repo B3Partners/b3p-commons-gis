@@ -408,12 +408,7 @@ public class OGCResponse {
             }
             layer = layer.substring(index + 1);//rename layer by removing namepace url
         }
-        
-        if(prefix.equals("")){
-            return featureTypeNamespacePrefix + layer;
-        }else{
-            return featureTypeNamespacePrefix + prefix + "_" + layer;
-        }
+		return Layer.attachPrefix(prefix, layer, featureTypeNamespacePrefix);
     }
 
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
@@ -463,12 +458,15 @@ public class OGCResponse {
                     String[] newKvp = kvpSplit[z].split("=");
                     if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
                         String[] layer = newKvp[1].split(":");
-                        String changedlayer = null;
+						String lname = null;
+						String ns = null;
                         if (layer.length > 1) {
-                            changedlayer = layer[0] + ":" + serverPrefix + "_" + layer[1];
+                            ns = layer[0];
+							lname = layer[1];
                         } else {
-                            changedlayer = serverPrefix + "_" + layer[0];
+                            lname = layer[0];
                         }
+                        String changedlayer = Layer.attachPrefix(serverPrefix, lname, ns);
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
                     } else {
                         newToken = newToken + "&" + kvpSplit[z];
@@ -588,52 +586,6 @@ public class OGCResponse {
             }
         };
     }
-
-    public Map splitLayerInParts(String fullLayerName) {
-        return splitLayerInParts(fullLayerName, true);
-    }
-
-    public Map splitLayerInParts(String fullLayerName, boolean splitName) {
-        String tPrefix = null;
-        String tLayerName = null;
-        String tSpAbbr = null;
-        String tSpLayerName = null;
-        String tNsUrl = null;
-        String[] temp = fullLayerName.split("}");
-        if (temp.length > 1) {
-            tSpLayerName = temp[1];
-            int index1 = fullLayerName.indexOf("{");
-            int index2 = fullLayerName.indexOf("}");
-            tNsUrl = fullLayerName.substring(index1 + 1, index2);
-            tPrefix = getNameSpacePrefix(tNsUrl);
-        } else {
-            String temp2[] = temp[0].split(":");
-            if (temp2.length > 1) {
-                tSpLayerName = temp2[1];
-                tPrefix = temp2[0];
-                tNsUrl = getNameSpace(tPrefix);
-            } else {
-                tSpLayerName = fullLayerName;
-           }
-        }
-        // assume same for now
-        tLayerName = tSpLayerName;
-        if (splitName) {
-            int index1 = tSpLayerName.indexOf("_");
-            if (index1 != -1) {
-                tSpAbbr = tSpLayerName.substring(0, index1);
-                tLayerName = tSpLayerName.substring(index1 + 1);
-            }
-        }
-        Map returnMap = new HashMap();
-        returnMap.put("prefix",tPrefix);
-        returnMap.put("spAbbr",tSpAbbr);
-        returnMap.put("layerName",tLayerName);
-        returnMap.put("spLayerName",tSpLayerName);
-        returnMap.put("nsUrl",tNsUrl);
-        return returnMap;
-    }
-
 
     public String getNameSpace(String prefix) {
         return (String) nameSpaces.get(prefix);

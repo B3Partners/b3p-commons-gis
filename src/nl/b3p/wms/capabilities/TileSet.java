@@ -186,14 +186,7 @@ public class TileSet {
                 if (layerString.length()>0){
                     layerString+=",";
                 }
-                String abbr=l.getSpAbbr();
-                //domme check maar kan ook een domme waarde komen.
-                if (abbr!=null && abbr.equals("0"))
-                    abbr=null;
-                if (abbr!=null && !urlServiceProvideCode){
-                    layerString+=l.getSpAbbr()+"_";
-                }
-                layerString+=l.getName();
+				layerString+=Layer.attachPrefix(l.getSpAbbr(), l.getName())
             }
             Element element = doc.createElement("Layers");
             Text text = doc.createTextNode(layerString);
