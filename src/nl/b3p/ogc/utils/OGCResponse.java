@@ -74,7 +74,7 @@ import org.w3c.dom.NodeList;
 /**
  * @author Jytte
  */
-public class OGCResponse {
+public class OGCResponse extends OGCCommunication implements OGCConstants {
 
     private String httpHost;
     private String response;
@@ -89,20 +89,13 @@ public class OGCResponse {
     private List getCapabilitiesV110 = new ArrayList();
     private List featureCollectionV100 = new ArrayList();
     private List featureCollectionV110 = new ArrayList();
-    private HashMap nameSpaces = null;
-    private HashMap schemaLocations;
     private String srs = null;
     private List supportedOperations = new ArrayList();
-//    private Node currentNode = null;
 
     /** Creates a new instance of OGCResponse */
     public OGCResponse() {
     }
 
-//    public OGCResponse(Node current) {
-//        this.currentNode = current;
-//        findNameSpace(currentNode);
-//    }
 
     public NodeList getNodeListFromXPath(Node currentNode, String xPathFrag) throws Exception {
         if (xPathFrag == null || xPathFrag.length() == 0) {
@@ -164,7 +157,6 @@ public class OGCResponse {
                 cn = cn.getNextSibling();
             }
         }
-        return;
     }
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
@@ -386,31 +378,6 @@ public class OGCResponse {
         return wfsCapabilities;
     }
 
-    /**
-     * This method determines the featureTypeName based on the given layer and prefix.
-     * Since the layer contains a {namespaceUrl} in the layer, it first needs to
-     * determine the namespace prefix. This value is saved in the featureTypeNamespacePrefix
-     * instance variable, for later use. 
-     * 
-     * @param prefix
-     * @param layer
-     * @return
-     */
-    private String determineFeatureTypeName(String prefix, String layer) {
-        String featureTypeNamespacePrefix = "";
-
-        int index = layer.indexOf("}");
-        if (index > -1) {
-            String namespace = layer.substring(1, index);
-            featureTypeNamespacePrefix = getNameSpacePrefix(namespace);
-            if (!"".equals(featureTypeNamespacePrefix)) {
-                featureTypeNamespacePrefix += ":";
-            }
-            layer = layer.substring(index + 1);//rename layer by removing namepace url
-        }
-		return Layer.attachPrefix(prefix, layer, featureTypeNamespacePrefix);
-    }
-
     public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
         String newSchemalocations = "";
         if (getSchemaLocations() != null) {
@@ -466,7 +433,7 @@ public class OGCResponse {
                         } else {
                             lname = layer[0];
                         }
-                        String changedlayer = Layer.attachPrefix(serverPrefix, lname, ns);
+                        String changedlayer = attachPrefix(serverPrefix, lname, ns);
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
                     } else {
                         newToken = newToken + "&" + kvpSplit[z];
@@ -567,93 +534,6 @@ public class OGCResponse {
         return outText.toString();
     }
 
-    public NamespaceContext getNamespaceContext() {
-
-        return new NamespaceContext() {
-
-            public String getNamespaceURI(String prefix) {
-                return (String) nameSpaces.get(prefix);
-            }
-
-            // Dummy implementation - not used!
-            public Iterator getPrefixes(String val) {
-                return null;
-            }
-
-            // Dummy implemenation - not used!
-            public String getPrefix(String uri) {
-                return null;
-            }
-        };
-    }
-
-    public String getNameSpace(String prefix) {
-        return (String) nameSpaces.get(prefix);
-    }
-
-    public String getNameSpacePrefix(String namespace) {
-        if (nameSpaces.size() == 0) {
-            return "";
-        }
-        // iterate through namespaces to find prefix
-        String prefix = "";
-        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
-            Map.Entry entry = (Map.Entry) iterator.next();
-            if (entry.getValue().equals(namespace)) {
-                prefix = (String) entry.getKey();
-                // if default namespace and one explicit namespace refer to same url
-                // xpath search needs explicit namespace
-                if (prefix!=null && prefix.length()>0) {
-                    return prefix;
-                }
-            }
-        }
-        return prefix;
-    }
-
-    public void findNameSpace(Node node) {
-        NamedNodeMap map = node.getAttributes();
-        if (map != null) {
-            for (int i = 0; map.getLength() > i; i++) {
-                String name = map.item(i).getNodeName();
-                String[] tokens = name.split(":", 2);
-                if (tokens[0].equalsIgnoreCase("xmlns")) {
-                    String value = map.item(i).getNodeValue();
-                    addOrReplaceNameSpace(tokens.length == 1 ? "" : tokens[1], value);
-                } else if (tokens.length == 2) {
-                    if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
-                        String value = map.item(i).getNodeValue();
-                        addOrReplaceSchemaLocation(tokens[1], value);
-                    }
-                }
-            }
-        }
-        if (node.hasChildNodes()) {
-            NodeList lijst = node.getChildNodes();
-            for (int i = 0; i < lijst.getLength(); i++) {
-                findNameSpace(lijst.item(i));
-            }
-        }
-    }
-
-    public void addOrReplaceNameSpace(String prefix, String nsUrl) {
-        if (prefix != null && nsUrl != null) {
-            if (nameSpaces == null) {
-                nameSpaces = new HashMap();
-            }
-            nameSpaces.put(prefix, nsUrl);
-        }
-    }
-
-    public void addOrReplaceSchemaLocation(String prefix, String location) {
-        if (prefix != null && location != null) {
-            if (getSchemaLocations() == null) {
-                setSchemaLocations(new HashMap());
-            }
-            getSchemaLocations().put(prefix, location);
-        }
-    }
-
     public void setSrs(String srs) {
         this.srs = srs;
     }
@@ -738,16 +618,16 @@ public class OGCResponse {
     }
 
     public Object mergeCapabilities(List layers) {
-        Object capabilities = new Object();
+        Object caps = new Object();
         if (versions.size() > 1) {
             //meerdere versies
             throw new UnsupportedOperationException("Capabilities with more versions are not yet supported!");
         } else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-            capabilities = getFeatureTypesV100(layers);
+            caps = getFeatureTypesV100(layers);
         } else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)) {
-            capabilities = getFeatureTypesV110(layers);
+            caps = getFeatureTypesV110(layers);
         }
-        return capabilities;
+        return caps;
     }
 
     public nl.b3p.xml.wfs.v110.WFS_Capabilities getFeatureTypesV110(List layers) {
@@ -819,12 +699,8 @@ public class OGCResponse {
             nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypes = nextWfsCapabilitiesV100.getFeatureTypeList().getFeatureType();
             for (int x = 0; x < featureTypes.length; x++) {
                 FeatureType feature = featureTypes[x];
-                // TODO hack, nog beter uitzoeken
                 String name = feature.getName();
-                int i = 0;
-                i = Math.max(i, name.lastIndexOf(":") + 1);
-                i = Math.max(i, name.lastIndexOf("}") + 1);
-                String featureName = name.substring(i);
+                String featureName = getfeaturename_getFeatureTypesV100(name);
 
                 Iterator il = layers.iterator();
                 while (il.hasNext()) {
@@ -1125,20 +1001,6 @@ public class OGCResponse {
                 }
             }
         }
-    }
-
-    /**
-     * @return the schemaLocations
-     */
-    public HashMap getSchemaLocations() {
-        return schemaLocations;
-    }
-
-    /**
-     * @param schemaLocations the schemaLocations to set
-     */
-    public void setSchemaLocations(HashMap schemaLocations) {
-        this.schemaLocations = schemaLocations;
     }
 
 }

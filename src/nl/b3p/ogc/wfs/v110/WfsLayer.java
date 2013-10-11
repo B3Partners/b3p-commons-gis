@@ -22,6 +22,8 @@
  */
 package nl.b3p.ogc.wfs.v110;
 
+import nl.b3p.ogc.utils.OGCCommunication;
+
 /**
  *
  * @author Jytte
@@ -86,6 +88,6 @@ public class WfsLayer {
     }
 
     public String getUniqueName() {
-		return Layer.attachPrefix(getSpAbbr(), getName());
+		return OGCCommunication.attachPrefix(getSpAbbr(), getName());
     }
 }

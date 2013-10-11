@@ -507,8 +507,9 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             while(it.hasNext()){                
                 TileSet ts=it.next();
                 ts.setUrlServiceProvideCode(urlServiceProvideCode);
-                if (ts!=null)
+                if (ts!=null) {
                     vendorSpecificElement.appendChild(ts.toElement(doc,doc.createElement("TileSet")));
+                }
             }            
         }
 
@@ -516,7 +517,6 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
         //De beschikbare layers.
         if (topLayer != null) {
-            topLayer.setUrlServiceProvideCode(urlServiceProvideCode);
             capabilityElement = topLayer.toElement(doc, capabilityElement);        //End of Capability
         }
         rootElement.appendChild(serviceElement);

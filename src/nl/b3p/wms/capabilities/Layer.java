@@ -24,11 +24,12 @@ package nl.b3p.wms.capabilities;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import nl.b3p.ogc.utils.OGCCommunication;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.logging.Log;
@@ -395,81 +396,15 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getUniqueName() {
-        return Layer.attachPrefix(getSpAbbr(), this.getName());
+        return OGCCommunication.attachPrefix(getSpAbbr(), this.getName());
     }
 	
-	static public String attachPrefix(String sp, String l) {
-		return Layer.attachPrefix(sp, l, null);
-	}
-	
-	static public String attachPrefix(String sp, String l, String ns) {
-		if (l==null || l.isEmpty()) {
-			return null;
-		}
-		if (sp==null || sp.isEmpty()) {
-			if (ns==null || ns.isEmpty()) {
-				return l;
-			} else {
-				return ns + ":" + l
-			}
-		}
-		if (ns==null || ns.isEmpty()) {
-			return  sp + "_" + l;
-		} else {
-			return sp + "_" + ns + ":" + l
-		}
-	}
- 
-    static public Map splitLayerInParts(String fullLayerName) {
-        return splitLayerInParts(fullLayerName, true);
-    }
-
-	static public Map splitLayerInParts(String fullLayerName, boolean splitName) {
-        String tPrefix = null;
-        String tLayerName = null;
-        String tSpAbbr = null;
-        String tSpLayerName = null;
-        String tNsUrl = null;
-        String[] temp = fullLayerName.split("}");
-        if (temp.length > 1) {
-            tSpLayerName = temp[1];
-            int index1 = fullLayerName.indexOf("{");
-            int index2 = fullLayerName.indexOf("}");
-            tNsUrl = fullLayerName.substring(index1 + 1, index2);
-            tPrefix = getNameSpacePrefix(tNsUrl);
-        } else {
-            String temp2[] = temp[0].split(":");
-            if (temp2.length > 1) {
-                tSpLayerName = temp2[1];
-                tPrefix = temp2[0];
-                tNsUrl = getNameSpace(tPrefix);
-            } else {
-                tSpLayerName = fullLayerName;
-            }
-        }
-        // assume same for now
-        tLayerName = tSpLayerName;
-        if (splitName) {
-            int index1 = tSpLayerName.indexOf("_");
-            if (index1 != -1) {
-                tSpAbbr = tSpLayerName.substring(0, index1);
-                tLayerName = tSpLayerName.substring(index1 + 1);
-            }
-        }
-        Map returnMap = new HashMap();
-        returnMap.put("prefix", tPrefix);
-        returnMap.put("spAbbr", tSpAbbr);
-        returnMap.put("layerName", tLayerName);
-        returnMap.put("spLayerName", tSpLayerName);
-        returnMap.put("nsUrl", tNsUrl);
-        return returnMap;
-    }
 
     public String getCompleteTitle(){
         if (getTitle()==null){
             return null;
         }
-		return Layer.attachPrefix(this.getSpAbbr(), this.getTitle().replace(" ", ""))
+		return OGCCommunication.attachPrefix(this.getSpAbbr(), this.getTitle().replace(" ", ""));
     }
 
     public String getMetadata() {
@@ -941,7 +876,6 @@ public class Layer implements XMLElement,Comparable{
             Iterator it = this.getLayers().iterator();
             while (it.hasNext()) {
                 Layer l = (Layer) it.next();
-                l.setUrlServiceProvideCode(urlServiceProvideCode);
                 layerElement = l.toElement(doc, layerElement);
             }
         }

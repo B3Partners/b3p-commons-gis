@@ -35,8 +35,14 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.*;
+import java.util.Set;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.*;
 import org.apache.commons.logging.Log;
@@ -56,15 +62,13 @@ import org.w3c.dom.NodeList;
 /*TODO: Deze class is nu case insensitive doordat er bij add/remove/get/etc. Parameter worden de parameters opgehaald
 en opgeslagen in hoofdletters. Als KBconstants de goede Static String waarden heeft (casesensitive) dan kan het hier weg
 zodat de klasse casesensitife is. Tevens kunnen dan alle strings die hier in staan worden vervangen door de constanten.*/
-public class OGCRequest implements OGCConstants {
+public class OGCRequest extends OGCCommunication implements OGCConstants {
 
     protected static final Log log = LogFactory.getLog(OGCRequest.class);
     protected String httpMethod;
     protected String httpHost;
     protected WFS_Capabilities capabilities;
     protected HashMap parameters;
-    protected HashMap nameSpaces;
-    protected HashMap schemaLocations;
     protected HashMap transactionList = new HashMap();
     protected HashMap getFeatureFilterMap = new HashMap();
     protected HashMap getFeaturePropertyNameListMap = new HashMap();
@@ -181,37 +185,6 @@ public class OGCRequest implements OGCConstants {
             throw new UnsupportedOperationException("kaartenbalie doesn't suport " + OGCConstants.WFS_GETFEATUREWITHLOCK + " yet!");
         } else {
             throw new UnsupportedOperationException("No supported WFS service found in request!");
-        }
-    }
-
-    public final void findNameSpace(Node node) {
-        NamedNodeMap map = node.getAttributes();
-        if (map != null) {
-            for (int i = 0; map.getLength() > i; i++) {
-                String value = map.item(i).getNodeValue();
-                if (value == null || value.length() == 0) {
-                    continue;
-                }
-                String name = map.item(i).getNodeName();
-                String[] tokens = name.split(":");
-                if (tokens[0].equalsIgnoreCase("xmlns")) {
-                    if (tokens.length > 1) {
-                        addOrReplaceNameSpace(tokens[1], value);
-                    } else {
-                        addOrReplaceNameSpace("", value);
-                    }
-                } else if (tokens.length == 2) {
-                    if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
-                        addOrReplaceSchemaLocation(tokens[1], value);
-                    }
-                }
-            }
-        }
-        if (node.hasChildNodes()) {
-            NodeList lijst = node.getChildNodes();
-            for (int i = 0; i < lijst.getLength(); i++) {
-                findNameSpace(lijst.item(i));
-            }
         }
     }
 
@@ -361,8 +334,8 @@ public class OGCRequest implements OGCConstants {
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
 					
-					Map m = Layer.splitLayerInParts(layer);
-					addElementToTransactionList(delete, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer);
+					addElementToTransactionList(delete, map.get("spAbbr"));
 					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Insert insert = transactionTypeChoiceItem.getInsert();
@@ -375,16 +348,16 @@ public class OGCRequest implements OGCConstants {
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
 					
-					Map m = Layer.splitLayerInParts(layer[0]);
-					addElementToTransactionList(insert, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer[0]);
+					addElementToTransactionList(insert, map.get("spAbbr"));
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
 					
-					Map m = Layer.splitLayerInParts(layer);
-					addElementToTransactionList(update, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer);
+					addElementToTransactionList(update, map.get("spAbbr"));
 	
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Native nativetransaction = transactionTypeChoiceItem.getNative();
@@ -418,8 +391,8 @@ public class OGCRequest implements OGCConstants {
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
  					
-					Map m = Layer.splitLayerInParts(layer);
-					addElementToTransactionList(delete, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer);
+					addElementToTransactionList(delete, map.get("spAbbr"));
 					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     Insert insert = transactionTypeChoiceItem.getInsert();
@@ -432,16 +405,16 @@ public class OGCRequest implements OGCConstants {
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
  					
-					Map m = Layer.splitLayerInParts(layer[0]);
-					addElementToTransactionList(insert, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer[0]);
+					addElementToTransactionList(insert, map.get("spAbbr"));
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
 					
-					Map m = Layer.splitLayerInParts(layer);
-					addElementToTransactionList(update, m.get("spAbbr"));
+					Map<String,String> map = splitLayerInParts(layer);
+					addElementToTransactionList(update, map.get("spAbbr"));
 					
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     Native nativetransaction = transactionTypeChoiceItem.getNative();
@@ -513,14 +486,7 @@ public class OGCRequest implements OGCConstants {
     }
 
     public void addGetFeatureFilterMap(String key, Object value) {
-        String newKey = "";
-        String[] temp = key.split("}");
-        if (temp.length == 2) {
-            newKey = temp[1];
-        } else {
-            newKey = key;
-        }
-        getFeatureFilterMap.put(newKey, value);
+        getFeatureFilterMap.put(stripNs(key), value);
     }
 
     public String getGetFeatureFilter(String key) {
@@ -541,14 +507,7 @@ public class OGCRequest implements OGCConstants {
     }
 
     public void addGetFeaturePropertyNameListMap(String key, Object value) {
-        String newKey = "";
-        String[] temp = key.split("}");
-        if (temp.length == 2) {
-            newKey = temp[1];
-        } else {
-            newKey = key;
-        }
-        getFeaturePropertyNameListMap.put(newKey, value);
+         getFeaturePropertyNameListMap.put(stripNs(key), value);
     }
 
     public String getGetFeaturePropertyNameList(String key) {
@@ -678,76 +637,6 @@ public class OGCRequest implements OGCConstants {
             return null;
         }
     }
-    public final static HashMap scaleCalibrations = new HashMap();
-
-    static {
-        // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
-        scaleCalibrations.put("EPSG:28992", new Double(3272));
-        // defaultPixelsPerlatLonDegree = 284479860
-        scaleCalibrations.put("EPSG:4326", new Double(284479860));
-        // TODO andere omrekenfactor toevoegen!
-    }
-
-    public double calcScale() {
-        String projection = (String) parameters.get(WMS_PARAM_SRS);
-        if (projection == null) {
-            return 0.0;
-        }
-        Double scaleCalibration = (Double) scaleCalibrations.get(projection);
-        if (scaleCalibration != null) {
-            return calcScale(scaleCalibration.doubleValue());
-        }
-        return 0.0;
-    }
-
-    /**Deze methode berekent de schaal waarbij de diagonaal van de viewport
-     * in pixels wordt omgerekend naar kaarteenheden.
-     *
-     * @param scaleCalibration omrekenfactor van pixels naar kaarteenheden.
-     * @return schaal van de kaart
-     */
-    public double calcScale(double scaleCalibration) {
-        double dvm = 0; // diagonaal viewport in kaarteenheden
-        try {
-            String width = (String) parameters.get(WMS_PARAM_WIDTH);
-            String height = (String) parameters.get(WMS_PARAM_HEIGHT);
-            double w = Double.parseDouble(width);
-            double h = Double.parseDouble(height);
-            double d = Math.sqrt(w * w + h * h);
-            dvm = d / scaleCalibration;
-        } catch (NumberFormatException nfe) {
-            log.error("error: ", nfe);
-            return 0.0;
-        }
-        if (dvm == 0.0) {
-            return 0.0;
-        }
-        String bbox = (String) parameters.get(WMS_PARAM_BBOX);
-        if (bbox == null) {
-            return 0.0;
-        }
-        String[] bboxa = bbox.split(",");
-        if (bboxa.length != 4) {
-            return 0.0;
-        }
-        double dkm = 0; // diagonaal kaart in kaarteenheden
-        try {
-            String minx = bboxa[0];
-            String maxx = bboxa[2];
-            String miny = bboxa[1];
-            String maxy = bboxa[3];
-            double ix = Double.parseDouble(minx);
-            double ax = Double.parseDouble(maxx);
-            double iy = Double.parseDouble(miny);
-            double ay = Double.parseDouble(maxy);
-            dkm = Math.sqrt((ax - ix) * (ax - ix) + (ay - iy) * (ay - iy));
-        } catch (NumberFormatException nfe) {
-            log.error("error: ", nfe);
-            return 0.0;
-        }
-
-        return dkm / dvm;
-    }
 
     /**
      *
@@ -845,13 +734,7 @@ public class OGCRequest implements OGCConstants {
             value = value.trim();
         }
         if (WFS_PARAM_TYPENAME.equals(param)) {
-            int index1 = param.indexOf("{");
-            int index2 = param.indexOf("}");
-            if (index1 >= 0 && index2 >= 0) {
-                String nameSpaceUri = param.substring(index1 + 1, index2);
-                String prefix = getNameSpacePrefix(nameSpaceUri);
-                param = prefix + ":" + param.substring(index2 + 1);
-            }
+            value = fixNsPrefix(value);
         }
         parameters.put(param, value);
         if (o == null) {
@@ -980,87 +863,6 @@ public class OGCRequest implements OGCConstants {
         return returnvalue;
     }
 
-    public String[] getNameSpacesArray() {
-        if (nameSpaces == null) {
-            return null;
-        }
-        String[] returnvalue = new String[nameSpaces.size()];
-        Set keys = nameSpaces.keySet();
-        Iterator it = keys.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            String prefix = (String) it.next();
-            String location = (String) nameSpaces.get(prefix);
-            returnvalue[i] = "xmlns:" + prefix + "=\"" + location + "\"";
-        }
-        return returnvalue;
-    }
-
-    public void addOrReplaceNameSpace(String prefix, String nsUrl) {
-        if (prefix != null && nsUrl != null) {
-            if (nameSpaces == null) {
-                nameSpaces = new HashMap();
-            }
-            nameSpaces.put(prefix, nsUrl);
-        }
-    }
-
-    public String[] getSchemaLocationsArray() {
-        if (schemaLocations == null) {
-            return null;
-        }
-        String[] returnvalue = new String[schemaLocations.size()];
-        Set keys = schemaLocations.keySet();
-        Iterator it = keys.iterator();
-        for (int i = 0; it.hasNext(); i++) {
-            String prefix = (String) it.next();
-            String location = (String) schemaLocations.get(prefix);
-            returnvalue[i] = prefix + ":schemaLocation=\"" + location + "\"";
-        }
-        return returnvalue;
-    }
-
-    public void addOrReplaceSchemaLocation(String prefix, String location) {
-        if (prefix != null && location != null) {
-            if (schemaLocations == null) {
-                schemaLocations = new HashMap();
-            }
-            schemaLocations.put(prefix, location);
-        }
-    }
-
-    /**
-     *Adds all namespaces needed for OpenGis
-     */
-    private void addOpengisNamespaces() {
-        if (nameSpaces == null) {
-            nameSpaces = new HashMap();
-        }
-        if (!nameSpaces.containsKey("wfs")) {
-            addOrReplaceNameSpace("wfs", "http://www.opengis.net/wfs");
-        }
-        if (!nameSpaces.containsKey("xsi")) {
-            addOrReplaceNameSpace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        }
-        if (!nameSpaces.containsKey("gml")) {
-            addOrReplaceNameSpace("gml", "http://www.opengis.net/gml");
-        }
-        if (!nameSpaces.containsKey("ogc")) {
-            addOrReplaceNameSpace("ogc", "http://www.opengis.net/ogc");
-        }
-    }
-
-    /**
-     *Adds all Schemalocations needed for OpenGis
-     */
-    private void addOpengisSchemaLocations() {
-        if (schemaLocations == null) {
-            schemaLocations = new HashMap();
-        }
-        if (!schemaLocations.containsKey("xsi")) {
-            addOrReplaceSchemaLocation("xsi", "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
-        }
-    }
-
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
         returnv.setHttpHost(new String(this.getHttpHost()));
@@ -1157,22 +959,6 @@ public class OGCRequest implements OGCConstants {
 
     protected void setParameters(HashMap parameters) {
         this.parameters = parameters;
-    }
-
-    protected void setNameSpaces(HashMap nameSpaces) {
-        this.nameSpaces = nameSpaces;
-    }
-
-    protected void setSchemaLocations(HashMap schemaLocations) {
-        this.schemaLocations = schemaLocations;
-    }
-
-    public HashMap getNameSpaces() {
-        return nameSpaces;
-    }
-
-    public HashMap getSchemaLocations() {
-        return schemaLocations;
     }
 
     public void checkRequestURL() throws Exception {
@@ -1276,17 +1062,17 @@ public class OGCRequest implements OGCConstants {
         }
     }
 
-    private void setBasicRequest(BaseRequestType brt) {
-        if (this.getParameter(WMS_VERSION) != null) {
-            brt.setVersion(this.getParameter(WMS_VERSION));
-        }
-        if (this.getParameter(WMS_SERVICE) != null) {
-            brt.setService(this.getParameter(WMS_SERVICE));
-        }
-        if (this.getParameter(WFS_PARAM_MAXFEATURES) != null) {
-            log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
-        }
-    }
+//    private void setBasicRequest(BaseRequestType brt) {
+//        if (this.getParameter(WMS_VERSION) != null) {
+//            brt.setVersion(this.getParameter(WMS_VERSION));
+//        }
+//        if (this.getParameter(WMS_SERVICE) != null) {
+//            brt.setService(this.getParameter(WMS_SERVICE));
+//        }
+//        if (this.getParameter(WFS_PARAM_MAXFEATURES) != null) {
+//            log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
+//        }
+//    }
 
     public WFS_Capabilities getCapabilities() {
         return capabilities;
@@ -1358,44 +1144,82 @@ public class OGCRequest implements OGCConstants {
             }
         }
     }
+    
+        public final static HashMap scaleCalibrations = new HashMap();
+
+    static {
+        // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw
+        scaleCalibrations.put("EPSG:28992", new Double(3272));
+        // defaultPixelsPerlatLonDegree = 284479860
+        scaleCalibrations.put("EPSG:4326", new Double(284479860));
+        // TODO andere omrekenfactor toevoegen!
+    }
+
+    public double calcScale() {
+        String projection = (String) parameters.get(WMS_PARAM_SRS);
+        if (projection == null) {
+            return 0.0;
+        }
+        Double scaleCalibration = (Double) scaleCalibrations.get(projection);
+        if (scaleCalibration != null) {
+            return calcScale(scaleCalibration.doubleValue());
+        }
+        return 0.0;
+    }
+
+    /**
+     * Deze methode berekent de schaal waarbij de diagonaal van de viewport in
+     * pixels wordt omgerekend naar kaarteenheden.
+     *
+     * @param scaleCalibration omrekenfactor van pixels naar kaarteenheden.
+     * @return schaal van de kaart
+     */
+    public double calcScale(double scaleCalibration) {
+        double dvm = 0; // diagonaal viewport in kaarteenheden
+        try {
+            String width = (String) parameters.get(WMS_PARAM_WIDTH);
+            String height = (String) parameters.get(WMS_PARAM_HEIGHT);
+            double w = Double.parseDouble(width);
+            double h = Double.parseDouble(height);
+            double d = Math.sqrt(w * w + h * h);
+            dvm = d / scaleCalibration;
+        } catch (NumberFormatException nfe) {
+            log.error("error: ", nfe);
+            return 0.0;
+        }
+        if (dvm == 0.0) {
+            return 0.0;
+        }
+        String bbox = (String) parameters.get(WMS_PARAM_BBOX);
+        if (bbox == null) {
+            return 0.0;
+        }
+        String[] bboxa = bbox.split(",");
+        if (bboxa.length != 4) {
+            return 0.0;
+        }
+        double dkm = 0; // diagonaal kaart in kaarteenheden
+        try {
+            String minx = bboxa[0];
+            String maxx = bboxa[2];
+            String miny = bboxa[1];
+            String maxy = bboxa[3];
+            double ix = Double.parseDouble(minx);
+            double ax = Double.parseDouble(maxx);
+            double iy = Double.parseDouble(miny);
+            double ay = Double.parseDouble(maxy);
+            dkm = Math.sqrt((ax - ix) * (ax - ix) + (ay - iy) * (ay - iy));
+        } catch (NumberFormatException nfe) {
+            log.error("error: ", nfe);
+            return 0.0;
+        }
+
+        return dkm / dvm;
+    }
+
 
     public String getFinalVersion() {
         return finalVersion;
-    }
-
-    public String getNameSpace(String param) {
-        if (param == null || nameSpaces == null) {
-            return null;
-        }
-        Object o = nameSpaces.get(param);
-        if (o == null) {
-            return null;
-        }
-        return (String) o;
-    }
-
-    public String getNameSpacePrefix(String namespaceUrl) {
-        if (nameSpaces == null || nameSpaces.size() == 0) {
-            return null;
-        }
-        for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
-            Map.Entry entry = (Map.Entry) iterator.next();
-            if (entry.getValue().equals(namespaceUrl)) {
-                return (String) entry.getKey();
-            }
-        }
-        //als namespace nog niet is toegevoegd
-        String prefix = null;
-        int nsTeller = 1;
-        //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
-        String ns = getNameSpace("ns" + nsTeller);
-        while (ns != null) {
-            nsTeller++;
-            ns = getNameSpace("ns" + nsTeller);
-        }
-        prefix = "ns" + nsTeller;
-        addOrReplaceNameSpace(prefix, namespaceUrl);
-        return prefix;
     }
 
     /**
