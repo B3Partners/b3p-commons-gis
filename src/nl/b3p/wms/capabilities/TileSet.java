@@ -187,7 +187,7 @@ public class TileSet {
                 if (layerString.length()>0){
                     layerString+=",";
                 }
-				layerString+=OGCCommunication.attachPrefix(l.getSpAbbr(), l.getName());
+				layerString+=OGCCommunication.attachSp(l.getSpAbbr(), l.getName());
             }
             Element element = doc.createElement("Layers");
             Text text = doc.createTextNode(layerString);

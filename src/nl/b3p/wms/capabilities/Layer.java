@@ -396,7 +396,7 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getUniqueName() {
-        return OGCCommunication.attachPrefix(getSpAbbr(), this.getName());
+        return OGCCommunication.attachSp(getSpAbbr(), this.getName());
     }
 	
 
@@ -404,7 +404,7 @@ public class Layer implements XMLElement,Comparable{
         if (getTitle()==null){
             return null;
         }
-		return OGCCommunication.attachPrefix(this.getSpAbbr(), this.getTitle().replace(" ", ""));
+		return OGCCommunication.attachSp(this.getSpAbbr(), this.getTitle().replace(" ", ""));
     }
 
     public String getMetadata() {

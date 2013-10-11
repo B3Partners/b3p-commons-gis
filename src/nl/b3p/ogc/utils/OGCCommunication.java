@@ -34,6 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -212,32 +214,7 @@ public class OGCCommunication implements OGCConstants {
             addOrReplaceSchemaLocation("xsi", "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
         }
     }
-
-    /**
-     * This method determines the featureTypeName based on the given layer and
-     * prefix. Since the layer contains a {namespaceUrl} in the layer, it first
-     * needs to determine the namespace prefix. This value is saved in the
-     * featureTypeNamespacePrefix instance variable, for later use.
-     *
-     * @param prefix
-     * @param layer
-     * @return
-     */
-    protected final String determineFeatureTypeName(String prefix, String layer) {
-        String featureTypeNamespacePrefix = "";
-
-        int index = layer.indexOf("}");
-        if (index > -1) {
-            String namespace = layer.substring(1, index);
-            featureTypeNamespacePrefix = getNameSpacePrefix(namespace);
-            if (!"".equals(featureTypeNamespacePrefix)) {
-                featureTypeNamespacePrefix += ":";
-            }
-            layer = layer.substring(index + 1);//rename layer by removing namepace url
-        }
-        return attachPrefix(prefix, layer, featureTypeNamespacePrefix);
-    }
-
+    
     public NamespaceContext getNamespaceContext() {
 
         return new NamespaceContext() {
@@ -256,16 +233,127 @@ public class OGCCommunication implements OGCConstants {
             }
         };
     }
-
-    protected final String getfeaturename_getFeatureTypesV100(String name) {
-        // TODO hack, nog beter uitzoeken
-
-        int i = 0;
-        i = Math.max(i, name.lastIndexOf(":") + 1);
-        i = Math.max(i, name.lastIndexOf("}") + 1);
-        return name.substring(i);
+    
+    public Map splitLayerInParts(String fullLayerName) throws Exception {
+        return splitLayerInParts(fullLayerName, true);
+    }
+    
+    public static Map splitLayerWithoutNsFix(String fullLayerName) throws Exception {
+        return splitLayerWithoutNsFix(fullLayerName, true);
     }
 
+   
+    public Map splitLayerInParts(String fullLayerName, boolean splitName) throws Exception {
+        Map m = splitLayerWithoutNsFix(fullLayerName, splitName);
+        String tPrefix = (String) m.get("prefix");
+        String tNsUrl = (String) m.get("nsUrl");
+        if (tNsUrl!= null && !tNsUrl.isEmpty()) {
+            tPrefix = getNameSpacePrefix(tNsUrl);
+            m.put("prefix", tPrefix);
+        } else if (tPrefix!= null && !tPrefix.isEmpty()) {
+            tNsUrl = getNameSpace(tPrefix);
+            m.put("nsUrl", tNsUrl);
+        }
+       return m;
+    }
+
+    public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName) throws Exception {
+        String tPrefix = null;
+        String tLayerName = null;
+        String tSpAbbr = null;
+        String tSpLayerName = null;
+        String tNsUrl = null;
+        String[] temp = fullLayerName.split("}");
+        if (temp.length > 1) {
+            tSpLayerName = temp[1];
+            int index1 = fullLayerName.indexOf("{");
+            int index2 = fullLayerName.indexOf("}");
+            tNsUrl = fullLayerName.substring(index1 + 1, index2);
+        } else {
+            String temp2[] = temp[0].split(":");
+            if (temp2.length > 1) {
+                tSpLayerName = temp2[1];
+                tPrefix = temp2[0];
+            } else {
+                tSpLayerName = fullLayerName;
+            }
+        }
+        // assume same for now
+        tLayerName = tSpLayerName;
+        if (splitName) {
+            int index1 = tSpLayerName.indexOf("_");
+            if (index1 != -1) {
+                tSpAbbr = tSpLayerName.substring(0, index1);
+                tLayerName = tSpLayerName.substring(index1 + 1);
+            }
+        }
+        
+        if (tLayerName.isEmpty()) {
+            throw new Exception(KBConfiguration.REQUEST_LAYERNAME_EXCEPTION + ": " + tLayerName);
+        }
+
+        Map returnMap = new HashMap();
+        returnMap.put("prefix", tPrefix);
+        returnMap.put("spAbbr", tSpAbbr);
+        returnMap.put("layerName", tLayerName);
+        returnMap.put("spLayerName", tSpLayerName);
+        returnMap.put("nsUrl", tNsUrl);
+        return returnMap;
+    }
+    
+    /**
+     * methode splitst lange layer naam volgens abbr_layer in een service provider
+     * deel (layerCode genoemd) en een echte layer naam (layerName)
+     * <p>
+     * @param completeLayerName lange layer naam
+     * @return straing array met 2 strings: abbr en layer
+     * @throws java.lang.Exception fout in format lange layer naam
+     */
+    public static String[] toCodeAndName(String completeLayerName) throws Exception {
+         
+        Map m = splitLayerWithoutNsFix(completeLayerName);
+        String layerCode = (String) m.get("spAbbr");
+        String layerName = (String) m.get("layerName");
+        
+        // TODO: dit gaat eigenlijk niet goed omdat net als bij wfs
+        // de namespace er weer voor gezet moet worden.
+        // Check of layers[i] juiste format heeft
+        return new String[]{layerCode, layerName};
+    }
+    
+    public static final String getLayerName(String ln) {
+        try {
+            return toCodeAndName(ln)[1];
+        } catch (Exception ex) {
+            // uitzoeken of deze niet gewoon gegooid kan worden
+        }
+        return ln;
+    }
+
+    static public String attachSp(String sp, String l) {
+        return attachSpNs(sp, l, null);
+    }
+
+    static public String attachSpNs(String sp, String l, String ns) {
+        if (l == null || l.isEmpty()) {
+            return null;
+        }
+        if (sp == null || sp.isEmpty()) {
+            if (ns == null || ns.isEmpty()) {
+                return l;
+            } else {
+                return ns + ":" + l;
+            }
+        }
+        if (ns == null || ns.isEmpty()) {
+            return sp + "_" + l;
+        } else {
+            return sp + "_" + ns + ":" + l;
+        }
+    }
+
+    /* uitzoeken */
+    
     protected final String stripNs(String key) {
         String[] temp = key.split("}");
         if (temp.length == 2) {
@@ -286,77 +374,28 @@ public class OGCCommunication implements OGCConstants {
         return ft;
     }
 
-    static public String attachPrefix(String sp, String l) {
-        return attachPrefix(sp, l, null);
+    /**
+     * This method determines the featureTypeName based on the given layer and
+     * prefix. Since the layer contains a {namespaceUrl} in the layer, it first
+     * needs to determine the namespace prefix. This value is saved in the
+     * featureTypeNamespacePrefix instance variable, for later use.
+     *
+     * @param prefix
+     * @param layer
+     * @return
+     */
+    protected final String determineFeatureTypeName(String prefix, String layer) {
+        Map m = null;
+        String featureTypeNamespacePrefix = "";
+        String spLayerName = layer;
+        try {
+            m = splitLayerInParts(layer, false);
+            featureTypeNamespacePrefix = (String) m.get("prefix");
+            spLayerName = (String) m.get("spLayerName");
+        } catch (Exception ex) {
+            // uitzoeken of deze niet gegooid kan worden
+        }
+        return attachSpNs(prefix, spLayerName, featureTypeNamespacePrefix);
     }
 
-    static public String attachPrefix(String sp, String l, String ns) {
-        if (l == null || l.isEmpty()) {
-            return null;
-        }
-        if (sp == null || sp.isEmpty()) {
-            if (ns == null || ns.isEmpty()) {
-                return l;
-            } else {
-                return ns + ":" + l;
-            }
-        }
-        if (ns == null || ns.isEmpty()) {
-            return sp + "_" + l;
-        } else {
-            return sp + "_" + ns + ":" + l;
-        }
-    }
-
-    public static final String getLayerName(String ln) {
-        if (ln.indexOf("_") > -1 && ln.indexOf("_") < ln.length() - 1) {
-            return ln.substring(ln.indexOf("_") + 1);
-        }
-        return null;
-    }
-    
-    public Map splitLayerInParts(String fullLayerName) {
-        return splitLayerInParts(fullLayerName, true);
-    }
-
-    public Map splitLayerInParts(String fullLayerName, boolean splitName) {
-        String tPrefix = null;
-        String tLayerName = null;
-        String tSpAbbr = null;
-        String tSpLayerName = null;
-        String tNsUrl = null;
-        String[] temp = fullLayerName.split("}");
-        if (temp.length > 1) {
-            tSpLayerName = temp[1];
-            int index1 = fullLayerName.indexOf("{");
-            int index2 = fullLayerName.indexOf("}");
-            tNsUrl = fullLayerName.substring(index1 + 1, index2);
-            tPrefix = getNameSpacePrefix(tNsUrl);
-        } else {
-            String temp2[] = temp[0].split(":");
-            if (temp2.length > 1) {
-                tSpLayerName = temp2[1];
-                tPrefix = temp2[0];
-                tNsUrl = getNameSpace(tPrefix);
-            } else {
-                tSpLayerName = fullLayerName;
-            }
-        }
-        // assume same for now
-        tLayerName = tSpLayerName;
-        if (splitName) {
-            int index1 = tSpLayerName.indexOf("_");
-            if (index1 != -1) {
-                tSpAbbr = tSpLayerName.substring(0, index1);
-                tLayerName = tSpLayerName.substring(index1 + 1);
-            }
-        }
-        Map returnMap = new HashMap();
-        returnMap.put("prefix", tPrefix);
-        returnMap.put("spAbbr", tSpAbbr);
-        returnMap.put("layerName", tLayerName);
-        returnMap.put("spLayerName", tSpLayerName);
-        returnMap.put("nsUrl", tNsUrl);
-        return returnMap;
-    }
-}
+ }

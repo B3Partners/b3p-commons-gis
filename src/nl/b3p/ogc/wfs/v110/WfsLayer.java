@@ -88,6 +88,6 @@ public class WfsLayer {
     }
 
     public String getUniqueName() {
-		return OGCCommunication.attachPrefix(getSpAbbr(), getName());
+		return OGCCommunication.attachSp(getSpAbbr(), getName());
     }
 }

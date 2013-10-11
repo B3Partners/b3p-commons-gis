@@ -433,7 +433,7 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
                         } else {
                             lname = layer[0];
                         }
-                        String changedlayer = attachPrefix(serverPrefix, lname, ns);
+                        String changedlayer = attachSpNs(serverPrefix, lname, ns);
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
                     } else {
                         newToken = newToken + "&" + kvpSplit[z];
@@ -700,7 +700,7 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
             for (int x = 0; x < featureTypes.length; x++) {
                 FeatureType feature = featureTypes[x];
                 String name = feature.getName();
-                String featureName = getfeaturename_getFeatureTypesV100(name);
+                String featureName = OGCCommunication.getLayerName(name);
 
                 Iterator il = layers.iterator();
                 while (il.hasNext()) {
