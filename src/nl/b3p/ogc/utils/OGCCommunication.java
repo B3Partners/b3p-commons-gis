@@ -235,16 +235,16 @@ public class OGCCommunication implements OGCConstants {
     }
     
     public Map splitLayerInParts(String fullLayerName) throws Exception {
-        return splitLayerInParts(fullLayerName, true);
+        return splitLayerInParts(fullLayerName, true, null, null);
     }
     
     public static Map splitLayerWithoutNsFix(String fullLayerName) throws Exception {
-        return splitLayerWithoutNsFix(fullLayerName, true);
+        return splitLayerWithoutNsFix(fullLayerName, true, null, null);
     }
 
    
-    public Map splitLayerInParts(String fullLayerName, boolean splitName) throws Exception {
-        Map m = splitLayerWithoutNsFix(fullLayerName, splitName);
+    public Map splitLayerInParts(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
+        Map m = splitLayerWithoutNsFix(fullLayerName, splitName, defaultSp, defaultNs);
         String tPrefix = (String) m.get("prefix");
         String tNsUrl = (String) m.get("nsUrl");
         if (tNsUrl!= null && !tNsUrl.isEmpty()) {
@@ -275,12 +275,15 @@ public class OGCCommunication implements OGCConstants {
      * @throws Exception 
      */
     public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName) throws Exception {
+        return splitLayerWithoutNsFix(fullLayerName, splitName, null, null);
+    }
+    
+    public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
         String tPrefix = null;
         String tLayerName = null;
         String tSpAbbr = null;
         String tSpLayerName = null;
         String tNsUrl = null;
-        boolean stillNeedsSplit = splitName;
         
         String[] temp = fullLayerName.split("}");
         if (temp.length > 1) {
@@ -296,19 +299,22 @@ public class OGCCommunication implements OGCConstants {
             } else {
                 tSpLayerName = fullLayerName;
             }
-            if (tPrefix != null && stillNeedsSplit) {
+            // b3p layering layers altijd eruit halen
+            if (tPrefix != null && (splitName ||
+                    tPrefix.startsWith(KBConfiguration.SERVICEPROVIDER_BASE_ABBR + "_"))
+                    ) {
                 int index1 = tPrefix.indexOf("_");
                 if (index1 != -1) {
                     tSpAbbr = tPrefix.substring(0, index1);
                     tPrefix = tPrefix.substring(index1 + 1);
-                    // sp foud in ns, so do not try to get from layername
-                    stillNeedsSplit = false;
                 }
             }
         }
-        // assume same for now
+
         tLayerName = tSpLayerName;
-        if (stillNeedsSplit) {
+        if (tSpAbbr==null && (splitName || 
+                    tSpLayerName.startsWith(KBConfiguration.SERVICEPROVIDER_BASE_ABBR + "_"))
+                ) {
             int index1 = tSpLayerName.indexOf("_");
             if (index1 != -1) {
                 tSpAbbr = tSpLayerName.substring(0, index1);
@@ -320,6 +326,13 @@ public class OGCCommunication implements OGCConstants {
             throw new Exception(KBConfiguration.REQUEST_LAYERNAME_EXCEPTION + ": " + tLayerName);
         }
 
+        if (defaultSp!=null && tSpAbbr==null) {
+            tSpAbbr = defaultSp;
+        }
+        if (defaultNs!=null && tPrefix==null) {
+            tPrefix = defaultNs;
+        }
+        
         Map returnMap = new HashMap();
         returnMap.put("prefix", tPrefix);
         returnMap.put("spAbbr", tSpAbbr);
@@ -357,7 +370,7 @@ public class OGCCommunication implements OGCConstants {
                 i = Math.max(i, name.lastIndexOf("}") + 1);
                 String featureName = name.substring(i);
 	*/
-    public static final String getLayerName(String ln) {
+    public static String getLayerName(String ln) {
         try {
             Map m = splitLayerWithoutNsFix(ln);
             return (String) m.get("spLayerName");
@@ -388,8 +401,37 @@ public class OGCCommunication implements OGCConstants {
             return sp + "_" + ns + ":" + l;
         }
     }
+    
+    public static String buildFullLayerName(Map m) {
+        String tPrefix = (String) m.get("prefix");
+        String tSpAbbr = (String) m.get("spAbbr");
+        String tLayerName = (String) m.get("layerName");
+        return attachSpNs(tSpAbbr, tLayerName, tPrefix);
+    }
+    
+    public static String buildLayerNameWithoutSp(Map m) {
+        String tPrefix = (String) m.get("prefix");
+        String tLayerName = (String) m.get("layerName");
+        return attachSpNs(null, tLayerName, tPrefix);
+    }
 
-    /* uitzoeken */
+    public static String buildLayerNameWithoutNs(Map m) {
+        String tSpAbbr = (String) m.get("spAbbr");
+        String tLayerName = (String) m.get("layerName");
+        return attachSpNs(tSpAbbr, tLayerName, null);
+    }
+        
+    public static String replaceIds(String originalId, String sp, String ns) {
+        String[] idSplit = originalId.split(sp + "_");
+        String newId = "";
+        for (int i = 0; i < idSplit.length; i++) {
+           newId += idSplit[i];
+           if (i < (idSplit.length - 1) && ns!=null) {
+                newId += ns + ":";
+            }
+        }
+        return newId;
+    }
     
     protected final String stripNs(String key) {
         String[] temp = key.split("}");
@@ -421,7 +463,7 @@ public class OGCCommunication implements OGCConstants {
      * @param layer
      * @return
      */
-    protected final String determineFeatureTypeName(String prefix, String layer) {
+    protected final String determineFeatureTypeName(String spAbbr, String layer) {
         Map m = null;
         String featureTypeNamespacePrefix = "";
         String spLayerName = layer;
@@ -432,7 +474,7 @@ public class OGCCommunication implements OGCConstants {
         } catch (Exception ex) {
             // uitzoeken of deze niet gegooid kan worden
         }
-        return attachSpNs(prefix, spLayerName, featureTypeNamespacePrefix);
+        return attachSpNs(spAbbr, spLayerName, featureTypeNamespacePrefix);
     }
     
     protected static String cleanPrefixInBody(String body, String prefix, String nsUrl, String ns) {

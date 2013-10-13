@@ -918,6 +918,13 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             returnv.setLayers((ArrayList) this.getLayers().clone());
         }
 
+        if (this.getNameSpaces() != null) {
+            returnv.setNameSpaces((HashMap) this.getNameSpaces().clone());
+        }
+        if (this.getSchemaLocations() != null) {
+            returnv.setSchemaLocations((HashMap) this.getSchemaLocations().clone());
+        }
+        
         return returnv;
     }
 
@@ -958,29 +965,35 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
      *
      * sp wordt als code geinterpreteerd.
      */
-    private String[] findServiceProviderNameAndPersonalCode(String httpHost) {
-        String[] spPc = new String[] {null,null};
-        if (httpHost.contains("/services/")) {
-            String[] parts = httpHost.split("/services/");
+    public static String[] findServiceProviderNameAndPersonalCode(String httpHost) {
+        String[] spPc = new String[]{null, null};
+        if (httpHost==null) {
+            return spPc;
+        }
+        String realHost = httpHost;
+        String[] tmp = httpHost.split("\\?|&");
+        if (tmp.length > 0) {
+            realHost = tmp[0];
+        }
+        String[] parts = realHost.split("/services/");
+        if (parts.length > 1) {
+            parts = parts[1].split("/");
+            // {"sp","pcode"} of {"pcode"}
             if (parts.length > 1) {
-                parts = parts[1].split("/");
-                // {"sp","pcode"} of {"pcode"}
-                if (parts.length > 1) {
-                    spPc[0] = parts[0];
-                    spPc[1] = parts[1];
-                } else if (parts.length == 1) {
-                    spPc[1] = parts[0];
-                }
+                spPc[0] = parts[0];
+                spPc[1] = parts[1];
+            } else if (parts.length == 1) {
+                spPc[1] = parts[0];
             }
         }
         return spPc;
     }
 
-    protected String findServiceProviderName(String httpHost) {
+    public static String findServiceProviderName(String httpHost) {
         return findServiceProviderNameAndPersonalCode(httpHost)[0];
     }
 
-    protected String findPersonalCode(String httpHost) {
+    public static String findPersonalCode(String httpHost) {
         return findServiceProviderNameAndPersonalCode(httpHost)[1];
     }
 

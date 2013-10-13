@@ -163,12 +163,17 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
         this.httpHost = request.getUrlWithNonOGCparams();
         if (nameSpaces == null) {
             nameSpaces = new HashMap();
-
         }
         findNameSpace(rootElement);
         Unmarshaller um;
         Object o;
 
+        // sp in url, dan weglaten
+        String spName = request.getServiceProviderName();
+        if (spName!=null && spName.equalsIgnoreCase(prefix)) {
+            prefix = null;
+        }
+ 
         String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
         if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
