@@ -257,12 +257,31 @@ public class OGCCommunication implements OGCConstants {
        return m;
     }
 
+    /**
+     * parse full name of layer, use splitName boolean to parse layernames
+     * known to not have a service provider in the name to prevend problems
+     * with underscores in names.
+     * 
+     * <li>{ns-uri}sp_layername
+     * <li>{ns-uri}layername (no service provider)
+     * <li>ns:layername (no service provider)
+     * <li>sp_ns:layername
+     * <li>sp_layername (no name space)
+     * <li>layername (no service provider and name space)
+     * 
+     * @param fullLayerName
+     * @param splitName try to split out service provider 
+     * @return
+     * @throws Exception 
+     */
     public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName) throws Exception {
         String tPrefix = null;
         String tLayerName = null;
         String tSpAbbr = null;
         String tSpLayerName = null;
         String tNsUrl = null;
+        boolean stillNeedsSplit = splitName;
+        
         String[] temp = fullLayerName.split("}");
         if (temp.length > 1) {
             tSpLayerName = temp[1];
@@ -277,10 +296,19 @@ public class OGCCommunication implements OGCConstants {
             } else {
                 tSpLayerName = fullLayerName;
             }
+            if (tPrefix != null && stillNeedsSplit) {
+                int index1 = tPrefix.indexOf("_");
+                if (index1 != -1) {
+                    tSpAbbr = tPrefix.substring(0, index1);
+                    tPrefix = tPrefix.substring(index1 + 1);
+                    // sp foud in ns, so do not try to get from layername
+                    stillNeedsSplit = false;
+                }
+            }
         }
         // assume same for now
         tLayerName = tSpLayerName;
-        if (splitName) {
+        if (stillNeedsSplit) {
             int index1 = tSpLayerName.indexOf("_");
             if (index1 != -1) {
                 tSpAbbr = tSpLayerName.substring(0, index1);
@@ -331,8 +359,8 @@ public class OGCCommunication implements OGCConstants {
 	*/
     public static final String getLayerName(String ln) {
         try {
-			Map m = splitLayerWithoutNsFix(completeLayerName);
-			return (String) m.get("spLayerName");
+            Map m = splitLayerWithoutNsFix(ln);
+            return (String) m.get("spLayerName");
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
         }
@@ -405,6 +433,28 @@ public class OGCCommunication implements OGCConstants {
             // uitzoeken of deze niet gegooid kan worden
         }
         return attachSpNs(prefix, spLayerName, featureTypeNamespacePrefix);
+    }
+    
+    protected static String cleanPrefixInBody(String body, String prefix, String nsUrl, String ns) {
+        String old = "";
+        if (nsUrl != null) {
+            old += nsUrl;
+        }
+        if (prefix != null) {
+            old += prefix;
+        }
+        if (old.length() == 0) {
+            return body;
+        }
+        String nsnew = "";
+        if (ns != null) {
+            nsnew += ns;
+        }
+        StringBuffer bBody = new StringBuffer(body);
+        for (int start = bBody.indexOf(old); start >= 0;) {
+            bBody.replace(start, start + old.length(), nsnew);
+        }
+        return bBody.toString();
     }
 
  }

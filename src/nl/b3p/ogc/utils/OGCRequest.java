@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.*;
 import org.apache.commons.logging.Log;
@@ -78,7 +79,9 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
     protected String password;
     // version that will be returned to client
     protected String finalVersion;
-    protected String serviceName;
+    protected String serviceProviderName;
+    private String personalCode;
+    
     public static final List NAMESPACES_NOT_IN_URL = Arrays.asList(new String[]{
                 "http://www.opengis.net/wfs",
                 "http://www.w3.org/2001/xmlschema-instance",
@@ -530,11 +533,10 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             return;
         }
         
-        this.serviceName    = null;
-        
         String[] tokens = url.split("\\?|&");
         if (tokens.length > 0) {
-            setHttpHost(tokens[0]);
+            this.serviceProviderName = findServiceProviderName(tokens[0]);
+            setHttpHost(fixHttpHost(tokens[0]));
         }
         for (int i = 0; i < tokens.length; i++) {
             if (tokens[i].contains("=")) {
@@ -865,7 +867,15 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
 
     public Object clone() {
         OGCRequest returnv = new OGCRequest();
-        returnv.setHttpHost(new String(this.getHttpHost()));
+        if (this.getHttpHost()!=null) {
+            returnv.setHttpHost(new String(this.getHttpHost()));
+        }
+        if (this.getServiceProviderName()!=null) {
+            returnv.setServiceProviderName(new String(this.getServiceProviderName()));
+        }
+        if (this.getPersonalCode()!=null ){
+            returnv.setPersonalCode(new String(this.getPersonalCode()));
+        }
         if (getPassword() != null) {
             returnv.setPassword(new String(this.getPassword()));
         }
@@ -911,32 +921,89 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         return returnv;
     }
 
-    public String getHost() {
-        return getHttpHost();
+//    public String getHost() {
+//        return getHttpHost();
+//    }
+//
+    public String getHttpHost() {
+        return this.httpHost;
+    }
+    
+    public void setHttpHost(String host) {
+        this.httpHost = host;
     }
 
-    protected String getHttpHost() {
-        return httpHost;
-    }
-
-    public void setHttpHost(String httpHost) {
+    public String fixHttpHost(String httpHost) {
         if (httpHost.indexOf('?') < 0) {
-            this.httpHost = httpHost + "?";
+            return httpHost + "?";
         } else if (httpHost.indexOf('?') == httpHost.length() - 1) {
-            this.httpHost = httpHost;
+            return httpHost;
         } else if (httpHost.lastIndexOf('&') == httpHost.length() - 1) {
-            this.httpHost = httpHost;
+            return httpHost;
         } else {
-            this.httpHost = httpHost + "&";
+            return httpHost + "&";
         }
-        
-        if( this.httpHost.contains("/services/") ){
-            String[] parts    = this.httpHost.split("/services/");
-            if( parts[1].contains("/") ){
-                parts   = parts[1].split("/");
-                this.serviceName    = parts[0];
+    }
+
+    /**
+     * uitzoeken of de serviceprovider in de url zit, geldige patronen zijn:
+     * <li>http://server/services/sp/pcode
+     * <li>http://server/services/sp/pcode/
+     * <li>http://server/services/pcode
+     * <li>http://server/services/pcode/
+     *
+     * ongeldig zijn:
+     * <li>http://server/services/sp/
+     * <li>http://server/services/sp
+     *
+     * sp wordt als code geinterpreteerd.
+     */
+    private String[] findServiceProviderNameAndPersonalCode(String httpHost) {
+        String[] spPc = new String[] {null,null};
+        if (httpHost.contains("/services/")) {
+            String[] parts = httpHost.split("/services/");
+            if (parts.length > 1) {
+                parts = parts[1].split("/");
+                // {"sp","pcode"} of {"pcode"}
+                if (parts.length > 1) {
+                    spPc[0] = parts[0];
+                    spPc[1] = parts[1];
+                } else if (parts.length == 1) {
+                    spPc[1] = parts[0];
+                }
             }
         }
+        return spPc;
+    }
+
+    protected String findServiceProviderName(String httpHost) {
+        return findServiceProviderNameAndPersonalCode(httpHost)[0];
+    }
+
+    protected String findPersonalCode(String httpHost) {
+        return findServiceProviderNameAndPersonalCode(httpHost)[1];
+    }
+
+    public void setServiceProviderName(String sp) {
+        this.serviceProviderName = sp;
+    }
+
+    public String getServiceProviderName() {
+        return this.serviceProviderName;
+    }
+
+    /**
+     * @return the personalCode
+     */
+    public String getPersonalCode() {
+        return personalCode;
+    }
+
+    /**
+     * @param personalCode the personalCode to set
+     */
+    public void setPersonalCode(String personalCode) {
+        this.personalCode = personalCode;
     }
 
     /**
@@ -1256,8 +1323,5 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
     public void setLayers(ArrayList layers) {
         this.layers = layers;
     }
-    
-    public String getServiceName(){
-        return this.serviceName;
-    }
+
 }

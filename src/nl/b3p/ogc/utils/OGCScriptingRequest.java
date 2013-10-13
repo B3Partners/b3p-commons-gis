@@ -231,7 +231,7 @@ public class OGCScriptingRequest extends OGCRequest {
     @Override
     public Object clone() {
         OGCScriptingRequest returnv = new OGCScriptingRequest();
-        returnv.setHttpHost(new String(this.getHttpHost()));
+        returnv.fixHttpHost(new String(this.getHttpHost()));
         if (getPassword() != null) {
             returnv.setPassword(new String(this.getPassword()));
         }
