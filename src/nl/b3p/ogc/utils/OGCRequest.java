@@ -91,7 +91,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
 
     /*Default constr.*/
     public OGCRequest() {
-        nameSpaces = new HashMap();
+        addOpengisNamespaces();
         parameters = new HashMap();
     }
 
@@ -102,7 +102,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
      *  For HTTP GET
      */
     public OGCRequest(String url) {
-        nameSpaces = new HashMap();
+        addOpengisNamespaces();
         parameters = new HashMap();
         setUrl(url);
     }
@@ -123,7 +123,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
      * For HTTP POST
      */
     public OGCRequest(Element rootElement, String url) throws ValidationException, Exception {
-        nameSpaces = new HashMap();
+        addOpengisNamespaces();
         parameters = new HashMap();
         setUrl(url);
         findNameSpace(rootElement);
@@ -535,7 +535,9 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         
         String[] tokens = url.split("\\?|&");
         if (tokens.length > 0) {
-            this.serviceProviderName = findServiceProviderName(tokens[0]);
+            String[] pi = findServiceProviderNameAndPersonalCode(tokens[0]);
+            this.serviceProviderName = pi[0];
+            this.personalCode = pi[1];
             setHttpHost(fixHttpHost(tokens[0]));
         }
         for (int i = 0; i < tokens.length; i++) {

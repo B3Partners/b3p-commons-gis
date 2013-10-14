@@ -34,8 +34,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.xml.namespace.NamespaceContext;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -50,15 +48,16 @@ public class OGCCommunication implements OGCConstants {
     protected HashMap nameSpaces;
     protected HashMap schemaLocations;
 
+    
     public void addOrReplaceNameSpace(String prefix, String nsUrl) {
         if (prefix != null && nsUrl != null) {
             if (nameSpaces == null) {
-                nameSpaces = new HashMap();
+                addOpengisNamespaces();
             }
             nameSpaces.put(prefix, nsUrl);
         }
     }
-
+    
     public final void findNameSpace(Node node) {
         NamedNodeMap map = node.getAttributes();
         if (map != null) {
@@ -73,7 +72,8 @@ public class OGCCommunication implements OGCConstants {
                     if (tokens.length > 1) {
                         addOrReplaceNameSpace(tokens[1], value);
                     } else {
-                        addOrReplaceNameSpace("", value);
+                        // namespace context kent geen default ns
+                        // addOrReplaceNameSpace("", value);
                     }
                 } else if (tokens.length == 2) {
                     if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
@@ -93,7 +93,7 @@ public class OGCCommunication implements OGCConstants {
     protected void addOrReplaceSchemaLocation(String prefix, String location) {
         if (prefix != null && location != null) {
             if (schemaLocations == null) {
-                schemaLocations = new HashMap();
+                addOpengisSchemaLocations();
             }
             schemaLocations.put(prefix, location);
         }
@@ -285,6 +285,9 @@ public class OGCCommunication implements OGCConstants {
         String tSpLayerName = null;
         String tNsUrl = null;
         
+        if (fullLayerName == null) {
+            return null;
+        }
         String[] temp = fullLayerName.split("}");
         if (temp.length > 1) {
             tSpLayerName = temp[1];
@@ -299,22 +302,11 @@ public class OGCCommunication implements OGCConstants {
             } else {
                 tSpLayerName = fullLayerName;
             }
-            // b3p layering layers altijd eruit halen
-            if (tPrefix != null && (splitName ||
-                    tPrefix.startsWith(KBConfiguration.SERVICEPROVIDER_BASE_ABBR + "_"))
-                    ) {
-                int index1 = tPrefix.indexOf("_");
-                if (index1 != -1) {
-                    tSpAbbr = tPrefix.substring(0, index1);
-                    tPrefix = tPrefix.substring(index1 + 1);
-                }
-            }
         }
 
         tLayerName = tSpLayerName;
-        if (tSpAbbr==null && (splitName || 
-                    tSpLayerName.startsWith(KBConfiguration.SERVICEPROVIDER_BASE_ABBR + "_"))
-                ) {
+        if (splitName || 
+                    tSpLayerName.startsWith(KBConfiguration.SERVICEPROVIDER_BASE_ABBR + "_")) {
             int index1 = tSpLayerName.indexOf("_");
             if (index1 != -1) {
                 tSpAbbr = tSpLayerName.substring(0, index1);
@@ -337,7 +329,6 @@ public class OGCCommunication implements OGCConstants {
         returnMap.put("prefix", tPrefix);
         returnMap.put("spAbbr", tSpAbbr);
         returnMap.put("layerName", tLayerName);
-        returnMap.put("spLayerName", tSpLayerName);
         returnMap.put("nsUrl", tNsUrl);
         return returnMap;
     }
@@ -353,6 +344,9 @@ public class OGCCommunication implements OGCConstants {
     public static String[] toCodeAndName(String completeLayerName) throws Exception {
          
         Map m = splitLayerWithoutNsFix(completeLayerName);
+        if (m==null) {
+            return null;
+        }
         String layerCode = (String) m.get("spAbbr");
         String layerName = (String) m.get("layerName");
         
@@ -362,18 +356,10 @@ public class OGCCommunication implements OGCConstants {
         return new String[]{layerCode, layerName};
     }
     
-	/* zo was het:
-	                // TODO hack, nog beter uitzoeken
-                String name = feature.getName();
-                int i = 0;
-                i = Math.max(i, name.lastIndexOf(":") + 1);
-                i = Math.max(i, name.lastIndexOf("}") + 1);
-                String featureName = name.substring(i);
-	*/
     public static String getLayerName(String ln) {
         try {
             Map m = splitLayerWithoutNsFix(ln);
-            return (String) m.get("spLayerName");
+            return buildLayerNameWithoutNs(m);
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
         }
@@ -398,7 +384,7 @@ public class OGCCommunication implements OGCConstants {
         if (ns == null || ns.isEmpty()) {
             return sp + "_" + l;
         } else {
-            return sp + "_" + ns + ":" + l;
+            return ns + ":" + sp + "_" + l;
         }
     }
     
@@ -464,17 +450,13 @@ public class OGCCommunication implements OGCConstants {
      * @return
      */
     protected final String determineFeatureTypeName(String spAbbr, String layer) {
-        Map m = null;
-        String featureTypeNamespacePrefix = "";
-        String spLayerName = layer;
         try {
-            m = splitLayerInParts(layer);
-            featureTypeNamespacePrefix = (String) m.get("prefix");
-            spLayerName = (String) m.get("spLayerName");
+            Map m = splitLayerInParts(layer, false, spAbbr, null);
+            return buildFullLayerName(m);
         } catch (Exception ex) {
             // uitzoeken of deze niet gegooid kan worden
         }
-        return attachSpNs(spAbbr, spLayerName, featureTypeNamespacePrefix);
+        return null;
     }
     
     protected static String cleanPrefixInBody(String body, String prefix, String nsUrl, String ns) {

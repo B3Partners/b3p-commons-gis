@@ -161,18 +161,9 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
 
     public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
         this.httpHost = request.getUrlWithNonOGCparams();
-        if (nameSpaces == null) {
-            nameSpaces = new HashMap();
-        }
         findNameSpace(rootElement);
         Unmarshaller um;
         Object o;
-
-        // sp in url, dan weglaten
-        String spName = request.getServiceProviderName();
-        if (spName!=null && spName.equalsIgnoreCase(prefix)) {
-            prefix = null;
-        }
  
         String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
@@ -497,12 +488,12 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
             StringWriter sw = new StringWriter();
             Marshaller m = new Marshaller(sw);
 
-            if (nameSpaces != null) {
-                Set keys = nameSpaces.keySet();
+            if (this.getNameSpaces() != null) {
+                Set keys = this.getNameSpaces().keySet();
                 Iterator it = keys.iterator();
                 for (int i = 0; it.hasNext(); i++) {
                     String prefix = (String) it.next();
-                    String location = (String) nameSpaces.get(prefix);
+                    String location = (String) this.getNameSpace(prefix);
                     m.setNamespaceMapping(prefix, location);
                 }
             }
@@ -644,12 +635,8 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
             nl.b3p.xml.wfs.v110.FeatureTypeList nextTypeList = nextWfsCapabilitiesV110.getFeatureTypeList();
             for (int x = 0; x < nextTypeList.getFeatureTypeCount(); x++) {
                 nl.b3p.xml.wfs.v110.FeatureType feature = nextTypeList.getFeatureType(x);
-                // TODO hack, nog beter uitzoeken
                 String name = feature.getName();
-                int i = 0;
-                i = Math.max(i, name.lastIndexOf(":") + 1);
-                i = Math.max(i, name.lastIndexOf("}") + 1);
-                String featureName = name.substring(i);
+                String featureName = OGCCommunication.getLayerName(name);
 
                 Iterator il = layers.iterator();
                 while (il.hasNext()) {
@@ -705,16 +692,6 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
             for (int x = 0; x < featureTypes.length; x++) {
                 FeatureType feature = featureTypes[x];
                 String name = feature.getName();
-				// TODO hier of regel 642 zit waarschijnlijk de fout:
-				/*
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE ServiceExceptionReport SYSTEM "http://localhost:8080/kaartenbalie/dtd/exception_1_1_1.dtd">
-<ServiceExceptionReport version="1.1.1">
-<ServiceException code="java.lang.UnsupportedOperationException"><![CDATA[Failed to get body of XML! Exception: ValidationException: The following exception occured while validating field: _featureTypeList of class: nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities: A minimum of 1 _featureTypeList object(s) (whose xml name is 'FeatureType') are required for class: nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList;
-- location of error: XPATH: WFS_Capabilities
-A minimum of 1 _featureTypeList object(s) (whose xml name is 'FeatureType') are required for class: nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList]]></ServiceException>
-</ServiceExceptionReport>				
-				*/
                 String featureName = OGCCommunication.getLayerName(name);
 
                 Iterator il = layers.iterator();
