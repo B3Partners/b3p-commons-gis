@@ -30,7 +30,7 @@ public class TileSet {
     private String layerString;
     private ServiceProvider serviceProvider;
     
-     private boolean urlServiceProvideCode = false;
+     private String urlServiceProvideCode = null;
 
     //<editor-fold defaultstate="collapsed" desc="Getters/setters">
     public Integer getId() {
@@ -89,11 +89,11 @@ public class TileSet {
         this.layers = layers;
     }
 
-    public boolean isUrlServiceProvideCode() {
+    public String getUrlServiceProvideCode() {
         return urlServiceProvideCode;
     }
 
-    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
+    public void setUrlServiceProvideCode(String urlServiceProvideCode) {
         this.urlServiceProvideCode = urlServiceProvideCode;
     }
     

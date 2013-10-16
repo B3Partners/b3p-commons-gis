@@ -55,4 +55,18 @@ public class LayerMetadata {
     public void setMetadata(String metadata) {
         this.metadata = metadata;
     }
+    
+    @Override
+    public Object clone() {
+        LayerMetadata cloneLM = new LayerMetadata();
+
+        if (null != this.id) {
+            cloneLM.id = new Integer(this.id.intValue());
+        }
+        if (null != this.metadata) {
+            cloneLM.metadata = new String(this.metadata);
+        }
+        return cloneLM;
+    }
+
 }

@@ -74,7 +74,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     private Boolean ignoreResource;
     private Boolean allowed = Boolean.TRUE;
     
-    private boolean urlServiceProvideCode = false;
+    private String urlServiceProvideCode = null;
 
     /** default ServiceProvider() constructor.
      */
@@ -275,14 +275,6 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         this.topLayer = topLayer;
     }
 
-    public boolean isUrlServiceProvideCode() {
-        return urlServiceProvideCode;
-    }
-
-    public void setUrlServiceProvideCode(boolean urlServiceProvideCode) {
-        this.urlServiceProvideCode = urlServiceProvideCode;
-    }
-
     public Set getServiceProviderKeywordList() {
         return serviceProviderKeywordList;
     }
@@ -313,6 +305,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
      */
     // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
     public void convertValues2KB(HashMap conversionValues) throws Exception {
+        conversionValues.put("spAbbrUrl", this.getUrlServiceProvideCode());
         conversionValues.put("spAbbr", this.abbr);
         String newUrl = (String)conversionValues.get("url");
         this.url = newUrl;
@@ -506,7 +499,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             Iterator<TileSet> it=this.getTileSets().iterator();
             while(it.hasNext()){                
                 TileSet ts=it.next();
-                ts.setUrlServiceProvideCode(urlServiceProvideCode);
+                ts.setUrlServiceProvideCode(getUrlServiceProvideCode());
                 if (ts!=null) {
                     vendorSpecificElement.appendChild(ts.toElement(doc,doc.createElement("TileSet")));
                 }
@@ -622,6 +615,17 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         sc.setWmsVersion(this.getWmsVersion());
         sc.setUserName(this.getUserName());
         sc.setPassword(this.getPassword());
+ 
+        sc.setUpdatedDate(this.getUpdatedDate());
+        sc.setContactInformation(this.getContactInformation());
+//        sc.setCode(this.getCode());
+        sc.setExpireDate(this.getExpireDate());
+        sc.setPersonalCode(this.getPersonalCode());
+        sc.setStatus(this.getStatus());
+        sc.setSldUrl(this.getSldUrl());
+        sc.setIgnoreResource(this.getIgnoreResource());
+        sc.setAllowed(this.getAllowed());
+        sc.setUrlServiceProvideCode(this.getUrlServiceProvideCode());
         
         HashSet dr=new HashSet();
         dr.addAll(this.getDomainResource());
@@ -712,5 +716,19 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
 
     public Boolean getAllowed() {
         return this.allowed;
+    }
+
+    /**
+     * @return the urlServiceProvideCode
+     */
+    public String getUrlServiceProvideCode() {
+        return urlServiceProvideCode;
+    }
+
+    /**
+     * @param urlServiceProvideCode the urlServiceProvideCode to set
+     */
+    public void setUrlServiceProvideCode(String urlServiceProvideCode) {
+        this.urlServiceProvideCode = urlServiceProvideCode;
     }
 }

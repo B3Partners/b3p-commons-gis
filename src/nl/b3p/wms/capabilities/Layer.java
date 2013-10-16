@@ -68,8 +68,6 @@ public class Layer implements XMLElement,Comparable{
     private String metadata;
     private Set layerMetadata;
     
-    private boolean urlServiceProvideCode = false;
-
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
         return id;
@@ -511,11 +509,6 @@ public class Layer implements XMLElement,Comparable{
     // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
     protected void convertValues2KB(HashMap conversionValues) {
         conversionValues.put("layerName", this.getName());
-        String spAbbr = "unknown";
-        if (this.getServiceProvider()!=null) {
-            spAbbr = this.getServiceProvider().getAbbr();
-        }
-        conversionValues.put("spAbbr", spAbbr);
         Iterator it;
         //Layers:
         if (null != this.getLayers() && this.getLayers().size() != 0) {
@@ -662,9 +655,24 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
+        if (this.oldMetadata != null) {
+            cloneLayer.oldMetadata = new String(this.oldMetadata);
+        }
+        
         if (this.metadata != null) {
             cloneLayer.metadata = new String(this.metadata);
         }
+        
+        if (null != this.layerMetadata) {
+            cloneLayer.layerMetadata = new HashSet();
+            Iterator it = this.layerMetadata.iterator();
+            while (it.hasNext()) {
+                LayerMetadata lm = (LayerMetadata) ((LayerMetadata) it.next()).clone();
+                lm.setLayer(cloneLayer);
+                cloneLayer.layerMetadata.add(lm);
+            }
+        }
+            
         return cloneLayer;
     }
     // </editor-fold>
@@ -700,8 +708,21 @@ public class Layer implements XMLElement,Comparable{
         }
 
         if (null != this.getName()) {
+            String layerUniqueName = null;
+            String spAbbrUrl = null;
+            if (this.getServiceProvider() != null) {
+                spAbbrUrl = this.getServiceProvider().getUrlServiceProvideCode();
+            }
+            String spAbbr = this.getSpAbbr();
+            if (spAbbrUrl != null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
+                layerUniqueName = this.getName();
+            } else {
+                layerUniqueName = 
+                        OGCCommunication.attachSp(this.getSpAbbr(), this.getName());
+            }
+
             Element nameElement = doc.createElement("Name");
-            Text text = doc.createTextNode(this.getUniqueName());
+            Text text = doc.createTextNode(layerUniqueName);
             nameElement.appendChild(text);
             layerElement.appendChild(nameElement);
         }
@@ -985,4 +1006,5 @@ public class Layer implements XMLElement,Comparable{
         Layer l = (Layer)o;
         return this.toString().compareTo(l.toString());
     }
+
 }

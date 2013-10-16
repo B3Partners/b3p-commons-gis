@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import nl.b3p.ogc.utils.KBCrypter;
+import nl.b3p.ogc.utils.OGCCommunication;
 import nl.b3p.ogc.utils.OGCConstants;
 import nl.b3p.ogc.utils.OGCRequest;
 import org.apache.commons.logging.Log;
@@ -117,7 +118,14 @@ public class LayerDomainResource implements XMLElement {
         String newUrl = (String) conversionValues.get("url");
         String spAbbr = (String) conversionValues.get("spAbbr");
         String layerName = (String) conversionValues.get("layerName");
-        String layerUniqueName = spAbbr+"_"+layerName;
+        String layerUniqueName = null;
+        String spAbbrUrl = (String) conversionValues.get("spAbbrUrl");
+        if (spAbbrUrl!=null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
+            layerUniqueName = layerName;
+        } else {
+            layerUniqueName = OGCCommunication.attachSp(spAbbr, layerName);
+        }
+         
         int pos = newUrl.indexOf("?");
         if (pos == -1) {
             newUrl += "?";

@@ -420,16 +420,7 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
                 for (int z = 0; z < kvpSplit.length; z++) {
                     String[] newKvp = kvpSplit[z].split("=");
                     if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
-                        String[] layer = newKvp[1].split(":");
-						String lname = null;
-						String ns = null;
-                        if (layer.length > 1) {
-                            ns = layer[0];
-							lname = layer[1];
-                        } else {
-                            lname = layer[0];
-                        }
-                        String changedlayer = attachSpNs(serverPrefix, lname, ns);
+                        String changedlayer = attachSp(serverPrefix, newKvp[1]);
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
                     } else {
                         newToken = newToken + "&" + kvpSplit[z];

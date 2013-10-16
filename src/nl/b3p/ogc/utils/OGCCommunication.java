@@ -348,11 +348,8 @@ public class OGCCommunication implements OGCConstants {
             return null;
         }
         String layerCode = (String) m.get("spAbbr");
-        String layerName = (String) m.get("layerName");
-        
-        // TODO: dit gaat eigenlijk niet goed omdat net als bij wfs
-        // de namespace er weer voor gezet moet worden.
-        // Check of layers[i] juiste format heeft
+        // plak de oorspronkelijke ns weer aan de kaartlaag indien van toepassing
+        String layerName = buildLayerNameWithoutSp(m);
         return new String[]{layerCode, layerName};
     }
     
@@ -363,11 +360,17 @@ public class OGCCommunication implements OGCConstants {
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
         }
-        return ln;
+        return null;
     }
 
     static public String attachSp(String sp, String l) {
-        return attachSpNs(sp, l, null);
+        try {
+            Map m = splitLayerWithoutNsFix(l, false, sp, null);
+            return buildFullLayerName(m);
+        } catch (Exception ex) {
+            // uitzoeken of deze niet gewoon gegooid kan worden
+        }
+        return null;
     }
 
     static public String attachSpNs(String sp, String l, String ns) {
