@@ -425,7 +425,8 @@ public class Layer implements XMLElement,Comparable{
         if (metaData != null) {
             Set<LayerMetadata> metaDataLayers = getLayerMetadata();
 
-            if (metaDataLayers.isEmpty()) {
+            if (metaDataLayers==null || metaDataLayers.isEmpty()) {
+                metaDataLayers = new HashSet();
                 LayerMetadata lmd = new LayerMetadata();
                 lmd.setLayer(this);
                 lmd.setMetadata(metaData);
