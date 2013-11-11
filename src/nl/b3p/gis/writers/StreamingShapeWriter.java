@@ -294,6 +294,10 @@ public class StreamingShapeWriter {
                 return ds.getFeatureWriterAppend(type.getTypeName()+suffix, Transaction.AUTO_COMMIT);
             }
         }
+        //hmm, not found? Just return the only available?
+        if (ds.getTypeNames().length==1){
+            return ds.getFeatureWriterAppend(ds.getTypeNames()[0], Transaction.AUTO_COMMIT);
+        }
         return ds.getFeatureWriterAppend(type.getTypeName()+suffix, Transaction.AUTO_COMMIT);
     }
 
