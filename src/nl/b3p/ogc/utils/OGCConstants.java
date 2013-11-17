@@ -150,6 +150,7 @@ public interface OGCConstants {
     public static final String WFS_OBJECT_SERVICEEXCEPTIONREPORT = "ServiceExceptionReport";
     public static final String WFS_OBJECT_GEOMETRYTYPE = "gml:GeometryPropertyType";
     public static final String WFS_SERVER_EXCEPTION = "ServiceExceptionReport";
+    public static final String WFS_OWS_EXCEPTION = "ExceptionReport";
     public static final String WFS_TRANSACTIONRESPONSE = "TransactionResponse";
     /**
      * List with essential parameters per wms service.

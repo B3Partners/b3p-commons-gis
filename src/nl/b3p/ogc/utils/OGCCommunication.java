@@ -72,8 +72,8 @@ public class OGCCommunication implements OGCConstants {
                     if (tokens.length > 1) {
                         addOrReplaceNameSpace(tokens[1], value);
                     } else {
-                        // namespace context kent geen default ns
-                        // addOrReplaceNameSpace("", value);
+                        // namespace context kent een default ns
+                        addOrReplaceNameSpace("", value);
                     }
                 } else if (tokens.length == 2) {
                     if (tokens[1].equalsIgnoreCase("SchemaLocation")) {
@@ -201,6 +201,9 @@ public class OGCCommunication implements OGCConstants {
         if (!nameSpaces.containsKey("ogc")) {
             addOrReplaceNameSpace("ogc", "http://www.opengis.net/ogc");
         }
+        if (!nameSpaces.containsKey("ows")) {
+            addOrReplaceNameSpace("ows", "http://www.opengis.net/ows");
+        }
     }
 
     /**
@@ -234,25 +237,25 @@ public class OGCCommunication implements OGCConstants {
         };
     }
     
-    public Map splitLayerInParts(String fullLayerName) throws Exception {
+    public LayerSummary splitLayerInParts(String fullLayerName) throws Exception {
         return splitLayerInParts(fullLayerName, true, null, null);
     }
     
-    public static Map splitLayerWithoutNsFix(String fullLayerName) throws Exception {
+    public static LayerSummary splitLayerWithoutNsFix(String fullLayerName) throws Exception {
         return splitLayerWithoutNsFix(fullLayerName, true, null, null);
     }
 
    
-    public Map splitLayerInParts(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
-        Map m = splitLayerWithoutNsFix(fullLayerName, splitName, defaultSp, defaultNs);
-        String tPrefix = (String) m.get("prefix");
-        String tNsUrl = (String) m.get("nsUrl");
+    public LayerSummary splitLayerInParts(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
+        LayerSummary m = splitLayerWithoutNsFix(fullLayerName, splitName, defaultSp, defaultNs);
+        String tPrefix = m.getPrefix();
+        String tNsUrl = m.getNsUrl();
         if (tNsUrl!= null && !tNsUrl.isEmpty()) {
             tPrefix = getNameSpacePrefix(tNsUrl);
-            m.put("prefix", tPrefix);
+            m.setPrefix(tPrefix);
         } else if (tPrefix!= null && !tPrefix.isEmpty()) {
             tNsUrl = getNameSpace(tPrefix);
-            m.put("nsUrl", tNsUrl);
+            m.setNsUrl(tNsUrl);
         }
        return m;
     }
@@ -274,11 +277,11 @@ public class OGCCommunication implements OGCConstants {
      * @return
      * @throws Exception 
      */
-    public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName) throws Exception {
+    public static LayerSummary splitLayerWithoutNsFix(String fullLayerName, boolean splitName) throws Exception {
         return splitLayerWithoutNsFix(fullLayerName, splitName, null, null);
     }
     
-    public static Map splitLayerWithoutNsFix(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
+    public static LayerSummary splitLayerWithoutNsFix(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) throws Exception {
         String tPrefix = null;
         String tLayerName = null;
         String tSpAbbr = null;
@@ -325,11 +328,11 @@ public class OGCCommunication implements OGCConstants {
             tPrefix = defaultNs;
         }
         
-        Map returnMap = new HashMap();
-        returnMap.put("prefix", tPrefix);
-        returnMap.put("spAbbr", tSpAbbr);
-        returnMap.put("layerName", tLayerName);
-        returnMap.put("nsUrl", tNsUrl);
+        LayerSummary returnMap = new LayerSummary();
+        returnMap.setPrefix(tPrefix);
+        returnMap.setSpAbbr(tSpAbbr);
+        returnMap.setLayerName(tLayerName);
+        returnMap.setNsUrl(tNsUrl);
         return returnMap;
     }
     
@@ -343,11 +346,11 @@ public class OGCCommunication implements OGCConstants {
      */
     public static String[] toCodeAndName(String completeLayerName) throws Exception {
          
-        Map m = splitLayerWithoutNsFix(completeLayerName);
+        LayerSummary m = splitLayerWithoutNsFix(completeLayerName);
         if (m==null) {
             return null;
         }
-        String layerCode = (String) m.get("spAbbr");
+        String layerCode = m.getSpAbbr();
         // plak de oorspronkelijke ns weer aan de kaartlaag indien van toepassing
         String layerName = buildLayerNameWithoutSp(m);
         return new String[]{layerCode, layerName};
@@ -355,7 +358,7 @@ public class OGCCommunication implements OGCConstants {
     
     public static String getLayerName(String ln) {
         try {
-            Map m = splitLayerWithoutNsFix(ln);
+            LayerSummary m = splitLayerWithoutNsFix(ln);
             return buildLayerNameWithoutNs(m);
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
@@ -365,7 +368,7 @@ public class OGCCommunication implements OGCConstants {
 
     static public String attachSp(String sp, String l) {
         try {
-            Map m = splitLayerWithoutNsFix(l, false, sp, null);
+            LayerSummary m = splitLayerWithoutNsFix(l, false, sp, null);
             return buildFullLayerName(m);
         } catch (Exception ex) {
             // uitzoeken of deze niet gewoon gegooid kan worden
@@ -391,26 +394,33 @@ public class OGCCommunication implements OGCConstants {
         }
     }
     
-    public static String buildFullLayerName(Map m) {
-        String tPrefix = (String) m.get("prefix");
-        String tSpAbbr = (String) m.get("spAbbr");
-        String tLayerName = (String) m.get("layerName");
+    public static String buildFullLayerName(LayerSummary m) {
+        String tPrefix = m.getPrefix();
+        String tSpAbbr = m.getSpAbbr();
+        String tLayerName = m.getLayerName();
         return attachSpNs(tSpAbbr, tLayerName, tPrefix);
     }
     
-    public static String buildLayerNameWithoutSp(Map m) {
-        String tPrefix = (String) m.get("prefix");
-        String tLayerName = (String) m.get("layerName");
+    public static String buildLayerNameWithoutSp(LayerSummary m) {
+        String tPrefix = m.getPrefix();
+        String tLayerName = m.getLayerName();
         return attachSpNs(null, tLayerName, tPrefix);
     }
 
-    public static String buildLayerNameWithoutNs(Map m) {
-        String tSpAbbr = (String) m.get("spAbbr");
-        String tLayerName = (String) m.get("layerName");
+    public static String buildLayerNameWithoutNs(LayerSummary m) {
+        String tSpAbbr =  m.getSpAbbr();
+        String tLayerName =  m.getLayerName();
         return attachSpNs(tSpAbbr, tLayerName, null);
     }
         
     public static String replaceIds(String originalId, String sp, String ns) {
+        if (sp==null) {
+            if (ns==null) {
+                return originalId;
+            } else {
+                return ns + ":" + originalId;
+            }
+        }
         String[] idSplit = originalId.split(sp + "_");
         String newId = "";
         for (int i = 0; i < idSplit.length; i++) {
@@ -454,7 +464,7 @@ public class OGCCommunication implements OGCConstants {
      */
     protected final String determineFeatureTypeName(String spAbbr, String layer) {
         try {
-            Map m = splitLayerInParts(layer, false, spAbbr, null);
+            LayerSummary m = splitLayerInParts(layer, false, spAbbr, null);
             return buildFullLayerName(m);
         } catch (Exception ex) {
             // uitzoeken of deze niet gegooid kan worden
@@ -484,4 +494,4 @@ public class OGCCommunication implements OGCConstants {
         return bBody.toString();
     }
 
- }
+  }

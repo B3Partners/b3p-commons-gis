@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.servlet.http.HttpServletRequest;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.*;
 import org.apache.commons.logging.Log;
@@ -52,9 +51,6 @@ import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 /**
  * @author Roy Braam
@@ -86,7 +82,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                 "http://www.opengis.net/wfs",
                 "http://www.w3.org/2001/xmlschema-instance",
                 "http://www.opengis.net/gml",
-                "http://www.opengis.net/ogc"
+                "http://www.opengis.net/ogc",
+                "http://www.opengis.net/ows"
             });
 
     /*Default constr.*/
@@ -337,8 +334,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
 					
-					Map<String,String> map = splitLayerInParts(layer);
-					addElementToTransactionList(delete, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer);
+                    addElementToTransactionList(delete, map.getSpAbbr());
 					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Insert insert = transactionTypeChoiceItem.getInsert();
@@ -351,16 +348,16 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
 					
-					Map<String,String> map = splitLayerInParts(layer[0]);
-					addElementToTransactionList(insert, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer[0]);
+                    addElementToTransactionList(insert, map.getSpAbbr());
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
 					
-					Map<String,String> map = splitLayerInParts(layer);
-					addElementToTransactionList(update, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer);
+                    addElementToTransactionList(update, map.getSpAbbr());
 	
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     nl.b3p.xml.wfs.v100.transaction.Native nativetransaction = transactionTypeChoiceItem.getNative();
@@ -394,8 +391,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                     String layer = delete.getTypeName();
                     getLayers().add(layer);
  					
-					Map<String,String> map = splitLayerInParts(layer);
-					addElementToTransactionList(delete, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer);
+                    addElementToTransactionList(delete, map.getSpAbbr());
 					
                 } else if (transactionTypeChoiceItem.getInsert() != null) {
                     Insert insert = transactionTypeChoiceItem.getInsert();
@@ -408,16 +405,16 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                     String[] layer = insertString.split("<");
                     getLayers().add(layer[0]);
  					
-					Map<String,String> map = splitLayerInParts(layer[0]);
-					addElementToTransactionList(insert, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer[0]);
+                    addElementToTransactionList(insert, map.getSpAbbr());
 
                 } else if (transactionTypeChoiceItem.getUpdate() != null) {
                     Update update = transactionTypeChoiceItem.getUpdate();
                     String layer = update.getTypeName();
                     getLayers().add(layer);
 					
-					Map<String,String> map = splitLayerInParts(layer);
-					addElementToTransactionList(update, map.get("spAbbr"));
+                    LayerSummary map = splitLayerInParts(layer);
+                    addElementToTransactionList(update, map.getSpAbbr());
 					
                 } else if (transactionTypeChoiceItem.getNative() != null) {
                     Native nativetransaction = transactionTypeChoiceItem.getNative();
@@ -584,9 +581,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             }
         }
 
-        if (OGCConstants.SUPPORTED_WFS_REQUESTS.contains(getParameter(OGCConstants.REQUEST))) {
-            setFinalVersion(getParameter(OGCConstants.VERSION));
-        }
+        setFinalVersion(getParameter(OGCConstants.VERSION));
     }
 
     /** Gets the full url with the params
@@ -605,9 +600,9 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         while (it.hasNext()) {
             Object o = it.next();
             if (o != null) {
-                sb.append(o);
-                sb.append("=");
                 if (parameters.get(o) != null) {
+                    sb.append(o);
+                    sb.append("=");
                     try {
                         String s = (String) parameters.get(o);
                         s = URLEncoder.encode(s, "utf-8");
@@ -615,25 +610,31 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                     } catch (UnsupportedEncodingException nee) {
                         log.error("Fout bij encoding voor het opbouwen van url.", nee);
                     }
+                    sb.append("&");
                 }
-                sb.append("&");
             }
         }
         if (getNameSpaces() != null && getNameSpaces().size() > 0) {
-            sb.append("namespace=");
+            StringBuffer nsp = new StringBuffer("namespace=");
             Set mapEntries = getNameSpaces().entrySet();
             it = mapEntries.iterator();
             while (it.hasNext()) {
+                if (nsp.length()>11) {
+                    nsp.append(",");
+                }
                 Map.Entry me = (Entry) it.next();
                 if (!NAMESPACES_NOT_IN_URL.contains(me.getValue().toString().toLowerCase())) {
-                    sb.append("xmlns(");
-                    sb.append(me.getKey());
-                    sb.append("=");
-                    sb.append(me.getValue());
-                    sb.append(")");
+                    nsp.append("xmlns(");
+                    nsp.append(me.getKey());
+                    nsp.append("=");
+                    nsp.append(me.getValue());
+                    nsp.append(")");
                 }
             }
-            sb.append("&");
+            if (nsp.length()>20) {
+                sb.append(nsp.toString());
+                sb.append("&");
+            }
         }
         if (sb.length() > 0) {
             return sb.toString();
@@ -1092,9 +1093,9 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
                 requiredParams = WFS_REQUIRED_PARAMS_DescribeFeatureType;
             } else if (request.equals(WFS_REQUEST_Transaction)) {
                 requiredParams = WFS_REQUIRED_PARAMS_Transaction;
-//            } else if (request.equals(WFS_REQUEST_GetFeatureWithLock)) {
+//            } else if (request.equalsIgnoreCase(WFS_REQUEST_GetFeatureWithLock)) {
 //                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
-//            } else if (request.equals(WFS_REQUEST_LockFeature)) {
+//            } else if (request.equalsIgnoreCase(WFS_REQUEST_LockFeature)) {
 //                throw new UnsupportedOperationException("Request '" + request + "' not supported!");
             } else {
                 throw new UnsupportedOperationException("Request '" + request + "' not supported! Use GetCapabilities request to "
@@ -1227,7 +1228,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         }
     }
     
-        public final static HashMap scaleCalibrations = new HashMap();
+    public final static HashMap scaleCalibrations = new HashMap();
 
     static {
         // defaultPixelsPerMeter = 3272, 3384: mattserver/Map.C, 3488: dcw

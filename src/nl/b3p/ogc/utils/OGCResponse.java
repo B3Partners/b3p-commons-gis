@@ -32,14 +32,10 @@
 package nl.b3p.ogc.utils;
 
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
-import javax.xml.namespace.NamespaceContext;
+import java.util.Set;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -51,434 +47,135 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
-import nl.b3p.xml.ows.v100.DCP;
-import nl.b3p.xml.ows.v100.HTTP;
-import nl.b3p.xml.ows.v100.Operation;
-import nl.b3p.xml.wfs.Filter_Capabilities;
-import nl.b3p.xml.wfs.v100.capabilities.DCPType;
-import nl.b3p.xml.wfs.v100.capabilities.DCPType_DescribeFeatureTypeType;
-import nl.b3p.xml.wfs.v100.capabilities.DCPType_FeatureTypeType;
-import nl.b3p.xml.wfs.v100.capabilities.DCPType_GetCapabilitiesType;
-import nl.b3p.xml.wfs.v100.capabilities.DCPType_TransactionType;
-import nl.b3p.xml.wfs.v100.capabilities.FeatureType;
-import nl.b3p.xml.wfs.v100.capabilities.HTTPTypeItem;
-import nl.b3p.xml.wfs.v100.capabilities.RequestTypeItem;
-import org.apache.xerces.dom.DeferredElementNSImpl;
+import static nl.b3p.ogc.utils.OGCCommunication.buildFullLayerName;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 /**
- * @author Jytte
+ * @author Chris
  */
-public class OGCResponse extends OGCCommunication implements OGCConstants {
+public abstract class OGCResponse extends OGCCommunication implements OGCConstants {
 
-    private String httpHost;
-    private String response;
-    private String version;
-    private List versions = new ArrayList();
-    private nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities newWfsCapabilitiesV100;
-    private nl.b3p.xml.wfs.v110.WFS_Capabilities newWfsCapabilitiesV110;
-    private nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport newExceptionReport;
-    private nl.b3p.xml.wfs.v100.transaction.TransactionResult newTransactionResponseV100;
-    private nl.b3p.xml.wfs.v110.TransactionResponse newTransactionResponseV110;
-    private List getCapabilitiesV100 = new ArrayList();
-    private List getCapabilitiesV110 = new ArrayList();
-    private List featureCollectionV100 = new ArrayList();
-    private List featureCollectionV110 = new ArrayList();
-    private String srs = null;
-    private List supportedOperations = new ArrayList();
-
+    protected static final Log log = LogFactory.getLog(OGCResponse.class);
+    protected String httpHost;
+    protected String version;
+    protected nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport newWfsV100ExceptionReport;
+    protected nl.b3p.xml.ows.v100.ExceptionReport newOwsV100ExceptionReport;
+    protected boolean usableResponse = false;
+    
     /** Creates a new instance of OGCResponse */
-    public OGCResponse() {
+    protected OGCResponse() {
     }
 
+    public static boolean isWfsV100ErrorResponse(Element rootElement) {
+        String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
-    public NodeList getNodeListFromXPath(Node currentNode, String xPathFrag) throws Exception {
-        if (xPathFrag == null || xPathFrag.length() == 0) {
-            return null;
-        }
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xpath = factory.newXPath();
-        xpath.setNamespaceContext(getNamespaceContext());
+        if (tagName.equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
+            return true;
+        } 
+        return false;
+    }
+    
+    public static boolean isOwsV100ErrorResponse(Element rootElement) {
+        String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
 
-        XPathExpression expr = xpath.compile(xPathFrag);
-        Object result = expr.evaluate(currentNode, XPathConstants.NODESET);
-        return (NodeList) result;
+        if (tagName.equalsIgnoreCase(OGCConstants.WFS_OWS_EXCEPTION)) {
+            return true;
+        } 
+        return false;
     }
 
-    private void replaceFeatureTypeName(Element elem, String spAbbr) throws Exception {
-        // update layer names in response
-        String wfsPrefix = getNameSpacePrefix("http://www.opengis.net/wfs");
-        String gmlPrefix = getNameSpacePrefix("http://www.opengis.net/gml");
-        StringBuilder sb = new StringBuilder();
-        sb.append("/");
-        if (wfsPrefix != null && wfsPrefix.length() > 0) {
-            sb.append(wfsPrefix);
-            sb.append(":");
+    public abstract void rebuildResponse(Document doc, OGCRequest request, String prefix) throws Exception;
+ 
+    public abstract String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest);
+    
+    public void setUsableResponse(boolean usable) {
+        usableResponse = usable;
+    }
+    
+    public boolean isUsableResponse() {
+        return usableResponse;
+    }
+    
+    public boolean hasWfsV100ErrorResponse() {
+        return newWfsV100ExceptionReport!=null;
+    }
+    
+    public boolean hasOwsV100ErrorResponse() {
+        return newOwsV100ExceptionReport!=null;
+    }
+    
+    public void logErrorResponse() {
+        if (hasWfsV100ErrorResponse()) {
+                log.error("Response was given while an underlying error (WFS 1.0.0) was detected but ignored: "
+                + this.getWfsV100ErrorResponseBody());
         }
-        sb.append("FeatureCollection/");
-        if (gmlPrefix != null && gmlPrefix.length() > 0) {
-            sb.append(gmlPrefix);
-            sb.append(":");
-        }
-        sb.append("featureMember");
-        NodeList nodes = getNodeListFromXPath(elem, sb.toString());
-        for (int i = 0; i < nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            Node cn = n.getFirstChild();
-             while (cn != null) {
-                if (cn.getNodeType() == Node.ELEMENT_NODE) {
-                    String cn_ns = cn.getNamespaceURI();
-                    String oldName = null;
-                    if (cn_ns != null && cn_ns.length() > 0) {
-                        oldName = "{" + cn_ns + "}" + cn.getLocalName();
-                    } else {
-                        oldName = cn.getLocalName();
-                    }
-                    String newName = determineFeatureTypeName(spAbbr, oldName);
-                    Element e = elem.getOwnerDocument().createElementNS(cn_ns, newName);
-                    n.appendChild(e);
-
-                    if (cn instanceof DeferredElementNSImpl || cn instanceof Element) {
-                        Element e2 = (Element) cn;
-                        NodeList childs = e2.getChildNodes();
-                        for (int j = 0; j < childs.getLength(); j++) {
-                            Node child = childs.item(j);
-                            Node tempNode = child.cloneNode(true);
-                            e.appendChild(tempNode);
-                        }
-                        n.replaceChild(e, cn);
-                    }
-                }
-                cn = cn.getNextSibling();
-            }
+        if (hasOwsV100ErrorResponse()) {
+                log.error("Response was given while an underlying error (OWS 1.0.0) was detected but ignored: "
+                + this.getOwsV100ErrorResponseBody());
         }
     }
-
-    public void rebuildResponse(Element rootElement, OGCRequest request, String prefix) throws Exception {
+    
+    /**
+     * Nu wordt alleen laatste fout weggeschreven, nog verbeteren indien
+     * mogelijk dat fouten bij elkaar worden opgeteld.
+     * @param doc
+     * @param request
+     * @param prefix
+     * @throws Exception
+     */
+    public void rebuildWfsV100ErrorResponse(Document doc, OGCRequest request, String prefix) throws Exception {
+        Element element = (Element) doc.getDocumentElement();
         this.httpHost = request.getUrlWithNonOGCparams();
-        findNameSpace(rootElement);
         Unmarshaller um;
         Object o;
  
-        String tagName = OGCRequest.removeNamespace(rootElement.getTagName());
+       version = request.getFinalVersion();
 
-        if (tagName.equalsIgnoreCase(OGCConstants.WFS_CAPABILITIES)) {
-            response = OGCConstants.WFS_CAPABILITIES;
-            version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
-            isSupportedVersion(version);
+        um = new Unmarshaller(nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport.class);
+        o = um.unmarshal(element);
+        nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport) o;
 
-            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
+        newWfsV100ExceptionReport = exceptionReport;
+    }
+    
+    public void rebuildOwsV100ErrorResponse(Document doc, OGCRequest request, String prefix) throws Exception {
+        Element element = (Element) doc.getDocumentElement();
+        this.httpHost = request.getUrlWithNonOGCparams();
+        Unmarshaller um;
+        Object o;
+ 
+        version = request.getFinalVersion();
 
-                getCapabilitiesV100.add(replaceCapabilitiesV100Url(wfsCapabilities, prefix));
-            } else {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
+        um = new Unmarshaller(nl.b3p.xml.ows.v100.ExceptionReport.class);
+        o = um.unmarshal(element);
+        nl.b3p.xml.ows.v100.ExceptionReport exceptionReport = (nl.b3p.xml.ows.v100.ExceptionReport) o;
 
-                getCapabilitiesV110.add(replaceCapabilitiesV110Url(wfsCapabilities, prefix));
-            }
-            checkSupportedOperations(OGCConstants.SUPPORTED_WFS_REQUESTS);
-        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_FEATURECOLLECTION)) {
-            response = OGCConstants.WFS_FEATURECOLLECTION;
-            version = request.getFinalVersion();
-
-            if (version != null && version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                // replace in dom tree, AnyNode is not mutable
-                replaceFeatureTypeName(rootElement, prefix);
-
-                um = new Unmarshaller(nl.b3p.xml.wfs.v100.FeatureCollection.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
-
-                featureCollectionV100.add(replaceFeatureCollectionV100Url(featureCollection, prefix));
-            } else {
-                // replace in dom tree, AnyNode is not mutable
-                replaceFeatureTypeName(rootElement, prefix);
-
-                um = new Unmarshaller(nl.b3p.xml.wfs.v110.FeatureCollection.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
-
-                featureCollectionV110.add(replaceFeatureCollectionV110Url(featureCollection, prefix));
-            }
-        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_SERVER_EXCEPTION)) {
-            response = OGCConstants.WFS_SERVER_EXCEPTION;
-            version = request.getFinalVersion();
-
-            um = new Unmarshaller(nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport.class);
-            o = um.unmarshal(rootElement);
-            nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport exceptionReport = (nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport) o;
-
-            newExceptionReport = exceptionReport;
-        } else if (tagName.equalsIgnoreCase(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
-            response = OGCConstants.WFS_TRANSACTIONRESPONSE;
-            version = request.getFinalVersion();
-
-            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v100.transaction.TransactionResult.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse = (nl.b3p.xml.wfs.v100.transaction.TransactionResult) o;
-
-                newTransactionResponseV100 = replaceTransactionResponseV100Url(transactionResponse, prefix);
-            } else {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v110.TransactionResponse.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse = (nl.b3p.xml.wfs.v110.TransactionResponse) o;
-
-                newTransactionResponseV110 = replaceTransactionResponseV110Url(transactionResponse, prefix);
-            }
-        }
+        newOwsV100ExceptionReport = exceptionReport;
     }
 
-    public nl.b3p.xml.wfs.v100.transaction.TransactionResult replaceTransactionResponseV100Url(nl.b3p.xml.wfs.v100.transaction.TransactionResult transactionResponse, String prefix) {
-        /* Niet helemaal duidelijk of er aan de respons xml nog wat moet gebeuren */
-        return transactionResponse;
-    }
+     public String getWfsV100ErrorResponseBody() {
+        Object castorObject = newWfsV100ExceptionReport;
+        return marshalObject(castorObject);
+     }
+     
+     public String getOwsV100ErrorResponseBody() {
+        Object castorObject = newOwsV100ExceptionReport;
+        return marshalObject(castorObject);
+     }
 
-    public nl.b3p.xml.wfs.v110.TransactionResponse replaceTransactionResponseV110Url(nl.b3p.xml.wfs.v110.TransactionResponse transactionResponse, String prefix) {
-        /* Niet helemaal duidelijk of er aan de respons xml nog wat moet gebeuren */
-        return transactionResponse;
-    }
-
-    public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities replaceCapabilitiesV100Url(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities, String prefix) {
-        wfsCapabilities.getService().setOnlineResource(httpHost);
-        nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
-        for (int b = 0; b < featureTypeList.length; b++) {
-            String layer = featureTypeList[b].getName();
-            String featureTypeName = this.determineFeatureTypeName(prefix, layer);
-            featureTypeList[b].setName(featureTypeName);
-        }
-        List newSupportedOperations = new ArrayList();
-        int requestCount = wfsCapabilities.getCapability().getRequest().getRequestTypeItemCount();
-        for (int i = 0; i < requestCount; i++) {
-            RequestTypeItem requestItem = wfsCapabilities.getCapability().getRequest().getRequestTypeItem(i);
-            if (requestItem.getDescribeFeatureType() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_DescribeFeatureType);
-                int dcpCount = requestItem.getDescribeFeatureType().getDCPType_DescribeFeatureTypeTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType_DescribeFeatureTypeType dcp = requestItem.getDescribeFeatureType().getDCPType_DescribeFeatureTypeType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            } else if (requestItem.getGetCapabilities() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetCapabilities);
-                int dcpCount = requestItem.getGetCapabilities().getDCPType_GetCapabilitiesTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType_GetCapabilitiesType dcp = requestItem.getGetCapabilities().getDCPType_GetCapabilitiesType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            } else if (requestItem.getGetFeature() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetFeature);
-                int dcpCount = requestItem.getGetFeature().getDCPType_FeatureTypeTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType_FeatureTypeType dcp = requestItem.getGetFeature().getDCPType_FeatureTypeType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            } else if (requestItem.getGetFeatureWithLock() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_GetFeatureWithLock);
-                int dcpCount = requestItem.getGetFeatureWithLock().getDCPType_FeatureTypeTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType_FeatureTypeType dcp = requestItem.getGetFeatureWithLock().getDCPType_FeatureTypeType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            } else if (requestItem.getLockFeature() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_LockFeature);
-                int dcpCount = requestItem.getLockFeature().getDCPTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType dcp = requestItem.getLockFeature().getDCPType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            } else if (requestItem.getTransaction() != null) {
-                newSupportedOperations.add(OGCConstants.WFS_REQUEST_Transaction);
-                int dcpCount = requestItem.getTransaction().getDCPType_TransactionTypeCount();
-                for (int x = 0; x < dcpCount; x++) {
-                    DCPType_TransactionType dcp = requestItem.getTransaction().getDCPType_TransactionType(x);
-                    int httpItemCount = dcp.getHTTP().getHTTPTypeItemCount();
-                    for (int y = 0; y < httpItemCount; y++) {
-                        replaceUrl(dcp.getHTTP().getHTTPTypeItem(y));
-                    }
-                }
-            }
-        }
-        checkSupportedOperations(newSupportedOperations);
-        setSrs(null);
-        return wfsCapabilities;
-    }
-
-    public void replaceUrl(HTTPTypeItem httpItem) {
-        if (httpItem.getGet() != null) {
-            httpItem.getGet().setOnlineResource(httpHost);
-        } else if (httpItem.getPost() != null) {
-            httpItem.getPost().setOnlineResource(httpHost);
-        }
-    }
-
-    public nl.b3p.xml.wfs.v110.WFS_Capabilities replaceCapabilitiesV110Url(nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities, String prefix) {
-        nl.b3p.xml.wfs.v110.FeatureType[] featureTypeList = wfsCapabilities.getFeatureTypeList().getFeatureType();
-        for (int b = 0; b < featureTypeList.length; b++) {
-            String layer = featureTypeList[b].getName();
-            String featureTypeName = this.determineFeatureTypeName(prefix, layer);
-            featureTypeList[b].setName(featureTypeName);
-        }
-        List newSupportedOperations = new ArrayList();
-        int operationCount = wfsCapabilities.getOperationsMetadata().getOperationCount();
-        for (int i = 0; i < operationCount; i++) {
-            Operation operation = wfsCapabilities.getOperationsMetadata().getOperation(i);
-            if (!newSupportedOperations.contains(operation.getName())) {
-                newSupportedOperations.add(operation.getName());
-            }
-            int dcpCount = operation.getDCPCount();
-            for (int n = 0; n < dcpCount; n++) {
-                DCP dcp = operation.getDCP(n);
-                HTTP http = dcp.getHTTP();
-                int httpCount = http.getHTTPItemCount();
-                for (int x = 0; x < httpCount; x++) {
-                    if (http.getHTTPItem(x).getGet() != null) {
-                        http.getHTTPItem(x).getGet().setHref(httpHost);
-                    } else if (http.getHTTPItem(x).getPost() != null) {
-                        http.getHTTPItem(x).getPost().setHref(httpHost);
-                    }
-                }
-            }
-        }
-        checkSupportedOperations(newSupportedOperations);
-        //Check for null. Only check the values that can be null according the specs.
-        if (wfsCapabilities.getServiceProvider() != null
-                && wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo() != null
-                && wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource() != null) {
-            wfsCapabilities.getServiceProvider().getServiceContact().getContactInfo().getOnlineResource().setHref(httpHost);
-        }
-        setSrs(null);
-        return wfsCapabilities;
-    }
-
-    public nl.b3p.xml.wfs.v100.FeatureCollection replaceFeatureCollectionV100Url(nl.b3p.xml.wfs.v100.FeatureCollection featureCollection, String serverPrefix) {
-        String newSchemalocations = "";
-        if (getSchemaLocations() != null) {
-            Set keys = getSchemaLocations().keySet();
-            Iterator it = keys.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                String prefix = (String) it.next();
-                String location = (String) getSchemaLocations().get(prefix);
-                newSchemalocations = changeLocation(location, serverPrefix);
-                addOrReplaceSchemaLocation(prefix, newSchemalocations);
-            }
-        }
-        // kan er nu even niet achter komen hoe ik de srs uit het object kan halen.
-        setSrs(null);
-        return featureCollection;
-    }
-
-    public nl.b3p.xml.wfs.v110.FeatureCollection replaceFeatureCollectionV110Url(nl.b3p.xml.wfs.v110.FeatureCollection featureCollection, String serverPrefix) {
-        String newSchemalocations = "";
-        if (getSchemaLocations() != null) {
-            Set keys = getSchemaLocations().keySet();
-            Iterator it = keys.iterator();
-            for (int i = 0; it.hasNext(); i++) {
-                String prefix = (String) it.next();
-                String location = (String) getSchemaLocations().get(prefix);
-                newSchemalocations = changeLocation(location, serverPrefix);
-                addOrReplaceSchemaLocation(prefix, newSchemalocations);
-            }
-        }
-        // kan er nu even niet achter komen hoe ik de srs uit het object kan halen.
-        setSrs(null);
-        return featureCollection;
-    }
-
-    public String changeLocation(String location, String serverPrefix) {
-        String newSchemalocations = "";
-        String[] tokens = location.split(" ");
-        for (int x = 0; x < tokens.length; x++) {
-            String[] token = tokens[x].split("\\?", 2);
-            if (token.length == 2) {
-                String kvp = token[1];
-                String newToken = "";
-                String[] kvpSplit = kvp.split("\\&");
-                for (int z = 0; z < kvpSplit.length; z++) {
-                    String[] newKvp = kvpSplit[z].split("=");
-                    if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
-                        String changedlayer = attachSp(serverPrefix, newKvp[1]);
-                        newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
-                    } else {
-                        newToken = newToken + "&" + kvpSplit[z];
-                    }
-                }
-                if (x != 0) {
-                    newSchemalocations = newSchemalocations + " " + httpHost + newToken;
-                } else {
-                    newSchemalocations = newSchemalocations + httpHost + newToken;
-                }
-            } else {
-                if (x != 0) {
-                    newSchemalocations = newSchemalocations + " " + token[0];
-                } else {
-                    newSchemalocations = newSchemalocations + token[0];
-                }
-            }
-        }
-        return newSchemalocations;
-    }
-
-    public String getResponseBody(List layers) {
+     protected String marshalObject(Object castorObject) {
         String body = null;
-        Object castorObject = null;
-
-        if (response == null || response.length() <= 0) {
-            return body;
-        }
-        if (response.equals(OGCConstants.WFS_CAPABILITIES)) {
-            List tlayers = new ArrayList();
-            Iterator iter = layers.iterator();
-            while (iter.hasNext()) {
-                HashMap sp = (HashMap) iter.next();
-                String layerName = determineFeatureTypeName((String) sp.get("spAbbr"), (String) sp.get("layer"));
-                tlayers.add(layerName);
-            }
-            castorObject = mergeCapabilities(tlayers);
-        } else if (response.equals(OGCConstants.WFS_SERVER_EXCEPTION)) {
-            castorObject = newExceptionReport;
-        } else if (response.equals(OGCConstants.WFS_FEATURECOLLECTION)) {
-            Object o = mergeFeatureCollection();
-            if (version.equals(OGCConstants.WFS_VERSION_100)) {
-                castorObject = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
-            } else {
-                castorObject = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
-            }
-        } else if (response.equals(OGCConstants.WFS_TRANSACTIONRESPONSE)) {
-            if (version.equals(OGCConstants.WFS_VERSION_100)) {
-                castorObject = newTransactionResponseV100;
-            } else {
-                castorObject = newTransactionResponseV110;
-            }
-        }
-
         try {
             StringWriter sw = new StringWriter();
             Marshaller m = new Marshaller(sw);
-
+            
             if (this.getNameSpaces() != null) {
                 Set keys = this.getNameSpaces().keySet();
                 Iterator it = keys.iterator();
@@ -505,11 +202,57 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
         } catch (Exception e) {
             throw new UnsupportedOperationException("Failed to get body of XML! Exception: " + e);
         }
-
         return body;
     }
 
-    public String serializeNode(Node doc) throws TransformerConfigurationException, TransformerException {
+    protected NodeList getNodeListFromXPath(Node currentNode, String xPathFrag) throws Exception {
+        if (xPathFrag == null || xPathFrag.length() == 0) {
+            return null;
+        }
+        XPathFactory factory = XPathFactory.newInstance();
+        XPath xpath = factory.newXPath();
+        xpath.setNamespaceContext(getNamespaceContext());
+
+        XPathExpression expr = xpath.compile(xPathFrag);
+        Object result = expr.evaluate(currentNode, XPathConstants.NODESET);
+        return (NodeList) result;
+    }
+
+    /**
+     * find layername in requestlayers that corresponds to response layername
+     * @param responseName name as found in response form underlying service
+     * @param layerMapList
+     * @return name as found in request and thus should be used in passed response
+     * @throws Exception 
+     */
+    public String getRequestName(String responseName, List<SpLayerSummary> spLayerMapList, String spInUrl) throws Exception {
+        for (SpLayerSummary sls : spLayerMapList) {
+            LayerSummary responseLayerMap = splitLayerInParts(responseName, (spInUrl==null), spInUrl, null);
+            String responseLayerName = responseLayerMap.getLayerName();
+            if (responseLayerName == null) {
+                // impossible
+                return null;
+            }
+            List<LayerSummary> lsl = sls.getLayers();
+            for (LayerSummary requestLayerMap : lsl) {
+                //only check on pure layer name without namespace
+                //hack necessary because response does not (always) return
+                //same namespace as in request.
+                String requestLayerName = requestLayerMap.getLayerName();
+                if (requestLayerName != null && requestLayerName.equals(responseLayerName)) {
+                    if (spInUrl==null) {
+                        return buildFullLayerName(requestLayerMap);
+                    } else {
+                        return buildLayerNameWithoutSp(requestLayerMap);
+                    }
+                }
+
+            }
+        }
+        return null;
+    }
+      
+    protected String serializeNode(Node doc) throws TransformerConfigurationException, TransformerException {
         StringWriter outText = new StringWriter();
         StreamResult sr = new StreamResult(outText);
         Properties oprops = new Properties();
@@ -521,469 +264,4 @@ public class OGCResponse extends OGCCommunication implements OGCConstants {
         return outText.toString();
     }
 
-    public void setSrs(String srs) {
-        this.srs = srs;
-    }
-
-    public String getSrs() {
-        return srs;
-    }
-
-    public void clearGetCapabilitiesV110() {
-        getCapabilitiesV110.clear();
-    }
-
-    public void clearGetCapabilitiesV100() {
-        getCapabilitiesV100.clear();
-    }
-
-    public void clearVersions() {
-        versions.clear();
-    }
-
-    public boolean isSupportedVersion(String version) {
-        if (OGCConstants.SUPPORTED_WFS_VERSIONS.contains(version)) {
-            if (!versions.contains(version) && version != null) {
-                versions.add(version);
-            }
-            return true;
-        } else {
-            throw new UnsupportedOperationException("WFS Version the serviceProvider returned is not supported by Kaartenbalie!");
-        }
-    }
-
-    public Object mergeFeatureCollection() {
-        if (version.equals(OGCConstants.WFS_VERSION_110)) {
-            nl.b3p.xml.wfs.v110.FeatureCollection featureCollection = null;
-
-            Iterator it = featureCollectionV110.iterator();
-            int i = 0;
-            int featureCount = 0;
-            while (it.hasNext()) {
-                nl.b3p.xml.wfs.v110.FeatureCollection newFeatureCollection = (nl.b3p.xml.wfs.v110.FeatureCollection) it.next();
-                if (i == 0) {
-                    featureCollection = newFeatureCollection;
-                    featureCount = newFeatureCollection.getNumberOfFeatures();
-                    i++;
-                } else {
-                    featureCount += newFeatureCollection.getNumberOfFeatures();
-                    Object[] o = newFeatureCollection.getFeatureMember();
-                    for (int x = 0; x < o.length; x++) {
-                        Object featureMember = o[x];
-                        featureCollection.addFeatureMember(featureMember);
-                    }
-                    i++;
-                }
-            }
-            featureCollection.setNumberOfFeatures(featureCount);
-            return featureCollection;
-        } else {
-            nl.b3p.xml.wfs.v100.FeatureCollection featureCollection = null;
-
-            Iterator it = featureCollectionV100.iterator();
-            int i = 0;
-            int featureCount = 0;
-            while (it.hasNext()) {
-                nl.b3p.xml.wfs.v100.FeatureCollection newFeatureCollection = (nl.b3p.xml.wfs.v100.FeatureCollection) it.next();
-                if (i == 0) {
-                     featureCollection = newFeatureCollection;
-                     featureCount = newFeatureCollection.getFeatureMemberCount();
-                   i++;
-                } else {
-                    featureCount += newFeatureCollection.getFeatureMemberCount();
-                    Object[] o = newFeatureCollection.getFeatureMember();
-                    for (int x = 0; x < o.length; x++) {
-                        Object featureMember = o[x];
-                        featureCollection.addFeatureMember(featureMember);
-                    }
-                    i++;
-                }
-            }
-            //featureCollection.setNumberOfFeatures(featureCount); not supported by wfs 1.0.0
-            return featureCollection;
-        }
-    }
-
-    public Object mergeCapabilities(List layers) {
-        Object caps = new Object();
-        if (versions.size() > 1) {
-            //meerdere versies
-            throw new UnsupportedOperationException("Capabilities with more versions are not yet supported!");
-        } else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-            caps = getFeatureTypesV100(layers);
-        } else if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_110)) {
-            caps = getFeatureTypesV110(layers);
-        }
-        return caps;
-    }
-
-    public nl.b3p.xml.wfs.v110.WFS_Capabilities getFeatureTypesV110(List layers) {
-        List foundFeatureTypes = new ArrayList();
-
-        Iterator it = getCapabilitiesV110.iterator();
-        while (it.hasNext()) {
-            nl.b3p.xml.wfs.v110.WFS_Capabilities nextWfsCapabilitiesV110 = (nl.b3p.xml.wfs.v110.WFS_Capabilities) it.next();
-            nl.b3p.xml.wfs.v110.FeatureTypeList nextTypeList = nextWfsCapabilitiesV110.getFeatureTypeList();
-            for (int x = 0; x < nextTypeList.getFeatureTypeCount(); x++) {
-                nl.b3p.xml.wfs.v110.FeatureType feature = nextTypeList.getFeatureType(x);
-                String name = feature.getName();
-                String featureName = OGCCommunication.getLayerName(name);
-
-                Iterator il = layers.iterator();
-                while (il.hasNext()) {
-                    String lName = (String) il.next();
-                    if (lName.equalsIgnoreCase(featureName)) {
-                        foundFeatureTypes.add(feature);
-                    }
-                }
-            }
-            if (newWfsCapabilitiesV110 == null) {
-                newWfsCapabilitiesV110 = nextWfsCapabilitiesV110;
-            } else {
-                checkFilterCapabilities(newWfsCapabilitiesV110.getFilter_Capabilities(), nextWfsCapabilitiesV110.getFilter_Capabilities());
-            }
-        }
-
-        if (newWfsCapabilitiesV110 == null) {
-            return null;
-        }
-
-        // toevoegen van de featureTypes met rechten
-        Iterator it2 = foundFeatureTypes.iterator();
-        nl.b3p.xml.wfs.v110.FeatureTypeList foundTypeList = new nl.b3p.xml.wfs.v110.FeatureTypeList();
-        while (it2.hasNext()) {
-            foundTypeList.addFeatureType((nl.b3p.xml.wfs.v110.FeatureType) it2.next());
-        }
-        newWfsCapabilitiesV110.setFeatureTypeList(foundTypeList);
-
-        Operation[] operations = newWfsCapabilitiesV110.getOperationsMetadata().getOperation();
-        String[] names = new String[operations.length];
-        for (int x = 0; x < operations.length; x++) {
-            names[x] = operations[x].getName();
-        }
-        for (int y = 0; y < names.length; y++) {
-            if (!supportedOperations.contains(names[y])) {
-                Operation remove = operations[y];
-                newWfsCapabilitiesV110.getOperationsMetadata().removeOperation(remove);
-            }
-        }
-
-        clearGetCapabilitiesV110();
-        this.clearVersions();
-        return newWfsCapabilitiesV110;
-    }
-
-    public nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities getFeatureTypesV100(List layers) {
-        List foundFeatureTypes = new ArrayList();
-
-        Iterator it = getCapabilitiesV100.iterator();
-        while (it.hasNext()) {
-            nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities nextWfsCapabilitiesV100 = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) it.next();
-            nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypes = nextWfsCapabilitiesV100.getFeatureTypeList().getFeatureType();
-            for (int x = 0; x < featureTypes.length; x++) {
-                FeatureType feature = featureTypes[x];
-                String name = feature.getName();
-                String featureName = OGCCommunication.getLayerName(name);
-
-                Iterator il = layers.iterator();
-                while (il.hasNext()) {
-                    String lName = (String) il.next();
-                    if (lName.equalsIgnoreCase(featureName)) {
-                        foundFeatureTypes.add(feature);
-                    }
-                }
-            }
-            if (newWfsCapabilitiesV100 == null) {
-                newWfsCapabilitiesV100 = nextWfsCapabilitiesV100;
-            } else {
-                checkFilterCapabilities(newWfsCapabilitiesV100.getFilter_Capabilities(), nextWfsCapabilitiesV100.getFilter_Capabilities());
-            }
-        }
-
-        if (newWfsCapabilitiesV100 == null) {
-            return null;
-        }
-
-        // toevoegen van de featureTypes met rechten
-        Iterator it2 = foundFeatureTypes.iterator();
-        nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList foundTypeList = new nl.b3p.xml.wfs.v100.capabilities.FeatureTypeList();
-        while (it2.hasNext()) {
-            foundTypeList.addFeatureType((nl.b3p.xml.wfs.v100.capabilities.FeatureType) it2.next());
-        }
-        newWfsCapabilitiesV100.setFeatureTypeList(foundTypeList);
-
-        RequestTypeItem[] operations = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem();
-        String[] names = new String[operations.length];
-        for (int x = 0; x < operations.length; x++) {
-            if (operations[x].getDescribeFeatureType() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_DescribeFeatureType;
-            } else if (operations[x].getGetCapabilities() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetCapabilities;
-            } else if (operations[x].getGetFeature() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetFeature;
-            } else if (operations[x].getGetFeatureWithLock() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetFeatureWithLock;
-            } else if (operations[x].getLockFeature() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_LockFeature;
-            } else if (operations[x].getTransaction() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_Transaction;
-            }
-        }
-        for (int y = 0; y < names.length; y++) {
-            if (!supportedOperations.contains(names[y])) {
-                RequestTypeItem requestItem = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem(y);
-                newWfsCapabilitiesV100.getCapability().getRequest().removeRequestTypeItem(requestItem);
-            }
-        }
-
-        clearGetCapabilitiesV100();
-        this.clearVersions();
-        return newWfsCapabilitiesV100;
-    }
-
-    //TODO concurrent modification error check uitvoeren
-    public void checkFilterCapabilities(Filter_Capabilities filterCapabilities, Filter_Capabilities newFilterCapabilities) {
-        if (filterCapabilities instanceof nl.b3p.xml.ogc.v110.Filter_Capabilities) {
-            nl.b3p.xml.ogc.v110.Filter_Capabilities filter = (nl.b3p.xml.ogc.v110.Filter_Capabilities) filterCapabilities;
-            nl.b3p.xml.ogc.v110.Filter_Capabilities newFilter = (nl.b3p.xml.ogc.v110.Filter_Capabilities) newFilterCapabilities;
-
-            nl.b3p.xml.ogc.v110.types.GeometryOperandType[] geometryOperand = filter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().getGeometryOperand();
-            nl.b3p.xml.ogc.v110.types.GeometryOperandType[] newGeometryOperand = newFilter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().getGeometryOperand();
-            for (int i = 0; i < geometryOperand.length; i++) {
-                boolean isValid = false;
-                String value = geometryOperand[i].toString();
-                for (int j = 0; j < newGeometryOperand.length; j++) {
-                    String newValue = newGeometryOperand[j].toString();
-                    if (value.equals(newValue)) {
-                        isValid = true;
-                    }
-                }
-                if (isValid == false) {
-//                    filter.getSpatial_Capabilities().getGeometryOperands_Spatial_CapabilitiesType().removeGeometryOperand(geometryOperand[i]);
-                }
-            }
-
-            nl.b3p.xml.ogc.v110.SpatialOperator[] spatialOperator = filter.getSpatial_Capabilities().getSpatialOperators().getSpatialOperator();
-            nl.b3p.xml.ogc.v110.SpatialOperator[] newSpatialOperator = newFilter.getSpatial_Capabilities().getSpatialOperators().getSpatialOperator();
-            for (int x = 0; x < spatialOperator.length; x++) {
-                boolean isValid = false;
-                String value = spatialOperator[x].getName().toString();
-                for (int y = 0; y < newSpatialOperator.length; y++) {
-                    String newValue = newSpatialOperator[y].getName().toString();
-                    if (value.equals(newValue)) {
-                        isValid = true;
-                    }
-                }
-                if (isValid == false) {
-//                    filter.getSpatial_Capabilities().getSpatialOperators().removeSpatialOperator(spatialOperator[x]);
-                }
-            }
-
-            nl.b3p.xml.ogc.v110.LogicalOperators logicalOperators = filter.getScalar_Capabilities().getLogicalOperators();
-            nl.b3p.xml.ogc.v110.LogicalOperators newLogicalOperators = newFilter.getScalar_Capabilities().getLogicalOperators();
-            if (!logicalOperators.toString().equals(newLogicalOperators.toString())) {
-                if (logicalOperators != null && newLogicalOperators == null) {
-                    filter.getScalar_Capabilities().setLogicalOperators(null);
-                }
-            }
-
-            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] comparisonOperators = null;
-            if (filter.getScalar_Capabilities().getComparisonOperators() != null) {
-                comparisonOperators = filter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
-            }
-            nl.b3p.xml.ogc.v110.ComparisonOperatorsTypeItem[] newComparisonOperators = null;
-            if (newFilter.getScalar_Capabilities().getComparisonOperators() != null) {
-                newComparisonOperators = newFilter.getScalar_Capabilities().getComparisonOperators().getComparisonOperatorsTypeItem();
-            }
-            if (comparisonOperators != null) {
-                for (int o = 0; o < comparisonOperators.length; o++) {
-                    boolean isValid = false;
-                    Class valueClass = comparisonOperators[o].getComparisonOperator().getClass();
-                    if (newComparisonOperators != null) {
-                        for (int p = 0; p < newComparisonOperators.length; p++) {
-                            Class newValueClass = newComparisonOperators[p].getComparisonOperator().getClass();
-                            if (valueClass.equals(newValueClass)) {
-                                isValid = true;
-                            }
-                        }
-                    }
-                    if (isValid == false) {
-                        filter.getScalar_Capabilities().getComparisonOperators().removeComparisonOperatorsTypeItem(comparisonOperators[o]);
-                    }
-                }
-            }
-            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] arithmeticOperators = null;
-            if (filter.getScalar_Capabilities().getArithmeticOperators() != null) {
-                arithmeticOperators = filter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
-            }
-            nl.b3p.xml.ogc.v110.ArithmeticOperatorsTypeItem[] newArithmeticOperators = null;
-            if (newFilter.getScalar_Capabilities().getArithmeticOperators() != null) {
-                newFilter.getScalar_Capabilities().getArithmeticOperators().getArithmeticOperatorsTypeItem();
-            }
-            if (arithmeticOperators != null) {
-                for (int f = 0; f < arithmeticOperators.length; f++) {
-                    boolean isValid = false;
-                    Class valueClass = arithmeticOperators[f].getSimpleArithmetic().getClass();
-                    if (newArithmeticOperators != null) {
-                        for (int h = 0; h < newArithmeticOperators.length; h++) {
-                            Class newValueClass = newArithmeticOperators[h].getSimpleArithmetic().getClass();
-                            if (valueClass.equals(newValueClass)) {
-                                isValid = true;
-                            }
-                        }
-                    }
-                    if (isValid == false) {
-                        filter.getScalar_Capabilities().getArithmeticOperators().removeArithmeticOperatorsTypeItem(arithmeticOperators[f]);
-                    }
-                }
-            }
-
-            nl.b3p.xml.ogc.v110.Id_CapabilitiesTypeItem[] idCapabilities = filter.getId_Capabilities().getId_CapabilitiesTypeItem();
-            nl.b3p.xml.ogc.v110.Id_CapabilitiesTypeItem[] newIdCapabilities = newFilter.getId_Capabilities().getId_CapabilitiesTypeItem();
-            for (int a = 0; a < idCapabilities.length; a++) {
-                boolean isValid = false;
-                Class valueClass = idCapabilities[a].getChoiceValue().getClass();
-                for (int b = 0; b < newIdCapabilities.length; b++) {
-                    Class newValueClass = newIdCapabilities[b].getChoiceValue().getClass();
-                    if (valueClass.equals(newValueClass)) {
-                        isValid = true;
-                    }
-                }
-                if (isValid == false) {
-                    filter.getId_Capabilities().removeId_CapabilitiesTypeItem(idCapabilities[a]);
-                }
-            }
-
-        } else if (filterCapabilities instanceof nl.b3p.xml.ogc.v100.capabilities.Filter_Capabilities) {
-            nl.b3p.xml.ogc.v100.capabilities.Filter_Capabilities filter = (nl.b3p.xml.ogc.v100.capabilities.Filter_Capabilities) filterCapabilities;
-            nl.b3p.xml.ogc.v100.capabilities.Filter_Capabilities newFilter = (nl.b3p.xml.ogc.v100.capabilities.Filter_Capabilities) newFilterCapabilities;
-
-            nl.b3p.xml.ogc.v100.capabilities.Spatial_OperatorsTypeItem[] spatialOperators = filter.getSpatial_Capabilities().getSpatial_Operators().getSpatial_OperatorsTypeItem();
-            nl.b3p.xml.ogc.v100.capabilities.Spatial_OperatorsTypeItem[] newSpatialOperators = newFilter.getSpatial_Capabilities().getSpatial_Operators().getSpatial_OperatorsTypeItem();
-            for (int i = 0; i < spatialOperators.length; i++) {
-                boolean isValid = false;
-                Class valueClass = spatialOperators[i].getChoiceValue().getClass();
-                for (int j = 0; j < newSpatialOperators.length; j++) {
-                    Class newValueClass = newSpatialOperators[j].getChoiceValue().getClass();
-                    if (newValueClass.equals(valueClass)) {
-                        isValid = true;
-                    }
-                }
-                if (isValid == false) {
-                    filter.getSpatial_Capabilities().getSpatial_Operators().removeSpatial_OperatorsTypeItem(spatialOperators[i]);
-                }
-            }
-//            for (int i = 0; i < newSpatialOperators.length; i++) {
-//                boolean isValid = false;
-//                Class newValueClass = newSpatialOperators[i].getChoiceValue().getClass();
-//                for (int j = 0; j < spatialOperators.length; j++) {
-//                    Class valueClass = spatialOperators[j].getChoiceValue().getClass();
-//                    if (newValueClass.equals(valueClass)) {
-//                        isValid = true;
-//                    }
-//                }
-//                if (isValid == false) {
-//                    filter.getSpatial_Capabilities().getSpatial_Operators().addSpatial_OperatorsTypeItem(newSpatialOperators[i]);
-//                }
-//            }
-
-            nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] scalarCapabilities = filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
-            nl.b3p.xml.ogc.v100.capabilities.Scalar_CapabilitiesTypeItem[] newScalarCapabilities = newFilter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem();
-            for (int x = 0; x < scalarCapabilities.length; x++) {
-                if (scalarCapabilities[x].getArithmetic_Operators() != null) {
-                    nl.b3p.xml.ogc.v100.capabilities.Arithmetic_OperatorsTypeItem[] arithmeticOperators = scalarCapabilities[x].getArithmetic_Operators().getArithmetic_OperatorsTypeItem();
-                    for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        if (newScalarCapabilities[y].getArithmetic_Operators() != null) {
-                            nl.b3p.xml.ogc.v100.capabilities.Arithmetic_OperatorsTypeItem[] newArithmeticOperators = newScalarCapabilities[y].getArithmetic_Operators().getArithmetic_OperatorsTypeItem();
-
-                            for (int k = 0; k < arithmeticOperators.length; k++) {
-                                boolean isValid = false;
-                                Class valueClass = arithmeticOperators[k].getChoiceValue().getClass();
-                                for (int l = 0; l < newArithmeticOperators.length; l++) {
-                                    Class newValueClass = newArithmeticOperators[l].getChoiceValue().getClass();
-                                    if (valueClass.equals(newValueClass)) {
-                                        isValid = true;
-                                    }
-                                }
-                                if (isValid == false) {
-                                    filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getArithmetic_Operators().removeArithmetic_OperatorsTypeItem(arithmeticOperators[k]);
-                                }
-                            }
-                        }
-                    }
-                } else if (scalarCapabilities[x].getComparison_Operators() != null) {
-                    nl.b3p.xml.ogc.v100.capabilities.Comparison_OperatorsTypeItem[] comparisonOperators = scalarCapabilities[x].getComparison_Operators().getComparison_OperatorsTypeItem();
-                    for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        if (newScalarCapabilities[y].getComparison_Operators() != null) {
-                            nl.b3p.xml.ogc.v100.capabilities.Comparison_OperatorsTypeItem[] newComparisonOperators = newScalarCapabilities[y].getComparison_Operators().getComparison_OperatorsTypeItem();
-
-                            for (int k = 0; k < comparisonOperators.length; k++) {
-                                boolean isValid = false;
-                                Class valueClass = comparisonOperators[k].getChoiceValue().getClass();
-                                for (int l = 0; l < newComparisonOperators.length; l++) {
-                                    Class newValueClass = newComparisonOperators[l].getChoiceValue().getClass();
-                                    if (valueClass.equals(newValueClass)) {
-                                        isValid = true;
-                                    }
-                                }
-                                if (isValid == false) {
-                                    if (x < filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItemCount()) {
-                                        filter.getScalar_Capabilities().getScalar_CapabilitiesTypeItem(x).getComparison_Operators().removeComparison_OperatorsTypeItem(comparisonOperators[k]);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else if (scalarCapabilities[x].getLogical_Operators() != null) {
-                    boolean isValid = false;
-                    Class valueClass = scalarCapabilities[x].getLogical_Operators().getClass();
-                    for (int y = 0; y < newScalarCapabilities.length; y++) {
-                        Class newValueClass = null;
-                        if (newScalarCapabilities != null && newScalarCapabilities[y].getLogical_Operators() != null) {
-                            newValueClass = newScalarCapabilities[y].getLogical_Operators().getClass();
-                        }
-                        if (valueClass.equals(newValueClass)) {
-                            isValid = true;
-                        }
-                    }
-                    if (isValid == false) {
-                        filter.getScalar_Capabilities().removeScalar_CapabilitiesTypeItem(scalarCapabilities[x]);
-                    }
-                }
-            }
-        }
-    }
-
-    private void checkSupportedOperations(List newSupportedOperations) {
-        if (supportedOperations.size() < 1) {
-            supportedOperations = newSupportedOperations;
-        } else {
-            boolean equals = true;
-            if (supportedOperations.size() == newSupportedOperations.size()) {
-                Iterator it = newSupportedOperations.iterator();
-                while (it.hasNext()) {
-                    if (!supportedOperations.contains(it.next())) {
-                        equals = false;
-                    }
-                }
-            } else {
-                equals = false;
-            }
-            if (equals == false) {
-                List remove = new ArrayList();
-                Iterator it = supportedOperations.iterator();
-                while (it.hasNext()) {
-                    Object o = it.next();
-                    if (!newSupportedOperations.contains(o)) {
-                        remove.add(o);
-                    }
-                }
-                Iterator itremove = remove.iterator();
-                while (itremove.hasNext()) {
-                    supportedOperations.remove(itremove.next());
-                }
-            }
-        }
-    }
-
-}
+ }

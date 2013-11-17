@@ -84,7 +84,7 @@ public class OGCScriptingRequest extends OGCRequest {
      * Not supported in OGScriptingRequest
      */
     @Override
-    public Map splitLayerInParts(String fullLayerName) {
+    public LayerSummary splitLayerInParts(String fullLayerName) {
         return splitLayerInParts(fullLayerName, true, null, null);
     }
 
@@ -92,9 +92,9 @@ public class OGCScriptingRequest extends OGCRequest {
      * Not supported in OGScriptingRequest
      */
     @Override
-    public Map splitLayerInParts(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) {
-        Map returnMap = new HashMap();
-        returnMap.put("error", "Not supported");
+    public LayerSummary splitLayerInParts(String fullLayerName, boolean splitName, String defaultSp, String defaultNs) {
+        LayerSummary returnMap = new LayerSummary();
+        returnMap.setError("Not supported");
         return returnMap;
     }    
         
