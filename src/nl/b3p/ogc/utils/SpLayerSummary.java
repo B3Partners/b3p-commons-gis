@@ -142,7 +142,8 @@ public class SpLayerSummary {
 
     public String getLayerName() {
         if (this.getLayers()!=null && !this.getLayers().isEmpty()) {
-            return this.getLayers().get(0).getLayerName();
+            LayerSummary l = this.getLayers().get(0);
+            return OGCCommunication.buildLayerNameWithoutSp(l);
         }
         return null;
     }
@@ -215,7 +216,7 @@ public class SpLayerSummary {
             if (ll.length() != 0) {
                 ll.append(",");
             }
-            ll.append(l.getLayerName());
+            ll.append(OGCCommunication.buildLayerNameWithoutSp(l));
         }
         return ll.toString();
     }
@@ -279,7 +280,7 @@ public class SpLayerSummary {
             return null;
         }
         for (LayerSummary ls : this.getLayers()) {
-            if (!layerName.equals(ls.getLayerName())) {
+            if (!layerName.equals(OGCCommunication.buildLayerNameWithoutSp(ls))) {
                 continue;
             }
             Set<Style> layerStyles = ls.getStyles();

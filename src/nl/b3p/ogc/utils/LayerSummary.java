@@ -224,7 +224,7 @@ public class LayerSummary {
             if (ll.length() != 0) {
                 ll.append(",");
             }
-            ll.append(l.getLayerName());
+            ll.append(OGCCommunication.buildLayerNameWithoutSp(l));
         }
         return ll.toString();
     }
@@ -236,7 +236,7 @@ public class LayerSummary {
         String[] la = new String[lsl.size()];
         for (int i=0; i<lsl.size(); i++) {
             LayerSummary l = lsl.get(i);
-            la[i] = l.getLayerName();
+            la[i] = OGCCommunication.buildLayerNameWithoutSp(l);
         }
         return la;
     }
