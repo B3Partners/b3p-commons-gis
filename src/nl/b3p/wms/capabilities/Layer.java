@@ -425,14 +425,16 @@ public class Layer implements XMLElement,Comparable{
         if (metaData != null) {
             Set<LayerMetadata> metaDataLayers = getLayerMetadata();
 
-            if (metaDataLayers.isEmpty()) {
+            if (metaDataLayers != null && metaDataLayers.isEmpty()) {
                 LayerMetadata lmd = new LayerMetadata();
                 lmd.setLayer(this);
                 lmd.setMetadata(metaData);
                 metaDataLayers.add(lmd);
-            } else {
+            } else if (metaDataLayers != null) {
+                
                 boolean first = true;
                 Iterator<LayerMetadata> iterator = metaDataLayers.iterator();
+                
                 while (iterator.hasNext()) {
                     LayerMetadata lmd = iterator.next();
                     if (first) {
@@ -444,6 +446,7 @@ public class Layer implements XMLElement,Comparable{
                 }
 
             }
+            
             this.setOldMetadata(null);
         }
     }
