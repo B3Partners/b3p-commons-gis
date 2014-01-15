@@ -1125,8 +1125,7 @@ public class WMSCapabilitiesReader {
             } else if (object instanceof Layer) {
                 Layer layer = (Layer) object;
                 checkObject(layer);
-                String[] name = sb.toString().split("[}:]");
-                layer.setName(name[name.length -1]);
+                layer.setName(sb.toString());
             } else if (object instanceof Style) {
                 Style style = (Style) object;
                 checkObject(style);

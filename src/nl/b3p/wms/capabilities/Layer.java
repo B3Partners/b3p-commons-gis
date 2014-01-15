@@ -29,6 +29,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import nl.b3p.ogc.utils.LayerSummary;
 import nl.b3p.ogc.utils.OGCCommunication;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -394,15 +395,38 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getUniqueName() {
-        return OGCCommunication.attachSp(getSpAbbr(), this.getName());
-    }
+
+        String spAbbrUrl = null;
+        if (this.getServiceProvider() != null) {
+            spAbbrUrl = this.getServiceProvider().getUrlServiceProvideCode();
+        }
+        String spAbbr = this.getSpAbbr();
+        if (spAbbrUrl != null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
+            return this.getName();
+        }
+        
+        LayerSummary ls = null;
+        try {
+            ls = OGCCommunication.splitLayerWithoutNsFix(this.getName(), false, getSpAbbr(), null);
+        } catch (Exception ex) {
+            return OGCCommunication.attachSp(getSpAbbr(), this.getName());
+        }
+        return OGCCommunication.buildFullLayerName(ls);
+     }
 	
 
     public String getCompleteTitle(){
         if (getTitle()==null){
             return null;
         }
-		return OGCCommunication.attachSp(this.getSpAbbr(), this.getTitle().replace(" ", ""));
+        LayerSummary ls = null;
+        try {
+             ls = OGCCommunication.splitLayerWithoutNsFix(getTitle().replace(" ", ""), false, getSpAbbr(), null);
+        } catch (Exception ex) {
+            return OGCCommunication.attachSp(getSpAbbr(), getTitle().replace(" ", ""));
+        }
+        return OGCCommunication.buildFullLayerName(ls);
+		
     }
 
     public String getMetadata() {
@@ -425,12 +449,12 @@ public class Layer implements XMLElement,Comparable{
         if (metaData != null) {
             Set<LayerMetadata> metaDataLayers = getLayerMetadata();
 
-            if (metaDataLayers != null && metaDataLayers.isEmpty()) {
+            if (metaDataLayers.isEmpty()) {
                 LayerMetadata lmd = new LayerMetadata();
                 lmd.setLayer(this);
                 lmd.setMetadata(metaData);
                 metaDataLayers.add(lmd);
-            } else if (metaDataLayers != null) {
+            } else {
                 
                 boolean first = true;
                 Iterator<LayerMetadata> iterator = metaDataLayers.iterator();
@@ -460,6 +484,9 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public Set getLayerMetadata() {
+        if (layerMetadata==null) {
+             layerMetadata = new HashSet();
+        }
         return layerMetadata;
     }
 
@@ -711,21 +738,8 @@ public class Layer implements XMLElement,Comparable{
         }
 
         if (null != this.getName()) {
-            String layerUniqueName = null;
-            String spAbbrUrl = null;
-            if (this.getServiceProvider() != null) {
-                spAbbrUrl = this.getServiceProvider().getUrlServiceProvideCode();
-            }
-            String spAbbr = this.getSpAbbr();
-            if (spAbbrUrl != null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
-                layerUniqueName = this.getName();
-            } else {
-                layerUniqueName = 
-                        OGCCommunication.attachSp(this.getSpAbbr(), this.getName());
-            }
-
             Element nameElement = doc.createElement("Name");
-            Text text = doc.createTextNode(layerUniqueName);
+            Text text = doc.createTextNode(this.getUniqueName());
             nameElement.appendChild(text);
             layerElement.appendChild(nameElement);
         }

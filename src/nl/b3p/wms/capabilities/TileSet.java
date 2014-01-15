@@ -7,6 +7,7 @@ package nl.b3p.wms.capabilities;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import nl.b3p.ogc.utils.LayerSummary;
 import nl.b3p.ogc.utils.OGCCommunication;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -187,7 +188,7 @@ public class TileSet {
                 if (layerString.length()>0){
                     layerString+=",";
                 }
-				layerString+=OGCCommunication.attachSp(l.getSpAbbr(), l.getName());
+		layerString+=l.getUniqueName();
             }
             Element element = doc.createElement("Layers");
             Text text = doc.createTextNode(layerString);
