@@ -395,7 +395,11 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getUniqueName() {
-
+        
+        if (this.getName() == null) {
+            return null;
+        }
+        
         String spAbbrUrl = null;
         if (this.getServiceProvider() != null) {
             spAbbrUrl = this.getServiceProvider().getUrlServiceProvideCode();
