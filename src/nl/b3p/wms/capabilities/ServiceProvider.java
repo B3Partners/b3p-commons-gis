@@ -617,7 +617,7 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
         sc.setPassword(this.getPassword());
  
         sc.setUpdatedDate(this.getUpdatedDate());
-        sc.setContactInformation(this.getContactInformation());
+//        sc.setContactInformation(this.getContactInformation());
 //        sc.setCode(this.getCode());
         sc.setExpireDate(this.getExpireDate());
         sc.setPersonalCode(this.getPersonalCode());
