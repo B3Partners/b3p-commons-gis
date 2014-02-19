@@ -60,9 +60,14 @@ public class Util {
         }
         SimpleFeatureTypeBuilder featureTypeBuilder = new SimpleFeatureTypeBuilder();
         featureTypeBuilder.init(feature.getFeatureType());
+        //if the default geometry is available but not set. Add it.
+        if (feature.getDefaultGeometryProperty()!=null && featureTypeBuilder.getDefaultGeometry()==null){
+            featureTypeBuilder.setDefaultGeometry(feature.getDefaultGeometryProperty().getName().toString());
+        }
         //new lists
         List<AttributeDescriptor> newAttributeDescriptors = new ArrayList<AttributeDescriptor>();
         List<Object> newAttributes = new ArrayList<Object>();
+        
         //old lists
         List<Object> attributes = feature.getAttributes();
         List<AttributeDescriptor> attributeDescriptors = new ArrayList<AttributeDescriptor>(feature.getFeatureType().getAttributeDescriptors());
