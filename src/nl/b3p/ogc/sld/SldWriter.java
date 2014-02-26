@@ -39,9 +39,18 @@ public class SldWriter {
     public List<SldNamedLayer> createNamedLayersWithKBStyles(List<Style> kbStyles) throws UnsupportedEncodingException, IOException, XPathExpressionException, Exception{        
         List<SldNamedLayer> namedLayers= new ArrayList<SldNamedLayer>();
         for (Style kbStyle : kbStyles){
-            List<SldUserStyle> sldStyles= new ArrayList<SldUserStyle>();
+            List<SldNode> sldStyles= new ArrayList<SldNode>();            
+            if (kbStyle.getSldConstraints()!=null){
+                Document docConstriant=SldReader.getDocument(kbStyle.getSldConstraints(),"UTF-8");
+                sldStyles.add(new SldLayerFeatureConstraints(docConstriant.getDocumentElement()));                
+            }
             Document doc=SldReader.getDocument(kbStyle.getSldPart(),"UTF-8");
-            sldStyles.add(new SldUserStyle(doc.getDocumentElement()));
+            String nodeName = doc.getDocumentElement().getNodeName();
+            if (nodeName.toLowerCase().indexOf("namedstyle")!=-1){
+                sldStyles.add(new SldNamedStyle(doc.getDocumentElement()));
+            }else{
+                sldStyles.add(new SldUserStyle(doc.getDocumentElement()));
+            }
             SldNamedLayer snl = new SldNamedLayer(sldStyles,kbStyle.getLayer().getName());
             namedLayers.add(snl);
         }        

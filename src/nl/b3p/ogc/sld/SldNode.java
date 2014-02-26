@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package nl.b3p.ogc.sld;
 
 import java.io.StringWriter;
@@ -25,11 +21,15 @@ import org.w3c.dom.Node;
  * @author Roy
  * Created on 1-sep-2011, 11:34:49
  */
-public class SldNode {
+abstract public class SldNode {
     private static final Log log = LogFactory.getLog(SldNamedLayer.class);
     
     protected static XPathFactory factory = XPathFactory.newInstance();
     protected static XPath xpath = factory.newXPath();
+    
+    protected Node node; 
+    
+    public abstract String getName() throws Exception; 
     
     static{
         xpath.setNamespaceContext((NamespaceContext) new NamespaceContext() {
@@ -78,6 +78,11 @@ public class SldNode {
 
         return writer.toString();
     }
+    
+    public String getSldPart() {
+        return serializeXpathNode(node);
+    }
+    
     protected boolean isTextNode(Node node) {
         short nodeType;
 
@@ -88,5 +93,13 @@ public class SldNode {
         nodeType = node.getNodeType();
 
         return nodeType == Node.CDATA_SECTION_NODE || nodeType == Node.TEXT_NODE;
+    }
+    
+    public Node getNode() {
+        return node;
+    }
+    
+    public void setNode(Node node) {
+        this.node = node;
     }
 }

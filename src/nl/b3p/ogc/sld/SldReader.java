@@ -89,10 +89,14 @@ public class SldReader {
     public List<SldNamedLayer> getNamedLayers(List<SldNamedLayer> namedLayers, String layerName) throws Exception{        
         List<SldNamedLayer> namedLayersWithName=new ArrayList<SldNamedLayer>();
         for (SldNamedLayer namedLayer : namedLayers){
-            if (namedLayer.getName().equals(layerName)){
+            
+            String name = namedLayer.getName();
+            
+            if (name.equalsIgnoreCase(layerName)) {
                 namedLayersWithName.add(namedLayer);
             }
         }
+        
         return namedLayersWithName;
     }
     

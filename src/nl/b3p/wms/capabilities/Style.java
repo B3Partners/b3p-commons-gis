@@ -42,6 +42,7 @@ public class Style implements XMLElement {
     private Layer layer;
     private Set domainResource;
     private String sldPart;
+    private String sldConstraints;
 
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
@@ -278,6 +279,14 @@ public class Style implements XMLElement {
 
         rootElement.appendChild(styleElement);
         return rootElement;
+    }
+    
+    public String getSldConstraints() {
+        return sldConstraints;
+    }
+
+    public void setSldConstraints(String sldConstraints) {
+        this.sldConstraints = sldConstraints;
     }
     // </editor-fold>
 }
