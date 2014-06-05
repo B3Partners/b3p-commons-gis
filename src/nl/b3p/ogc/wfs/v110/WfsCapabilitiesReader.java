@@ -102,6 +102,7 @@ public class WfsCapabilitiesReader {
             InputStream is = method.getResponseBodyAsStream();
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
             DocumentBuilder builder = dbf.newDocumentBuilder();
             Document doc = builder.parse(is);
             Element rootElement = doc.getDocumentElement();

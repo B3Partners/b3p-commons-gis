@@ -150,7 +150,9 @@ public class SldReader {
         return getDocument(is);
     }
     public static Document getDocument(InputStream is) throws Exception {        
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        DocumentBuilder builder = dbf.newDocumentBuilder();
         Document doc = builder.parse(is);
         return doc;        
     }
