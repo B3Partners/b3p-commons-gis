@@ -68,6 +68,7 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
     protected nl.b3p.xml.ogc.v100.exception.ServiceExceptionReport newWfsV100ExceptionReport;
     protected nl.b3p.xml.ows.v100.ExceptionReport newOwsV100ExceptionReport;
     protected boolean usableResponse = false;
+    protected boolean alreadyDirectWritten = false;
     
     /** Creates a new instance of OGCResponse */
     protected OGCResponse() {
@@ -262,6 +263,20 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
         t.setOutputProperties(oprops);
         t.transform(new DOMSource(doc), sr);
         return outText.toString();
+    }
+
+    /**
+     * @return the alreadyDirectWritten
+     */
+    public boolean isAlreadyDirectWritten() {
+        return alreadyDirectWritten;
+    }
+
+    /**
+     * @param alreadyDirectWritten the alreadyDirectWritten to set
+     */
+    public void setAlreadyDirectWritten(boolean alreadyDirectWritten) {
+        this.alreadyDirectWritten = alreadyDirectWritten;
     }
 
  }
