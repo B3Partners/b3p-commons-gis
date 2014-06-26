@@ -50,18 +50,18 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
         this.doc = doc;
     }
 
-    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest) {
+    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest, String encoding) {
         if (!this.isUsableResponse()) {
             if (this.hasWfsV100ErrorResponse()) {
-                return this.getWfsV100ErrorResponseBody();
+                return this.getWfsV100ErrorResponseBody(encoding);
             } else if (this.hasOwsV100ErrorResponse()) {
-                return this.getOwsV100ErrorResponseBody();
+                return this.getOwsV100ErrorResponseBody(encoding);
             } else {
                 throw new UnsupportedOperationException("Failed to get suitable reponse! ");
             }
         }
         if (this.hasWfsV100ErrorResponse()) {
-            logErrorResponse();
+            logErrorResponse(encoding);
         }
         try {
              String spInUrl = ogcrequest.getServiceProviderName();

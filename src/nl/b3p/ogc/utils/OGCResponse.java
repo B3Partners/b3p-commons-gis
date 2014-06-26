@@ -94,7 +94,7 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
 
     public abstract void rebuildResponse(Document doc, OGCRequest request, String prefix) throws Exception;
  
-    public abstract String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest);
+    public abstract String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest, String encoding);
     
     public void setUsableResponse(boolean usable) {
         usableResponse = usable;
@@ -112,14 +112,14 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
         return newOwsV100ExceptionReport!=null;
     }
     
-    public void logErrorResponse() {
+    public void logErrorResponse(String encoding) {
         if (hasWfsV100ErrorResponse()) {
                 log.error("Response was given while an underlying error (WFS 1.0.0) was detected but ignored: "
-                + this.getWfsV100ErrorResponseBody());
+                + this.getWfsV100ErrorResponseBody(encoding));
         }
         if (hasOwsV100ErrorResponse()) {
                 log.error("Response was given while an underlying error (OWS 1.0.0) was detected but ignored: "
-                + this.getOwsV100ErrorResponseBody());
+                + this.getOwsV100ErrorResponseBody(encoding));
         }
     }
     
@@ -161,21 +161,25 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
         newOwsV100ExceptionReport = exceptionReport;
     }
 
-     public String getWfsV100ErrorResponseBody() {
+     public String getWfsV100ErrorResponseBody(String encoding) {
         Object castorObject = newWfsV100ExceptionReport;
-        return marshalObject(castorObject);
+        return marshalObject(castorObject, encoding);
      }
      
-     public String getOwsV100ErrorResponseBody() {
+     public String getOwsV100ErrorResponseBody(String encoding) {
         Object castorObject = newOwsV100ExceptionReport;
-        return marshalObject(castorObject);
+        return marshalObject(castorObject, encoding);
      }
 
      protected String marshalObject(Object castorObject) {
+         return marshalObject(castorObject, null);
+     }
+     protected String marshalObject(Object castorObject, String encoding) {
         String body = null;
         try {
             StringWriter sw = new StringWriter();
             Marshaller m = new Marshaller(sw);
+            m.setEncoding(encoding);
             
             if (this.getNameSpaces() != null) {
                 Set keys = this.getNameSpaces().keySet();

@@ -142,6 +142,9 @@ public class KBConfiguration {
      * Save messages received and sent
      */
     public static boolean SAVE_MESSAGES = false;
+    public static String RESPONSE_SIZE_LIMIT = "0";
+    public static String WFS_RESPONSE_TIME_LIMIT = "300000";
+    public static String WMS_RESPONSE_TIME_LIMIT = "10000";
 
     public static void configure() {
         configure(KBCONFIG);
@@ -241,6 +244,9 @@ public class KBConfiguration {
         UNSUPPORTED_VERSION = prop.getProperty("UNSUPPORTED_VERSION", UNSUPPORTED_VERSION);
 
         SAVE_MESSAGES = "true".equalsIgnoreCase(prop.getProperty("SAVE_MESSAGES", String.valueOf(SAVE_MESSAGES)));
+        RESPONSE_SIZE_LIMIT = prop.getProperty("RESPONSE_SIZE_LIMIT", RESPONSE_SIZE_LIMIT);
+        WFS_RESPONSE_TIME_LIMIT = prop.getProperty("WFS_RESPONSE_TIME_LIMIT", WFS_RESPONSE_TIME_LIMIT);
+        WMS_RESPONSE_TIME_LIMIT = prop.getProperty("WMS_RESPONSE_TIME_LIMIT", WMS_RESPONSE_TIME_LIMIT);
     }
 
     protected static Color getColorFromProperties(Properties prop, String name, Color defval) {

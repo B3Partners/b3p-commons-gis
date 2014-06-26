@@ -194,29 +194,29 @@ public class WFSGetFeatureResponse extends OGCResponse implements OGCConstants {
         return featureCollection;
     }
 
-    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest) {
+    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest, String encoding) {
         Object castorObject = null;
 
         Object o = mergeFeatureCollection();
 
         if (!this.isUsableResponse()) {
             if (this.hasWfsV100ErrorResponse()) {
-                return this.getWfsV100ErrorResponseBody();
+                return this.getWfsV100ErrorResponseBody(encoding);
             } else if (this.hasOwsV100ErrorResponse()) {
-                return this.getOwsV100ErrorResponseBody();
+                return this.getOwsV100ErrorResponseBody(encoding);
             } else {
                 throw new UnsupportedOperationException("Failed to get suitable reponse! ");
             }
         }
         if (this.hasWfsV100ErrorResponse()) {
-            logErrorResponse();
+            logErrorResponse(encoding);
         }
         if (version.equals(OGCConstants.WFS_VERSION_100)) {
             castorObject = (nl.b3p.xml.wfs.v100.FeatureCollection) o;
         } else {
             castorObject = (nl.b3p.xml.wfs.v110.FeatureCollection) o;
         }
-        return marshalObject(castorObject);
+        return marshalObject(castorObject, encoding);
     }
 
    public Object mergeFeatureCollection() {

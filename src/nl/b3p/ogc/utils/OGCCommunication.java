@@ -214,7 +214,8 @@ public class OGCCommunication implements OGCConstants {
             schemaLocations = new HashMap();
         }
         if (!schemaLocations.containsKey("xsi")) {
-            addOrReplaceSchemaLocation("xsi", "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
+            // cvl: uitgezet want wfs 1.0.0 en 1.1.0 hebben zelfde url
+            // addOrReplaceSchemaLocation("xsi", "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
         }
     }
     

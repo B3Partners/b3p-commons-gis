@@ -347,26 +347,26 @@ public class WFSGetCapabilitiesResponse extends OGCResponse implements OGCConsta
      * @param layers
      * @return
      */
-    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest) {
+    public String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest, String encoding) {
         String spInUrl = ogcrequest.getServiceProviderName();
         Object castorObject = mergeCapabilities(layers, spInUrl);
         
         if (!this.isUsableResponse()) {
             if (this.hasWfsV100ErrorResponse()) {
-                return this.getWfsV100ErrorResponseBody();
+                return this.getWfsV100ErrorResponseBody(encoding);
             } else if (this.hasOwsV100ErrorResponse()) {
-                return this.getOwsV100ErrorResponseBody();
+                return this.getOwsV100ErrorResponseBody(encoding);
             } else {
                 throw new UnsupportedOperationException("Failed to get suitable reponse! ");
             }
         }
         if (this.hasWfsV100ErrorResponse()) {
-            logErrorResponse();
+            logErrorResponse(encoding);
         }
 
         buildHeader(ogcrequest);
         
-        return marshalObject(castorObject);
+        return marshalObject(castorObject, encoding);
     }
 
     private void clearGetCapabilitiesV110() {
