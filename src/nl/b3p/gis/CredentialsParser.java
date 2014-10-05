@@ -31,12 +31,13 @@ package nl.b3p.gis;
 
 import java.util.ArrayList;
 import java.util.List;
+import nl.b3p.ogc.utils.KBConfiguration;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.auth.AuthPolicy;
 import org.apache.commons.httpclient.auth.AuthScope;
 
 public class CredentialsParser {
-    public static final int RTIMEOUT = 20000;
+    private final static int maxResponseTime = new Integer(KBConfiguration.WMS_RESPONSE_TIME_LIMIT);
     public static final int PORT = AuthScope.ANY_PORT;
     public static final String HOST = AuthScope.ANY_HOST; // "localhost";
     public static final HttpVersion HTTP_VERSION = HttpVersion.HTTP_1_1;
@@ -47,7 +48,7 @@ public class CredentialsParser {
      * @return HttpClient
      */
     public static HttpClient CommonsHttpClientCredentials(){
-        return CredentialsParser.CommonsHttpClientCredentials(null, HOST, PORT, RTIMEOUT,HTTP_VERSION);
+        return CredentialsParser.CommonsHttpClientCredentials(null, HOST, PORT, maxResponseTime,HTTP_VERSION);
     }
             
     /**
@@ -57,7 +58,7 @@ public class CredentialsParser {
      * @return HttpClient
      */
     public static HttpClient CommonsHttpClientCredentials(B3PCredentials credentials){
-        return CredentialsParser.CommonsHttpClientCredentials(credentials,HOST,PORT,RTIMEOUT,HTTP_VERSION);
+        return CredentialsParser.CommonsHttpClientCredentials(credentials,HOST,PORT, maxResponseTime,HTTP_VERSION);
     }
     
     
@@ -86,7 +87,7 @@ public class CredentialsParser {
      */
     public static HttpClient CommonsHttpClientCredentials(B3PCredentials credentials,String url,int port,int timeout,HttpVersion http_version){
         HttpClient client   = new HttpClient();  
-        client.getHttpConnectionManager().getParams().setConnectionTimeout(RTIMEOUT);
+        client.getHttpConnectionManager().getParams().setConnectionTimeout(maxResponseTime);
         
         HttpVersion version = HttpVersion.HTTP_1_1;
         if( http_version == HttpVersion.HTTP_0_9 || http_version == HttpVersion.HTTP_1_0 ){
