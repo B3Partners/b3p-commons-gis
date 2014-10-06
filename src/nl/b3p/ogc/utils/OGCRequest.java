@@ -728,7 +728,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             }
         } catch (UnsupportedEncodingException ex) {
             value = v;
-            log.error("Error deconding value. Try with the original value", ex);
+            log.error("Error decoding value. Try with the original value", ex);
         }
         if (param == null) {
             return null;
@@ -1145,18 +1145,6 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         }
     }
 
-//    private void setBasicRequest(BaseRequestType brt) {
-//        if (this.getParameter(WMS_VERSION) != null) {
-//            brt.setVersion(this.getParameter(WMS_VERSION));
-//        }
-//        if (this.getParameter(WMS_SERVICE) != null) {
-//            brt.setService(this.getParameter(WMS_SERVICE));
-//        }
-//        if (this.getParameter(WFS_PARAM_MAXFEATURES) != null) {
-//            log.debug("nog niet geimplementeerd: " + WFS_PARAM_MAXFEATURES);
-//        }
-//    }
-
     public WFS_Capabilities getCapabilities() {
         return capabilities;
     }
@@ -1267,7 +1255,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             double d = Math.sqrt(w * w + h * h);
             dvm = d / scaleCalibration;
         } catch (NumberFormatException nfe) {
-            log.error("error: ", nfe);
+            log.debug("Fout omrekenen schaal: ", nfe);
+            
             return 0.0;
         }
         if (dvm == 0.0) {
@@ -1293,7 +1282,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
             double ay = Double.parseDouble(maxy);
             dkm = Math.sqrt((ax - ix) * (ax - ix) + (ay - iy) * (ay - iy));
         } catch (NumberFormatException nfe) {
-            log.error("error: ", nfe);
+            log.debug("Fout omrekenen schaal: ", nfe);
+            
             return 0.0;
         }
 

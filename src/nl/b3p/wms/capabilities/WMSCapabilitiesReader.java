@@ -61,7 +61,6 @@ import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
 import nl.b3p.gis.B3PCredentials;
 import nl.b3p.gis.CredentialsParser;
-import org.apache.bcel.generic.AALOAD;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.auth.AuthScope;
@@ -240,6 +239,32 @@ public class WMSCapabilitiesReader {
         return serviceProvider;
     }
     // </editor-fold>
+    
+    public ServiceProvider getProvider(ByteArrayInputStream in) {
+
+        //Nu kan het service provider object gemaakt en gevuld worden
+        serviceProvider = new ServiceProvider();
+        XMLReader reader = null;
+        try {
+            reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
+        } catch (SAXException ex) {
+            
+        }
+
+        IgnoreEntityResolver r = new IgnoreEntityResolver();
+        reader.setEntityResolver(r);
+
+        reader.setContentHandler(s);
+        InputSource is = new InputSource(in);
+        is.setEncoding(KBConfiguration.CHARSET);
+
+        try {
+            reader.parse(is);
+        } catch (Exception ex) {
+        }
+        
+        return serviceProvider;
+    }
 
     /** Private method which validates a XML document at a given location.
      *
@@ -889,7 +914,15 @@ public class WMSCapabilitiesReader {
         public void startElement(String uri, String localName, String qName, Attributes attributes) {
             Identifier identifier = new Identifier();
             String authority = attributes.getValue("name");
-            identifier.setAuthorityName(authority);
+            
+            /* Transformer gaat fout in TreeWalker als AuthorityURL
+            element null bevat */
+            if (authority != null) {
+                identifier.setAuthorityName(authority);                
+            } else {                
+                identifier.setAuthorityName("");                
+            }
+            
             stack.push(identifier);
         }
 
@@ -1714,7 +1747,7 @@ public class WMSCapabilitiesReader {
             try {
                 today = df.parse(sb.toString());
             } catch (ParseException e) {
-                log.error("Error pasring string to Date." + e);
+                log.debug("Error pasring string to Date." + e);
             }
 
             serviceProvider.setExpireDate(today);
