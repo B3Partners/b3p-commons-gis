@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
-import nl.b3p.gis.B3PCredentials;
+import nl.b3p.commons.services.B3PCredentials;
 import nl.b3p.ogc.ServiceProviderInterface;
 import nl.b3p.ogc.utils.KBConfiguration;
 import org.apache.commons.logging.Log;

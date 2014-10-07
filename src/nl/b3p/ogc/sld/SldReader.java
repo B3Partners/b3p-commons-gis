@@ -1,6 +1,7 @@
 package nl.b3p.ogc.sld;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,13 +15,14 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import nl.b3p.gis.B3PCredentials;
-import nl.b3p.gis.CredentialsParser;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
+import nl.b3p.commons.services.B3PCredentials;
+import nl.b3p.commons.services.HttpClientConfigured;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -134,21 +136,31 @@ public class SldReader {
         return name;
     }
 
-    private Document getDocument(String urlString,B3PCredentials credentials) throws Exception {
-        InputStream is = null;
-        
-        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(credentials);
-        GetMethod method = new GetMethod(urlString);
+    private Document getDocument(String urlString, B3PCredentials credentials) throws Exception {
+        HttpClientConfigured hcc = new HttpClientConfigured(credentials);
+        HttpGet request = new HttpGet(urlString);
 
-        int statusCode = client.executeMethod(method);
-        if (statusCode != HttpStatus.SC_OK) {
-               throw new Exception("Host: " + urlString + " error: " + method.getStatusLine().getReasonPhrase());
+        HttpResponse response = null;
+        try {
+            response = hcc.execute(request);
+            HttpEntity entity = response.getEntity();
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                throw new Exception("Error connecting to server. Status code: " + statusCode);
+            }
+            return getDocument(entity.getContent());
+         } finally {
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse)response).close();
+                } catch (IOException ex) {
+                    log.debug("Error closing: ", ex);
+                }
+            }
         }
-         
-        is  = method.getResponseBodyAsStream();
-        
-        return getDocument(is);
     }
+    
     public static Document getDocument(InputStream is) throws Exception {        
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         dbf.setNamespaceAware(true);

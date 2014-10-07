@@ -39,19 +39,17 @@ import java.util.Iterator;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import nl.b3p.gis.B3PCredentials;
-import nl.b3p.gis.CredentialsParser;
+import nl.b3p.commons.services.B3PCredentials;
+import nl.b3p.commons.services.HttpClientConfigured;
 import nl.b3p.ogc.utils.OGCConstants;
 import nl.b3p.ogc.utils.OGCRequest;
-//import nl.b3p.xml.wfs.v110.FeatureType;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.w3c.dom.Document;
@@ -78,28 +76,30 @@ public class WfsCapabilitiesReader {
 
     public WfsServiceProvider getProvider(String url,B3PCredentials credentials) throws IOException, Exception {
         WfsServiceProvider provider = new WfsServiceProvider();
-        HttpMethod method = null;
-        //PostMethod postMethod = null;
-        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(credentials);
+        
+        HttpClientConfigured hcc = new HttpClientConfigured(credentials);
                 
-        String host = url;
         OGCRequest or = new OGCRequest(url);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         or.addOrReplaceParameter(OGCConstants.SERVICE, OGCConstants.WMS_PARAM_WFS);
-        method = new GetMethod(or.getUrl());
-        int status = client.executeMethod(method);
-        if (status != HttpStatus.SC_OK) {
-            log.error("Error doing Get getCapabilities: " + status + ": " + method.getResponseBodyAsString());
-            log.info("try doing a Post getCapabilities");
-            method = new PostMethod(host);
+
+        HttpGet httpget = new HttpGet(url);
+        HttpResponse response = hcc.execute(httpget);
+        HttpEntity entity = response.getEntity();
+        
+        if (entity == null) {
+            //TODO uitzoeken of dit een goede test is.
             String body = getGetCapabilitieBody();
-            //work around voor Esri Post request. Contenttype mag geen text/xml zijn.
-            //((PostMethod)method).setRequestEntity(new StringRequestEntity(body,"text/xml", "UTF-8"));
-            ((PostMethod) method).setRequestEntity(new StringRequestEntity(body, null, null));
-            status = client.executeMethod(method);
+            HttpPost httppost = new HttpPost(body);
+             //work around voor esri post request. Contenttype mag geen text/xml zijn.
+            //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+            httppost.setEntity(new StringEntity(body));
+            response = hcc.execute(httppost);
+            entity = response.getEntity();
         }
-        if (status == HttpStatus.SC_OK) {
-            InputStream is = method.getResponseBodyAsStream();
+        
+        if (entity != null) {
+            InputStream is = entity.getContent();
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setNamespaceAware(true);
@@ -171,8 +171,12 @@ public class WfsCapabilitiesReader {
                 }
             }
         } else {
-            log.error("Error doing Post getCapabilities: " + status + ": " + method.getResponseBodyAsString());
-            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: " + status + " request: " + or.getUrl());
+            log.error("Error doing Post getCapabilities: " 
+                    + response.getStatusLine().getStatusCode() + ": " 
+                    + getGetCapabilitieBody());
+            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: " 
+                    + response.getStatusLine().getStatusCode() + " request: " 
+                    + or.getUrl());
         }
         provider.setUrl(url);
         return provider;

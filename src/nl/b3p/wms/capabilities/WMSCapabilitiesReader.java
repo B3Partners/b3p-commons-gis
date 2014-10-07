@@ -34,11 +34,6 @@ WMT_MS wmt = wms.getWMT_MS("http://viz.globe.gov/viz-bin/wmt.cgi?SERVICE=WMS&VER
  */
 package nl.b3p.wms.capabilities;
 
-import nl.b3p.ogc.utils.KBConfiguration;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import java.util.Stack;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -48,26 +43,28 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import java.util.Iterator;
 import java.util.Set;
-import org.xml.sax.Attributes;
-
+import java.util.Stack;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import nl.b3p.commons.xml.IgnoreEntityResolver;
-import nl.b3p.gis.B3PCredentials;
-import nl.b3p.gis.CredentialsParser;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
+import nl.b3p.commons.services.B3PCredentials;
+import nl.b3p.commons.services.HttpClientConfigured;
+import nl.b3p.ogc.utils.KBConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
 
 public class WMSCapabilitiesReader {
 
@@ -76,9 +73,6 @@ public class WMSCapabilitiesReader {
     private static final String SCHEMA_FEATURE = "http://apache.org/xml/features/validation/schema";
     private static final String SCHEMA_FACTORY = "http://www.w3.org/2001/XMLSchema";
     private static final String SCHEMA_FILE = "wms.xsd";
-    private static final String host = AuthScope.ANY_HOST; // "localhost";
-    private static final int port = AuthScope.ANY_PORT;
-    private static final int RTIMEOUT = 20000;
 
     private Stack stack = new Stack();
     private Switcher s = null;
@@ -114,54 +108,36 @@ public class WMSCapabilitiesReader {
     }
 
     public ByteArrayOutputStream getCapabilities(String location, B3PCredentials credentials, String remoteAddr) throws Exception {
-        HttpClient client   = CredentialsParser.CommonsHttpClientCredentials(credentials);
-     
-        // Create a method instance.
-        GetMethod method = new GetMethod(location);
-        
+        HttpClientConfigured hcc = new HttpClientConfigured(credentials);
+        HttpGet httpget = new HttpGet(location);
         if(remoteAddr != null) {
             // Add a header so Kaartenbalie can check the IP of the client logging in
-            method.addRequestHeader("X-Forwarded-For", remoteAddr);
+            httpget.addHeader("X-Forwarded-For", remoteAddr);
         }
         
+        HttpResponse response = hcc.execute(httpget);
+        HttpEntity entity = response.getEntity();
+        
         ByteArrayOutputStream out = null;
-        try {
-            int statusCode = client.executeMethod(method);
-            if (statusCode != HttpStatus.SC_OK) {
-//                log.error("Host: " + location + " error: " + method.getStatusLine().getReasonPhrase());
-                throw new Exception("Host: " + location + " error: " + method.getStatusLine().getReasonPhrase());
-            }
-            String mimeType = null;
-            if (method.getResponseHeader("Content-Type") != null) {
-                mimeType = method.getResponseHeader("Content-Type").getValue();
-            }
-            if (mimeType == null || mimeType.indexOf("xml") == -1) {
-//                log.error("Host: " + location + " error: Cannot get a GetCapabilities document from server");
+        if (entity != null) {
+            Header mimeType = entity.getContentType();
+            if (mimeType == null || mimeType.getValue().indexOf("xml") == -1) {
                 throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document from server");
             }
-            if (mimeType.equals("application/vnd.ogc.se_xml")) {
-//                log.error("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
-                throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + method.getResponseBodyAsString());
+            if (mimeType.getValue().equals("application/vnd.ogc.se_xml")) {
+                throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + entity.getContent());
             }
 
-            InputStream is = method.getResponseBodyAsStream();
+            InputStream is = entity.getContent();
             int len = 0;
             out = new ByteArrayOutputStream();
             byte[] buf = new byte[1024];
             while ((len = is.read(buf)) > -1) {
                 out.write(buf, 0, len);
             }
-
-        } catch (IOException ex) {
-            log.error("Could not read inputsource.", ex);
-
-        } finally {
-            // Release the connection.
-            method.releaseConnection();
         }
 
         if (out == null) {
-//            log.error("Host: " + location + " error: No service provider object could be created, unkown reason!");
             throw new Exception("Host: " + location + " error: No service provider object could be created, unkown reason!");
         }
         return out;

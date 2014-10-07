@@ -25,7 +25,7 @@ package nl.b3p.ogc.wfs.v110;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
-import nl.b3p.gis.B3PCredentials;
+import nl.b3p.commons.services.B3PCredentials;
 import nl.b3p.ogc.ServiceProviderInterface;
 
 /**

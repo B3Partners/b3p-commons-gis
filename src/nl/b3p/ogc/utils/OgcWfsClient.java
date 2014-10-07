@@ -25,9 +25,11 @@ package nl.b3p.ogc.utils;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jump.feature.FeatureCollection;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,6 +37,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -43,31 +47,27 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import nl.b3p.commons.xml.IgnoreEntityResolver;
+import nl.b3p.commons.services.B3PCredentials;
+import nl.b3p.commons.services.HttpClientConfigured;
 import nl.b3p.xml.wfs.DescribeFeatureType;
 import nl.b3p.xml.wfs.FeatureType;
 import nl.b3p.xml.wfs.FeatureTypeList;
 import nl.b3p.xml.wfs.Filter;
 import nl.b3p.xml.wfs.GetCapabilities;
 import nl.b3p.xml.wfs.GetFeature;
-import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.Transaction;
-import java.io.StringReader;
-import javax.xml.namespace.QName;
-import javax.xml.parsers.DocumentBuilder;
-import nl.b3p.commons.xml.IgnoreEntityResolver;
-import nl.b3p.gis.B3PCredentials;
-import nl.b3p.gis.CredentialsParser;
+import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoice;
 import nl.b3p.xml.wfs.v110.TransactionTypeChoiceItem;
 import nl.b3p.xml.wfs.v110.types.ResultTypeType;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.xerces.dom.DeferredElementNSImpl;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.util.XSDSchemaLocationResolver;
@@ -175,54 +175,59 @@ public class OgcWfsClient {
         credentials.setUserName(username);
         credentials.setPassword(password);
         
-        HttpClient client = CredentialsParser.CommonsHttpClientCredentials(credentials);
+        HttpClientConfigured hcc = new HttpClientConfigured(credentials);
+        HttpResponse response = null;
         
-        int status;
-        HttpMethod httpmethod = null;
-        if (o instanceof String) {
-            String url = (String) o;
-            url = url.replaceAll(" ", "%20");
-            httpmethod = new GetMethod(url);
-        } else {
-            String body = null;
-            StringWriter sw = new StringWriter();
-            Marshaller m = new Marshaller(sw);
-            m.setMarshalAsDocument(false);
-            m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
-            m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
-            m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
-            m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
-            if (namespaces != null) {
-                Iterator it = namespaces.keySet().iterator();
-                while (it.hasNext()) {
-                    String key = (String) it.next();
-                    String value = (String) namespaces.get(key);
-                    if (key != null && value != null) {
-                        m.setNamespaceMapping(key, value);
+        try {
+            if (o instanceof String) {
+                String url = (String) o;
+                url = url.replaceAll(" ", "%20");
+                HttpGet httpget = new HttpGet(url);
+                response = hcc.execute(httpget);
+            } else {
+                String body = null;
+                StringWriter sw = new StringWriter();
+                Marshaller m = new Marshaller(sw);
+                m.setMarshalAsDocument(false);
+                m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
+                m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
+                m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
+                m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
+                if (namespaces != null) {
+                    Iterator it = namespaces.keySet().iterator();
+                    while (it.hasNext()) {
+                        String key = (String) it.next();
+                        String value = (String) namespaces.get(key);
+                        if (key != null && value != null) {
+                            m.setNamespaceMapping(key, value);
+                        }
                     }
                 }
-            }
-            //m.setNamespaceMapping("app", "http://www.deegree.org/app");
-            m.marshal(o);
-            body = sw.toString();
-            PostMethod postmethod = new PostMethod(host);
+                //m.setNamespaceMapping("app", "http://www.deegree.org/app");
+                m.marshal(o);
+                body = sw.toString();
+
+                HttpPost httppost = new HttpPost(body);
             //work around voor esri post request. Contenttype mag geen text/xml zijn.
-            //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-            postmethod.setRequestEntity(new StringRequestEntity(body, null, null));
-            httpmethod = postmethod;
-        }
-        
-        status = client.executeMethod(httpmethod);
-        if (status == HttpStatus.SC_OK) {
-            /*DEBUG:
-            String s=method.getResponseBodyAsString();
-            return new StringBufferInputStream(s);
-             */
-            return httpmethod.getResponseBodyAsStream();
-        } else {
-            log.error("Url returned status: " + status + ": " + httpmethod.getResponseBodyAsString());
-            throw new Exception("Url returned status: " + status + ": " + httpmethod.getResponseBodyAsString());
+                //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+                httppost.setEntity(new StringEntity(body));
+                response = hcc.execute(httppost);
+            }
+
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != 200) {
+                throw new Exception("Error connecting to server. Status code: " + statusCode);
+            }
+            return response.getEntity().getContent();
+        } finally {
+            if (response instanceof CloseableHttpResponse) {
+                try {
+                    ((CloseableHttpResponse)response).close();
+                } catch (IOException ex) {
+                    log.debug("Error closing: ", ex);
+                }
+            }
         }
     }
 
