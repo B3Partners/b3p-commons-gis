@@ -221,13 +221,8 @@ public class OgcWfsClient {
             }
             return response.getEntity().getContent();
         } finally {
-            if (response instanceof CloseableHttpResponse) {
-                try {
-                    ((CloseableHttpResponse)response).close();
-                } catch (IOException ex) {
-                    log.debug("Error closing: ", ex);
-                }
-            }
+            hcc.close(response);
+            hcc.close();
         }
     }
 

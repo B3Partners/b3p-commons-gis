@@ -116,25 +116,31 @@ public class WMSCapabilitiesReader {
         }
         
         HttpResponse response = hcc.execute(httpget);
-        HttpEntity entity = response.getEntity();
-        
         ByteArrayOutputStream out = null;
-        if (entity != null) {
-            Header mimeType = entity.getContentType();
-            if (mimeType == null || mimeType.getValue().indexOf("xml") == -1) {
-                throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document from server");
-            }
-            if (mimeType.getValue().equals("application/vnd.ogc.se_xml")) {
-                throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + entity.getContent());
-            }
+        
+        try {
+            HttpEntity entity = response.getEntity();
 
-            InputStream is = entity.getContent();
-            int len = 0;
-            out = new ByteArrayOutputStream();
-            byte[] buf = new byte[1024];
-            while ((len = is.read(buf)) > -1) {
-                out.write(buf, 0, len);
+            if (entity != null) {
+                Header mimeType = entity.getContentType();
+                if (mimeType == null || mimeType.getValue().indexOf("xml") == -1) {
+                    throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document from server");
+                }
+                if (mimeType.getValue().equals("application/vnd.ogc.se_xml")) {
+                    throw new Exception("Host: " + location + " error: Cannot get a GetCapabilities document. reason: " + entity.getContent());
+                }
+
+                InputStream is = entity.getContent();
+                int len = 0;
+                out = new ByteArrayOutputStream();
+                byte[] buf = new byte[1024];
+                while ((len = is.read(buf)) > -1) {
+                    out.write(buf, 0, len);
+                }
             }
+        } finally {
+            hcc.close(response);
+            hcc.close();
         }
 
         if (out == null) {

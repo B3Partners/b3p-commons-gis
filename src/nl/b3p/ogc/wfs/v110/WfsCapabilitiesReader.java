@@ -85,99 +85,107 @@ public class WfsCapabilitiesReader {
 
         HttpGet httpget = new HttpGet(url);
         HttpResponse response = hcc.execute(httpget);
-        HttpEntity entity = response.getEntity();
         
-        if (entity == null) {
-            //TODO uitzoeken of dit een goede test is.
-            String body = getGetCapabilitieBody();
-            HttpPost httppost = new HttpPost(body);
+        try {
+            HttpEntity entity = response.getEntity();
+
+            if (entity == null) {
+                //TODO uitzoeken of dit een goede test is.
+                String body = getGetCapabilitieBody();
+                HttpPost httppost = new HttpPost(body);
              //work around voor esri post request. Contenttype mag geen text/xml zijn.
-            //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-            httppost.setEntity(new StringEntity(body));
-            response = hcc.execute(httppost);
-            entity = response.getEntity();
-        }
-        
-        if (entity != null) {
-            InputStream is = entity.getContent();
+                //postmethod.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
+                httppost.setEntity(new StringEntity(body));
+                response = hcc.execute(httppost);
+                entity = response.getEntity();
+            }
 
-            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-            dbf.setNamespaceAware(true);
-            DocumentBuilder builder = dbf.newDocumentBuilder();
-            Document doc = builder.parse(is);
-            Element rootElement = doc.getDocumentElement();
+            if (entity != null) {
+                InputStream is = entity.getContent();
 
-            Unmarshaller um;
-            Object o;
-            String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
-            if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
+                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                dbf.setNamespaceAware(true);
+                DocumentBuilder builder = dbf.newDocumentBuilder();
+                Document doc = builder.parse(is);
+                Element rootElement = doc.getDocumentElement();
 
-                provider.setWfsVersion(wfsCapabilities.getVersion());
-                Date date = new Date(System.currentTimeMillis());
-                provider.setUpdatedDate(date);
-                String title = wfsCapabilities.getService().getTitle();
-                provider.setName("OGC:WFS");
-                provider.setTitle(title);
-                /*
-                 * Info in Serviceprovider en layers opslaan
-                 */
-                nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
-                for (int i = 0; i < featureTypeArray.length; i++) {
-                    nl.b3p.xml.wfs.v100.capabilities.FeatureType featureType = featureTypeArray[i];
-                    WfsLayer layer = new WfsLayer();
-                    String[] name = featureType.getName().split("[}:]");
-                    layer.setName(name[name.length -1]);
-                    String layerTitle = featureType.getTitle();
-                    if (layerTitle != null && layerTitle.length()!=0) {
-                        layer.setTitle(layerTitle);
-                    } else {
-                        layer.setTitle(layer.getName());
+                Unmarshaller um;
+                Object o;
+                String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
+                if (version.equalsIgnoreCase(OGCConstants.WFS_VERSION_100)) {
+                    um = new Unmarshaller(nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities.class);
+                    o = um.unmarshal(rootElement);
+                    nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v100.capabilities.WFS_Capabilities) o;
+
+                    provider.setWfsVersion(wfsCapabilities.getVersion());
+                    Date date = new Date(System.currentTimeMillis());
+                    provider.setUpdatedDate(date);
+                    String title = wfsCapabilities.getService().getTitle();
+                    provider.setName("OGC:WFS");
+                    provider.setTitle(title);
+                    /*
+                     * Info in Serviceprovider en layers opslaan
+                     */
+                    nl.b3p.xml.wfs.v100.capabilities.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
+                    for (int i = 0; i < featureTypeArray.length; i++) {
+                        nl.b3p.xml.wfs.v100.capabilities.FeatureType featureType = featureTypeArray[i];
+                        WfsLayer layer = new WfsLayer();
+                        String[] name = featureType.getName().split("[}:]");
+                        layer.setName(name[name.length - 1]);
+                        String layerTitle = featureType.getTitle();
+                        if (layerTitle != null && layerTitle.length() != 0) {
+                            layer.setTitle(layerTitle);
+                        } else {
+                            layer.setTitle(layer.getName());
+                        }
+                        layer.setWfsServiceProvider(provider);
+                        provider.addWfsLayer(layer);
                     }
-                    layer.setWfsServiceProvider(provider);
-                    provider.addWfsLayer(layer);
+                } else {
+                    um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
+                    o = um.unmarshal(rootElement);
+                    nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
+
+                    provider.setWfsVersion(wfsCapabilities.getVersion());
+                    Date date = new Date(System.currentTimeMillis());
+                    provider.setUpdatedDate(date);
+                    String title = wfsCapabilities.getServiceProvider().getProviderName();
+                    provider.setName("OGC:WFS");
+                    provider.setTitle(title);
+                    /*
+                     * Info in Serviceprovider en layers opslaan
+                     */
+
+                    nl.b3p.xml.wfs.v110.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
+                    for (int i = 0; i < featureTypeArray.length; i++) {
+                        nl.b3p.xml.wfs.v110.FeatureType featureType = featureTypeArray[i];
+                        WfsLayer layer = new WfsLayer();
+                        String[] name = featureType.getName().split("[}:]");
+                        layer.setName(name[name.length - 1]);
+                        String layerTitle = featureType.getTitle();
+                        if (layerTitle != null && layerTitle.length() != 0) {
+                            layer.setTitle(layerTitle);
+                        } else {
+                            layer.setTitle(layer.getName());
+                        }
+                        layer.setWfsServiceProvider(provider);
+                        provider.addWfsLayer(layer);
+                    }
                 }
             } else {
-                um = new Unmarshaller(nl.b3p.xml.wfs.v110.WFS_Capabilities.class);
-                o = um.unmarshal(rootElement);
-                nl.b3p.xml.wfs.v110.WFS_Capabilities wfsCapabilities = (nl.b3p.xml.wfs.v110.WFS_Capabilities) o;
-
-                provider.setWfsVersion(wfsCapabilities.getVersion());
-                Date date = new Date(System.currentTimeMillis());
-                provider.setUpdatedDate(date);
-                String title = wfsCapabilities.getServiceProvider().getProviderName();
-                provider.setName("OGC:WFS");
-                provider.setTitle(title);
-                /*
-                 * Info in Serviceprovider en layers opslaan
-                 */
-
-                nl.b3p.xml.wfs.v110.FeatureType[] featureTypeArray = wfsCapabilities.getFeatureTypeList().getFeatureType();
-                for (int i = 0; i < featureTypeArray.length; i++) {
-                    nl.b3p.xml.wfs.v110.FeatureType featureType = featureTypeArray[i];
-                    WfsLayer layer = new WfsLayer();
-                    String[] name = featureType.getName().split("[}:]");
-                    layer.setName(name[name.length -1]);
-                    String layerTitle = featureType.getTitle();
-                    if (layerTitle != null && layerTitle.length()!=0) {
-                        layer.setTitle(layerTitle);
-                    } else {
-                        layer.setTitle(layer.getName());
-                    }
-                    layer.setWfsServiceProvider(provider);
-                    provider.addWfsLayer(layer);
-                }
+                log.error("Error doing Post getCapabilities: "
+                        + response.getStatusLine().getStatusCode() + ": "
+                        + getGetCapabilitieBody());
+                throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: "
+                        + response.getStatusLine().getStatusCode() + " request: "
+                        + or.getUrl());
             }
-        } else {
-            log.error("Error doing Post getCapabilities: " 
-                    + response.getStatusLine().getStatusCode() + ": " 
-                    + getGetCapabilitieBody());
-            throw new Exception("Error doing HTTPPost and HTTPGet method. Code returned: " 
-                    + response.getStatusLine().getStatusCode() + " request: " 
-                    + or.getUrl());
+
+        } finally {
+            hcc.close(response);
+            hcc.close();
         }
+
         provider.setUrl(url);
         return provider;
     }

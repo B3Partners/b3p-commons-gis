@@ -150,14 +150,9 @@ public class SldReader {
                 throw new Exception("Error connecting to server. Status code: " + statusCode);
             }
             return getDocument(entity.getContent());
-         } finally {
-            if (response instanceof CloseableHttpResponse) {
-                try {
-                    ((CloseableHttpResponse)response).close();
-                } catch (IOException ex) {
-                    log.debug("Error closing: ", ex);
-                }
-            }
+        } finally {
+            hcc.close(response);
+            hcc.close();
         }
     }
     
