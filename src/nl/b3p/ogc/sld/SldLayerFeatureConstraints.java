@@ -23,9 +23,14 @@ import org.w3c.dom.Node;
  *
  * @author Roy Braam
  */
-public class SldLayerFeatureConstraints extends SldNode{
+public class SldLayerFeatureConstraints extends SldNode {
 
-    SldLayerFeatureConstraints(Node n) {
+    SldLayerFeatureConstraints() throws XPathExpressionException {
+        super();
+    }
+
+    SldLayerFeatureConstraints(Node n) throws XPathExpressionException {
+        this();
         this.node=n;
     }
 

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -15,39 +16,75 @@ import org.w3c.dom.NodeList;
  *
  * @author Boy de Wit
  */
-public class SldNamedLayer extends SldNode{
+public class SldNamedLayer extends SldNode {
     private static final Log log = LogFactory.getLog(SldNamedLayer.class);
         
-    private static XPathExpression xpath_name;
-    private static XPathExpression xpath_userStyle;
-    private static XPathExpression xpath_namedStyle;
-    private static XPathExpression xpath_layerFeatureConstraints;
+    private static XPathExpression xpath_name = null;
+    private static XPathExpression xpath_userStyle = null;
+    private static XPathExpression xpath_namedStyle = null;
+    private static XPathExpression xpath_layerFeatureConstraints = null;
     
-    static{
-        try{
-            xpath_name = xpath.compile("Name");
-            xpath_userStyle = xpath.compile("UserStyle");
-            xpath_namedStyle = xpath.compile("NamedStyle");
-            xpath_layerFeatureConstraints = xpath.compile("LayerFeatureConstraints");
-        }catch(Exception e){}
+    public SldNamedLayer() throws XPathExpressionException {
+        super();
+        initXpath();
     }
-
-    public SldNamedLayer() {
+    
+    public SldNamedLayer(String version) throws XPathExpressionException {
+        super(version);
+        initXpath();
+     }
+    
+    private void initXpath() throws XPathExpressionException {
+        if (xpath_name == null) {
+            if (version.equalsIgnoreCase("1.0.0")) {
+                xpath_name = xpath.compile("sld:Name");
+            } else if (version.equalsIgnoreCase("1.1.0")) {
+                xpath_name = xpath.compile("se:Name");
+            } else {
+                throw new NotImplementedException();
+            }
+            xpath_userStyle = xpath.compile("sld:UserStyle");
+            xpath_namedStyle = xpath.compile("sld:NamedStyle");
+            xpath_layerFeatureConstraints = xpath.compile("sld:LayerFeatureConstraints");
+        }
     }
     
     public SldNamedLayer(List<SldNode> styles, String namedLayerName) throws Exception{
+        this();
+        this.node=initElement(styles, namedLayerName);  
+    }
+    
+    public SldNamedLayer(List<SldNode> styles, String namedLayerName, String version) throws Exception {
+        this(version);
+        this.node=initElement(styles, namedLayerName);  
+    }
+    
+    private Node initElement(List<SldNode> styles, String namedLayerName) throws  Exception {
         String xml = "";
-        xml += "<NamedLayer>";
-        xml += "<Name>" + namedLayerName + "</Name>";
+        xml += "<sld:NamedLayer xmlns:sld=\"http://www.opengis.net/sld\">";
+        if (version.equalsIgnoreCase("1.0.0")) {
+            xml += "<sld:Name>" + namedLayerName + "</sld:Name>";
+        } else if (version.equalsIgnoreCase("1.1.0")) {
+            xml += "<se:Name xmlns:se=\"http://www.opengis.net/se\">" + namedLayerName + "</se:Name>";
+        } else {
+            throw new NotImplementedException();
+        }
         for (SldNode style : styles) {
             xml += style.getSldPart();
         }
-        xml += "</NamedLayer>";
-        Document doc=SldReader.getDocument(xml,"UTF-8");
+        xml += "</sld:NamedLayer>";
+        Document doc = SldReader.getDocument(xml, "UTF-8");
         
-        this.node=doc.getDocumentElement();  
+        return doc.getDocumentElement();  
     }
-    public SldNamedLayer(Node node) {
+    
+    public SldNamedLayer(Node node) throws XPathExpressionException {
+        this();
+        this.node = node;
+    }
+    
+    public SldNamedLayer(Node node, String version) throws XPathExpressionException {
+        this(version);
         this.node = node;
     }
 

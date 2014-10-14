@@ -1,7 +1,6 @@
 package nl.b3p.ogc.sld;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,16 +11,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import nl.b3p.commons.services.B3PCredentials;
 import nl.b3p.commons.services.HttpClientConfigured;
+import nl.b3p.commons.xml.DocumentHelper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -40,7 +37,7 @@ public class SldReader {
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
 
-        String expr = "/StyledLayerDescriptor/NamedLayer";
+        String expr = "/sld:StyledLayerDescriptor/sld:NamedLayer";
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, doc, XPathConstants.NODESET);
 
         List<SldNamedLayer> namedLayers= new ArrayList<SldNamedLayer>();
@@ -108,7 +105,7 @@ public class SldReader {
         XPath xpath = factory.newXPath();
         setNameSpaceContext(xpath);
 
-        String expr = "UserStyle";
+        String expr = "sld:UserStyle";
         NodeList nodeSet = (NodeList) xpath.evaluate(expr, node, XPathConstants.NODESET);
 
         List<SldUserStyle> userStyles = new ArrayList<SldUserStyle>();
@@ -123,17 +120,6 @@ public class SldReader {
         }
 
         return userStyles;
-    }
-
-    private String getStyleName(Node node) throws XPathExpressionException {
-        XPathFactory factory = XPathFactory.newInstance();
-        XPath xpath = factory.newXPath();
-        setNameSpaceContext(xpath);
-
-        XPathExpression xPathExpression = xpath.compile("Name");
-        String name = xPathExpression.evaluate(node);
-
-        return name;
     }
 
     private Document getDocument(String urlString, B3PCredentials credentials) throws Exception {
@@ -161,6 +147,7 @@ public class SldReader {
         dbf.setNamespaceAware(true);
         DocumentBuilder builder = dbf.newDocumentBuilder();
         Document doc = builder.parse(is);
+        log.debug("content after parsing: " + DocumentHelper.document2String(doc));
         return doc;        
     }
     
@@ -184,6 +171,8 @@ public class SldReader {
                     throw new NullPointerException("Null prefix");
                 } else if ("sld".equals(prefix)) {
                     return "http://www.opengis.net/sld";
+                } else if ("se".equals(prefix)) {
+                    return "http://www.opengis.net/se";
                 } else if ("ogc".equals(prefix)) {
                     return "http://www.opengis.net/ogc";
                 } else if ("xml".equals(prefix)) {

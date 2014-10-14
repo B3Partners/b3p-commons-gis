@@ -19,40 +19,60 @@ package nl.b3p.ogc.sld;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
-import static nl.b3p.ogc.sld.SldNode.xpath;
+import org.apache.commons.lang.NotImplementedException;
 import org.w3c.dom.Node;
 
 /**
  *
  * @author Roy Braam
  */
-public class SldNamedStyle extends SldNode{
+public class SldNamedStyle extends SldNode {
     
-    private static XPathExpression xpath_name;
-    private SldLayerFeatureConstraints constriants;
-    static{
-        try{
-            xpath_name = xpath.compile("Name");
-        }catch(Exception e){}
-    }
+    private static XPathExpression xpath_name = null;
+    private SldLayerFeatureConstraints constraints;
        
-    public SldNamedStyle() {
+    public SldNamedStyle() throws XPathExpressionException {
+        super();
+        initXpath();
+    }
+    
+    public SldNamedStyle(String version) throws XPathExpressionException {
+        super(version);
+        initXpath();
+    }
+    
+    private void initXpath() throws XPathExpressionException {
+       if (xpath_name == null) {
+            if (version.equalsIgnoreCase("1.0.0")) {
+                xpath_name = xpath.compile("sld:Name");
+            } else if (version.equalsIgnoreCase("1.1.0")) {
+                xpath_name = xpath.compile("sld:Name");
+            } else {
+                throw new NotImplementedException();
+            }
+        }
     }
 
-    public SldNamedStyle(Node node) {
+    public SldNamedStyle(Node node) throws XPathExpressionException {
+        this();
+        this.node = node;
+    }
+    
+    public SldNamedStyle(Node node, String version) throws XPathExpressionException {
+        this(version);
         this.node = node;
     }
    
     public String getName() throws XPathExpressionException {
         String name="";
-        if (this.constriants!=null){
-            name+=this.constriants.getName()+" - ";                    
+        if (this.constraints!=null){
+            name+=this.constraints.getName()+" - ";                    
         }
         name+=xpath_name.evaluate(node);        
         return name;
     }
+    
     public void setName(String name) throws XPathExpressionException{
-        //this.name = name;
         Node n=(Node) xpath_name.evaluate(node, XPathConstants.NODE);
         n.setNodeValue(name);
     }
@@ -66,11 +86,11 @@ public class SldNamedStyle extends SldNode{
     }
     
     public SldLayerFeatureConstraints getFeatureConstraints() {
-        return constriants;
+        return constraints;
     }
     
-    public void setFeatureConstraints(SldLayerFeatureConstraints constriants) {
-        this.constriants = constriants;
+    public void setFeatureConstraints(SldLayerFeatureConstraints constraints) {
+        this.constraints = constraints;
     }
     
 }
