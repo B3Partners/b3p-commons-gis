@@ -269,7 +269,7 @@ abstract public class SldNode {
                 + "<StyledLayerDescriptor version=\"1.1.0\" xsi:schemaLocation=\"http://www.opengis.net/sld StyledLayerDescriptor.xsd\" xmlns=\"http://www.opengis.net/sld\" "
                 + "xmlns:ogc=\"http://www.opengis.net/ogc\" xmlns:se=\"http://www.opengis.net/se\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">"
                 + "	<NamedLayer>"
-                + "		<se:Name>OCEANSEA_1M:Foundation</se:Name>"
+                + "		<se:Name xmlns:se=\"http://www.opengis.net/se\">OCEANSEA_1M:Foundation</se:Name>"
                 + "		<UserStyle>"
                 + "			<se:Name>GEOSYM</se:Name>"
                 + "			<IsDefault>1</IsDefault>"
@@ -315,8 +315,17 @@ abstract public class SldNode {
             Node importedNode = sldDoc.importNode(snlNode, true);
             sldDoc.getFirstChild().appendChild(importedNode);
         }
+        sldDoc.normalizeDocument();
         
-        System.out.println(DocumentHelper.document2String(sldDoc));
+        String sldString = DocumentHelper.document2String(sldDoc);
+        System.out.println(sldString);
+        String newSldString = sldString
+                .replaceFirst("xmlns:se=\"http://www.opengis.net/se\"", "HACKHACK")
+                .replaceAll(" xmlns:se=\"http://www.opengis.net/se\"", "")
+                .replaceFirst("HACKHACK","xmlns:se=\"http://www.opengis.net/se\"");
+        System.out.println(newSldString);
+        Document newSldDoc = SldReader.getDocument(newSldString, "UTF-8");
+        System.out.println(DocumentHelper.document2String(newSldDoc));
 
     }
 }

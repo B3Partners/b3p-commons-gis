@@ -51,7 +51,15 @@ public class SldWriter {
             Node snlNode = snl.getNode();
             Node importedNode = sldDoc.importNode(snlNode, true);
             sldDoc.getFirstChild().appendChild(importedNode);
+            sldDoc.normalizeDocument();
         }
-        return DocumentHelper.document2String(sldDoc);
+        String sldString = DocumentHelper.document2String(sldDoc);
+        //TODO mapserver kan sld niet lezen als er een namespace staat bij Name!!!
+        //Dit kan omdat de namespace se al gedeclareerd is in het root element.
+        String newSldString = sldString
+                .replaceFirst("xmlns:se=\"http://www.opengis.net/se\"", "HACKHACK")
+                .replaceAll(" xmlns:se=\"http://www.opengis.net/se\"", "")
+                .replaceFirst("HACKHACK", "xmlns:se=\"http://www.opengis.net/se\"");
+        return newSldString;
     }
 }
