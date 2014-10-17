@@ -147,7 +147,7 @@ public class Style implements XMLElement {
 
                 //make SLDProxy Url.
                 String sldProxyUrl=(String)conversionValues.get("url");
-                sldProxyUrl = sldProxyUrl.replace("/services/", "/ProxySLD/");
+                sldProxyUrl = sldProxyUrl.replace("/services/", "/proxysld/");
                 if (sldProxyUrl.indexOf("?")!=sldProxyUrl.length()-1 &&
                         sldProxyUrl.indexOf("&")!=sldProxyUrl.length()-1){
                     sldProxyUrl+= sldProxyUrl.indexOf("?")>0 ? "&" : "?";

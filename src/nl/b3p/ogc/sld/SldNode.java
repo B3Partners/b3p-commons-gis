@@ -15,6 +15,7 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import nl.b3p.commons.xml.DocumentHelper;
+import nl.b3p.ogc.utils.OGCCommunication;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -148,7 +149,7 @@ abstract public class SldNode {
             throw new NotImplementedException();
         }
     }
-    
+       
     protected String serializeXpathNode(Node node) {
         StringWriter writer = new StringWriter();
 
@@ -298,13 +299,20 @@ abstract public class SldNode {
     }
 
     public static void main(String [] args) throws Exception {
-        SldReader sr = new SldReader();
-        Document nl110Doc = SldReader.getDocument(getSld110Example(), "UTF-8");
-        Document nl100Doc = SldReader.getDocument(getSld100Example(), "UTF-8");
-        List<SldNamedLayer> nl110List = sr.getNamedLayers(nl110Doc);
-        List<SldNamedLayer> nl100List = sr.getNamedLayers(nl100Doc);
+        Document nl110Doc = SldWriter.getDocument(getSld110Example(), "UTF-8");
+        Document nl100Doc = SldWriter.getDocument(getSld100Example(), "UTF-8");
+
+        SldWriter sr = new SldWriter();
+        sr.parseDocument(nl110Doc);
+        System.out.println("110 doc, version: " + sr.getVersion());
+        List<SldNamedLayer> nl110List = sr.getNamedlayers();
+
+        SldWriter sr2 = new SldWriter();
+        sr2.parseDocument(nl100Doc);
+        System.out.println("100 doc, version: " + sr2.getVersion());
+        List<SldNamedLayer> nl100List = sr2.getNamedlayers();
         
-        Document sldDoc = SldReader.getDocument(getSldNodeString("1.1.0"), "UTF-8");
+        Document sldDoc = SldWriter.getDocument(getSldNodeString("1.1.0"), "UTF-8");
         for (SldNamedLayer snl : nl110List){
             Node snlNode = snl.getNode();
             Node importedNode = sldDoc.importNode(snlNode, true);
@@ -324,7 +332,7 @@ abstract public class SldNode {
                 .replaceAll(" xmlns:se=\"http://www.opengis.net/se\"", "")
                 .replaceFirst("HACKHACK","xmlns:se=\"http://www.opengis.net/se\"");
         System.out.println(newSldString);
-        Document newSldDoc = SldReader.getDocument(newSldString, "UTF-8");
+        Document newSldDoc = SldWriter.getDocument(newSldString, "UTF-8");
         System.out.println(DocumentHelper.document2String(newSldDoc));
 
     }

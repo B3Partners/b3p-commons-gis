@@ -73,7 +73,7 @@ public class SldNamedLayer extends SldNode {
             xml += style.getSldPart();
         }
         xml += "</sld:NamedLayer>";
-        Document doc = SldReader.getDocument(xml, "UTF-8");
+        Document doc = SldWriter.getDocument(xml, "UTF-8");
         
         return doc.getDocumentElement();  
     }
