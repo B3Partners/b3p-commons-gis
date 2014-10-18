@@ -146,7 +146,7 @@ public class LayerDomainResource implements XMLElement {
                 newUrl += "=";
                 newUrl += OGCConstants.NONOGC_SERVICE_METADATA;
                 newUrl += "&";
-                newUrl += OGCConstants.METADATA_LAYER;
+                newUrl += OGCConstants.WMS_PARAM_LAYER;
                 newUrl += "=";
                 newUrl += layerUniqueName;
 
@@ -159,6 +159,10 @@ public class LayerDomainResource implements XMLElement {
             newUrl += OGCConstants.SERVICE;
             newUrl += "=";
             newUrl += OGCConstants.NONOGC_SERVICE_PROXY;
+            newUrl += "&";
+            newUrl += OGCConstants.WMS_PARAM_LAYER;
+            newUrl += "=";
+            newUrl += layerUniqueName;
             newUrl += "&";
             newUrl += OGCConstants.PROXY_URL;
             newUrl += "=";

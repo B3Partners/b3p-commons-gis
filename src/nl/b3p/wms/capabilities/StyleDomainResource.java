@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Iterator;
 import nl.b3p.ogc.utils.KBCrypter;
+import nl.b3p.ogc.utils.OGCCommunication;
 import nl.b3p.ogc.utils.OGCConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -137,6 +138,16 @@ public class StyleDomainResource implements XMLElement {
 
     protected void convertValues2KB(HashMap conversionValues) {
         String newUrl = (String) conversionValues.get("url");
+        String spAbbr = (String) conversionValues.get("spAbbr");
+        String layerName = (String) conversionValues.get("layerName");
+        String layerUniqueName = null;
+        String spAbbrUrl = (String) conversionValues.get("spAbbrUrl");
+        if (spAbbrUrl!=null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
+            layerUniqueName = layerName;
+        } else {
+            layerUniqueName = OGCCommunication.attachSp(spAbbr, layerName);
+        }
+
         int pos = newUrl.indexOf("?");
         if (pos == -1) {
             newUrl += "?";
@@ -147,6 +158,10 @@ public class StyleDomainResource implements XMLElement {
         newUrl += OGCConstants.SERVICE;
         newUrl += "=";
         newUrl += OGCConstants.NONOGC_SERVICE_PROXY;
+        newUrl += "&";
+        newUrl += OGCConstants.WMS_PARAM_LAYER;
+        newUrl += "=";
+        newUrl += layerUniqueName;
         newUrl += "&";
         newUrl += OGCConstants.PROXY_URL;
         newUrl += "=";
