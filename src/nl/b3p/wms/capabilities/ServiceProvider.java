@@ -306,7 +306,6 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
     // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
     public void convertValues2KB(HashMap conversionValues) throws Exception {
         conversionValues.put("spAbbrUrl", this.getUrlServiceProvideCode());
-        conversionValues.put("spAbbr", this.abbr);
         String newUrl = (String)conversionValues.get("url");
         this.url = newUrl;
 

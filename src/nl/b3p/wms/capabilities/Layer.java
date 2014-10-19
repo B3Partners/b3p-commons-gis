@@ -543,6 +543,10 @@ public class Layer implements XMLElement,Comparable{
     // <editor-fold defaultstate="" desc="convertValues2KB(String newUrl) method">
     protected void convertValues2KB(HashMap conversionValues) {
         conversionValues.put("layerName", this.getName());
+        ServiceProvider sp = this.getServiceProvider();
+        if (sp!=null) {
+            conversionValues.put("spAbbr", sp.getAbbr());
+        }
         Iterator it;
         //Layers:
         if (null != this.getLayers() && this.getLayers().size() != 0) {
