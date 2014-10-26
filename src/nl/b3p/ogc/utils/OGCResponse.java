@@ -232,7 +232,7 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
      */
     public String getRequestName(String responseName, List<SpLayerSummary> spLayerMapList, String spInUrl) throws Exception {
         for (SpLayerSummary sls : spLayerMapList) {
-            LayerSummary responseLayerMap = splitLayerInParts(responseName, (spInUrl==null), spInUrl, null);
+            LayerSummary responseLayerMap = splitLayerInParts(responseName, false, spInUrl, null);
             String responseLayerName = responseLayerMap.getLayerName();
             if (responseLayerName == null) {
                 // impossible

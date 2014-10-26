@@ -50,9 +50,14 @@ public class OGCCommunication implements OGCConstants {
 
     
     public void addOrReplaceNameSpace(String prefix, String nsUrl) {
-        if (prefix != null && nsUrl != null) {
+        if (prefix != null && nsUrl != null && !nsUrl.isEmpty()) {
             if (nameSpaces == null) {
                 addOpengisNamespaces();
+            }
+            
+            if (prefix.isEmpty()) { 
+                //default namespace, create new ns for use in xpath
+                prefix = getNameSpacePrefix(nsUrl, true);
             }
             nameSpaces.put(prefix, nsUrl);
         }
@@ -129,6 +134,10 @@ public class OGCCommunication implements OGCConstants {
     }
 
     public String getNameSpacePrefix(String namespaceUrl) {
+        return getNameSpacePrefix(namespaceUrl, true);
+    }
+    
+    public String getNameSpacePrefix(String namespaceUrl, boolean create) {
         if (nameSpaces == null || nameSpaces.isEmpty()) {
             return null;
         }
@@ -138,16 +147,18 @@ public class OGCCommunication implements OGCConstants {
                 return (String) entry.getKey();
             }
         }
-        //als namespace nog niet is toegevoegd
-        String prefix = null;
-        int nsTeller = 1;
-        //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
-        String ns = getNameSpace("ns" + nsTeller);
-        while (ns != null) {
-            nsTeller++;
-            ns = getNameSpace("ns" + nsTeller);
+        String prefix = ""; //default namespace
+        if (create) {
+            //als namespace nog niet is toegevoegd en het is niet de default ns
+            int nsTeller = 1;
+            //kijk of de namespace prefix al bestaat anders ophogen en nogmaals proberen
+            String ns = getNameSpace("ns" + nsTeller);
+            while (ns != null) {
+                nsTeller++;
+                ns = getNameSpace("ns" + nsTeller);
+            }
+            prefix = "ns" + nsTeller;
         }
-        prefix = "ns" + nsTeller;
         addOrReplaceNameSpace(prefix, namespaceUrl);
         return prefix;
     }
