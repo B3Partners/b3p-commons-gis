@@ -92,8 +92,24 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
         return false;
     }
 
+    /**
+     * In dit deel wordt ook de naam van de kaartlaag/featuretype aangepast
+     * aan de gebruikte naam in het request.
+     * @param doc
+     * @param request
+     * @param prefix
+     * @throws Exception 
+     */
     public abstract void rebuildResponse(Document doc, OGCRequest request, String prefix) throws Exception;
  
+    /**
+     * In dit deel wordt dus niet de naam van kaartlaag/featuretype aangepast,
+     * dit moet al in de methode rebuildResponse zijn gebeurd
+     * @param layers
+     * @param ogcrequest
+     * @param encoding
+     * @return 
+     */
     public abstract String getResponseBody(List<SpLayerSummary> layers, OGCRequest ogcrequest, String encoding);
     
     public void setUsableResponse(boolean usable) {
@@ -232,7 +248,7 @@ public abstract class OGCResponse extends OGCCommunication implements OGCConstan
      */
     public String getRequestName(String responseName, List<SpLayerSummary> spLayerMapList, String spInUrl) throws Exception {
         for (SpLayerSummary sls : spLayerMapList) {
-            LayerSummary responseLayerMap = splitLayerInParts(responseName, false, spInUrl, null);
+            LayerSummary responseLayerMap = splitLayerInParts(responseName, true, spInUrl, null);
             String responseLayerName = responseLayerMap.getLayerName();
             if (responseLayerName == null) {
                 // impossible

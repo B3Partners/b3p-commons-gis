@@ -90,7 +90,7 @@ public class WFSTransactionResponse extends OGCResponse implements OGCConstants 
             } else if (this.hasOwsV100ErrorResponse()) {
                 return this.getOwsV100ErrorResponseBody(encoding);
             } else {
-                throw new UnsupportedOperationException("Failed to get suitable reponse! ");
+                throw new UnsupportedOperationException("Failed to get suitable response! ");
             }
         }
         if (this.hasWfsV100ErrorResponse()) {

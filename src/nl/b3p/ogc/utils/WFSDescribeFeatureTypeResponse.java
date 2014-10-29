@@ -47,6 +47,7 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
     public void rebuildResponse(Document doc, OGCRequest request, String prefix) throws Exception {
         this.setUsableResponse(true);
         findNameSpace(doc);
+        rebuildNodeWithNameReplace(doc, prefix);
         this.doc = doc;
     }
 
@@ -64,19 +65,14 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
             logErrorResponse(encoding);
         }
         try {
-             String spInUrl = ogcrequest.getServiceProviderName();
-             rebuildNodeWithNameReplace(doc, layers, spInUrl);
-             return serializeNode(doc);
+            return serializeNode(doc);
         } catch (Exception ex) {
             throw new UnsupportedOperationException("Failed to get body of XML! Exception: " + ex);
         }
     }
 
-    private void rebuildNodeWithNameReplace(Node currentNode, List<SpLayerSummary> spLayerSummaries, String spInUrl) throws Exception {
-        if (spLayerSummaries == null || spLayerSummaries.size() == 0) {
-            return;
-        }
-        String prefix = getNameSpacePrefix("http://www.w3.org/2001/XMLSchema");
+    private void rebuildNodeWithNameReplace(Node currentNode, String spAbbr) throws Exception {
+        String prefix = getNameSpacePrefix("http://www.w3.org/2001/XMLSchema", true);
         StringBuilder sb = new StringBuilder();
         sb.append("/");
         if (prefix != null && prefix.length() > 0) {
@@ -106,16 +102,8 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
                     continue;
                 }
                 String textContent = nameAttr.getTextContent();
-                String requestName = getRequestName(textContent, spLayerSummaries, spInUrl);
-                if (requestName == null) {
-                    parentNode.removeChild(n);
-                } else {
-                    if (spInUrl==null || spInUrl.isEmpty()) {
-                        nameAttr.setTextContent(requestName);
-                    } else {
-                        // no replacement required
-                    }
-                }
+                String newName = determineFeatureTypeName(spAbbr, textContent);
+                nameAttr.setTextContent(newName);
             }
         }
 

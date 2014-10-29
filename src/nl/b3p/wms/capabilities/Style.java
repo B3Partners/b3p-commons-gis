@@ -134,7 +134,7 @@ public class Style implements XMLElement {
                     url.addOrReplaceParameter(OGCConstants.WMS_VERSION, wmsVersion);
                 }else{
                     //if no version then fallback to 1.1.1
-                    url.addOrReplaceNameSpace(OGCConstants.WMS_VERSION, OGCConstants.WMS_VERSION_111);
+                    url.addOrReplaceParameter(OGCConstants.WMS_VERSION, OGCConstants.WMS_VERSION_111);
                 }
                 url.addOrReplaceParameter(OGCConstants.WMS_PARAM_LAYER, this.getLayer().getName());
                 String format="image/png";

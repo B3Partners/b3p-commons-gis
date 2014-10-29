@@ -54,15 +54,10 @@ public class OGCCommunication implements OGCConstants {
             if (nameSpaces == null) {
                 addOpengisNamespaces();
             }
-            
-            if (prefix.isEmpty()) { 
-                //default namespace, create new ns for use in xpath
-                prefix = getNameSpacePrefix(nsUrl, true);
-            }
             nameSpaces.put(prefix, nsUrl);
         }
     }
-    
+ 
     public final void findNameSpace(Node node) {
         NamedNodeMap map = node.getAttributes();
         if (map != null) {
@@ -134,7 +129,7 @@ public class OGCCommunication implements OGCConstants {
     }
 
     public String getNameSpacePrefix(String namespaceUrl) {
-        return getNameSpacePrefix(namespaceUrl, true);
+        return getNameSpacePrefix(namespaceUrl, false);
     }
     
     public String getNameSpacePrefix(String namespaceUrl, boolean create) {
@@ -144,7 +139,13 @@ public class OGCCommunication implements OGCConstants {
         for (Iterator iterator = nameSpaces.entrySet().iterator(); iterator.hasNext();) {
             Map.Entry entry = (Map.Entry) iterator.next();
             if (entry.getValue().equals(namespaceUrl)) {
-                return (String) entry.getKey();
+                String prefix = (String) entry.getKey();
+                if (prefix.isEmpty() && create) {
+                    //default namespace moet voor xpath calcs een prefix
+                    //hebben, deze wordt daarom verderop gecreerd.
+                } else {
+                    return (String) entry.getKey();
+                }
             }
         }
         String prefix = ""; //default namespace
@@ -459,6 +460,10 @@ public class OGCCommunication implements OGCConstants {
         if (index1 >= 0 && index2 >= 0) {
             String nameSpaceUri = ft.substring(index1 + 1, index2);
             String prefix = getNameSpacePrefix(nameSpaceUri);
+            if (prefix.isEmpty()) {
+                // default namespace
+                return ft.substring(index2 + 1);
+            }
             return prefix + ":" + ft.substring(index2 + 1);
         }
         return ft;

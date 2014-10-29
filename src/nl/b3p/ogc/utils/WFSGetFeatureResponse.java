@@ -53,8 +53,8 @@ public class WFSGetFeatureResponse extends OGCResponse implements OGCConstants {
  
     protected void replaceFeatureTypeName(Element elem, String spAbbr) throws Exception {
         // update layer names in response
-        String wfsPrefix = getNameSpacePrefix("http://www.opengis.net/wfs");
-        String gmlPrefix = getNameSpacePrefix("http://www.opengis.net/gml");
+        String wfsPrefix = getNameSpacePrefix("http://www.opengis.net/wfs", true);
+        String gmlPrefix = getNameSpacePrefix("http://www.opengis.net/gml", true);
         StringBuilder sb = new StringBuilder();
         sb.append("/");
         if (wfsPrefix != null && wfsPrefix.length() > 0) {
