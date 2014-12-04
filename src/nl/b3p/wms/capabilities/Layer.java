@@ -4,19 +4,19 @@
  * general helper classes and extensions.
  *
  * Copyright 2005 - 2008 B3Partners BV
- * 
+ *
  * This file is part of B3P Commons GIS.
- * 
+ *
  * B3P Commons GIS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * B3P Commons GIS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -68,7 +68,7 @@ public class Layer implements XMLElement,Comparable{
     private String oldMetadata;
     private String metadata;
     private Set layerMetadata;
-    
+
     // <editor-fold defaultstate="" desc="getter and setter methods.">
     public Integer getId() {
         return id;
@@ -193,7 +193,7 @@ public class Layer implements XMLElement,Comparable{
             log.error(msg);
             throw new Exception(msg);
         }
-        
+
         layerset.add(this);
 
         Set layers = getLayers();
@@ -336,9 +336,9 @@ public class Layer implements XMLElement,Comparable{
                         + ", name=" + layer.getName()
                         + ", title=" + layer.getTitle()
                         + ", cascaded=" + layer.getCascaded();
-            
+
             String msg = "Duplicate sibling layer added to parent [" + thisLayerDesc + "]: duplicate [" + layerDesc + "]";
-            
+
             throw new Exception(msg);
         } else {
             layers.add(layer);
@@ -395,11 +395,11 @@ public class Layer implements XMLElement,Comparable{
     }
 
     public String getUniqueName() {
-        
+
         if (this.getName() == null) {
             return null;
         }
-        
+
         String spAbbrUrl = null;
         if (this.getServiceProvider() != null) {
             spAbbrUrl = this.getServiceProvider().getUrlServiceProvideCode();
@@ -408,7 +408,7 @@ public class Layer implements XMLElement,Comparable{
         if (spAbbrUrl != null && spAbbrUrl.equalsIgnoreCase(spAbbr)) {
             return this.getName();
         }
-        
+
         LayerSummary ls = null;
         try {
             ls = OGCCommunication.splitLayerWithoutNsFix(this.getName(), false, getSpAbbr(), null);
@@ -417,7 +417,7 @@ public class Layer implements XMLElement,Comparable{
         }
         return OGCCommunication.buildFullLayerName(ls);
      }
-	
+
 
     public String getCompleteTitle(){
         if (getTitle()==null){
@@ -430,7 +430,7 @@ public class Layer implements XMLElement,Comparable{
             return OGCCommunication.attachSp(getSpAbbr(), getTitle().replace(" ", ""));
         }
         return OGCCommunication.buildFullLayerName(ls);
-		
+
     }
 
     public String getMetadata() {
@@ -459,10 +459,10 @@ public class Layer implements XMLElement,Comparable{
                 lmd.setMetadata(metaData);
                 metaDataLayers.add(lmd);
             } else {
-                
+
                 boolean first = true;
                 Iterator<LayerMetadata> iterator = metaDataLayers.iterator();
-                
+
                 while (iterator.hasNext()) {
                     LayerMetadata lmd = iterator.next();
                     if (first) {
@@ -474,7 +474,7 @@ public class Layer implements XMLElement,Comparable{
                 }
 
             }
-            
+
             this.setOldMetadata(null);
         }
     }
@@ -693,24 +693,10 @@ public class Layer implements XMLElement,Comparable{
             }
         }
 
-        if (this.oldMetadata != null) {
-            cloneLayer.oldMetadata = new String(this.oldMetadata);
-        }
-        
-        if (this.metadata != null) {
-            cloneLayer.metadata = new String(this.metadata);
-        }
-        
-        if (null != this.layerMetadata) {
-            cloneLayer.layerMetadata = new HashSet();
-            Iterator it = this.layerMetadata.iterator();
-            while (it.hasNext()) {
-                LayerMetadata lm = (LayerMetadata) ((LayerMetadata) it.next()).clone();
-                lm.setLayer(cloneLayer);
-                cloneLayer.layerMetadata.add(lm);
-            }
-        }
-            
+        // Skip cloning of stuff not used in toElement():
+
+        // oldMetadata, metadata, layerMetadata
+
         return cloneLayer;
     }
     // </editor-fold>
@@ -959,7 +945,7 @@ public class Layer implements XMLElement,Comparable{
         }
         return tuples;
     }
-    
+
     /**
      * Public method to check wether the given layer as parameter equals this layer.
      */
