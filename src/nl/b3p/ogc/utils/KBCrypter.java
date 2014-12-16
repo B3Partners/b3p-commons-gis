@@ -4,19 +4,19 @@
  * general helper classes and extensions.
  *
  * Copyright 2005 - 2008 B3Partners BV
- * 
+ *
  * This file is part of B3P Commons GIS.
- * 
+ *
  * B3P Commons GIS is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * B3P Commons GIS is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with B3P Commons GIS.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -75,7 +75,7 @@ public class KBCrypter {
         Cipher c1 = Cipher.getInstance(cipherParameters);
         c1.init(Cipher.ENCRYPT_MODE, secretKey);
         byte clearTextBytes[];
-        clearTextBytes = clearText.getBytes();
+        clearTextBytes = clearText.getBytes(); // XXX USES PLATFORM DEFAULT ENCODING! Cannot fix without breaking password matches for previously saved values
         byte encryptedText[] = c1.doFinal(clearTextBytes);
         String encryptedEncodedText = new String(encoder.encode(encryptedText), CHARSET);
         /* Verwijder eventuele \r\n karakters die door Commons-Codec 1.4
