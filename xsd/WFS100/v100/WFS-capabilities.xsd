@@ -274,7 +274,8 @@
 	<xsd:element name="CSV"/>
 	<xsd:element name="GEOJSON"/>
 	<xsd:element name="SHAPE-ZIP"/>
-    <xsd:element name="JSON"/>
+	<xsd:element name="JSON"/>
+	<xsd:element name="KML"/>
 	<xsd:complexType name="ResultFormatType">
 		<xsd:sequence maxOccurs="unbounded">
 			<xsd:element ref="wfs:GML2"/>
@@ -282,7 +283,8 @@
 			<xsd:element ref="wfs:GEOJSON" minOccurs="0"/>
 			<xsd:element ref="wfs:CSV" minOccurs="0"/>
 			<xsd:element ref="wfs:SHAPE-ZIP" minOccurs="0"/>
-            <xsd:element ref="wfs:JSON" minOccurs="0"/>
+			<xsd:element ref="wfs:JSON" minOccurs="0"/>
+			<xsd:element ref="wfs:KML" minOccurs="0"/>
 		</xsd:sequence>
 	</xsd:complexType>
 	<!-- The SchemaDescriptionLanguageType type defines the schema languages

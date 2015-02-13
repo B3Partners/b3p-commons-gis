@@ -49,6 +49,10 @@ public class ResultFormatTypeItem implements java.io.Serializable {
      */
     private java.lang.Object _JSON;
 
+    /**
+     * Field _KML
+     */
+    private java.lang.Object _KML;
 
       //----------------/
      //- Constructors -/
@@ -179,4 +183,15 @@ public class ResultFormatTypeItem implements java.io.Serializable {
     {
         this._JSON = JSON;
     }
+    
+    public java.lang.Object getKML()
+    {
+        return this._KML;
+    }
+    
+    public void setKML(java.lang.Object KML)
+    {
+        this._KML = KML;
+    }
+
 }

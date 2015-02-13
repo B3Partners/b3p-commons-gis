@@ -276,6 +276,42 @@ public class ResultFormatTypeItemDescriptor extends org.exolab.castor.xml.util.X
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
+        
+        //-- _KML
+        desc = new org.exolab.castor.xml.util.XMLFieldDescriptorImpl(java.lang.Object.class, "_KML", "KML", org.exolab.castor.xml.NodeType.Element);
+        handler = new org.exolab.castor.xml.XMLFieldHandler() {
+            public java.lang.Object getValue( java.lang.Object object ) 
+                throws IllegalStateException
+            {
+                ResultFormatTypeItem target = (ResultFormatTypeItem) object;
+                return target.getKML();
+            }
+            public void setValue( java.lang.Object object, java.lang.Object value) 
+                throws IllegalStateException, IllegalArgumentException
+            {
+                try {
+                    ResultFormatTypeItem target = (ResultFormatTypeItem) object;
+                    target.setKML( (java.lang.Object) value);
+                }
+                catch (java.lang.Exception ex) {
+                    throw new IllegalStateException(ex.toString());
+                }
+            }
+            public java.lang.Object newInstance( java.lang.Object parent ) {
+                return new java.lang.Object();
+            }
+        };
+        desc.setHandler(handler);
+        desc.setNameSpaceURI("http://www.opengis.net/wfs");
+        desc.setMultivalued(false);
+        addFieldDescriptor(desc);
+        
+        //-- validation code for: _KML
+        fieldValidator = new org.exolab.castor.xml.FieldValidator();
+        { //-- local scope
+        }
+        desc.setValidator(fieldValidator);        
+        
     } //-- nl.b3p.xml.wfs.v100.capabilities.ResultFormatTypeItemDescriptor()
 
 
