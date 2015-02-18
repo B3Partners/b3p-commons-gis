@@ -488,27 +488,34 @@ public class WFSGetCapabilitiesResponse extends OGCResponse implements OGCConsta
         newWfsCapabilitiesV100.setFeatureTypeList(foundTypeList);
 
         RequestTypeItem[] operations = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem();
-        String[] names = new String[operations.length];
+        List<RequestTypeItem> unsupportedRequestItems = new ArrayList<RequestTypeItem>();
         for (int x = 0; x < operations.length; x++) {
-            if (operations[x].getDescribeFeatureType() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_DescribeFeatureType;
-            } else if (operations[x].getGetCapabilities() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetCapabilities;
-            } else if (operations[x].getGetFeature() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetFeature;
-            } else if (operations[x].getGetFeatureWithLock() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_GetFeatureWithLock;
-            } else if (operations[x].getLockFeature() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_LockFeature;
-            } else if (operations[x].getTransaction() != null) {
-                names[x] = OGCConstants.WFS_REQUEST_Transaction;
+            boolean supported = true;
+            if (operations[x].getDescribeFeatureType() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_DescribeFeatureType)) {
+                supported = false;
+            } else if (operations[x].getGetCapabilities() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_GetCapabilities)) {
+                supported = false;
+            } else if (operations[x].getGetFeature() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_GetFeature)) {
+                supported = false;
+            } else if (operations[x].getGetFeatureWithLock() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_GetFeatureWithLock)) {
+                supported = false;
+            } else if (operations[x].getLockFeature() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_LockFeature)) {
+                supported = false;
+            } else if (operations[x].getTransaction() != null &&
+                !supportedOperations.contains(OGCConstants.WFS_REQUEST_Transaction)) {
+                supported = false;
+            }
+            if (!supported) {
+                unsupportedRequestItems.add(newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem(x));
             }
         }
-        for (int y = 0; y < names.length; y++) {
-            if (!supportedOperations.contains(names[y])) {
-                RequestTypeItem requestItem = newWfsCapabilitiesV100.getCapability().getRequest().getRequestTypeItem(y);
-                newWfsCapabilitiesV100.getCapability().getRequest().removeRequestTypeItem(requestItem);
-            }
+        for (RequestTypeItem requestItem : unsupportedRequestItems) {
+            newWfsCapabilitiesV100.getCapability().getRequest().removeRequestTypeItem(requestItem);
         }
 
         clearGetCapabilitiesV100();
