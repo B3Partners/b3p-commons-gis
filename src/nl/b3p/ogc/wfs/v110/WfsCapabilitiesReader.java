@@ -41,6 +41,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import nl.b3p.commons.services.B3PCredentials;
 import nl.b3p.commons.services.HttpClientConfigured;
+import nl.b3p.ogc.utils.OGCCommunication;
 import nl.b3p.ogc.utils.OGCConstants;
 import nl.b3p.ogc.utils.OGCRequest;
 import org.apache.commons.logging.Log;
@@ -62,19 +63,16 @@ import org.w3c.dom.Element;
 public class WfsCapabilitiesReader {
 
     private static final Log log = LogFactory.getLog(WfsCapabilitiesReader.class);
-    private HashMap nameSpaces;
-    private String schemaLocation;
 
     /** Creates a new instance of WfsCapabilitiesReader */
     public WfsCapabilitiesReader() {
-        this.setNamespaces();
     }
     
     public WfsServiceProvider getProvider(String url) throws IOException, Exception {
         return getProvider(url,null);
     }
 
-    public WfsServiceProvider getProvider(String url,B3PCredentials credentials) throws IOException, Exception {
+    public WfsServiceProvider getProvider(String url, B3PCredentials credentials) throws IOException, Exception {
         WfsServiceProvider provider = new WfsServiceProvider();
         
         HttpClientConfigured hcc = new HttpClientConfigured(credentials);
@@ -82,8 +80,9 @@ public class WfsCapabilitiesReader {
         OGCRequest or = new OGCRequest(url);
         or.addOrReplaceParameter(OGCConstants.WMS_REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
         or.addOrReplaceParameter(OGCConstants.SERVICE, OGCConstants.WMS_PARAM_WFS);
+        String eUrl = or.getUrl();
 
-        HttpGet httpget = new HttpGet(url);
+        HttpGet httpget = new HttpGet(eUrl);
         HttpResponse response = hcc.execute(httpget);
         
         try {
@@ -108,7 +107,10 @@ public class WfsCapabilitiesReader {
                 DocumentBuilder builder = dbf.newDocumentBuilder();
                 Document doc = builder.parse(is);
                 Element rootElement = doc.getDocumentElement();
-
+   
+                OGCCommunication ogcc = new OGCCommunication();
+                ogcc.findNameSpace(doc);
+                
                 Unmarshaller um;
                 Object o;
                 String version = rootElement.getAttribute(OGCConstants.VERSION.toLowerCase());
@@ -130,8 +132,8 @@ public class WfsCapabilitiesReader {
                     for (int i = 0; i < featureTypeArray.length; i++) {
                         nl.b3p.xml.wfs.v100.capabilities.FeatureType featureType = featureTypeArray[i];
                         WfsLayer layer = new WfsLayer();
-                        String[] name = featureType.getName().split("[}:]");
-                        layer.setName(name[name.length - 1]);
+                        String lname = ogcc.fixNsPrefix(featureType.getName());
+                        layer.setName(lname);
                         String layerTitle = featureType.getTitle();
                         if (layerTitle != null && layerTitle.length() != 0) {
                             layer.setTitle(layerTitle);
@@ -160,8 +162,8 @@ public class WfsCapabilitiesReader {
                     for (int i = 0; i < featureTypeArray.length; i++) {
                         nl.b3p.xml.wfs.v110.FeatureType featureType = featureTypeArray[i];
                         WfsLayer layer = new WfsLayer();
-                        String[] name = featureType.getName().split("[}:]");
-                        layer.setName(name[name.length - 1]);
+                        String lname = ogcc.fixNsPrefix(featureType.getName());
+                        layer.setName(lname);
                         String layerTitle = featureType.getTitle();
                         if (layerTitle != null && layerTitle.length() != 0) {
                             layer.setTitle(layerTitle);
@@ -200,16 +202,12 @@ public class WfsCapabilitiesReader {
         try {
             StringWriter sw = new StringWriter();
             Marshaller m = new Marshaller(sw);
-            if (nameSpaces != null) {
-                Set keys = nameSpaces.keySet();
-                Iterator it = keys.iterator();
-                for (int i = 0; it.hasNext(); i++) {
-                    String prefix = (String) it.next();
-                    String location = (String) nameSpaces.get(prefix);
-                    m.setNamespaceMapping(prefix, location);
-                }
-            }
-            m.setSchemaLocation(schemaLocation);
+            m.setNamespaceMapping("wfs", "http://www.opengis.net/wfs");
+            m.setNamespaceMapping("gml", "http://www.opengis.net/gml");
+            m.setNamespaceMapping("ogc", "http://www.opengis.net/ogc");
+            m.setNamespaceMapping("app", "http://www.deegree.org/app");
+            m.setNamespaceMapping("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            m.setSchemaLocation("http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd");
 
             m.marshal(getCapabilities);
             body = sw.toString();
@@ -218,21 +216,5 @@ public class WfsCapabilitiesReader {
         }
 
         return body;
-    }
-
-    /*
-     * Makes HashMaps of nameSpaces and schemalocations so they can be added to the getCapabilities request.
-     * Because there is no request to save the namespaces from they are set here. Probably not all namespaces
-     * are necessary.
-     */
-    public void setNamespaces() {
-        nameSpaces = new HashMap();
-        nameSpaces.put("wfs", "http://www.opengis.net/wfs");
-        nameSpaces.put("gml", "http://www.opengis.net/gml");
-        nameSpaces.put("ogc", "http://www.opengis.net/ogc");
-        nameSpaces.put("app", "http://www.deegree.org/app");
-        nameSpaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-        schemaLocation = "http://www.opengis.net/wfs ../wfs/1.1.0/WFS.xsd";
     }
 }
