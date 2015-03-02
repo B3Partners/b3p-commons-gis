@@ -179,6 +179,7 @@ public interface OGCConstants {
             });
     public static final List REQUIRED_PARAMS_PROXY = Arrays.asList(new String[]{
                 SERVICE,
+                WMS_PARAM_LAYER,
                 PROXY_URL
             });
     public static final List REQUIRED_PARAMS_METADATA = Arrays.asList(new String[]{
