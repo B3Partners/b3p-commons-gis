@@ -156,7 +156,7 @@ public class FeatureSchemaFactory {
     /*public static void main(String [] args) throws Exception{
     String url="jdbc:postgresql://localhost:5432/pnb_wis";
     String user="postgres";
-    String password="***REMOVED***";
+    String password="xxxxxxx";
     FeatureSchema fs=createFeatureSchemaFromDbTable(url,user,password,new org.postgresql.Driver(),"tankstations_centroid");
     FileReader fr = new FileReader("c:\\public_tankstations_centroid.csv");
     CsvInputStream cis = new CsvInputStream(fr);
