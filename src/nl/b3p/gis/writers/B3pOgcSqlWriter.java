@@ -652,38 +652,7 @@ public class B3pOgcSqlWriter {
         return false;
     }
 
-    /*  public static void main(String [] args) throws IOException, ParseException, Exception{
-    String w1url="http://w1.b3p.nl/cgi-bin/mapserv.exe?SRSNAME=EPSG:28992&TYPENAME=tankstations_centroid&BBOX=70000,300000,305000,425000&VERSION=1.0.0&SERVICE=WFS&map=e:/mapserver/pnb_wis/pnb_wis2.map&REQUEST=GetFeature";
-    String royurl="http://b3p-roy/cgi-bin/mapserv.exe?map=C:/mapserver/map/pnb_wis/geoplaza.map&SERVICE=WFS&REQUEST=GetFeature&VERSION=1.0.0&TYPENAME=strooiroutes&BBOX=70000,300000,305000,425000&SRSNAME=EPSG:28992";
-    //,POL2006_P5B_V,POL2006_P5A_V,POL2006_P4_V,POL2006_P3_V,POL2006_P6_V,POL2006_P2_V,POL2006_P1_V,POL2006_Grens_sted_dynam_V,POL2006_P13_Water_V,POL2006_AEF_beek_L,POL2006_SEF_beek_L,POL2006_P7_Transportas_L
-    String degree="http://lin017.prvlimburg.nl/cgi-bin/oru/pol2006_1_perspectieven?SRSNAME=EPSG:28992&TYPENAME=POL2006_P9_V,POL2006_P8_V&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature";
-    String url="jdbc:postgresql://localhost:5432/gistest";
-    String user="postgres";
-    String password="***REMOVED***";
-    B3pGMLReader reader = new B3pGMLReader();
-    OGCRequest wfslink=new OGCRequest(degree);
-    wfslink.addOrReplaceNameSpace("app","http://www.deegree.org/app");
-    HashMap features=reader.readWFSUrl(wfslink);
-    if (features!=null){
-    Set featureTypes=features.keySet();
-    Iterator it=featureTypes.iterator();
-    DriverManager.registerDriver(new org.postgresql.Driver());
-    Connection conn= DriverManager.getConnection(url,user,password);
-    
-    while(it.hasNext()){
-    String featureType= (String)it.next();
-    String tableName=new String(featureType);
-    if (tableName.contains(":")){
-    tableName=featureType.split(":")[1];
-    }
-    FeatureCollection fc= (FeatureCollection) features.get(featureType);
-    B3pOgcSqlWriter bosw = new B3pOgcSqlWriter(url,user,password,new org.postgresql.Driver());
-    bosw.setBatchValue(10);
-    if (fc!=null)
-    bosw.write(fc,tableName.toLowerCase(),"the_geom","28992",2,true,true);
-    }
-    }
-    }*/
+  
     /**Get the connection
      */
     public Connection getConnection() {
