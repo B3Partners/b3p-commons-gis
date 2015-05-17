@@ -1,0 +1,12 @@
+<binding xmlns="http://www.castor.org/SourceGenerator/Binding" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            defaultBinding="element">
+<!--OGC--> 
+<!--Operands-->
+  <elementBinding name="complexType:SpatialOperatorType/GeometryOperands">
+      <java-class name="GeometryOperands_SpatialOperatorType"/>
+   </elementBinding>
+   <elementBinding name="complexType:Spatial_CapabilitiesType/GeometryOperands">
+      <java-class name="GeometryOperands_Spatial_CapabilitiesType"/>
+   </elementBinding>
+</binding>

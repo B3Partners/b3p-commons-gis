@@ -1,0 +1,29 @@
+<binding xmlns="http://www.castor.org/SourceGenerator/Binding" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" defaultBinding="element">
+	<!-- dcptype
+-->
+	<elementBinding name="/complexType:GetCapabilitiesType/DCPType">
+		<java-class name="DCPType_GetCapabilitiesType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:DescribeFeatureTypeType/DCPType">
+		<java-class name="DCPType_DescribeFeatureTypeType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:TransactionType/DCPType">
+		<java-class name="DCPType_TransactionType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:GetFeatureTypeType/DCPType">
+		<java-class name="DCPType_GetFeatureTypeType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:GetFeatureTypeType/DCPType">
+		<java-class name="DCPType_FeatureTypeType"/>
+	</elementBinding>
+	<!--operations -->
+	<elementBinding name="/complexType:FeatureTypeType/Operations">
+		<java-class name="Operations_FeatureTypeType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:FeatureTypeListType/Operations">
+		<java-class name="Operations_FeatureTypeListType"/>
+	</elementBinding>
+	<elementBinding name="/complexType:FeatureTypeListType/Operations">
+		<java-class name="Operations_FeatureTypeListType"/>
+	</elementBinding>
+</binding>
