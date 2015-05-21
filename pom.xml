@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-commons-gis</artifactId>
-    <version>4.2</version>
+    <version>4.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>nl.b3p</groupId>
             <artifactId>jump-b3p</artifactId>
-            <version>4.2</version>
+            <version>4.2-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>nl.b3p</groupId>
             <artifactId>b3p-commons-core</artifactId>
-            <version>4.2</version>
+            <version>4.2-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -77,13 +77,13 @@
             <artifactId>javaee-api</artifactId>
             <version>6.0</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency-->
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
                 <version>2.4</version>
                 <scope>provided</scope>
-            </dependency -->
+            </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>windows-1252</project.build.sourceEncoding>
