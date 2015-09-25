@@ -487,6 +487,13 @@ public class ServiceProvider implements XMLElement, ServiceProviderInterface {
             vendorSpecificElement.appendChild(userName);
         }
 
+        if (this.getGivenName() != null) {
+            Element givenName = doc.createElement("GivenName");
+            Text text = doc.createTextNode(this.getGivenName());
+            givenName.appendChild(text);
+            vendorSpecificElement.appendChild(givenName);
+        }
+
         if (this.getPersonalCode() != null) {
             Element pCode = doc.createElement("PersonalCode");
             Text text = doc.createTextNode(this.getPersonalCode());

@@ -340,6 +340,7 @@ public class WMSCapabilitiesReader {
         s.setElementHandler("OrganizationCode", new OrganizationCodeHandler());        
         s.setElementHandler("ExpireDate", new ExpireDateHandler());
         s.setElementHandler("UserName", new UserNameHandler());
+        s.setElementHandler("GivenName", new GivenNameHandler());
         s.setElementHandler("PersonalCode", new PersonalCodeHandler());
         //s.setElementHandler("UserDefinedSymbolization", new UserDefinedSymbolizationHandler());
         
@@ -1755,6 +1756,28 @@ public class WMSCapabilitiesReader {
             ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
             checkObject(serviceProvider);
             serviceProvider.setUserName(sb.toString());
+        }
+    }
+    
+    private class GivenNameHandler extends ElementHandler {
+
+        StringBuffer sb;
+
+        @Override
+        public void startElement(String uri, String localName, String qName, Attributes atts) {
+            sb = new StringBuffer();
+        }
+
+        @Override
+        public void characters(char[] chars, int start, int len) {
+            sb.append(chars, start, len);
+        }
+
+        @Override
+        public void endElement(String uri, String localName, String qName) throws SAXException {
+            ServiceProvider serviceProvider = (ServiceProvider) stack.peek();
+            checkObject(serviceProvider);
+            serviceProvider.setGivenName(sb.toString());
         }
     }
 
