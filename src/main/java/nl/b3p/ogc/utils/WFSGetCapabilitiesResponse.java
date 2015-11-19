@@ -39,6 +39,7 @@ import nl.b3p.xml.ows.v100.DCP;
 import nl.b3p.xml.ows.v100.HTTP;
 import nl.b3p.xml.ows.v100.Operation;
 import nl.b3p.xml.ows.v100.OperationsMetadata;
+import nl.b3p.xml.ows.v100.Parameter_Operation;
 import nl.b3p.xml.ows.v100.ServiceContact;
 import nl.b3p.xml.ows.v100.ServiceIdentification;
 import nl.b3p.xml.ows.v100.ServiceProvider;
@@ -439,6 +440,16 @@ public class WFSGetCapabilitiesResponse extends OGCResponse implements OGCConsta
             if (!supportedOperations.contains(names[y])) {
                 Operation remove = operations[y];
                 newWfsCapabilitiesV110.getOperationsMetadata().removeOperation(remove);
+            } else {
+                Operation o = operations[y];
+                Parameter_Operation[] poa = o.getParameter_Operation();
+                for (int x = 0; x < poa.length; x++) {
+                    if (poa[x]!=null && poa[x].getName()!=null &&
+                        poa[x].getName().equalsIgnoreCase("outputFormat")) {
+                        // add default for wfs 1.1: text/xml; subtype=gml/3.1.1
+                        poa[x].setValue(0,"text/xml; subtype=gml/3.1.1");
+                    }
+                }
             }
         }
         
