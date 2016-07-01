@@ -808,6 +808,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         removeParameter(WMS_PARAM_SLD);
         removeParameter(WMS_PARAM_WFS);
         removeParameter(WMS_SERVICE);
+        removeParameter(WMS_PARAM_LAYER);
     }
 
     /** Removes all WFS parameters (version 1.0.0???)
