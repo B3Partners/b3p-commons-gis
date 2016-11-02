@@ -92,13 +92,11 @@ public class BBOXTypeDescriptor extends nl.b3p.xml.ogc.v110.SpatialOpsTypeDescri
         };
         desc.setHandler(handler);
         desc.setNameSpaceURI("http://www.opengis.net/ogc");
-        desc.setRequired(true);
         desc.setMultivalued(false);
         addFieldDescriptor(desc);
         
         //-- validation code for: _propertyName
         fieldValidator = new org.exolab.castor.xml.FieldValidator();
-        fieldValidator.setMinOccurs(1);
         { //-- local scope
         }
         desc.setValidator(fieldValidator);
