@@ -73,16 +73,12 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
 
     private void rebuildNodeWithNameReplace(Node currentNode, String spAbbr) throws Exception {
         String prefix = getNameSpacePrefix("http://www.w3.org/2001/XMLSchema", true);
-        String elementLabel = "";
         String parentPath = "/";
         if (prefix != null && prefix.length() > 0) {
             parentPath += prefix;
-            elementLabel += prefix;
             parentPath += ":";
-            elementLabel += ":";
         }
         parentPath += "schema";
-        elementLabel += "element";
         
         Node parentNode = null;
         NodeList parentNodes = getNodeListFromXPath(currentNode, parentPath);
@@ -91,8 +87,8 @@ public class WFSDescribeFeatureTypeResponse extends OGCResponse implements OGCCo
             NodeList nodes = parentNode.getChildNodes();
             for (int i = 0; i < nodes.getLength(); i++) {
                 Node n = nodes.item(i);
-                String nodeName = n.getNodeName();
-                if (nodeName==null || !nodeName.equals(elementLabel)) {
+                if (!"element".equals(n.getLocalName())
+                        || !"http://www.w3.org/2001/XMLSchema".equals(n.getNamespaceURI())) {
                     continue;
                 }
                 NamedNodeMap nnm = n.getAttributes();
