@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-commons-gis</artifactId>
-    <version>4.2.6-SNAPSHOT</version>
+    <version>4.2.6</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -105,7 +105,7 @@
         <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
         <url>https://github.com/B3Partners/b3p-commons-gis</url>
-      <tag>b3p-commons-gis-${project.version}</tag>
+      <tag>b3p-commons-gis-4.2.6</tag>
     </scm>
     <distributionManagement>
         <repository>
