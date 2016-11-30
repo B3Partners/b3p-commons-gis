@@ -1122,6 +1122,11 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         while (it.hasNext()) {
             String parameter = (String) it.next();
             if (!parameters.containsKey(parameter)) {
+                if (parameter.equalsIgnoreCase(WFS_PARAM_TYPENAME)) {
+                    if (getFeatureFilterMap != null && !getFeatureFilterMap.isEmpty()) {
+                        continue;
+                    }
+                }                
                 reason.append("Not all parameters for request '");
                 reason.append(request);
                 reason.append("' are available, missing parameter: ");
