@@ -31,6 +31,7 @@
  */
 package nl.b3p.ogc.utils;
 
+import java.io.FileInputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.xml.transform.stream.StreamSource;
 import nl.b3p.xml.wfs.WFS_Capabilities;
 import nl.b3p.xml.wfs.v110.*;
 import org.apache.commons.logging.Log;
@@ -51,6 +53,7 @@ import org.exolab.castor.xml.Marshaller;
 import org.exolab.castor.xml.Unmarshaller;
 import org.exolab.castor.xml.ValidationException;
 import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
 
 /**
  * @author Roy Braam
@@ -115,6 +118,21 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         return tokens[0];
     }
 
+    public static void main(String... args) throws Exception  {
+        
+        Unmarshaller um = new Unmarshaller(nl.b3p.xml.wfs.v110.GetCapabilities.class);
+        nl.b3p.xml.wfs.v110.GetCapabilities o = (nl.b3p.xml.wfs.v110.GetCapabilities)um.unmarshal(new InputSource(new FileInputStream("d:\\getcapwfs.xml")));
+        
+                    StringWriter sw = new StringWriter();
+                    Marshaller m = new Marshaller(sw);
+                nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities =o;//new nl.b3p.xml.wfs.v110.GetCapabilities();
+                nl.b3p.xml.ows.v100.AcceptVersions av = new nl.b3p.xml.ows.v100.AcceptVersions();
+                av.addVersion(OGCConstants.WFS_VERSION_110);
+                getCapabilities.setAcceptVersions(av);
+               m.marshal(getCapabilities);
+               System.out.println(sw.toString());
+    
+    }
     /**
      * Constructor
      * For HTTP POST
@@ -198,7 +216,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
     }
 
     public final void setGetCapabilitiesV110(nl.b3p.xml.wfs.v110.GetCapabilities getCapabilities) {
-        addOrReplaceParameter(OGCConstants.VERSION, finalVersion);//OGCConstants.WFS_VERSION_110);
+        addOrReplaceParameter(OGCConstants.VERSION, OGCConstants.WFS_VERSION_110);
         addOrReplaceParameter(OGCConstants.SERVICE, getCapabilities.getService());
         addOrReplaceParameter(OGCConstants.REQUEST, OGCConstants.WFS_REQUEST_GetCapabilities);
     }
@@ -1140,7 +1158,8 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
         it = requiredParams.iterator();
         while (it.hasNext()) {
             String parameter = (String) it.next();
-            if (!parameter.equalsIgnoreCase(WMS_PARAM_STYLES)) {
+            if (!parameter.equalsIgnoreCase(WMS_PARAM_STYLES) &&
+                    !parameter.equalsIgnoreCase(WFS_PARAM_TYPENAME)) {
                 if (this.getParameter(parameter) == null) {
                     reason.append("Value for parameter ");
                     reason.append(parameter);

@@ -365,9 +365,12 @@ public class OgcWfsClient {
             gc.setVersion(or.getParameter(OGCConstants.VERSION));
             return gc;
         }
-
+        
         nl.b3p.xml.wfs.v110.GetCapabilities gc = new nl.b3p.xml.wfs.v110.GetCapabilities();
         gc.setService(OGCConstants.WFS_SERVICE_WFS);
+        nl.b3p.xml.ows.v100.AcceptVersions av = new nl.b3p.xml.ows.v100.AcceptVersions();
+        av.addVersion(OGCConstants.WFS_VERSION_110);
+        gc.setAcceptVersions(av);
         return gc;
     }
 
