@@ -31,7 +31,6 @@
  */
 package nl.b3p.ogc.utils;
 
-import java.io.FileInputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -487,7 +486,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
     }
 
     public void addGetFeatureFilterMap(String key, Object value) {
-        getFeatureFilterMap.put(stripNs(key), value);
+        getFeatureFilterMap.put(key, value);
     }
 
     public String getGetFeatureFilter(String key) {
