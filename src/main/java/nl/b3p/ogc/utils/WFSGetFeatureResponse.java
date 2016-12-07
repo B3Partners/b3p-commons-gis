@@ -134,14 +134,14 @@ public class WFSGetFeatureResponse extends OGCResponse implements OGCConstants {
         String newSchemalocations = "";
         String[] tokens = location.split(" ");
         for (int x = 0; x < tokens.length; x++) {
-            String[] token = tokens[x].split("\\?", 2);
+            String[] token = tokens[x].split("(%3F)|[\\?]", 2);
             if (token.length == 2) {
                 String kvp = token[1];
                 String newToken = "";
-                String[] kvpSplit = kvp.split("\\&");
+                String[] kvpSplit = kvp.split("(%26)|[\\&]");
                 for (int z = 0; z < kvpSplit.length; z++) {
                     String[] newKvp = kvpSplit[z].split("=");
-                    if (newKvp[0].equals(OGCConstants.WFS_PARAM_TYPENAME)) {
+                    if (newKvp[0].equalsIgnoreCase(OGCConstants.WFS_PARAM_TYPENAME)) {
                         String changedlayer = attachSp(serverPrefix, newKvp[1]);
                         newToken = newToken + "&" + newKvp[0] + "=" + changedlayer;
                     } else {
