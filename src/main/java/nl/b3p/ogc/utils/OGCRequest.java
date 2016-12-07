@@ -507,7 +507,7 @@ public class OGCRequest extends OGCCommunication implements OGCConstants {
     }
 
     public void addGetFeaturePropertyNameListMap(String key, Object value) {
-         getFeaturePropertyNameListMap.put(stripNs(key), value);
+         getFeaturePropertyNameListMap.put(key, value);
     }
 
     public String getGetFeaturePropertyNameList(String key) {
