@@ -1337,7 +1337,11 @@ public class WMSCapabilitiesReader {
                 StyleDomainResource domainResource = (StyleDomainResource) stack.pop();
                 checkObject(domainResource);
                 String domain = (String) stack.peek();
-                domainResource.setUrl(href);
+                String urlString = href;
+                if(domain.equals("LegendURL") && !urlString.toLowerCase().contains("service=wms")){
+                    urlString += "&SERVICE=WMS";
+                }
+                domainResource.setUrl(urlString);
                 domainResource.setDomain(domain);
                 stack.push(domainResource);
             } else if (object instanceof ServiceProvider) {
