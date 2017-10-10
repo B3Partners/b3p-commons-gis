@@ -171,7 +171,7 @@ public class IdentificationTypeDescriptor extends nl.b3p.xml.ows.v100.Descriptio
         { //-- local scope
             org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
             typeValidator.setWhiteSpace("preserve");
-            typeValidator.setPattern("(application|audio|image|text|video|message|multipart|model)/.+(;\\s*.+=.+)*");
+            typeValidator.addPattern("(application|audio|image|text|video|message|multipart|model)/.+(;\\s*.+=.+)*");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);

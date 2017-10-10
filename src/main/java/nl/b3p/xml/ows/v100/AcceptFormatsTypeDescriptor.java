@@ -101,7 +101,7 @@ public class AcceptFormatsTypeDescriptor extends org.exolab.castor.xml.util.XMLC
         { //-- local scope
             org.exolab.castor.xml.validators.StringValidator typeValidator = new org.exolab.castor.xml.validators.StringValidator();
             typeValidator.setWhiteSpace("preserve");
-            typeValidator.setPattern("(application|audio|image|text|video|message|multipart|model)/.+(;\\s*.+=.+)*");
+            typeValidator.addPattern("(application|audio|image|text|video|message|multipart|model)/.+(;\\s*.+=.+)*");
             fieldValidator.setValidator(typeValidator);
         }
         desc.setValidator(fieldValidator);
