@@ -31,11 +31,11 @@
  */
 package nl.b3p.ogc.utils;
 
+import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
-import org.apache.xerces.dom.DeferredElementNSImpl;
 import org.exolab.castor.xml.Unmarshaller;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

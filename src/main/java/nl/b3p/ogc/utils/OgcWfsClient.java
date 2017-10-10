@@ -22,10 +22,10 @@
  */
 package nl.b3p.ogc.utils;
 
+import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jump.feature.FeatureCollection;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -64,11 +64,9 @@ import nl.b3p.xml.wfs.v110.types.ResultTypeType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.xerces.dom.DeferredElementNSImpl;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.util.XSDSchemaLocationResolver;
 import org.exolab.castor.types.AnyNode;
