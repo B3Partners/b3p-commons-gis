@@ -13,6 +13,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.jdkPlatform>JDK_${project.build.targetVersion}</netbeans.hint.jdkPlatform>
     </properties>
+    <prerequisites>
+        <maven>3.2.5</maven>
+    </prerequisites>
     <organization>
         <name>B3Partners B.V.</name>
         <url>http://www.b3partners.nl/</url>
@@ -57,7 +60,7 @@
         <dependency>
             <groupId>com.esri</groupId>
             <artifactId>arcobjects</artifactId>
-            <version>10.0.0</version>
+            <version>10.5.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -131,8 +134,8 @@
         <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
         <url>https://github.com/B3Partners/b3p-commons-gis</url>
-      <tag>HEAD</tag>
-  </scm>
+        <tag>HEAD</tag>
+    </scm>
     <distributionManagement>
         <repository>
             <id>repo.b3p.nl</id>
@@ -202,6 +205,29 @@
                         </plugin>
                     </reportPlugins>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>[3.2.5,)</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>${java.version}</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
