@@ -1,10 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-commons-gis</artifactId>
     <version>5.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
+
+    <url>https://github.com/B3Partners/${project.artifactId}/</url>
+    <organization>
+        <name>B3Partners B.V.</name>
+        <url>http://www.b3partners.nl/</url>
+    </organization>
+
+    <prerequisites>
+        <maven>3.2.5</maven>
+    </prerequisites>
+
+    <scm>
+        <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
+        <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
+        <url>https://github.com/B3Partners/b3p-commons-gis</url>
+        <tag>HEAD</tag>
+    </scm>
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/B3Partners/${project.artifactId}/issues</url>
+    </issueManagement>
+    <distributionManagement>
+        <repository>
+            <id>repo.b3p.nl</id>
+            <name>B3P release Repository</name>
+            <url>http://repo.b3p.nl/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>repo.b3p.nl</id>
+            <name>B3P snapshot Repository</name>
+            <url>http://repo.b3p.nl/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <site>
+            <id>gh-pages</id>
+            <name>github pages site</name>
+            <url>github:http://b3partners.github.io/${project.artifactId}/</url>
+        </site>
+    </distributionManagement>
+
     <properties>
         <project.build.sourceVersion>1.8</project.build.sourceVersion>
         <project.build.targetVersion>1.8</project.build.targetVersion>
@@ -13,18 +53,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.jdkPlatform>JDK_${project.build.targetVersion}</netbeans.hint.jdkPlatform>
     </properties>
-    <prerequisites>
-        <maven>3.2.5</maven>
-    </prerequisites>
-    <organization>
-        <name>B3Partners B.V.</name>
-        <url>http://www.b3partners.nl/</url>
-    </organization>
-    <url>https://github.com/B3Partners/${project.artifactId}/</url>
-    <issueManagement>
-        <system>Github</system>
-        <url>https://github.com/B3Partners/${project.artifactId}/issues</url>
-    </issueManagement>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -35,7 +64,7 @@
                 <scope>import</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>    
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -117,6 +146,7 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
     <repositories>
         <repository>
             <id>repo.b3p.nl</id>
@@ -130,34 +160,12 @@
             <url>file://${project.basedir}/../B3pGisSuiteMvnRepo</url>
         </repository>
     </repositories>
-    <scm>
-        <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
-        <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
-        <url>https://github.com/B3Partners/b3p-commons-gis</url>
-        <tag>HEAD</tag>
-    </scm>
-    <distributionManagement>
-        <repository>
-            <id>repo.b3p.nl</id>
-            <name>B3P release Repository</name>
-            <url>http://repo.b3p.nl/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>repo.b3p.nl</id>
-            <name>B3P snapshot Repository</name>
-            <url>http://repo.b3p.nl/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-        <site>
-            <id>gh-pages</id>
-            <name>github pages site</name>
-            <url>github:http://b3partners.github.io/${project.artifactId}/</url>
-        </site>
-    </distributionManagement>
-    <build>        
+
+    <build>
         <plugins>            
-            <plugin>                
-                <groupId>org.apache.maven.plugins</groupId>                
-                <artifactId>maven-release-plugin</artifactId>                
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
                 <version>2.5.3</version>
             </plugin>
             <plugin>
