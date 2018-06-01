@@ -360,7 +360,7 @@ public class B3pOgcSqlWriter {
         Object o = f.getAttribute(fs.getAttributeName(i));
         StringBuffer values = new StringBuffer();
         if (fs.getAttributeType(i).equals(AttributeType.GEOMETRY)) {
-            values.append("GeomFromText(\'");
+            values.append("ST_GeomFromText(\'");
             values.append(f.getGeometry().toText());
 
             int geomSRID = f.getGeometry().getSRID();
