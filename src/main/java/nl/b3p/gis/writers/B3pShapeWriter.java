@@ -30,16 +30,16 @@
  */
 package nl.b3p.gis.writers;
 
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.MultiPolygon;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jump.feature.FeatureDataset;
-import com.vividsolutions.jump.io.DriverProperties;
-import com.vividsolutions.jump.io.IllegalParametersException;
-import com.vividsolutions.jump.io.ShapefileWriter;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.MultiLineString;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.MultiPolygon;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.jump.feature.FeatureDataset;
+import org.locationtech.jts.jump.io.DriverProperties;
+import org.locationtech.jts.jump.io.IllegalParametersException;
+import org.locationtech.jts.jump.io.ShapefileWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -94,7 +94,7 @@ public class B3pShapeWriter {
      *@return a list of file's of type java.io.File
      * @deprecated use StreamingShapeWriter instead.
      */
-    public List writeToShape(com.vividsolutions.jump.feature.FeatureCollection fcAll, String filename) throws IllegalParametersException, Exception {
+    public List writeToShape(org.locationtech.jts.jump.feature.FeatureCollection fcAll, String filename) throws IllegalParametersException, Exception {
         FeatureDataset allPoint = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allPoly = new FeatureDataset(fcAll.getFeatureSchema());
         FeatureDataset allLine = new FeatureDataset(fcAll.getFeatureSchema());
@@ -103,7 +103,7 @@ public class B3pShapeWriter {
         FeatureDataset allMLine = new FeatureDataset(fcAll.getFeatureSchema());*/
         Iterator it = fcAll.iterator();
         while (it.hasNext()) {
-            com.vividsolutions.jump.feature.Feature f = (com.vividsolutions.jump.feature.Feature) it.next();
+            org.locationtech.jts.jump.feature.Feature f = (org.locationtech.jts.jump.feature.Feature) it.next();
             if (f.getGeometry() instanceof Point) {
                 allPoint.add(f);
             } else if (f.getGeometry() instanceof Polygon) {
@@ -264,7 +264,7 @@ public class B3pShapeWriter {
      * @param shpName the name of the shape file.
      * @deprecated Use the writeShape with a GeoTools FeatureCollection
      */
-    public List writeShape(com.vividsolutions.jump.feature.FeatureCollection fc, String shpName) throws IllegalParametersException, Exception {
+    public List writeShape(org.locationtech.jts.jump.feature.FeatureCollection fc, String shpName) throws IllegalParametersException, Exception {
         ArrayList files = new ArrayList();
         if (!shpName.endsWith(".shp")) {
             shpName += ".shp";

@@ -23,8 +23,8 @@
 package nl.b3p.ogc.utils;
 
 import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jump.feature.FeatureCollection;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.jump.feature.FeatureCollection;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;

@@ -30,7 +30,7 @@
  */
 package nl.b3p.ogc.utils;
 
-import com.vividsolutions.jump.feature.AttributeType;
+import org.locationtech.jts.jump.feature.AttributeType;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

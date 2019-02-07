@@ -30,13 +30,13 @@
  */
 package nl.b3p.gis;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.MultiPoint;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.PrecisionModel;
-import com.vividsolutions.jump.feature.BasicFeature;
-import com.vividsolutions.jump.feature.FeatureSchema;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.jump.feature.BasicFeature;
+import org.locationtech.jts.jump.feature.FeatureSchema;
 
 /**
  *
