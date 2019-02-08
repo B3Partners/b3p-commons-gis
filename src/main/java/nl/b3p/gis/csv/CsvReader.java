@@ -22,9 +22,9 @@
  */
 package nl.b3p.gis.csv;
 
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureDataset;
-import com.vividsolutions.jump.feature.FeatureSchema;
+import org.locationtech.jts.jump.feature.Feature;
+import org.locationtech.jts.jump.feature.FeatureDataset;
+import org.locationtech.jts.jump.feature.FeatureSchema;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;

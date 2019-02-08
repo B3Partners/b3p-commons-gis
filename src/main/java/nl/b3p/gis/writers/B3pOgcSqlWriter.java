@@ -30,11 +30,11 @@
  */
 package nl.b3p.gis.writers;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jump.feature.AttributeType;
-import com.vividsolutions.jump.feature.Feature;
-import com.vividsolutions.jump.feature.FeatureCollection;
-import com.vividsolutions.jump.feature.FeatureSchema;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.jump.feature.AttributeType;
+import org.locationtech.jts.jump.feature.Feature;
+import org.locationtech.jts.jump.feature.FeatureCollection;
+import org.locationtech.jts.jump.feature.FeatureSchema;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;

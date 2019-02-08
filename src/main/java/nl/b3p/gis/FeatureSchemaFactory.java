@@ -30,9 +30,9 @@
  */
 package nl.b3p.gis;
 
-import com.vividsolutions.jump.coordsys.CoordinateSystem;
-import com.vividsolutions.jump.feature.AttributeType;
-import com.vividsolutions.jump.feature.FeatureSchema;
+import org.locationtech.jts.jump.coordsys.CoordinateSystem;
+import org.locationtech.jts.jump.feature.AttributeType;
+import org.locationtech.jts.jump.feature.FeatureSchema;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
