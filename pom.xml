@@ -12,11 +12,6 @@
         <name>B3Partners B.V.</name>
         <url>http://www.b3partners.nl/</url>
     </organization>
-
-    <prerequisites>
-        <maven>3.2.5</maven>
-    </prerequisites>
-
     <scm>
         <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
@@ -118,11 +113,6 @@
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-metadata</artifactId>
-            <version>${geotools.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
             <version>${geotools.version}</version>
         </dependency>
         <dependency>

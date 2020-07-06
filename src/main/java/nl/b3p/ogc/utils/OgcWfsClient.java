@@ -22,7 +22,6 @@
  */
 package nl.b3p.ogc.utils;
 
-import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.jump.feature.FeatureCollection;
 import java.io.ByteArrayOutputStream;
@@ -77,7 +76,7 @@ import org.exolab.castor.xml.ValidationException;
 import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.v1_0.OGCConfiguration;
-import org.geotools.xml.Encoder;
+import org.geotools.xsd.Encoder;
 import org.opengis.feature.Feature;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -258,7 +257,7 @@ public class OgcWfsClient {
         String prefix = "";
         for (int i = 0; i < childs.getLength() && prefix.length() == 0; i++) {
             Node n = childs.item(i);
-            if (n instanceof DeferredElementNSImpl) {
+            if (n instanceof Element) {
                 Element e = (Element) n;
                 if (e.getLocalName().equalsIgnoreCase("element")) {
                     if (e.getAttribute("type") != null && e.getAttribute("type").contains(":")) {
@@ -947,11 +946,11 @@ public class OgcWfsClient {
         });
 
         // TODO validatie uitzetten, maar hoe?
-        org.geotools.xml.Parser parser = null;
+        org.geotools.xsd.Parser parser = null;
         if (gmlVersion == 2) {
-            parser = new org.geotools.xml.Parser(configGml2);
+            parser = new org.geotools.xsd.Parser(configGml2);
         } else {
-            parser = new org.geotools.xml.Parser(configGml3);
+            parser = new org.geotools.xsd.Parser(configGml3);
         }
 
         Object o = null;
@@ -960,9 +959,9 @@ public class OgcWfsClient {
         } catch (Exception ex) {
             log.warn("GML version " + gmlVersion + " not correct. Trying other version:", ex);
             if (gmlVersion == 2) {
-                parser = new org.geotools.xml.Parser(configGml3);
+                parser = new org.geotools.xsd.Parser(configGml3);
             } else {
-                parser = new org.geotools.xml.Parser(configGml2);
+                parser = new org.geotools.xsd.Parser(configGml2);
             }
             try {
                 o = parser.parse(new StringReader(elementToString(elem)));
