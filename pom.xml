@@ -4,7 +4,7 @@
 
     <groupId>nl.b3p</groupId>
     <artifactId>b3p-commons-gis</artifactId>
-    <version>5.1.1-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <url>https://github.com/B3Partners/${project.artifactId}/</url>
@@ -12,11 +12,6 @@
         <name>B3Partners B.V.</name>
         <url>http://www.b3partners.nl/</url>
     </organization>
-
-    <prerequisites>
-        <maven>3.2.5</maven>
-    </prerequisites>
-
     <scm>
         <connection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</connection>
         <developerConnection>scm:git:git@github.com:B3Partners/b3p-commons-gis.git</developerConnection>
@@ -46,26 +41,18 @@
     </distributionManagement>
 
     <properties>
-        <project.build.sourceVersion>1.8</project.build.sourceVersion>
-        <project.build.targetVersion>1.8</project.build.targetVersion>
+        <java.version>1.8</java.version>
+        <project.build.sourceVersion>${java.version}</project.build.sourceVersion>
+        <project.build.targetVersion>${java.version}</project.build.targetVersion>
         <maven.compiler.source>${project.build.sourceVersion}</maven.compiler.source>
         <maven.compiler.target>${project.build.targetVersion}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.jdkPlatform>JDK_${project.build.targetVersion}</netbeans.hint.jdkPlatform>
         <maven-javadoc-plugin.version>3.2.0</maven-javadoc-plugin.version>
+        <geotools.version>23.1</geotools.version>
+        <slf4j.version>1.7.30</slf4j.version>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>nl.b3p</groupId>
-                <artifactId>datastorelinker-bom</artifactId>
-                <version>5.2.1</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -96,54 +83,62 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
+            <version>1.2</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
+            <version>1.14</version>
         </dependency>
         <dependency>
             <groupId>org.locationtech.jts</groupId>
             <artifactId>jts-core</artifactId>
+            <version>1.16.1</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-metadata</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.geotools</groupId>
-            <artifactId>gt-main</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-shapefile</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-epsg-hsql</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools</groupId>
             <artifactId>gt-cql</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>org.geotools.xsd</groupId>
             <artifactId>gt-xsd-filter</artifactId>
+            <version>${geotools.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -230,7 +225,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>[3.2.5,)</version>
+                                    <version>[3.3.9,)</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>${java.version}</version>
@@ -239,6 +234,24 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>${java.version}</version>
+                        </jdk>
+                    </toolchains>
+                </configuration>
             </plugin>
         </plugins>
     </build>

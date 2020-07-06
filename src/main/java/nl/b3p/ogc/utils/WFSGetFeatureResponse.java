@@ -31,7 +31,6 @@
  */
 package nl.b3p.ogc.utils;
 
-import com.sun.org.apache.xerces.internal.dom.DeferredElementNSImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +83,7 @@ public class WFSGetFeatureResponse extends OGCResponse implements OGCConstants {
                     Element e = elem.getOwnerDocument().createElementNS(cn_ns, newName);
                     n.appendChild(e);
 
-                    if (cn instanceof DeferredElementNSImpl || cn instanceof Element) {
+                    if (cn instanceof Element) {
                         Element e2 = (Element) cn;
                         NodeList childs = e2.getChildNodes();
                         for (int j = 0; j < childs.getLength(); j++) {
