@@ -22,12 +22,19 @@ timestamps {
 
                 stage('Build') {
                     echo "Building branch: ${env.BRANCH_NAME}"
-                    sh "mvn install -B -V -e -fae -q"
+                    sh "mvn install -B -V -e -fae -q --global-toolchains .jenkins/toolchains.xml"
                 }
 
                 stage('Test') {
                     echo "Running unit tests"
-                    sh "mvn -e test -B"
+                    sh "mvn -e test -B --global-toolchains .jenkins/toolchains.xml"
+                }
+
+                if (jdkTestName == 'OpenJDK11') {
+                    stage("cleanup Java 11 packages") {
+                        echo "Verwijder de Java 11 build artifacts uit lokale repo"
+                        sh "mvn build-helper:remove-project-artifact"
+                    }
                 }
             }
         }
