@@ -57,7 +57,7 @@
         <dependency>
             <groupId>nl.b3p</groupId>
             <artifactId>jump-b3p</artifactId>
-            <version>5.1.0</version>
+            <version>6.0</version>
         </dependency>
         <dependency>
             <groupId>nl.b3p</groupId>
@@ -149,13 +149,6 @@
             <name>B3P Repository</name>
             <url>https://repo.b3p.nl/nexus/repository/public/</url>
         </repository>
-        <!-- voor arcobjects
-        <repository>
-            <id>nl.b3p.gissuite</id>
-            <name>B3P GIS Suite Maven Repository</name>
-            <url>file://${project.basedir}/../B3pGisSuiteMvnRepo</url>
-        </repository>
-		 -->
     </repositories>
 
     <build>
