@@ -28,7 +28,7 @@ public class GeoToolsLoggingInitializer implements ServletContextListener {
             GeoTools.init();
             Logging.ALL.setLoggerFactory("org.geotools.util.logging.Log4JLoggerFactory");
         } catch (ClassNotFoundException | IllegalArgumentException e) {
-            sce.getServletContext().log(e, "Omzetten GeoTools logger is mislukt.");
+            sce.getServletContext().log("Omzetten GeoTools logger is mislukt.", e);
         }
     }
 
