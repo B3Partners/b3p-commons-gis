@@ -103,7 +103,7 @@ public class FeatureFactory {
             Coordinate c = new Coordinate(x, y);
             if (useMultiPoint) {
                 Coordinate[] ca = new Coordinate[]{c};
-                MultiPoint p = gf.createMultiPoint(ca);
+                MultiPoint p = gf.createMultiPointFromCoords(ca);
                 f.setGeometry(p);
             } else {
                 Point p = gf.createPoint(c);
